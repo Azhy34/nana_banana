@@ -5,49 +5,6 @@ import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState } f
 import { ASPECT_RATIOS, IMAGE_SIZES, MODEL_OPTIONS } from './constants';
 import { generateImageComposition } from './services/geminiService';
 
-// Helper to resize and compress images before state storage
-const resizeImage = (file: File, maxDimension: number = 2048): Promise<string> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-
-        // Calculate new dimensions maintaining aspect ratio
-        if (width > height) {
-          if (width > maxDimension) {
-            height *= maxDimension / width;
-            width = maxDimension;
-          }
-        } else {
-          if (height > maxDimension) {
-            width *= maxDimension / height;
-            height = maxDimension;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            // Compress to JPEG with 0.85 quality to drastically reduce size while keeping visual fidelity
-            // This prevents 503 timeouts with large 18MB+ files
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-            resolve(dataUrl);
-        } else {
-            resolve(e.target?.result as string); // Fallback
-        }
-      };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  });
-};
-
 function App() {
   const [step, setStep] = useState<Step>(Step.Prompt);
   
@@ -69,19 +26,22 @@ function App() {
 
   // Handlers
   const handleUpload = async (file: File) => {
-    // Process image: Resize/Compress to avoid API Timeouts
-    const optimizedDataUrl = await resizeImage(file);
-    const base64Data = optimizedDataUrl.split(',')[1]; // Strip header
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      const base64Data = dataUrl.split(',')[1];
+      
+      const newImage: UploadedImage = {
+          id: Math.random().toString(36).substring(7),
+          data: base64Data,
+          mimeType: file.type,
+          previewUrl: dataUrl,
+      };
 
-    const newImage: UploadedImage = {
-        id: Math.random().toString(36).substring(7),
-        data: base64Data,
-        mimeType: 'image/jpeg', // We converted to jpeg in resizeImage
-        previewUrl: optimizedDataUrl,
+      // Limit to 1 reference image
+      setReferenceImages([newImage]);
     };
-
-    // Limit to 1 reference image
-    setReferenceImages([newImage]);
+    reader.readAsDataURL(file);
   };
 
   const removeImage = () => {

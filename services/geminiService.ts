@@ -20,7 +20,7 @@ export const generateImageComposition = async (
 
   // 1. Add Reference Image (Optional)
   if (referenceImage) {
-    parts.push({ text: "REFERENCE_IMAGE: Use this image as a style and composition reference." });
+    parts.push({ text: "REFERENCE_IMAGE: This is the EXACT image that must be used as the base/reference." });
     parts.push({
       inlineData: {
         data: referenceImage.data,
@@ -31,16 +31,17 @@ export const generateImageComposition = async (
 
   // 2. Add Text Prompt
   const fullPrompt = `
-    TASK: Image Generation based on user instructions and optional reference.
+    TASK: Image Generation based on user instructions and an EXACT reference image.
 
     USER PROMPT: ${prompt}
 
     INSTRUCTIONS:
-    1. If a REFERENCE_IMAGE is provided, use it to guide the style, lighting, and composition of the generated image, blending it with the requirements from the USER PROMPT.
-    2. If no REFERENCE_IMAGE is provided, generate the image solely based on the USER PROMPT.
-    3. Ensure high quality, adherence to the specified aspect ratio, and visual fidelity.
+    1. If a REFERENCE_IMAGE is provided, you MUST use it 1:1 as the base for the generation. Maintain the exact composition, key elements, and perspective of the REFERENCE_IMAGE.
+    2. Apply the styles, lighting, or modifications requested in the USER PROMPT while strictly preserving the identity and structure of the REFERENCE_IMAGE.
+    3. If no REFERENCE_IMAGE is provided, generate the image solely based on the USER PROMPT.
+    4. Ensure maximum visual fidelity and adherence to the specified aspect ratio.
     
-    ${referenceImage ? "Make sure the result respects the visual style of the REFERENCE_IMAGE." : ""}
+    ${referenceImage ? "CRITICAL: The REFERENCE_IMAGE must be preserved 1:1 in its core structure. Integrate the prompt into this specific image." : ""}
   `;
   parts.push({ text: fullPrompt });
 
