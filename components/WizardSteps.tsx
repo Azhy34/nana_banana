@@ -7,10 +7,9 @@ interface WizardStepsProps {
 }
 
 const steps = [
-  { id: Step.Reference, label: '1. Reference' },
-  { id: Step.People, label: '2. People' },
-  { id: Step.Prompt, label: '3. Settings' },
-  { id: Step.Result, label: '4. Result' },
+  { id: Step.Prompt, label: '1. Settings & Prompt' },
+  { id: Step.Reference, label: '2. Reference (Optional)' },
+  { id: Step.Result, label: '3. Result' },
 ];
 
 export const WizardSteps: React.FC<WizardStepsProps> = ({ currentStep, setStep }) => {

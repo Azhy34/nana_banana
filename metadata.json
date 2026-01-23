@@ -1,5 +1,0 @@
-{
-  "name": "Gemini Image Composer",
-  "description": "A 4-step AI image composition tool using Gemini 3 Pro and Flash. Upload reference styles, add people, and generate high-quality custom images with preservation of facial features.",
-  "requestFramePermissions": []
-}

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { WizardSteps } from './components/WizardSteps';
 import { ImageUploader } from './components/ImageUploader';
 import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState } from './types';
@@ -49,12 +49,11 @@ const resizeImage = (file: File, maxDimension: number = 2048): Promise<string> =
 };
 
 function App() {
-  const [step, setStep] = useState<Step>(Step.Reference);
+  const [step, setStep] = useState<Step>(Step.Prompt);
   
   // Data State
   const [apiKey, setApiKey] = useState<string>('');
   const [referenceImages, setReferenceImages] = useState<UploadedImage[]>([]);
-  const [peopleImages, setPeopleImages] = useState<UploadedImage[]>([]);
   const [settings, setSettings] = useState<GenerationSettings>({
     prompt: "",
     model: ModelType.Pro,
@@ -69,7 +68,7 @@ function App() {
   });
 
   // Handlers
-  const handleUpload = async (file: File, target: 'reference' | 'people') => {
+  const handleUpload = async (file: File) => {
     // Process image: Resize/Compress to avoid API Timeouts
     const optimizedDataUrl = await resizeImage(file);
     const base64Data = optimizedDataUrl.split(',')[1]; // Strip header
@@ -81,20 +80,12 @@ function App() {
         previewUrl: optimizedDataUrl,
     };
 
-    if (target === 'reference') {
-        // Limit to 1 reference image for style
-        setReferenceImages([newImage]);
-    } else {
-        setPeopleImages((prev) => [...prev, newImage]);
-    }
+    // Limit to 1 reference image
+    setReferenceImages([newImage]);
   };
 
-  const removeImage = (id: string, target: 'reference' | 'people') => {
-    if (target === 'reference') {
-      setReferenceImages([]);
-    } else {
-      setPeopleImages((prev) => prev.filter((img) => img.id !== id));
-    }
+  const removeImage = () => {
+    setReferenceImages([]);
   };
 
   const handleGenerate = async () => {
@@ -114,7 +105,6 @@ function App() {
       const result = await generateImageComposition(
         apiKey,
         referenceImages[0] || null,
-        peopleImages,
         settings
       );
       setGenerationState({ isLoading: false, error: null, resultImage: result });
@@ -129,77 +119,27 @@ function App() {
 
   const getModelDescription = (model: ModelType) => {
     if (model === ModelType.Pro) {
-        return "✨ Best for strict adherence to atmosphere, high fidelity, and 4K resolution. (Recommended for this task)";
+        return "✨ Best for high fidelity, complex instructions, and 4K resolution. (Recommended)";
     }
-    return "⚡️ Optimized for speed. Good for quick experiments, but less precise with complex lighting.";
+    return "⚡️ Optimized for speed. Good for quick experiments.";
   };
 
   // Render Steps
   const renderStepContent = () => {
     switch (step) {
-      case Step.Reference:
-        return (
-          <div className="space-y-6 animate-fadeIn">
-            <ImageUploader
-              title="Step 1: Base Reference (Atmosphere)"
-              description="Upload the main photo. The background, body poses, lighting, and overall atmosphere will be KEPT from this image."
-              uploadedImages={referenceImages}
-              onUpload={(file) => handleUpload(file, 'reference')}
-              onRemove={(id) => removeImage(id, 'reference')}
-              maxImages={1}
-              multiple={false}
-            />
-            <div className="flex justify-end">
-              <button
-                onClick={() => setStep(Step.People)}
-                disabled={referenceImages.length === 0}
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-all shadow-lg shadow-indigo-500/30 flex items-center"
-              >
-                Next Step: Add Faces <span className="ml-2">→</span>
-              </button>
-            </div>
-          </div>
-        );
-
-      case Step.People:
-        return (
-          <div className="space-y-6 animate-fadeIn">
-            <ImageUploader
-              title="Step 2: Face & Hair Identity"
-              description="Upload photos of the people to insert. Only their FACES and HAIR will be used to replace the faces in the reference photo."
-              uploadedImages={peopleImages}
-              onUpload={(file) => handleUpload(file, 'people')}
-              onRemove={(id) => removeImage(id, 'people')}
-              multiple={true}
-            />
-            <div className="flex justify-between">
-               <button onClick={() => setStep(Step.Reference)} className="px-6 py-3 text-slate-400 hover:text-white font-medium transition-colors">
-                Back
-              </button>
-              <button
-                onClick={() => setStep(Step.Prompt)}
-                disabled={peopleImages.length === 0}
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-all shadow-lg shadow-indigo-500/30 flex items-center"
-              >
-                Next Step: Adjustments <span className="ml-2">→</span>
-              </button>
-            </div>
-          </div>
-        );
-
       case Step.Prompt:
         return (
           <div className="space-y-6 animate-fadeIn max-w-2xl mx-auto">
             
             <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50">
-                <label className="block text-sm font-medium text-indigo-300 mb-2">Optional Modifications</label>
+                <label className="block text-sm font-medium text-indigo-300 mb-2">Image Description (Prompt)</label>
                 <p className="text-xs text-slate-400 mb-3">
-                  Example: "Add candles to the cake". <br/>
-                  <span className="text-indigo-400 font-medium">TIP:</span> If the reference has specific details like visible teeth or a specific expression, please mention it here (e.g., "Keep the teeth visible").
+                  Describe the image you want to generate in detail.<br/>
+                  <span className="text-indigo-400 font-medium">TIP:</span> Be specific about subject, style, colors, and lighting.
                 </p>
                 <textarea
                     className="w-full h-32 bg-slate-900 border border-slate-700 rounded-lg p-3 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                    placeholder="Make small changes to the scene or emphasize specific details..."
+                    placeholder="e.g. A futuristic city with flying cars at sunset, cyberpunk style..."
                     value={settings.prompt}
                     onChange={(e) => setSettings({...settings, prompt: e.target.value})}
                 />
@@ -262,8 +202,32 @@ function App() {
                 )}
             </div>
 
-            <div className="flex justify-between pt-4">
-               <button onClick={() => setStep(Step.People)} className="px-6 py-3 text-slate-400 hover:text-white font-medium transition-colors">
+            <div className="flex justify-end pt-4">
+              <button
+                onClick={() => setStep(Step.Reference)}
+                disabled={!settings.prompt.trim()}
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-all shadow-lg shadow-indigo-500/30 flex items-center"
+              >
+                Next Step: Add Reference (Optional) <span className="ml-2">→</span>
+              </button>
+            </div>
+          </div>
+        );
+
+      case Step.Reference:
+        return (
+          <div className="space-y-6 animate-fadeIn">
+            <ImageUploader
+              title="Step 2: Reference Image (Optional)"
+              description="Upload an image to guide the style, composition, or atmosphere. If skipped, the image will be generated based on the prompt only."
+              uploadedImages={referenceImages}
+              onUpload={handleUpload}
+              onRemove={removeImage}
+              maxImages={1}
+              multiple={false}
+            />
+            <div className="flex justify-between">
+               <button onClick={() => setStep(Step.Prompt)} className="px-6 py-3 text-slate-400 hover:text-white font-medium transition-colors">
                 Back
               </button>
               <button
@@ -290,15 +254,10 @@ function App() {
                              <svg className="w-8 h-8 text-indigo-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                          </div>
                      </div>
-                     <h3 className="text-2xl font-bold text-white mb-2">Creating Masterpiece...</h3>
+                     <h3 className="text-2xl font-bold text-white mb-2">Generating Image...</h3>
                      <p className="text-slate-400 max-w-md mx-auto">
-                        Preserving atmosphere from Reference and inserting Faces...
+                        Creating your vision based on the prompt {referenceImages.length > 0 && "and reference"}...
                      </p>
-                     {settings.model === ModelType.Pro && (
-                         <p className="text-xs text-slate-500 mt-4 bg-slate-800/50 px-3 py-1 rounded-full">
-                             Using Nano Banana Pro (gemini-3-pro-image-preview)
-                         </p>
-                     )}
                  </div>
              ) : generationState.error ? (
                  <div className="py-10 bg-red-900/20 border border-red-700/50 rounded-xl p-6 max-w-2xl mx-auto">
@@ -330,7 +289,7 @@ function App() {
                          </button>
                          <a 
                              href={generationState.resultImage!} 
-                             download={`gemini-composition-${Date.now()}.png`}
+                             download={`gemini-gen-${Date.now()}.png`}
                              className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/30 flex items-center"
                          >
                              Download Image <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -379,10 +338,10 @@ function App() {
         <main className="max-w-7xl mx-auto px-4 py-8">
             <div className="mb-12 text-center">
                 <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
-                    AI Image Composition
+                    AI Image Generation
                 </h2>
                 <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-                    Strictly preserve atmosphere from reference photos and insert specific faces.
+                    Generate high-quality images from text prompts and optional reference photos.
                 </p>
                 {!apiKey && (
                     <div className="mt-4 inline-block bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-2">

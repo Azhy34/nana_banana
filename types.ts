@@ -1,8 +1,7 @@
 export enum Step {
-  Reference = 1,
-  People = 2,
-  Prompt = 3,
-  Result = 4,
+  Prompt = 1,
+  Reference = 2,
+  Result = 3,
 }
 
 export enum ModelType {
