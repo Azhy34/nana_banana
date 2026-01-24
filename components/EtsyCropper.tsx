@@ -1,6 +1,3 @@
-import React, { useRef, useState, useEffect } from 'react';
-import {
-  ETSY_PRESETS,
   getPresetsByCategory,
   CropPreset,
   cropImage,
@@ -13,7 +10,6 @@ import {
   Point,
 } from '../services/imageCropService';
 import { detectWallCoordinates, WallCoordinates } from '../services/geminiService';
-import { Step } from '../types';
 
 interface EtsyCropperProps {
   initialImage?: string | null;
@@ -40,6 +36,161 @@ const AspectPreview = ({ width, height, active }: { width: number, height: numbe
         }}
         className={`border-[1.5px] transition-colors ${active ? 'border-indigo-500 bg-indigo-500/30' : 'border-slate-500 bg-slate-800'}`}
       />
+    </div>
+  );
+};
+
+// --- Sub-components for Refactoring ---
+
+const CategoryTabs = ({ 
+  activeCategory, 
+  setActiveCategory, 
+  onPresetSelect 
+}: { 
+  activeCategory: CategoryType, 
+  setActiveCategory: (cat: CategoryType) => void,
+  onPresetSelect: (preset: CropPreset) => void
+}) => (
+  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+    {(Object.keys(CATEGORY_LABELS) as CategoryType[]).map((category) => (
+      <button
+        key={category}
+        onClick={() => {
+          setActiveCategory(category);
+          const presets = getPresetsByCategory(category);
+          if (presets.length > 0) onPresetSelect(presets[0]);
+        }}
+        className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+          activeCategory === category
+            ? 'bg-slate-700 text-white'
+            : 'text-slate-500 hover:text-slate-300'
+        }`}
+      >
+        {CATEGORY_LABELS[category]}
+      </button>
+    ))}
+  </div>
+);
+
+interface PresetButtonProps {
+  preset: CropPreset;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+const PresetButton: React.FC<PresetButtonProps> = ({ 
+  preset, 
+  isSelected, 
+  onClick 
+}) => (
+  <button
+    onClick={onClick}
+    className={`p-2.5 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
+      isSelected
+        ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10'
+        : 'border-slate-800 bg-slate-800/40 hover:border-slate-700'
+    }`}
+  >
+    <AspectPreview width={preset.width} height={preset.height} active={isSelected} />
+    <div className="flex-1 min-w-0">
+      <div className="font-bold text-white leading-tight text-sm truncate">{preset.label}</div>
+      <div className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+        {preset.width} × {preset.height}
+      </div>
+    </div>
+  </button>
+);
+
+const BatchModeView = ({
+  selectedForBatch,
+  setSelectedForBatch,
+  isProcessing,
+  onGenerate
+}: {
+  selectedForBatch: Set<string>,
+  setSelectedForBatch: (next: Set<string>) => void,
+  isProcessing: boolean,
+  onGenerate: () => void
+}) => (
+  <div className="space-y-6">
+    <div className="grid md:grid-cols-3 gap-4">
+      {(Object.keys(CATEGORY_LABELS) as CategoryType[]).map((category) => (
+        <div key={category} className="bg-slate-800/30 p-4 rounded-2xl border border-slate-700/50">
+          <h3 className="font-bold text-white mb-3 flex items-center gap-2">
+            {CATEGORY_LABELS[category]}
+          </h3>
+          <div className="space-y-2">
+            {getPresetsByCategory(category).map((preset) => (
+              <label key={preset.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-700/30 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={selectedForBatch.has(preset.id)}
+                  onChange={() => {
+                    const next = new Set(selectedForBatch);
+                    if (next.has(preset.id)) next.delete(preset.id);
+                    else next.add(preset.id);
+                    setSelectedForBatch(next);
+                  }}
+                  className="w-5 h-5 rounded border-slate-600 text-indigo-600 focus:ring-indigo-500 bg-slate-900"
+                />
+                <div className="text-sm">
+                  <div className="font-medium text-slate-200">{preset.label}</div>
+                  <div className="text-xs text-slate-500">{preset.width}x{preset.height}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+    
+    <button
+      onClick={onGenerate}
+      disabled={isProcessing || selectedForBatch.size === 0}
+      className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-2xl shadow-2xl shadow-indigo-500/20 disabled:opacity-50"
+    >
+      {isProcessing ? '⏳ Обработка...' : `⚡ Создать все выбранные (${selectedForBatch.size})`}
+    </button>
+  </div>
+);
+
+const ResultsGallery = ({ 
+  crops, 
+  exportFormat, 
+  onClear 
+}: { 
+  crops: { [key: string]: string }, 
+  exportFormat: string, 
+  onClear: () => void 
+}) => {
+  const cropIds = Object.keys(crops);
+  if (cropIds.length === 0) return null;
+
+  return (
+    <div className="pt-8 border-t border-slate-800 space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-bold text-white">Готовые форматы ({cropIds.length})</h3>
+        <button onClick={onClear} className="text-sm text-slate-500 hover:text-slate-300">Очистить все</button>
+      </div>
+      
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {ETSY_PRESETS.filter(p => crops[p.id]).map((preset) => (
+          <div key={preset.id} className="group space-y-2">
+            <div className="aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 relative">
+              <img src={crops[preset.id]} className="w-full h-full object-cover shadow-inner" alt={preset.label} />
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button 
+                  onClick={() => downloadCrop(crops[preset.id], `etsy-${preset.id}.${exportFormat === 'png' ? 'png' : 'jpg'}`)}
+                  className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
+                >
+                  📥
+                </button>
+              </div>
+            </div>
+            <div className="text-xs font-medium text-slate-400 text-center truncate">{preset.label}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -200,22 +351,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     dw /= zoom;
     dh /= zoom;
 
-    // Отрисовка crop области
-    const cropX = selectedPreset.specialMode === 'tile' ? 0 : offsetX * scale;
-    const cropY = selectedPreset.specialMode === 'tile' ? 0 : offsetY * scale;
-    const cropWidth = selectedPreset.specialMode === 'tile' ? canvas.width : dw * scale;
-    const cropHeight = selectedPreset.specialMode === 'tile' ? canvas.height : dh * scale;
-
-    // Полутемная область снаружи crop
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Очистить область crop (через clip или просто отрисовку поверх)
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(cropX, cropY, cropWidth, cropHeight);
-    ctx.clip();
-    
+    // Отрисовка основного изображения
     if (selectedPreset.specialMode === 'tile') {
       const w = canvas.width / 2;
       const h = canvas.height / 2;
@@ -223,54 +359,43 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       ctx.drawImage(img, w, 0, w, h);
       ctx.drawImage(img, 0, h, w, h);
       ctx.drawImage(img, w, h, w, h);
-    } else if (selectedPreset.specialMode === 'warp' && wallPoints && patternImgRef.current) {
-      // Warp Mode: Draw pattern inside detected wall points
+    } else if (selectedPreset.specialMode === 'warp' && wallPoints) {
+      // В режиме Warp рисуем фон и паттерн (если есть)
       const tl = { x: wallPoints.topLeft.x * canvas.width, y: wallPoints.topLeft.y * canvas.height };
       const tr = { x: wallPoints.topRight.x * canvas.width, y: wallPoints.topRight.y * canvas.height };
       const br = { x: wallPoints.bottomRight.x * canvas.width, y: wallPoints.bottomRight.y * canvas.height };
       const bl = { x: wallPoints.bottomLeft.x * canvas.width, y: wallPoints.bottomLeft.y * canvas.height };
 
       drawQuadrilateralWarp(
-        ctx, patternImgRef.current, img,
+        ctx, patternImgRef.current || new Image(), img,
         tl, tr, br, bl,
         canvas.width, canvas.height
       );
     } else {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     }
-    ctx.restore();
 
-    // Warp Points UI (only in Warp mode)
-    if (selectedPreset.specialMode === 'warp' && wallPoints) {
-      const points = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'] as const;
-      ctx.fillStyle = '#fff';
-      ctx.strokeStyle = '#818cf8';
-      ctx.lineWidth = 2;
+    // РЕЖИМ ОБРЕЗКИ (CROP) - только для обычных пресетов
+    if (selectedPreset.specialMode !== 'warp' && selectedPreset.specialMode !== 'tile') {
+      const cropX = offsetX * scale;
+      const cropY = offsetY * scale;
+      const cropWidth = dw * scale;
+      const cropHeight = dh * scale;
+
+      // Полутемная область снаружи crop
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(cropX, cropY, cropWidth, cropHeight);
       
-      points.forEach(key => {
-        const p = wallPoints[key];
-        const x = p.x * canvas.width;
-        const y = p.y * canvas.height;
-        
-        ctx.beginPath();
-        ctx.arc(x, y, 6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-      });
-      
-      // Draw frame
+      // Отрисовка части изображения внутри crop без затемнения
+      ctx.save();
       ctx.beginPath();
-      ctx.moveTo(wallPoints.topLeft.x * canvas.width, wallPoints.topLeft.y * canvas.height);
-      ctx.lineTo(wallPoints.topRight.x * canvas.width, wallPoints.topRight.y * canvas.height);
-      ctx.lineTo(wallPoints.bottomRight.x * canvas.width, wallPoints.bottomRight.y * canvas.height);
-      ctx.lineTo(wallPoints.bottomLeft.x * canvas.width, wallPoints.bottomLeft.y * canvas.height);
-      ctx.closePath();
-      ctx.strokeStyle = 'rgba(129, 140, 248, 0.5)';
-      ctx.setLineDash([5, 5]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    } else {
-      // Граница crop (для обычных режимов)
+      ctx.rect(cropX, cropY, cropWidth, cropHeight);
+      ctx.clip();
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+
+      // Граница crop
       ctx.strokeStyle = '#818cf8';
       ctx.lineWidth = 3;
       ctx.strokeRect(cropX, cropY, cropWidth, cropHeight);
@@ -284,13 +409,48 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         cropY + 25
       );
     }
-    ctx.fillStyle = '#818cf8';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.fillText(
-      `${selectedPreset.width}x${selectedPreset.height}px`,
-      cropX + 10,
-      cropY + 25
-    );
+
+    // UI УПРАВЛЕНИЯ ТОЧКАМИ WARP
+    if (selectedPreset.specialMode === 'warp' && wallPoints) {
+      const points = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'] as const;
+      
+      // Линии контура
+      ctx.beginPath();
+      ctx.moveTo(wallPoints.topLeft.x * canvas.width, wallPoints.topLeft.y * canvas.height);
+      ctx.lineTo(wallPoints.topRight.x * canvas.width, wallPoints.topRight.y * canvas.height);
+      ctx.lineTo(wallPoints.bottomRight.x * canvas.width, wallPoints.bottomRight.y * canvas.height);
+      ctx.lineTo(wallPoints.bottomLeft.x * canvas.width, wallPoints.bottomLeft.y * canvas.height);
+      ctx.closePath();
+      ctx.strokeStyle = '#818cf8';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Сами точки
+      points.forEach(key => {
+        const p = wallPoints[key];
+        const x = p.x * canvas.width;
+        const y = p.y * canvas.height;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = draggingPoint === key ? '#4f46e5' : '#818cf8';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+
+      if (!patternImgRef.current) {
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = '20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Загрузите паттерн для предпросмотра', canvas.width/2, canvas.height/2);
+      }
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
@@ -607,37 +767,64 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <div className="space-y-4">
-              {/* Pattern Upload for Warp Mode */}
+              {/* Pattern Upload & Warp Controls */}
               {selectedPreset.specialMode === 'warp' && (
-                <div className="bg-indigo-900/20 p-4 rounded-xl border border-indigo-500/30 mb-4 animate-fadeIn">
-                  <h4 className="text-sm font-bold text-indigo-300 mb-2 flex items-center gap-2">
-                    <span className="text-xl">🎨</span> 1. Загрузите файл паттерна
-                  </h4>
-                  <div className="flex items-center gap-4">
-                    {patternImage ? (
-                      <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-700">
-                        <img src={patternImage} className="w-10 h-10 object-cover rounded" alt="Pattern" />
-                        <span className="text-xs text-green-400 font-bold">Паттерн загружен</span>
-                        <button onClick={() => setPatternImage(null)} className="text-slate-400 hover:text-white px-2">✕</button>
-                      </div>
-                    ) : (
-                      <label className="flex-1 cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-2 px-4 rounded-lg text-center transition-colors">
-                        Выбрать файл...
-                        <input type="file" className="hidden" accept="image/*" onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if(file) {
-                            const reader = new FileReader();
-                            reader.onload = (ev) => setPatternImage(ev.target?.result as string);
-                            reader.readAsDataURL(file);
-                          }
-                        }} />
-                      </label>
-                    )}
-                    {isDetectingWall && <span className="text-xs text-indigo-300 animate-pulse">🤖 ИИ ищет стену...</span>}
+                <div className="bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl border border-indigo-500/30 mb-4 animate-fadeIn">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <span className="text-xl">🎨</span> Мокап паттерна
+                      </h4>
+                      <p className="text-xs text-slate-400">
+                        Загрузите паттерн и расставьте точки на стене
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      {patternImage ? (
+                        <div className="flex items-center gap-2 bg-slate-900 p-1.5 rounded-lg border border-slate-700">
+                          <img src={patternImage} className="w-8 h-8 object-cover rounded" alt="Pattern" />
+                          <button 
+                            onClick={() => setPatternImage(null)} 
+                            className="text-[10px] bg-slate-800 hover:bg-red-900/40 text-slate-400 hover:text-red-400 px-2 py-1 rounded transition-colors"
+                          >
+                            Заменить
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 px-4 rounded-lg transition-all shadow-lg shadow-indigo-600/20">
+                          Выбрать паттерн...
+                          <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if(file) {
+                              const reader = new FileReader();
+                              reader.onload = (ev) => setPatternImage(ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </label>
+                      )}
+                      
+                      <button 
+                        onClick={() => setWallPoints({
+                          topLeft: { x: 0.2, y: 0.2 },
+                          topRight: { x: 0.8, y: 0.2 },
+                          bottomRight: { x: 0.8, y: 0.8 },
+                          bottomLeft: { x: 0.2, y: 0.8 }
+                        })}
+                        className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-medium transition-colors"
+                        title="Сбросить точки"
+                      >
+                        🔄 Сброс
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-500 mt-2">
-                    2. ИИ найдет стену автоматически. Перетащите точки, если нужно поправить.
-                  </p>
+                  {isDetectingWall && (
+                    <div className="mt-3 flex items-center gap-2 text-[10px] text-indigo-400 font-bold animate-pulse">
+                      <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                      ИИ анализирует перспективу...
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -706,119 +893,38 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
           </div>
 
           <div className="space-y-4">
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-              {(Object.keys(CATEGORY_LABELS) as CategoryType[]).map((category) => (
-                <button
-                  key={category}
-                  onClick={() => {
-                    setActiveCategory(category);
-                    const presets = getPresetsByCategory(category);
-                    if (presets.length > 0) setSelectedPreset(presets[0]);
-                  }}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                    activeCategory === category
-                      ? 'bg-slate-700 text-white'
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  {CATEGORY_LABELS[category]}
-                </button>
-              ))}
-            </div>
+            <CategoryTabs 
+              activeCategory={activeCategory} 
+              setActiveCategory={setActiveCategory} 
+              onPresetSelect={setSelectedPreset} 
+            />
 
             <div className="grid gap-2">
               {getPresetsByCategory(activeCategory).map((preset) => (
-                <button
-                  key={preset.id}
-                  onClick={() => setSelectedPreset(preset)}
-                  className={`p-2.5 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
-                    selectedPreset.id === preset.id
-                      ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10'
-                      : 'border-slate-800 bg-slate-800/40 hover:border-slate-700'
-                  }`}
-                >
-                  <AspectPreview width={preset.width} height={preset.height} active={selectedPreset.id === preset.id} />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-white leading-tight text-sm truncate">{preset.label}</div>
-                    <div className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
-                      {preset.width} × {preset.height}
-                    </div>
-                  </div>
-                </button>
+                <PresetButton 
+                  key={preset.id} 
+                  preset={preset} 
+                  isSelected={selectedPreset.id === preset.id} 
+                  onClick={() => setSelectedPreset(preset)} 
+                />
               ))}
             </div>
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
-          <div className="grid md:grid-cols-3 gap-4">
-            {(Object.keys(CATEGORY_LABELS) as CategoryType[]).map((category) => (
-              <div key={category} className="bg-slate-800/30 p-4 rounded-2xl border border-slate-700/50">
-                <h3 className="font-bold text-white mb-3 flex items-center gap-2">
-                  {CATEGORY_LABELS[category]}
-                </h3>
-                <div className="space-y-2">
-                  {getPresetsByCategory(category).map((preset) => (
-                    <label key={preset.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-700/30 cursor-pointer transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={selectedForBatch.has(preset.id)}
-                        onChange={() => {
-                          const next = new Set(selectedForBatch);
-                          if (next.has(preset.id)) next.delete(preset.id);
-                          else next.add(preset.id);
-                          setSelectedForBatch(next);
-                        }}
-                        className="w-5 h-5 rounded border-slate-600 text-indigo-600 focus:ring-indigo-500 bg-slate-900"
-                      />
-                      <div className="text-sm">
-                        <div className="font-medium text-slate-200">{preset.label}</div>
-                        <div className="text-xs text-slate-500">{preset.width}x{preset.height}</div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <button
-            onClick={handleGenerateBatchCrops}
-            disabled={isProcessing || selectedForBatch.size === 0}
-            className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-2xl shadow-2xl shadow-indigo-500/20 disabled:opacity-50"
-          >
-            {isProcessing ? '⏳ Обработка...' : `⚡ Создать все выбранные (${selectedForBatch.size})`}
-          </button>
-        </div>
+        <BatchModeView 
+          selectedForBatch={selectedForBatch} 
+          setSelectedForBatch={setSelectedForBatch} 
+          isProcessing={isProcessing} 
+          onGenerate={handleGenerateBatchCrops} 
+        />
       )}
 
-      {Object.keys(crops).length > 0 && (
-        <div className="pt-8 border-t border-slate-800 space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xl font-bold text-white">Готовые форматы ({Object.keys(crops).length})</h3>
-            <button onClick={() => setCrops({})} className="text-sm text-slate-500 hover:text-slate-300">Очистить все</button>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {ETSY_PRESETS.filter(p => crops[p.id]).map((preset) => (
-              <div key={preset.id} className="group space-y-2">
-                <div className="aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 relative">
-                  <img src={crops[preset.id]} className="w-full h-full object-cover shadow-inner" alt={preset.label} />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button 
-                      onClick={() => downloadCrop(crops[preset.id], `etsy-${preset.id}.${exportFormat === 'png' ? 'png' : 'jpg'}`)}
-                      className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
-                    >
-                      📥
-                    </button>
-                  </div>
-                </div>
-                <div className="text-xs font-medium text-slate-400 text-center truncate">{preset.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <ResultsGallery 
+        crops={crops} 
+        exportFormat={exportFormat} 
+        onClear={() => setCrops({})} 
+      />
     </div>
   );
 };

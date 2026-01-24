@@ -338,37 +338,49 @@ export const drawQuadrilateralWarp = (
 ) => {
   // 1. Рисуем фон (интерьер)
   if (backgroundImg) {
-    ctx.drawImage(backgroundImg, 0, 0, canvasWidth, canvasHeight);
+    // Используем "Cover" логику для фона, чтобы избежать искажений
+    const imgRatio = backgroundImg.width / backgroundImg.height;
+    const canvasRatio = canvasWidth / canvasHeight;
+    let drawW, drawH, drawX, drawY;
+
+    if (imgRatio > canvasRatio) {
+      drawH = canvasHeight;
+      drawW = canvasHeight * imgRatio;
+      drawX = (canvasWidth - drawW) / 2;
+      drawY = 0;
+    } else {
+      drawW = canvasWidth;
+      drawH = canvasWidth / imgRatio;
+      drawX = 0;
+      drawY = (canvasHeight - drawH) / 2;
+    }
+    ctx.drawImage(backgroundImg, drawX, drawY, drawW, drawH);
   }
 
-  // 2. Настраиваем наложение для паттерна (чтобы тени просвечивали)
+  // 2. Настраиваем наложение для паттерна
   ctx.save();
   ctx.globalCompositeOperation = 'multiply';
 
-  // Временная реализация Warp через треугольники (упрощенная)
-  // Для полноценного Warp нужна сложная математика трансформации матриц.
-  // Здесь мы используем простое разбиение на 2 треугольника.
+  // Используем треугольники для имитации перспективы
+  // Разрезаем квадрат по диагонали TL-BR
   
-  // Треугольник 1: TL, TR, BL
+  // Треугольник 1: TL, TR, BR
   drawTriangle(ctx, patternImg, 
-    0, 0, patternImg.width, 0, 0, patternImg.height, // Source coords (full image)
-    tl.x, tl.y, tr.x, tr.y, bl.x, bl.y // Dest coords
+    0, 0, patternImg.width, 0, patternImg.width, patternImg.height,
+    tl.x, tl.y, tr.x, tr.y, br.x, br.y
   );
 
-  // Треугольник 2: TR, BR, BL
-  // Здесь есть нюанс: для текстуры мы должны брать координаты, соответствующие
-  // правильной проекции. Для простоты берем всю текстуру.
+  // Треугольник 2: TL, BL, BR
   drawTriangle(ctx, patternImg,
-    patternImg.width, 0, patternImg.width, patternImg.height, 0, patternImg.height,
-    tr.x, tr.y, br.x, br.y, bl.x, bl.y
+    0, 0, 0, patternImg.height, patternImg.width, patternImg.height,
+    tl.x, tl.y, bl.x, bl.y, br.x, br.y
   );
 
   ctx.restore();
 };
 
 /**
- * Helper для отрисовки текстурированного треугольника
- * (Affine Transform Hack)
+ * Отрисовка текстурированного треугольника через аффинное преобразование
  */
 function drawTriangle(
   ctx: CanvasRenderingContext2D,
@@ -377,6 +389,8 @@ function drawTriangle(
   sx0: number, sy0: number, sx1: number, sy1: number, sx2: number, sy2: number
 ) {
   ctx.save();
+  
+  // Создаем путь для обрезки
   ctx.beginPath();
   ctx.moveTo(sx0, sy0);
   ctx.lineTo(sx1, sy1);
@@ -384,9 +398,9 @@ function drawTriangle(
   ctx.closePath();
   ctx.clip();
 
-  // Affine transform calculation
+  // Расчет аффинной матрицы для трансформации (x0,y0)->(sx0,sy0) и т.д.
   const denom = x0 * (y2 - y1) - x1 * y2 + x2 * y1 + (x1 - x2) * y0;
-  if (denom === 0) {
+  if (Math.abs(denom) < 0.0001) {
     ctx.restore();
     return;
   }
