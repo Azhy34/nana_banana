@@ -2,7 +2,10 @@ export enum Step {
   Prompt = 1,
   Reference = 2,
   Result = 3,
+  Crop = 4,
 }
+
+export type ViewMode = 'generator' | 'cropper';
 
 export enum ModelType {
   Flash = 'gemini-2.5-flash-image',

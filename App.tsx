@@ -4,10 +4,12 @@ import { WizardSteps } from './components/WizardSteps';
 import { PromptStep } from './components/PromptStep';
 import { ReferenceStep } from './components/ReferenceStep';
 import { ResultStep } from './components/ResultStep';
-import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState } from './types';
+import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState, ViewMode } from './types';
 import { generateImageComposition } from './services/geminiService';
+import { EtsyCropper } from './components/EtsyCropper';
 
 function App() {
+  const [viewMode, setViewMode] = useState<ViewMode>('generator');
   const [step, setStep] = useState<Step>(Step.Prompt);
   
   // Data State
@@ -109,6 +111,7 @@ function App() {
             generationState={generationState}
             referenceImages={referenceImages}
             setStep={setStep}
+            onViewModeChange={setViewMode}
           />
         );
     }
@@ -116,31 +119,68 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-indigo-500/30">
-        <Header apiKey={apiKey} setApiKey={setApiKey} />
+      <Header apiKey={apiKey} setApiKey={setApiKey} />
 
-        <main className="max-w-7xl mx-auto px-4 py-8">
-            <div className="mb-12 text-center">
-                <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
-                    AI Image Generation
-                </h2>
-                <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-                    Generate high-quality images from text prompts and optional reference photos.
-                </p>
-                {!apiKey && (
-                    <div className="mt-4 inline-block bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-2">
-                        <p className="text-yellow-200 text-sm">
-                            ⚠️ Please enter your API Key in the top right to start generating.
-                        </p>
-                    </div>
-                )}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* View Mode Switcher */}
+        <div className="flex justify-center mb-10">
+          <div className="inline-flex bg-slate-800/50 p-1.5 rounded-2xl border border-slate-700 shadow-xl">
+            <button
+              onClick={() => setViewMode('generator')}
+              className={`px-8 py-3 rounded-xl font-bold transition-all duration-300 ${
+                viewMode === 'generator'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              🎨 Generator
+            </button>
+            <button
+              onClick={() => setViewMode('cropper')}
+              className={`px-8 py-3 rounded-xl font-bold transition-all duration-300 ${
+                viewMode === 'cropper'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              ✂️ Etsy Cropper
+            </button>
+          </div>
+        </div>
+
+        {viewMode === 'generator' ? (
+          <>
+            <div className="mb-12 text-center animate-fadeIn">
+              <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
+                AI Image Generation
+              </h2>
+              <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+                Generate high-quality images from text prompts and optional reference photos.
+              </p>
+              {!apiKey && (
+                <div className="mt-4 inline-block bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-2">
+                  <p className="text-yellow-200 text-sm">
+                    ⚠️ Please enter your API Key in the top right to start generating.
+                  </p>
+                </div>
+              )}
             </div>
 
             <WizardSteps currentStep={step} setStep={setStep} />
 
             <div className="max-w-4xl mx-auto transition-all duration-500">
-                {renderStepContent()}
+              {renderStepContent()}
             </div>
-        </main>
+          </>
+        ) : (
+          <div className="animate-fadeIn">
+            <EtsyCropper 
+              initialImage={generationState.resultImage} 
+              onBack={() => setViewMode('generator')}
+            />
+          </div>
+        )}
+      </main>
     </div>
   );
 }

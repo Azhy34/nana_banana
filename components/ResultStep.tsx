@@ -1,16 +1,18 @@
 import React from 'react';
-import { GenerationState, Step, UploadedImage } from '../types';
+import { GenerationState, Step, UploadedImage, ViewMode } from '../types';
 
 interface ResultStepProps {
   generationState: GenerationState;
   referenceImages: UploadedImage[];
   setStep: (step: Step) => void;
+  onViewModeChange?: (mode: ViewMode) => void;
 }
 
 export const ResultStep: React.FC<ResultStepProps> = ({
   generationState,
   referenceImages,
-  setStep
+  setStep,
+  onViewModeChange
 }) => {
   if (generationState.isLoading) {
     return (
@@ -71,6 +73,12 @@ export const ResultStep: React.FC<ResultStepProps> = ({
         >
           Download Image <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
         </a>
+        <button
+          onClick={() => onViewModeChange?.('cropper')}
+          className="px-8 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-purple-500/30 flex items-center"
+        >
+          ✂️ Etsy Cropper <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
       </div>
     </div>
   );
