@@ -8,6 +8,7 @@ import {
   batchCropImages,
   calculateCropArea,
   ExportFormat,
+  drawPerspective,
 } from '../services/imageCropService';
 import { Step } from '../types';
 interface EtsyCropperProps {
@@ -169,6 +170,25 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       ctx.drawImage(img, w, 0, w, h);
       ctx.drawImage(img, 0, h, w, h);
       ctx.drawImage(img, w, h, w, h);
+    } else if (selectedPreset.specialMode === 'perspective') {
+      // Предпросмотр перспективы
+      const targetRatio = selectedPreset.width / selectedPreset.height;
+      const imgRatio = img.width / img.height;
+      let dw, dh;
+      if (imgRatio > targetRatio) {
+        dh = img.height; dw = img.height * targetRatio;
+      } else {
+        dw = img.width; dh = img.width / targetRatio;
+      }
+      dw /= zoom; dh /= zoom;
+
+      drawPerspective(
+        ctx, img,
+        offsetX, offsetY, dw, dh,
+        cropX, cropY, cropWidth, cropHeight,
+        selectedPreset.perspectiveMode || 'none',
+        selectedPreset.perspectiveAmount || 0.2
+      );
     } else {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     }
@@ -243,6 +263,31 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
           sourceImage,
           selectedPreset.width,
           selectedPreset.height,
+          exportFormat
+        );
+      } else if (selectedPreset.specialMode === 'perspective') {
+        const { createPerspectiveImage } = await import('../services/imageCropService');
+        const img = imgRef.current;
+        const targetRatio = selectedPreset.width / selectedPreset.height;
+        const imgRatio = img.width / img.height;
+        let dw, dh;
+        if (imgRatio > targetRatio) {
+          dh = img.height; dw = img.height * targetRatio;
+        } else {
+          dw = img.width; dh = img.width / targetRatio;
+        }
+        dw /= zoom; dh /= zoom;
+
+        croppedImage = await createPerspectiveImage(
+          sourceImage,
+          offsetX,
+          offsetY,
+          dw,
+          dh,
+          selectedPreset.width,
+          selectedPreset.height,
+          selectedPreset.perspectiveMode || 'none',
+          selectedPreset.perspectiveAmount || 0.2,
           exportFormat
         );
       } else {

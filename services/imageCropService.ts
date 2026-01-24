@@ -16,6 +16,8 @@ export type AnchorPoint =
 
 export type ExportFormat = 'jpeg' | 'png';
 
+export type PerspectiveMode = 'none' | 'left' | 'right' | 'corner-in';
+
 export interface CropPreset {
   id: string;
   name: string;
@@ -27,7 +29,9 @@ export interface CropPreset {
   icon: string;
   defaultZoom?: number;
   defaultAnchor?: AnchorPoint;
-  specialMode?: 'tile';
+  specialMode?: 'tile' | 'perspective';
+  perspectiveMode?: PerspectiveMode;
+  perspectiveAmount?: number; // 0 to 1
 }
 
 export const ETSY_PRESETS: CropPreset[] = [
@@ -96,39 +100,63 @@ export const ETSY_PRESETS: CropPreset[] = [
     id: 'detail_macro_side',
     name: 'detail_macro_side',
     label: '🔍 Детали (сбоку)',
-    description: 'Макро-текстуры боковой части (2000x2000)',
+    description: 'Макро-текстуры боковой части с наклоном (2000x2000)',
     width: 2000,
     height: 2000,
     category: 'primary',
     icon: '🔍',
     defaultZoom: 2.5,
-    defaultAnchor: 'right',
+    defaultAnchor: 'center',
+    specialMode: 'perspective',
+    perspectiveMode: 'right',
+    perspectiveAmount: 0.15,
   },
 
   // 🔍 Дополнительные (Secondary)
   {
     id: 'room_corner_left',
     name: 'room_corner_left',
-    label: '🏠 Левый угол',
-    description: 'Вид на левый стык комнаты',
+    label: '🏠 Наклон влево',
+    description: 'Реалистичный вид стены под углом влево',
     width: 2000,
     height: 2000,
     category: 'secondary',
     icon: '🏠',
-    defaultZoom: 1.5,
-    defaultAnchor: 'top-left',
+    defaultZoom: 1.2,
+    defaultAnchor: 'center',
+    specialMode: 'perspective',
+    perspectiveMode: 'left',
+    perspectiveAmount: 0.2,
   },
   {
     id: 'room_corner_right',
     name: 'room_corner_right',
-    label: '🏠 Правый угол',
-    description: 'Вид на правый стык комнаты',
+    label: '🏠 Наклон вправо',
+    description: 'Реалистичный вид стены под углом вправо',
     width: 2000,
     height: 2000,
     category: 'secondary',
     icon: '🏠',
-    defaultZoom: 1.5,
-    defaultAnchor: 'top-right',
+    defaultZoom: 1.2,
+    defaultAnchor: 'center',
+    specialMode: 'perspective',
+    perspectiveMode: 'right',
+    perspectiveAmount: 0.2,
+  },
+  {
+    id: 'internal_corner_view',
+    name: 'internal_corner_view',
+    label: '📐 Угол (стык)',
+    description: 'Демонстрация стыковки обоев во внутреннем углу',
+    width: 2000,
+    height: 2000,
+    category: 'secondary',
+    icon: '📐',
+    defaultZoom: 1.2,
+    defaultAnchor: 'center',
+    specialMode: 'perspective',
+    perspectiveMode: 'corner-in',
+    perspectiveAmount: 0.25,
   },
   {
     id: 'size_map',
@@ -347,6 +375,141 @@ export const createTiledImage = (
   });
 };
 
+/**
+ * Отрисовывает изображение с эффектом перспективы или внутреннего угла.
+ * Использует метод вертикальных срезов для имитации 3D трансформации.
+ */
+export const drawPerspective = (
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  sx: number, sy: number, sw: number, sh: number,
+  dx: number, dy: number, dw: number, dh: number,
+  mode: PerspectiveMode,
+  amount: number = 0.2
+) => {
+  if (mode === 'none') {
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+    return;
+  }
+
+  ctx.save();
+  
+  if (mode === 'corner-in') {
+    // Режим внутреннего угла: две стены, сходящиеся к центру
+    const midX = dx + dw / 2;
+    const halfW = dw / 2;
+    
+    // Левая стена (наклон вправо к центру)
+    drawPerspective(ctx, img, sx, sy, sw / 2, sh, dx, dy, halfW, dh, 'right', amount);
+    // Правая стена (наклон влево к центру)
+    drawPerspective(ctx, img, sx + sw / 2, sy, sw / 2, sh, midX, dy, halfW, dh, 'left', amount);
+    
+    // Тень в углу для реализма
+    const gradient = ctx.createLinearGradient(midX - 50, dy, midX + 50, dy);
+    gradient.addColorStop(0, 'rgba(0,0,0,0)');
+    gradient.addColorStop(0.5, `rgba(0,0,0,${amount * 0.8})`);
+    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(midX - 50, dy, 100, dh);
+    
+    ctx.restore();
+    return;
+  }
+
+  // Отрисовка наклона через вертикальные срезы
+  const slices = 120; // Количество срезов для плавности
+  const sliceW = dw / slices;
+  const sourceSliceW = sw / slices;
+
+  for (let i = 0; i <= slices; i++) {
+    const x = dx + i * sliceW;
+    const sX = sx + i * sourceSliceW;
+    
+    // Рассчитываем высоту среза на основе перспективы
+    // t идет от 0 до 1
+    const t = i / slices;
+    let scale;
+    
+    if (mode === 'left') {
+      // Слева выше, справа ниже (наклон от нас вправо)
+      scale = 1 - (t * amount);
+    } else {
+      // Слева ниже, справа выше (наклон от нас влево)
+      scale = (1 - amount) + (t * amount);
+    }
+
+    const sliceH = dh * scale;
+    const yOffset = (dh - sliceH) / 2;
+
+    ctx.drawImage(
+      img,
+      sX, sy, sourceSliceW, sh,
+      x, dy + yOffset, sliceW, sliceH
+    );
+  }
+
+  // Наложение легкого градиента для имитации освещения
+  const lightGrad = ctx.createLinearGradient(dx, dy, dx + dw, dy);
+  if (mode === 'left') {
+    lightGrad.addColorStop(0, 'rgba(255,255,255,0.05)');
+    lightGrad.addColorStop(1, 'rgba(0,0,0,0.1)');
+  } else {
+    lightGrad.addColorStop(0, 'rgba(0,0,0,0.1)');
+    lightGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
+  }
+  ctx.fillStyle = lightGrad;
+  ctx.fillRect(dx, dy, dw, dh);
+
+  ctx.restore();
+};
+
+/**
+ * Создает изображение с перспективой
+ */
+export const createPerspectiveImage = (
+  imageData: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  targetWidth: number,
+  targetHeight: number,
+  mode: PerspectiveMode,
+  amount: number = 0.2,
+  format: ExportFormat = 'png',
+  quality: number = 1.0
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('Canvas context failed'));
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      // Фон (белый или прозрачный)
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+      drawPerspective(
+        ctx, img,
+        x, y, width, height,
+        0, 0, targetWidth, targetHeight,
+        mode, amount
+      );
+
+      resolve(canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', format === 'png' ? undefined : quality));
+    };
+    img.onerror = () => reject(new Error('Image load failed'));
+    img.src = imageData;
+  });
+};
+
 export const downloadCrop = (
   imageData: string,
   filename: string = 'etsy-crop.png'
@@ -381,6 +544,28 @@ export const batchCropImages = (
       const processPreset = async (preset: CropPreset) => {
         if (preset.specialMode === 'tile') {
           results[preset.id] = await createTiledImage(imageData, preset.width, preset.height, format, 1.0);
+        } else if (preset.specialMode === 'perspective') {
+          const area = calculateCropArea(
+            img.width,
+            img.height,
+            preset.width,
+            preset.height,
+            preset.defaultZoom || 1.0,
+            preset.defaultAnchor || 'center'
+          );
+          results[preset.id] = await createPerspectiveImage(
+            imageData,
+            area.x,
+            area.y,
+            area.width,
+            area.height,
+            preset.width,
+            preset.height,
+            preset.perspectiveMode || 'none',
+            preset.perspectiveAmount || 0.2,
+            format,
+            1.0
+          );
         } else {
           const area = calculateCropArea(
             img.width,
