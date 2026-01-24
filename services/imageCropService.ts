@@ -3,6 +3,17 @@
  * Поддерживает стандарты Etsy (3000px+), JPG 92-95%, sRGB.
  */
 
+export type AnchorPoint = 
+  | 'center' 
+  | 'top' 
+  | 'bottom' 
+  | 'left' 
+  | 'right' 
+  | 'top-left' 
+  | 'top-right' 
+  | 'bottom-left' 
+  | 'bottom-right';
+
 export interface CropPreset {
   id: string;
   name: string;
@@ -12,6 +23,8 @@ export interface CropPreset {
   height: number;
   category: 'primary' | 'secondary' | 'social';
   icon: string;
+  defaultZoom?: number;
+  defaultAnchor?: AnchorPoint;
 }
 
 export const ETSY_PRESETS: CropPreset[] = [
@@ -25,6 +38,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 2250,
     category: 'primary',
     icon: '🖼️',
+    defaultZoom: 1.0,
+    defaultAnchor: 'center',
   },
   {
     id: 'thumb_square',
@@ -35,6 +50,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 2000,
     category: 'primary',
     icon: '📸',
+    defaultZoom: 1.0,
+    defaultAnchor: 'center',
   },
   {
     id: 'vertical_wall',
@@ -45,6 +62,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 2700,
     category: 'primary',
     icon: '📐',
+    defaultZoom: 1.0,
+    defaultAnchor: 'center',
   },
   {
     id: 'lifestyle_context',
@@ -55,6 +74,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 1800,
     category: 'primary',
     icon: '🛋️',
+    defaultZoom: 1.1,
+    defaultAnchor: 'center',
   },
   {
     id: 'detail_macro',
@@ -65,6 +86,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 2000,
     category: 'primary',
     icon: '🔍',
+    defaultZoom: 2.2,
+    defaultAnchor: 'center',
   },
 
   // 🔍 Дополнительные (Secondary)
@@ -77,6 +100,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 2000,
     category: 'secondary',
     icon: '🏠',
+    defaultZoom: 1.4,
+    defaultAnchor: 'top-left',
   },
   {
     id: 'size_map',
@@ -87,6 +112,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 2000,
     category: 'secondary',
     icon: '📏',
+    defaultZoom: 1.0,
+    defaultAnchor: 'center',
   },
   {
     id: 'pattern_repeat',
@@ -97,6 +124,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 2000,
     category: 'secondary',
     icon: '🔄',
+    defaultZoom: 1.8,
+    defaultAnchor: 'bottom-right',
   },
   {
     id: 'color_palette',
@@ -107,6 +136,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 2000,
     category: 'secondary',
     icon: '🎨',
+    defaultZoom: 1.2,
+    defaultAnchor: 'bottom-left',
   },
   {
     id: 'packaging',
@@ -117,6 +148,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 2000,
     category: 'secondary',
     icon: '📦',
+    defaultZoom: 1.5,
+    defaultAnchor: 'center',
   },
 
   // 📱 Соцсети (Social Media)
@@ -129,6 +162,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 1350,
     category: 'social',
     icon: '📸',
+    defaultZoom: 1.0,
+    defaultAnchor: 'center',
   },
   {
     id: 'stories_reels',
@@ -139,6 +174,8 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 1920,
     category: 'social',
     icon: '📲',
+    defaultZoom: 1.0,
+    defaultAnchor: 'center',
   },
   {
     id: 'pinterest_pin',
@@ -149,8 +186,73 @@ export const ETSY_PRESETS: CropPreset[] = [
     height: 1500,
     category: 'social',
     icon: '📌',
+    defaultZoom: 1.0,
+    defaultAnchor: 'center',
   },
 ];
+
+export interface CropArea {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Рассчитывает область кропа для заполнения (cover) целевого прямоугольника
+ * с учетом зума и точки привязки.
+ */
+export const calculateCropArea = (
+  imgWidth: number,
+  imgHeight: number,
+  targetWidth: number,
+  targetHeight: number,
+  zoom: number = 1.0,
+  anchor: AnchorPoint = 'center'
+): CropArea => {
+  const targetRatio = targetWidth / targetHeight;
+  const imgRatio = imgWidth / imgHeight;
+
+  let dw, dh;
+
+  // 1. Сначала находим размеры для "cover"
+  if (imgRatio > targetRatio) {
+    // Картинка шире, чем нужно. Ограничиваем по высоте.
+    dh = imgHeight;
+    dw = imgHeight * targetRatio;
+  } else {
+    // Картинка уже, чем нужно. Ограничиваем по ширине.
+    dw = imgWidth;
+    dh = imgWidth / targetRatio;
+  }
+
+  // 2. Применяем зум (уменьшаем область выреза)
+  dw /= zoom;
+  dh /= zoom;
+
+  // 3. Рассчитываем координаты на основе якоря
+  let x, y;
+
+  // Горизонтальное выравнивание
+  if (anchor.includes('left')) {
+    x = 0;
+  } else if (anchor.includes('right')) {
+    x = imgWidth - dw;
+  } else {
+    x = (imgWidth - dw) / 2;
+  }
+
+  // Вертикальное выравнивание
+  if (anchor.includes('top')) {
+    y = 0;
+  } else if (anchor.includes('bottom')) {
+    y = imgHeight - dh;
+  } else {
+    y = (imgHeight - dh) / 2;
+  }
+
+  return { x, y, width: dw, height: dh };
+};
 
 export const getPresetsByCategory = (category: CropPreset['category']) => {
   return ETSY_PRESETS.filter(p => p.category === category);
@@ -162,6 +264,8 @@ export const cropImage = (
   y: number,
   width: number,
   height: number,
+  targetWidth: number,
+  targetHeight: number,
   quality: number = 0.95
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -169,8 +273,8 @@ export const cropImage = (
     img.crossOrigin = "anonymous";
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
       const ctx = canvas.getContext('2d');
 
       if (!ctx) {
@@ -178,7 +282,11 @@ export const cropImage = (
         return;
       }
 
-      // Отрисовка с обрезкой
+      // Включаем сглаживание для качественного ресайза
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      // Отрисовка с обрезкой и масштабированием до целевого размера
       ctx.drawImage(
         img,
         x,
@@ -187,8 +295,8 @@ export const cropImage = (
         height,
         0,
         0,
-        width,
-        height
+        targetWidth,
+        targetHeight
       );
       
       // Сохраняем в JPG с заданным качеством
@@ -231,6 +339,15 @@ export const batchCropImages = (
       
       try {
         presets.forEach(preset => {
+          const area = calculateCropArea(
+            img.width,
+            img.height,
+            preset.width,
+            preset.height,
+            preset.defaultZoom || 1.0,
+            preset.defaultAnchor || 'center'
+          );
+
           const canvas = document.createElement('canvas');
           canvas.width = preset.width;
           canvas.height = preset.height;
@@ -238,19 +355,16 @@ export const batchCropImages = (
 
           if (!ctx) return;
 
-          // Центрируем кроп по умолчанию
-          const maxX = Math.max(0, img.width - preset.width);
-          const maxY = Math.max(0, img.height - preset.height);
-          const x = Math.floor(maxX / 2);
-          const y = Math.floor(maxY / 2);
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
 
           // Отрисовка с обрезкой
           ctx.drawImage(
             img,
-            x,
-            y,
-            preset.width,
-            preset.height,
+            area.x,
+            area.y,
+            area.width,
+            area.height,
             0,
             0,
             preset.width,

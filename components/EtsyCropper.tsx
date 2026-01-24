@@ -6,6 +6,7 @@ import {
   cropImage,
   downloadCrop,
   batchCropImages,
+  calculateCropArea,
 } from '../services/imageCropService';
 import { Step } from '../types';
 interface EtsyCropperProps {
@@ -47,6 +48,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
 
   const [sourceImage, setSourceImage] = useState<string | null>(initialImage || 'https://images.unsplash.com/photo-1540989100695-9b8763814c8f?q=80&w=3000&auto=format&fit=crop');
   const [selectedPreset, setSelectedPreset] = useState<CropPreset>(ETSY_PRESETS[0]);
+  const [zoom, setZoom] = useState(1.0);
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -58,28 +60,47 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
   const [activeCategory, setActiveCategory] = useState<CategoryType>('primary');
   const [showBatchMode, setShowBatchMode] = useState(false);
 
-  // Загрузка изображения
+  // Загрузка изображения или смена пресета
   useEffect(() => {
-    if (sourceImage) {
+    if (sourceImage && imgRef.current) {
+      const img = imgRef.current;
+      const area = calculateCropArea(
+        img.width,
+        img.height,
+        selectedPreset.width,
+        selectedPreset.height,
+        selectedPreset.defaultZoom || 1.0,
+        selectedPreset.defaultAnchor || 'center'
+      );
+      setOffsetX(area.x);
+      setOffsetY(area.y);
+      setZoom(selectedPreset.defaultZoom || 1.0);
+    } else if (sourceImage) {
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
         imgRef.current = img;
-        // Центрируем кроп по умолчанию
-        const maxX = Math.max(0, img.width - selectedPreset.width);
-        const maxY = Math.max(0, img.height - selectedPreset.height);
-        setOffsetX(Math.floor(maxX / 2));
-        setOffsetY(Math.floor(maxY / 2));
+        const area = calculateCropArea(
+          img.width,
+          img.height,
+          selectedPreset.width,
+          selectedPreset.height,
+          selectedPreset.defaultZoom || 1.0,
+          selectedPreset.defaultAnchor || 'center'
+        );
+        setOffsetX(area.x);
+        setOffsetY(area.y);
+        setZoom(selectedPreset.defaultZoom || 1.0);
         drawPreview();
       };
       img.src = sourceImage;
     }
-  }, [sourceImage]);
+  }, [sourceImage, selectedPreset.id]);
 
-  // Перерисовка при изменении preset или offset
+  // Перерисовка при изменении параметров
   useEffect(() => {
     drawPreview();
-  }, [selectedPreset, offsetX, offsetY, sourceImage]);
+  }, [selectedPreset, offsetX, offsetY, zoom, sourceImage]);
 
   const drawPreview = () => {
     if (!canvasRef.current || !imgRef.current) return;
@@ -98,11 +119,27 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     // Отрисовка основного изображения
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
+    // Рассчитываем размеры области выреза на основе текущего пресета и зума
+    const targetRatio = selectedPreset.width / selectedPreset.height;
+    const imgRatio = img.width / img.height;
+
+    let dw, dh;
+    if (imgRatio > targetRatio) {
+      dh = img.height;
+      dw = img.height * targetRatio;
+    } else {
+      dw = img.width;
+      dh = img.width / targetRatio;
+    }
+
+    dw /= zoom;
+    dh /= zoom;
+
     // Отрисовка crop области
     const cropX = offsetX * scale;
     const cropY = offsetY * scale;
-    const cropWidth = selectedPreset.width * scale;
-    const cropHeight = selectedPreset.height * scale;
+    const cropWidth = dw * scale;
+    const cropHeight = dh * scale;
 
     // Полутемная область снаружи crop
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
@@ -148,25 +185,56 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       clientY = e.clientY;
     }
 
-    // Вычисляем координаты относительно центра кропа
-    const x = Math.floor((clientX - rect.left) / scale - selectedPreset.width / 2);
-    const y = Math.floor((clientY - rect.top) / scale - selectedPreset.height / 2);
+    // Рассчитываем текущие размеры рамки (dw, dh) для правильного позиционирования
+    const targetRatio = selectedPreset.width / selectedPreset.height;
+    const imgRatio = img.width / img.height;
+    let dw, dh;
+    if (imgRatio > targetRatio) {
+      dh = img.height;
+      dw = img.height * targetRatio;
+    } else {
+      dw = img.width;
+      dh = img.width / targetRatio;
+    }
+    dw /= zoom;
+    dh /= zoom;
 
-    const maxX = Math.max(0, img.width - selectedPreset.width);
-    const maxY = Math.max(0, img.height - selectedPreset.height);
+    // Вычисляем координаты относительно центра кропа
+    const x = Math.floor((clientX - rect.left) / scale - dw / 2);
+    const y = Math.floor((clientY - rect.top) / scale - dh / 2);
+
+    const maxX = Math.max(0, img.width - dw);
+    const maxY = Math.max(0, img.height - dh);
 
     setOffsetX(Math.max(0, Math.min(x, maxX)));
     setOffsetY(Math.max(0, Math.min(y, maxY)));
   };
 
   const handleApplyCrop = async () => {
-    if (!sourceImage) return;
+    if (!sourceImage || !imgRef.current) return;
     setIsProcessing(true);
+
+    const img = imgRef.current;
+    const targetRatio = selectedPreset.width / selectedPreset.height;
+    const imgRatio = img.width / img.height;
+    let dw, dh;
+    if (imgRatio > targetRatio) {
+      dh = img.height;
+      dw = img.height * targetRatio;
+    } else {
+      dw = img.width;
+      dh = img.width / targetRatio;
+    }
+    dw /= zoom;
+    dh /= zoom;
+
     try {
       const croppedImage = await cropImage(
         sourceImage,
         offsetX,
         offsetY,
+        dw,
+        dh,
         selectedPreset.width,
         selectedPreset.height
       );
@@ -294,21 +362,60 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       {!showBatchMode ? (
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <div
-              ref={containerRef}
-              className="relative w-full bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl"
-            >
-              <canvas
-                ref={canvasRef}
-                onMouseDown={() => setIsDragging(true)}
-                onMouseMove={handleCanvasInteraction}
-                onMouseUp={() => setIsDragging(false)}
-                onMouseLeave={() => setIsDragging(false)}
-                onTouchStart={() => setIsDragging(true)}
-                onTouchMove={handleCanvasInteraction}
-                onTouchEnd={() => setIsDragging(false)}
-                className="w-full cursor-move touch-none"
-              />
+            <div className="space-y-4">
+              <div
+                ref={containerRef}
+                className="relative w-full bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl"
+              >
+                <canvas
+                  ref={canvasRef}
+                  onMouseDown={() => setIsDragging(true)}
+                  onMouseMove={handleCanvasInteraction}
+                  onMouseUp={() => setIsDragging(false)}
+                  onMouseLeave={() => setIsDragging(false)}
+                  onTouchStart={() => setIsDragging(true)}
+                  onTouchMove={handleCanvasInteraction}
+                  onTouchEnd={() => setIsDragging(false)}
+                  className="w-full cursor-move touch-none"
+                />
+              </div>
+
+              {/* Zoom Control */}
+              <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 flex items-center gap-4">
+                <span className="text-sm font-medium text-slate-400 min-w-[3rem]">Zoom</span>
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="4" 
+                  step="0.05" 
+                  value={zoom}
+                  onChange={(e) => {
+                    const newZoom = parseFloat(e.target.value);
+                    setZoom(newZoom);
+                    
+                    // Корректируем смещение при зуме, чтобы рамка не выходила за края
+                    if (imgRef.current) {
+                      const img = imgRef.current;
+                      const targetRatio = selectedPreset.width / selectedPreset.height;
+                      const imgRatio = img.width / img.height;
+                      let dw, dh;
+                      if (imgRatio > targetRatio) {
+                        dh = img.height; dw = img.height * targetRatio;
+                      } else {
+                        dw = img.width; dh = img.width / targetRatio;
+                      }
+                      dw /= newZoom; dh /= newZoom;
+                      
+                      const maxX = Math.max(0, img.width - dw);
+                      const maxY = Math.max(0, img.height - dh);
+                      setOffsetX(prev => Math.max(0, Math.min(prev, maxX)));
+                      setOffsetY(prev => Math.max(0, Math.min(prev, maxY)));
+                    }
+                  }}
+                  className="flex-1 accent-indigo-500"
+                />
+                <span className="text-sm font-bold text-indigo-400 min-w-[2.5rem]">{zoom.toFixed(2)}x</span>
+              </div>
             </div>
             
             <button
@@ -417,8 +524,8 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {ETSY_PRESETS.filter(p => crops[p.id]).map((preset) => (
               <div key={preset.id} className="group space-y-2">
-                <div className="aspect-[4/3] bg-slate-900 rounded-xl overflow-hidden border border-slate-700 relative">
-                  <img src={crops[preset.id]} className="w-full h-full object-contain" alt={preset.label} />
+                <div className="aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 relative">
+                  <img src={crops[preset.id]} className="w-full h-full object-cover shadow-inner" alt={preset.label} />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button 
                       onClick={() => downloadCrop(crops[preset.id], `etsy-${preset.id}.jpg`)}
