@@ -7,6 +7,7 @@ import {
   downloadCrop,
   batchCropImages,
   calculateCropArea,
+  ExportFormat,
 } from '../services/imageCropService';
 import { Step } from '../types';
 interface EtsyCropperProps {
@@ -59,6 +60,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
   );
   const [activeCategory, setActiveCategory] = useState<CategoryType>('primary');
   const [showBatchMode, setShowBatchMode] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
 
   // Загрузка изображения или смена пресета
   useEffect(() => {
@@ -117,7 +119,17 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     canvas.height = img.height * scale;
 
     // Отрисовка основного изображения
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    if (selectedPreset.specialMode === 'tile') {
+      // Рисуем плитку 2x2 для предпросмотра
+      const w = canvas.width / 2;
+      const h = canvas.height / 2;
+      ctx.drawImage(img, 0, 0, w, h);
+      ctx.drawImage(img, w, 0, w, h);
+      ctx.drawImage(img, 0, h, w, h);
+      ctx.drawImage(img, w, h, w, h);
+    } else {
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
 
     // Рассчитываем размеры области выреза на основе текущего пресета и зума
     const targetRatio = selectedPreset.width / selectedPreset.height;
@@ -136,10 +148,10 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     dh /= zoom;
 
     // Отрисовка crop области
-    const cropX = offsetX * scale;
-    const cropY = offsetY * scale;
-    const cropWidth = dw * scale;
-    const cropHeight = dh * scale;
+    const cropX = selectedPreset.specialMode === 'tile' ? 0 : offsetX * scale;
+    const cropY = selectedPreset.specialMode === 'tile' ? 0 : offsetY * scale;
+    const cropWidth = selectedPreset.specialMode === 'tile' ? canvas.width : dw * scale;
+    const cropHeight = selectedPreset.specialMode === 'tile' ? canvas.height : dh * scale;
 
     // Полутемная область снаружи crop
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
@@ -150,7 +162,16 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     ctx.beginPath();
     ctx.rect(cropX, cropY, cropWidth, cropHeight);
     ctx.clip();
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    if (selectedPreset.specialMode === 'tile') {
+      const w = canvas.width / 2;
+      const h = canvas.height / 2;
+      ctx.drawImage(img, 0, 0, w, h);
+      ctx.drawImage(img, w, 0, w, h);
+      ctx.drawImage(img, 0, h, w, h);
+      ctx.drawImage(img, w, h, w, h);
+    } else {
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
     ctx.restore();
 
     // Граница crop
@@ -214,30 +235,42 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     if (!sourceImage || !imgRef.current) return;
     setIsProcessing(true);
 
-    const img = imgRef.current;
-    const targetRatio = selectedPreset.width / selectedPreset.height;
-    const imgRatio = img.width / img.height;
-    let dw, dh;
-    if (imgRatio > targetRatio) {
-      dh = img.height;
-      dw = img.height * targetRatio;
-    } else {
-      dw = img.width;
-      dh = img.width / targetRatio;
-    }
-    dw /= zoom;
-    dh /= zoom;
-
     try {
-      const croppedImage = await cropImage(
-        sourceImage,
-        offsetX,
-        offsetY,
-        dw,
-        dh,
-        selectedPreset.width,
-        selectedPreset.height
-      );
+      let croppedImage: string;
+      if (selectedPreset.specialMode === 'tile') {
+        const { createTiledImage } = await import('../services/imageCropService');
+        croppedImage = await createTiledImage(
+          sourceImage,
+          selectedPreset.width,
+          selectedPreset.height,
+          exportFormat
+        );
+      } else {
+        const img = imgRef.current;
+        const targetRatio = selectedPreset.width / selectedPreset.height;
+        const imgRatio = img.width / img.height;
+        let dw, dh;
+        if (imgRatio > targetRatio) {
+          dh = img.height;
+          dw = img.height * targetRatio;
+        } else {
+          dw = img.width;
+          dh = img.width / targetRatio;
+        }
+        dw /= zoom;
+        dh /= zoom;
+
+        croppedImage = await cropImage(
+          sourceImage,
+          offsetX,
+          offsetY,
+          dw,
+          dh,
+          selectedPreset.width,
+          selectedPreset.height,
+          exportFormat
+        );
+      }
 
       setCrops(prev => ({
         ...prev,
@@ -256,7 +289,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     const selectedPresets = ETSY_PRESETS.filter(p => selectedForBatch.has(p.id));
 
     try {
-      const newCrops = await batchCropImages(sourceImage, selectedPresets);
+      const newCrops = await batchCropImages(sourceImage, selectedPresets, exportFormat);
       setCrops(prev => ({ ...prev, ...newCrops }));
       setShowBatchMode(false);
     } catch (error) {
@@ -336,27 +369,55 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         </div>
       </div>
 
-      <div className="flex gap-3 bg-slate-800/50 p-1.5 rounded-xl border border-slate-700">
-        <button
-          onClick={() => setShowBatchMode(false)}
-          className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
-            !showBatchMode
-              ? 'bg-indigo-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          ✏️ Ручной режим
-        </button>
-        <button
-          onClick={() => setShowBatchMode(true)}
-          className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
-            showBatchMode
-              ? 'bg-indigo-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          ⚡ Batch Mode
-        </button>
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-slate-800/50 p-2 rounded-2xl border border-slate-700/50">
+        <div className="flex gap-1 p-1 bg-slate-900/50 rounded-xl border border-slate-700 w-full sm:w-auto">
+          <button
+            onClick={() => setShowBatchMode(false)}
+            className={`flex-1 sm:flex-none px-6 py-2 rounded-lg font-medium transition-all ${
+              !showBatchMode
+                ? 'bg-indigo-600 text-white shadow-lg'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            ✏️ Ручной
+          </button>
+          <button
+            onClick={() => setShowBatchMode(true)}
+            className={`flex-1 sm:flex-none px-6 py-2 rounded-lg font-medium transition-all ${
+              showBatchMode
+                ? 'bg-indigo-600 text-white shadow-lg'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            ⚡ Batch Mode
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3 bg-slate-900/50 p-1 rounded-xl border border-slate-700 w-full sm:w-auto px-3 py-1.5">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Качество:</span>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setExportFormat('png')}
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                exportFormat === 'png'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              PNG (Max)
+            </button>
+            <button
+              onClick={() => setExportFormat('jpeg')}
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                exportFormat === 'jpeg'
+                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                  : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              JPG (100%)
+            </button>
+          </div>
+        </div>
       </div>
 
       {!showBatchMode ? (
@@ -528,7 +589,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
                   <img src={crops[preset.id]} className="w-full h-full object-cover shadow-inner" alt={preset.label} />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button 
-                      onClick={() => downloadCrop(crops[preset.id], `etsy-${preset.id}.jpg`)}
+                      onClick={() => downloadCrop(crops[preset.id], `etsy-${preset.id}.${exportFormat === 'png' ? 'png' : 'jpg'}`)}
                       className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
                     >
                       📥

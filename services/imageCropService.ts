@@ -1,6 +1,6 @@
 /**
  * Image Crop Service для Etsy
- * Поддерживает стандарты Etsy (3000px+), JPG 92-95%, sRGB.
+ * Поддерживает стандарты Etsy (3000px+), JPG 100%, PNG Lossless, sRGB.
  */
 
 export type AnchorPoint = 
@@ -14,6 +14,8 @@ export type AnchorPoint =
   | 'bottom-left' 
   | 'bottom-right';
 
+export type ExportFormat = 'jpeg' | 'png';
+
 export interface CropPreset {
   id: string;
   name: string;
@@ -25,6 +27,7 @@ export interface CropPreset {
   icon: string;
   defaultZoom?: number;
   defaultAnchor?: AnchorPoint;
+  specialMode?: 'tile';
 }
 
 export const ETSY_PRESETS: CropPreset[] = [
@@ -143,13 +146,12 @@ export const ETSY_PRESETS: CropPreset[] = [
     id: 'pattern_repeat',
     name: 'pattern_repeat',
     label: '🔄 Повтор паттерна',
-    description: 'Демонстрация стыковки',
+    description: 'Демонстрация стыковки (плитка 2x2)',
     width: 2000,
     height: 2000,
     category: 'secondary',
     icon: '🔄',
-    defaultZoom: 1.8,
-    defaultAnchor: 'bottom-right',
+    specialMode: 'tile',
   },
 
   // 📱 Соцсети (Social Media)
@@ -266,7 +268,8 @@ export const cropImage = (
   height: number,
   targetWidth: number,
   targetHeight: number,
-  quality: number = 0.95
+  format: ExportFormat = 'png',
+  quality: number = 1.0
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -282,7 +285,6 @@ export const cropImage = (
         return;
       }
 
-      // Включаем сглаживание для качественного ресайза
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
@@ -299,17 +301,55 @@ export const cropImage = (
         targetHeight
       );
       
-      // Сохраняем в JPG с заданным качеством
-      resolve(canvas.toDataURL('image/jpeg', quality));
+      resolve(canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', format === 'png' ? undefined : quality));
     };
     img.onerror = () => reject(new Error('Failed to load image'));
     img.src = imageData;
   });
 };
 
+/**
+ * Специальная функция для создания плитки 2x2
+ */
+export const createTiledImage = (
+  imageData: string,
+  targetWidth: number,
+  targetHeight: number,
+  format: ExportFormat = 'png',
+  quality: number = 1.0
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('Canvas context failed'));
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      const w = targetWidth / 2;
+      const h = targetHeight / 2;
+
+      // Рисуем 4 копии
+      ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, w, h);
+      ctx.drawImage(img, 0, 0, img.width, img.height, w, 0, w, h);
+      ctx.drawImage(img, 0, 0, img.width, img.height, 0, h, w, h);
+      ctx.drawImage(img, 0, 0, img.width, img.height, w, h, w, h);
+
+      resolve(canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', format === 'png' ? undefined : quality));
+    };
+    img.onerror = () => reject(new Error('Image load failed'));
+    img.src = imageData;
+  });
+};
+
 export const downloadCrop = (
   imageData: string,
-  filename: string = 'etsy-crop.jpg'
+  filename: string = 'etsy-crop.png'
 ) => {
   const link = document.createElement('a');
   link.href = imageData;
@@ -329,7 +369,8 @@ export const getGroupedPresets = () => {
 
 export const batchCropImages = (
   imageData: string,
-  presets: CropPreset[]
+  presets: CropPreset[],
+  format: ExportFormat = 'png'
 ): Promise<{ [key: string]: string }> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -337,8 +378,10 @@ export const batchCropImages = (
     img.onload = () => {
       const results: { [key: string]: string } = {};
       
-      try {
-        presets.forEach(preset => {
+      const processPreset = async (preset: CropPreset) => {
+        if (preset.specialMode === 'tile') {
+          results[preset.id] = await createTiledImage(imageData, preset.width, preset.height, format, 1.0);
+        } else {
           const area = calculateCropArea(
             img.width,
             img.height,
@@ -347,38 +390,23 @@ export const batchCropImages = (
             preset.defaultZoom || 1.0,
             preset.defaultAnchor || 'center'
           );
-
-          const canvas = document.createElement('canvas');
-          canvas.width = preset.width;
-          canvas.height = preset.height;
-          const ctx = canvas.getContext('2d');
-
-          if (!ctx) return;
-
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-
-          // Отрисовка с обрезкой
-          ctx.drawImage(
-            img,
+          results[preset.id] = await cropImage(
+            imageData,
             area.x,
             area.y,
             area.width,
             area.height,
-            0,
-            0,
             preset.width,
-            preset.height
+            preset.height,
+            format,
+            1.0
           );
-          
-          // Сохраняем в JPG 95%
-          results[preset.id] = canvas.toDataURL('image/jpeg', 0.95);
-        });
-        
-        resolve(results);
-      } catch (error) {
-        reject(error);
-      }
+        }
+      };
+
+      Promise.all(presets.map(processPreset))
+        .then(() => resolve(results))
+        .catch(reject);
     };
     img.onerror = () => reject(new Error('Failed to load image for batch processing'));
     img.src = imageData;
