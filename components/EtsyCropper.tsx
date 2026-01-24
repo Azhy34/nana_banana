@@ -8,9 +8,13 @@ import {
   batchCropImages,
   calculateCropArea,
   ExportFormat,
-  drawPerspective,
+  drawQuadrilateralWarp,
+  createWarpedImage,
+  Point,
 } from '../services/imageCropService';
+import { detectWallCoordinates, WallCoordinates } from '../services/geminiService';
 import { Step } from '../types';
+
 interface EtsyCropperProps {
   initialImage?: string | null;
   onBack?: () => void;
@@ -62,6 +66,54 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
   const [activeCategory, setActiveCategory] = useState<CategoryType>('primary');
   const [showBatchMode, setShowBatchMode] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
+
+  // Vision Mockup State
+  const [patternImage, setPatternImage] = useState<string | null>(null);
+  const patternImgRef = useRef<HTMLImageElement | null>(null);
+  const [wallPoints, setWallPoints] = useState<WallCoordinates | null>(null);
+  const [isDetectingWall, setIsDetectingWall] = useState(false);
+  const [draggingPoint, setDraggingPoint] = useState<keyof WallCoordinates | null>(null);
+
+  // Auto-detect wall when entering warp mode
+  useEffect(() => {
+    if (selectedPreset.specialMode === 'warp' && sourceImage && !wallPoints && !isDetectingWall) {
+      const detect = async () => {
+        setIsDetectingWall(true);
+        try {
+          const apiKey = localStorage.getItem('gemini_api_key');
+          if (apiKey) {
+            const points = await detectWallCoordinates(apiKey, sourceImage);
+            setWallPoints(points);
+          }
+        } catch (e) {
+          console.error("Wall detection failed", e);
+          // Default points (inset rectangle)
+          setWallPoints({
+            topLeft: { x: 0.2, y: 0.2 },
+            topRight: { x: 0.8, y: 0.2 },
+            bottomRight: { x: 0.8, y: 0.8 },
+            bottomLeft: { x: 0.2, y: 0.8 }
+          });
+        } finally {
+          setIsDetectingWall(false);
+        }
+      };
+      detect();
+    }
+  }, [selectedPreset.specialMode, sourceImage]);
+
+  // Load pattern image ref
+  useEffect(() => {
+    if (patternImage) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        patternImgRef.current = img;
+        drawPreview();
+      };
+      img.src = patternImage;
+    }
+  }, [patternImage]);
 
   // Загрузка изображения или смена пресета
   useEffect(() => {
@@ -163,6 +215,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     ctx.beginPath();
     ctx.rect(cropX, cropY, cropWidth, cropHeight);
     ctx.clip();
+    
     if (selectedPreset.specialMode === 'tile') {
       const w = canvas.width / 2;
       const h = canvas.height / 2;
@@ -170,36 +223,67 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       ctx.drawImage(img, w, 0, w, h);
       ctx.drawImage(img, 0, h, w, h);
       ctx.drawImage(img, w, h, w, h);
-    } else if (selectedPreset.specialMode === 'perspective') {
-      // Предпросмотр перспективы
-      const targetRatio = selectedPreset.width / selectedPreset.height;
-      const imgRatio = img.width / img.height;
-      let dw, dh;
-      if (imgRatio > targetRatio) {
-        dh = img.height; dw = img.height * targetRatio;
-      } else {
-        dw = img.width; dh = img.width / targetRatio;
-      }
-      dw /= zoom; dh /= zoom;
+    } else if (selectedPreset.specialMode === 'warp' && wallPoints && patternImgRef.current) {
+      // Warp Mode: Draw pattern inside detected wall points
+      const tl = { x: wallPoints.topLeft.x * canvas.width, y: wallPoints.topLeft.y * canvas.height };
+      const tr = { x: wallPoints.topRight.x * canvas.width, y: wallPoints.topRight.y * canvas.height };
+      const br = { x: wallPoints.bottomRight.x * canvas.width, y: wallPoints.bottomRight.y * canvas.height };
+      const bl = { x: wallPoints.bottomLeft.x * canvas.width, y: wallPoints.bottomLeft.y * canvas.height };
 
-      drawPerspective(
-        ctx, img,
-        offsetX, offsetY, dw, dh,
-        cropX, cropY, cropWidth, cropHeight,
-        selectedPreset.perspectiveMode || 'none',
-        selectedPreset.perspectiveAmount || 0.2
+      drawQuadrilateralWarp(
+        ctx, patternImgRef.current, img,
+        tl, tr, br, bl,
+        canvas.width, canvas.height
       );
     } else {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     }
     ctx.restore();
 
-    // Граница crop
-    ctx.strokeStyle = '#818cf8';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(cropX, cropY, cropWidth, cropHeight);
-    
-    // Метки размеров
+    // Warp Points UI (only in Warp mode)
+    if (selectedPreset.specialMode === 'warp' && wallPoints) {
+      const points = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'] as const;
+      ctx.fillStyle = '#fff';
+      ctx.strokeStyle = '#818cf8';
+      ctx.lineWidth = 2;
+      
+      points.forEach(key => {
+        const p = wallPoints[key];
+        const x = p.x * canvas.width;
+        const y = p.y * canvas.height;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+      
+      // Draw frame
+      ctx.beginPath();
+      ctx.moveTo(wallPoints.topLeft.x * canvas.width, wallPoints.topLeft.y * canvas.height);
+      ctx.lineTo(wallPoints.topRight.x * canvas.width, wallPoints.topRight.y * canvas.height);
+      ctx.lineTo(wallPoints.bottomRight.x * canvas.width, wallPoints.bottomRight.y * canvas.height);
+      ctx.lineTo(wallPoints.bottomLeft.x * canvas.width, wallPoints.bottomLeft.y * canvas.height);
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(129, 140, 248, 0.5)';
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else {
+      // Граница crop (для обычных режимов)
+      ctx.strokeStyle = '#818cf8';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(cropX, cropY, cropWidth, cropHeight);
+      
+      // Метки размеров
+      ctx.fillStyle = '#818cf8';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText(
+        `${selectedPreset.width}x${selectedPreset.height}px`,
+        cropX + 10,
+        cropY + 25
+      );
+    }
     ctx.fillStyle = '#818cf8';
     ctx.font = 'bold 14px sans-serif';
     ctx.fillText(
@@ -209,14 +293,47 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     );
   };
 
+  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    if (selectedPreset.specialMode === 'warp' && wallPoints && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      
+      let clientX, clientY;
+      if ('touches' in e) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      
+      const x = (clientX - rect.left) / canvas.width;
+      const y = (clientY - rect.top) / canvas.height;
+      
+      // Find clicked point
+      const threshold = 20 / canvas.width; // 20px hit area
+      const points = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'] as const;
+      
+      for (const key of points) {
+        const p = wallPoints[key];
+        const dist = Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2));
+        if (dist < threshold) {
+          setDraggingPoint(key);
+          setIsDragging(true);
+          return;
+        }
+      }
+    }
+    
+    setIsDragging(true);
+  };
+
   const handleCanvasInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging || !canvasRef.current || !imgRef.current) return;
 
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const img = imgRef.current;
-    const scale = canvas.width / img.width;
-
+    
     let clientX, clientY;
     if ('touches' in e) {
       clientX = e.touches[0].clientX;
@@ -226,6 +343,21 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       clientY = e.clientY;
     }
 
+    // WARP MODE INTERACTION
+    if (selectedPreset.specialMode === 'warp' && draggingPoint && wallPoints) {
+      const x = Math.max(0, Math.min(1, (clientX - rect.left) / canvas.width));
+      const y = Math.max(0, Math.min(1, (clientY - rect.top) / canvas.height));
+      
+      setWallPoints({
+        ...wallPoints,
+        [draggingPoint]: { x, y }
+      });
+      return;
+    }
+
+    // NORMAL CROP INTERACTION
+    const img = imgRef.current;
+    const scale = canvas.width / img.width;
     // Рассчитываем текущие размеры рамки (dw, dh) для правильного позиционирования
     const targetRatio = selectedPreset.width / selectedPreset.height;
     const imgRatio = img.width / img.height;
@@ -250,6 +382,11 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     setOffsetX(Math.max(0, Math.min(x, maxX)));
     setOffsetY(Math.max(0, Math.min(y, maxY)));
   };
+  
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setDraggingPoint(null);
+  };
 
   const handleApplyCrop = async () => {
     if (!sourceImage || !imgRef.current) return;
@@ -265,29 +402,30 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
           selectedPreset.height,
           exportFormat
         );
-      } else if (selectedPreset.specialMode === 'perspective') {
-        const { createPerspectiveImage } = await import('../services/imageCropService');
+      } else if (selectedPreset.specialMode === 'warp' && wallPoints && patternImage) {
+        const { createWarpedImage } = await import('../services/imageCropService');
         const img = imgRef.current;
-        const targetRatio = selectedPreset.width / selectedPreset.height;
-        const imgRatio = img.width / img.height;
-        let dw, dh;
-        if (imgRatio > targetRatio) {
-          dh = img.height; dw = img.height * targetRatio;
-        } else {
-          dw = img.width; dh = img.width / targetRatio;
-        }
-        dw /= zoom; dh /= zoom;
+        const targetW = selectedPreset.width;
+        const targetH = selectedPreset.height;
+        
+        // Scale normalized points to target resolution
+        const scalePoint = (p: {x:number, y:number}) => ({ x: p.x * targetW, y: p.y * targetH });
+        
+        const scaledPoints = {
+          tl: scalePoint(wallPoints.topLeft),
+          tr: scalePoint(wallPoints.topRight),
+          br: scalePoint(wallPoints.bottomRight),
+          bl: scalePoint(wallPoints.bottomLeft)
+        };
 
-        croppedImage = await createPerspectiveImage(
+        // Note: For actual export, we render the full resolution background
+        // and warp the pattern onto it.
+        croppedImage = await createWarpedImage(
           sourceImage,
-          offsetX,
-          offsetY,
-          dw,
-          dh,
-          selectedPreset.width,
-          selectedPreset.height,
-          selectedPreset.perspectiveMode || 'none',
-          selectedPreset.perspectiveAmount || 0.2,
+          patternImage,
+          scaledPoints,
+          targetW,
+          targetH,
           exportFormat
         );
       } else {
@@ -469,20 +607,54 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <div className="space-y-4">
+              {/* Pattern Upload for Warp Mode */}
+              {selectedPreset.specialMode === 'warp' && (
+                <div className="bg-indigo-900/20 p-4 rounded-xl border border-indigo-500/30 mb-4 animate-fadeIn">
+                  <h4 className="text-sm font-bold text-indigo-300 mb-2 flex items-center gap-2">
+                    <span className="text-xl">🎨</span> 1. Загрузите файл паттерна
+                  </h4>
+                  <div className="flex items-center gap-4">
+                    {patternImage ? (
+                      <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-700">
+                        <img src={patternImage} className="w-10 h-10 object-cover rounded" alt="Pattern" />
+                        <span className="text-xs text-green-400 font-bold">Паттерн загружен</span>
+                        <button onClick={() => setPatternImage(null)} className="text-slate-400 hover:text-white px-2">✕</button>
+                      </div>
+                    ) : (
+                      <label className="flex-1 cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-2 px-4 rounded-lg text-center transition-colors">
+                        Выбрать файл...
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if(file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => setPatternImage(ev.target?.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        }} />
+                      </label>
+                    )}
+                    {isDetectingWall && <span className="text-xs text-indigo-300 animate-pulse">🤖 ИИ ищет стену...</span>}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    2. ИИ найдет стену автоматически. Перетащите точки, если нужно поправить.
+                  </p>
+                </div>
+              )}
+
               <div
                 ref={containerRef}
                 className="relative w-full bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl"
               >
                 <canvas
                   ref={canvasRef}
-                  onMouseDown={() => setIsDragging(true)}
+                  onMouseDown={handleMouseDown}
                   onMouseMove={handleCanvasInteraction}
-                  onMouseUp={() => setIsDragging(false)}
-                  onMouseLeave={() => setIsDragging(false)}
-                  onTouchStart={() => setIsDragging(true)}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  onTouchStart={handleMouseDown}
                   onTouchMove={handleCanvasInteraction}
-                  onTouchEnd={() => setIsDragging(false)}
-                  className="w-full cursor-move touch-none"
+                  onTouchEnd={handleMouseUp}
+                  className={`w-full touch-none ${selectedPreset.specialMode === 'warp' ? 'cursor-crosshair' : 'cursor-move'}`}
                 />
               </div>
 

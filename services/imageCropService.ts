@@ -16,8 +16,6 @@ export type AnchorPoint =
 
 export type ExportFormat = 'jpeg' | 'png';
 
-export type PerspectiveMode = 'none' | 'left' | 'right' | 'corner-in';
-
 export interface CropPreset {
   id: string;
   name: string;
@@ -29,9 +27,7 @@ export interface CropPreset {
   icon: string;
   defaultZoom?: number;
   defaultAnchor?: AnchorPoint;
-  specialMode?: 'tile' | 'perspective';
-  perspectiveMode?: PerspectiveMode;
-  perspectiveAmount?: number; // 0 to 1
+  specialMode?: 'tile' | 'warp';
 }
 
 export const ETSY_PRESETS: CropPreset[] = [
@@ -96,67 +92,18 @@ export const ETSY_PRESETS: CropPreset[] = [
     defaultZoom: 2.5,
     defaultAnchor: 'center',
   },
-  {
-    id: 'detail_macro_side',
-    name: 'detail_macro_side',
-    label: '🔍 Детали (сбоку)',
-    description: 'Макро-текстуры боковой части с наклоном (2000x2000)',
-    width: 2000,
-    height: 2000,
-    category: 'primary',
-    icon: '🔍',
-    defaultZoom: 2.5,
-    defaultAnchor: 'center',
-    specialMode: 'perspective',
-    perspectiveMode: 'right',
-    perspectiveAmount: 0.15,
-  },
 
-  // 🔍 Дополнительные (Secondary)
+  // 🔍 Дополнительные (Secondary) - НАКЛОНЫ И МОКАПЫ
   {
-    id: 'room_corner_left',
-    name: 'room_corner_left',
-    label: '🏠 Наклон влево',
-    description: 'Реалистичный вид стены под углом влево',
-    width: 2000,
-    height: 2000,
-    category: 'secondary',
-    icon: '🏠',
-    defaultZoom: 1.2,
-    defaultAnchor: 'center',
-    specialMode: 'perspective',
-    perspectiveMode: 'left',
-    perspectiveAmount: 0.2,
-  },
-  {
-    id: 'room_corner_right',
-    name: 'room_corner_right',
-    label: '🏠 Наклон вправо',
-    description: 'Реалистичный вид стены под углом вправо',
-    width: 2000,
-    height: 2000,
-    category: 'secondary',
-    icon: '🏠',
-    defaultZoom: 1.2,
-    defaultAnchor: 'center',
-    specialMode: 'perspective',
-    perspectiveMode: 'right',
-    perspectiveAmount: 0.2,
-  },
-  {
-    id: 'internal_corner_view',
-    name: 'internal_corner_view',
-    label: '📐 Угол (стык)',
-    description: 'Демонстрация стыковки обоев во внутреннем углу',
+    id: 'perspective_warp',
+    name: 'perspective_warp',
+    label: '📐 Наклон / Мокап',
+    description: 'Идеальное наложение паттерна на стену с сохранением теней',
     width: 2000,
     height: 2000,
     category: 'secondary',
     icon: '📐',
-    defaultZoom: 1.2,
-    defaultAnchor: 'center',
-    specialMode: 'perspective',
-    perspectiveMode: 'corner-in',
-    perspectiveAmount: 0.25,
+    specialMode: 'warp',
   },
   {
     id: 'size_map',
@@ -376,137 +323,129 @@ export const createTiledImage = (
 };
 
 /**
- * Отрисовывает изображение с эффектом перспективы или внутреннего угла.
- * Использует метод вертикальных срезов для имитации 3D трансформации.
+ * Отрисовывает паттерн внутри 4-х точек (Warp) с режимом наложения Multiply.
+ * Использует метод разбиения на треугольники для текстурирования.
  */
-export const drawPerspective = (
+export interface Point { x: number; y: number }
+
+export const drawQuadrilateralWarp = (
   ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
-  sx: number, sy: number, sw: number, sh: number,
-  dx: number, dy: number, dw: number, dh: number,
-  mode: PerspectiveMode,
-  amount: number = 0.2
+  patternImg: HTMLImageElement,
+  backgroundImg: HTMLImageElement | null,
+  tl: Point, tr: Point, br: Point, bl: Point,
+  canvasWidth: number,
+  canvasHeight: number
 ) => {
-  if (mode === 'none') {
-    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-    return;
+  // 1. Рисуем фон (интерьер)
+  if (backgroundImg) {
+    ctx.drawImage(backgroundImg, 0, 0, canvasWidth, canvasHeight);
   }
 
+  // 2. Настраиваем наложение для паттерна (чтобы тени просвечивали)
   ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+
+  // Временная реализация Warp через треугольники (упрощенная)
+  // Для полноценного Warp нужна сложная математика трансформации матриц.
+  // Здесь мы используем простое разбиение на 2 треугольника.
   
-  if (mode === 'corner-in') {
-    // Режим внутреннего угла: две стены, сходящиеся к центру
-    const midX = dx + dw / 2;
-    const halfW = dw / 2;
-    
-    // Левая стена (наклон вправо к центру)
-    drawPerspective(ctx, img, sx, sy, sw / 2, sh, dx, dy, halfW, dh, 'right', amount);
-    // Правая стена (наклон влево к центру)
-    drawPerspective(ctx, img, sx + sw / 2, sy, sw / 2, sh, midX, dy, halfW, dh, 'left', amount);
-    
-    // Тень в углу для реализма
-    const gradient = ctx.createLinearGradient(midX - 50, dy, midX + 50, dy);
-    gradient.addColorStop(0, 'rgba(0,0,0,0)');
-    gradient.addColorStop(0.5, `rgba(0,0,0,${amount * 0.8})`);
-    gradient.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(midX - 50, dy, 100, dh);
-    
-    ctx.restore();
-    return;
-  }
+  // Треугольник 1: TL, TR, BL
+  drawTriangle(ctx, patternImg, 
+    0, 0, patternImg.width, 0, 0, patternImg.height, // Source coords (full image)
+    tl.x, tl.y, tr.x, tr.y, bl.x, bl.y // Dest coords
+  );
 
-  // Отрисовка наклона через вертикальные срезы
-  const slices = 120; // Количество срезов для плавности
-  const sliceW = dw / slices;
-  const sourceSliceW = sw / slices;
-
-  for (let i = 0; i <= slices; i++) {
-    const x = dx + i * sliceW;
-    const sX = sx + i * sourceSliceW;
-    
-    // Рассчитываем высоту среза на основе перспективы
-    // t идет от 0 до 1
-    const t = i / slices;
-    let scale;
-    
-    if (mode === 'left') {
-      // Слева выше, справа ниже (наклон от нас вправо)
-      scale = 1 - (t * amount);
-    } else {
-      // Слева ниже, справа выше (наклон от нас влево)
-      scale = (1 - amount) + (t * amount);
-    }
-
-    const sliceH = dh * scale;
-    const yOffset = (dh - sliceH) / 2;
-
-    ctx.drawImage(
-      img,
-      sX, sy, sourceSliceW, sh,
-      x, dy + yOffset, sliceW, sliceH
-    );
-  }
-
-  // Наложение легкого градиента для имитации освещения
-  const lightGrad = ctx.createLinearGradient(dx, dy, dx + dw, dy);
-  if (mode === 'left') {
-    lightGrad.addColorStop(0, 'rgba(255,255,255,0.05)');
-    lightGrad.addColorStop(1, 'rgba(0,0,0,0.1)');
-  } else {
-    lightGrad.addColorStop(0, 'rgba(0,0,0,0.1)');
-    lightGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
-  }
-  ctx.fillStyle = lightGrad;
-  ctx.fillRect(dx, dy, dw, dh);
+  // Треугольник 2: TR, BR, BL
+  // Здесь есть нюанс: для текстуры мы должны брать координаты, соответствующие
+  // правильной проекции. Для простоты берем всю текстуру.
+  drawTriangle(ctx, patternImg,
+    patternImg.width, 0, patternImg.width, patternImg.height, 0, patternImg.height,
+    tr.x, tr.y, br.x, br.y, bl.x, bl.y
+  );
 
   ctx.restore();
 };
 
 /**
- * Создает изображение с перспективой
+ * Helper для отрисовки текстурированного треугольника
+ * (Affine Transform Hack)
  */
-export const createPerspectiveImage = (
-  imageData: string,
-  x: number,
-  y: number,
+function drawTriangle(
+  ctx: CanvasRenderingContext2D,
+  im: HTMLImageElement,
+  x0: number, y0: number, x1: number, y1: number, x2: number, y2: number,
+  sx0: number, sy0: number, sx1: number, sy1: number, sx2: number, sy2: number
+) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(sx0, sy0);
+  ctx.lineTo(sx1, sy1);
+  ctx.lineTo(sx2, sy2);
+  ctx.closePath();
+  ctx.clip();
+
+  // Affine transform calculation
+  const denom = x0 * (y2 - y1) - x1 * y2 + x2 * y1 + (x1 - x2) * y0;
+  if (denom === 0) {
+    ctx.restore();
+    return;
+  }
+
+  const m11 = -(y0 * (sx2 - sx1) - y1 * sx2 + y2 * sx1 + (y1 - y2) * sx0) / denom;
+  const m12 = (y1 * sy2 + y0 * (sy1 - sy2) - y2 * sy1 + (y2 - y1) * sy0) / denom;
+  const m21 = (x0 * (sx2 - sx1) - x1 * sx2 + x2 * sx1 + (x1 - x2) * sx0) / denom;
+  const m22 = -(x1 * sy2 + x0 * (sy1 - sy2) - x2 * sy1 + (x2 - x1) * sy0) / denom;
+  const dx = (x0 * (y2 * sx1 - y1 * sx2) + y0 * (x1 * sx2 - x2 * sx1) + (x2 * y1 - x1 * y2) * sx0) / denom;
+  const dy = (x0 * (y2 * sy1 - y1 * sy2) + y0 * (x1 * sy2 - x2 * sy1) + (x2 * y1 - x1 * y2) * sy0) / denom;
+
+  ctx.transform(m11, m12, m21, m22, dx, dy);
+  ctx.drawImage(im, 0, 0);
+  ctx.restore();
+}
+
+/**
+ * Создает финальное изображение с Warp
+ */
+export const createWarpedImage = (
+  bgImageData: string,
+  patternImageData: string,
+  points: { tl: Point, tr: Point, br: Point, bl: Point },
   width: number,
   height: number,
-  targetWidth: number,
-  targetHeight: number,
-  mode: PerspectiveMode,
-  amount: number = 0.2,
-  format: ExportFormat = 'png',
-  quality: number = 1.0
+  format: ExportFormat = 'png'
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
+    const bgImg = new Image();
+    bgImg.crossOrigin = "anonymous";
+    const patImg = new Image();
+    patImg.crossOrigin = "anonymous";
+
+    let bgLoaded = false;
+    let patLoaded = false;
+
+    const tryRender = () => {
+      if (!bgLoaded || !patLoaded) return;
+
       const canvas = document.createElement('canvas');
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext('2d');
-      if (!ctx) return reject(new Error('Canvas context failed'));
+      if (!ctx) return reject(new Error('Canvas failed'));
 
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-
-      // Фон (белый или прозрачный)
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, targetWidth, targetHeight);
-
-      drawPerspective(
-        ctx, img,
-        x, y, width, height,
-        0, 0, targetWidth, targetHeight,
-        mode, amount
+      drawQuadrilateralWarp(
+        ctx, patImg, bgImg,
+        points.tl, points.tr, points.br, points.bl,
+        width, height
       );
 
-      resolve(canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', format === 'png' ? undefined : quality));
+      resolve(canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg'));
     };
-    img.onerror = () => reject(new Error('Image load failed'));
-    img.src = imageData;
+
+    bgImg.onload = () => { bgLoaded = true; tryRender(); };
+    patImg.onload = () => { patLoaded = true; tryRender(); };
+    
+    bgImg.src = bgImageData;
+    patImg.src = patternImageData;
   });
 };
 
@@ -544,28 +483,6 @@ export const batchCropImages = (
       const processPreset = async (preset: CropPreset) => {
         if (preset.specialMode === 'tile') {
           results[preset.id] = await createTiledImage(imageData, preset.width, preset.height, format, 1.0);
-        } else if (preset.specialMode === 'perspective') {
-          const area = calculateCropArea(
-            img.width,
-            img.height,
-            preset.width,
-            preset.height,
-            preset.defaultZoom || 1.0,
-            preset.defaultAnchor || 'center'
-          );
-          results[preset.id] = await createPerspectiveImage(
-            imageData,
-            area.x,
-            area.y,
-            area.width,
-            area.height,
-            preset.width,
-            preset.height,
-            preset.perspectiveMode || 'none',
-            preset.perspectiveAmount || 0.2,
-            format,
-            1.0
-          );
         } else {
           const area = calculateCropArea(
             img.width,
