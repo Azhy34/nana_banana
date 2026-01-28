@@ -3,9 +3,11 @@ import React from 'react';
 interface HeaderProps {
   apiKey: string;
   setApiKey: (key: string) => void;
+  replicateToken: string;
+  setReplicateToken: (token: string) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ apiKey, setApiKey }) => {
+export const Header: React.FC<HeaderProps> = ({ apiKey, setApiKey, replicateToken, setReplicateToken }) => {
   return (
     <header className="border-b border-slate-800/60 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -17,23 +19,35 @@ export const Header: React.FC<HeaderProps> = ({ apiKey, setApiKey }) => {
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Gemini <span className="text-indigo-400">Composer</span></h1>
         </div>
-        
-        {/* API Key Input */}
-        <div className="flex items-center space-x-3">
+
+        {/* API Keys Section */}
+        <div className="flex items-center space-x-2">
           <div className="relative group">
             <input
               type="password"
-              placeholder="Enter Gemini API Key"
+              placeholder="Gemini Key"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none w-64 transition-all"
+              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none w-36 transition-all"
             />
-            <div className="absolute right-0 top-full mt-2 w-64 p-2 bg-slate-800 text-xs text-slate-400 rounded border border-slate-700 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-              Your API key is used only in your browser for this session and is never stored on our servers.
+            <div className="absolute right-0 top-full mt-2 w-56 p-2 bg-slate-800 text-xs text-slate-400 rounded border border-slate-700 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+              Ключ Gemini для генерации
             </div>
           </div>
-          <div className="text-xs font-medium text-slate-500 bg-slate-800/50 px-3 py-1 rounded-full border border-slate-700">
-            v1.0
+          <div className="relative group">
+            <input
+              type="password"
+              placeholder="Replicate Token"
+              value={replicateToken}
+              onChange={(e) => setReplicateToken(e.target.value)}
+              className="bg-slate-800 border border-purple-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none w-36 transition-all"
+            />
+            <div className="absolute right-0 top-full mt-2 w-56 p-2 bg-slate-800 text-xs text-slate-400 rounded border border-slate-700 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+              Токен Replicate для апскейла
+            </div>
+          </div>
+          <div className="text-xs font-medium text-slate-500 bg-slate-800/50 px-2 py-1 rounded-full border border-slate-700">
+            v1.1
           </div>
         </div>
       </div>

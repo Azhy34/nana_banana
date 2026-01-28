@@ -1,3 +1,6 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  ETSY_PRESETS,
   getPresetsByCategory,
   CropPreset,
   cropImage,
@@ -28,8 +31,8 @@ const AspectPreview = ({ width, height, active }: { width: number, height: numbe
   const ratio = width / height;
   return (
     <div className={`w-12 h-10 flex items-center justify-center bg-slate-950 rounded-md border transition-colors ${active ? 'border-indigo-400' : 'border-slate-700'}`}>
-      <div 
-        style={{ 
+      <div
+        style={{
           aspectRatio: `${width}/${height}`,
           width: ratio > 1.2 ? '28px' : (ratio < 0.8 ? '16px' : '22px'),
           height: ratio > 1.2 ? '18px' : (ratio < 0.8 ? '28px' : '22px'),
@@ -42,12 +45,12 @@ const AspectPreview = ({ width, height, active }: { width: number, height: numbe
 
 // --- Sub-components for Refactoring ---
 
-const CategoryTabs = ({ 
-  activeCategory, 
-  setActiveCategory, 
-  onPresetSelect 
-}: { 
-  activeCategory: CategoryType, 
+const CategoryTabs = ({
+  activeCategory,
+  setActiveCategory,
+  onPresetSelect
+}: {
+  activeCategory: CategoryType,
   setActiveCategory: (cat: CategoryType) => void,
   onPresetSelect: (preset: CropPreset) => void
 }) => (
@@ -60,11 +63,10 @@ const CategoryTabs = ({
           const presets = getPresetsByCategory(category);
           if (presets.length > 0) onPresetSelect(presets[0]);
         }}
-        className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-          activeCategory === category
+        className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeCategory === category
             ? 'bg-slate-700 text-white'
             : 'text-slate-500 hover:text-slate-300'
-        }`}
+          }`}
       >
         {CATEGORY_LABELS[category]}
       </button>
@@ -78,18 +80,17 @@ interface PresetButtonProps {
   onClick: () => void;
 }
 
-const PresetButton: React.FC<PresetButtonProps> = ({ 
-  preset, 
-  isSelected, 
-  onClick 
+const PresetButton: React.FC<PresetButtonProps> = ({
+  preset,
+  isSelected,
+  onClick
 }) => (
   <button
     onClick={onClick}
-    className={`p-2.5 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
-      isSelected
+    className={`p-2.5 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${isSelected
         ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10'
         : 'border-slate-800 bg-slate-800/40 hover:border-slate-700'
-    }`}
+      }`}
   >
     <AspectPreview width={preset.width} height={preset.height} active={isSelected} />
     <div className="flex-1 min-w-0">
@@ -143,7 +144,7 @@ const BatchModeView = ({
         </div>
       ))}
     </div>
-    
+
     <button
       onClick={onGenerate}
       disabled={isProcessing || selectedForBatch.size === 0}
@@ -154,14 +155,14 @@ const BatchModeView = ({
   </div>
 );
 
-const ResultsGallery = ({ 
-  crops, 
-  exportFormat, 
-  onClear 
-}: { 
-  crops: { [key: string]: string }, 
-  exportFormat: string, 
-  onClear: () => void 
+const ResultsGallery = ({
+  crops,
+  exportFormat,
+  onClear
+}: {
+  crops: { [key: string]: string },
+  exportFormat: string,
+  onClear: () => void
 }) => {
   const cropIds = Object.keys(crops);
   if (cropIds.length === 0) return null;
@@ -172,14 +173,14 @@ const ResultsGallery = ({
         <h3 className="text-xl font-bold text-white">Готовые форматы ({cropIds.length})</h3>
         <button onClick={onClear} className="text-sm text-slate-500 hover:text-slate-300">Очистить все</button>
       </div>
-      
+
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {ETSY_PRESETS.filter(p => crops[p.id]).map((preset) => (
           <div key={preset.id} className="group space-y-2">
             <div className="aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 relative">
               <img src={crops[preset.id]} className="w-full h-full object-cover shadow-inner" alt={preset.label} />
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button 
+                <button
                   onClick={() => downloadCrop(crops[preset.id], `etsy-${preset.id}.${exportFormat === 'png' ? 'png' : 'jpg'}`)}
                   className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
                 >
@@ -386,7 +387,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.clearRect(cropX, cropY, cropWidth, cropHeight);
-      
+
       // Отрисовка части изображения внутри crop без затемнения
       ctx.save();
       ctx.beginPath();
@@ -399,7 +400,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       ctx.strokeStyle = '#818cf8';
       ctx.lineWidth = 3;
       ctx.strokeRect(cropX, cropY, cropWidth, cropHeight);
-      
+
       // Метки размеров
       ctx.fillStyle = '#818cf8';
       ctx.font = 'bold 14px sans-serif';
@@ -413,7 +414,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     // UI УПРАВЛЕНИЯ ТОЧКАМИ WARP
     if (selectedPreset.specialMode === 'warp' && wallPoints) {
       const points = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'] as const;
-      
+
       // Линии контура
       ctx.beginPath();
       ctx.moveTo(wallPoints.topLeft.x * canvas.width, wallPoints.topLeft.y * canvas.height);
@@ -432,7 +433,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         const p = wallPoints[key];
         const x = p.x * canvas.width;
         const y = p.y * canvas.height;
-        
+
         ctx.beginPath();
         ctx.arc(x, y, 8, 0, Math.PI * 2);
         ctx.fillStyle = draggingPoint === key ? '#4f46e5' : '#818cf8';
@@ -448,7 +449,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         ctx.fillStyle = '#fff';
         ctx.font = '20px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Загрузите паттерн для предпросмотра', canvas.width/2, canvas.height/2);
+        ctx.fillText('Загрузите паттерн для предпросмотра', canvas.width / 2, canvas.height / 2);
       }
     }
   };
@@ -457,7 +458,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     if (selectedPreset.specialMode === 'warp' && wallPoints && canvasRef.current) {
       const canvas = canvasRef.current;
       const rect = canvas.getBoundingClientRect();
-      
+
       let clientX, clientY;
       if ('touches' in e) {
         clientX = e.touches[0].clientX;
@@ -466,14 +467,14 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         clientX = e.clientX;
         clientY = e.clientY;
       }
-      
+
       const x = (clientX - rect.left) / canvas.width;
       const y = (clientY - rect.top) / canvas.height;
-      
+
       // Find clicked point
       const threshold = 20 / canvas.width; // 20px hit area
       const points = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'] as const;
-      
+
       for (const key of points) {
         const p = wallPoints[key];
         const dist = Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2));
@@ -484,7 +485,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         }
       }
     }
-    
+
     setIsDragging(true);
   };
 
@@ -493,7 +494,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
 
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    
+
     let clientX, clientY;
     if ('touches' in e) {
       clientX = e.touches[0].clientX;
@@ -507,7 +508,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     if (selectedPreset.specialMode === 'warp' && draggingPoint && wallPoints) {
       const x = Math.max(0, Math.min(1, (clientX - rect.left) / canvas.width));
       const y = Math.max(0, Math.min(1, (clientY - rect.top) / canvas.height));
-      
+
       setWallPoints({
         ...wallPoints,
         [draggingPoint]: { x, y }
@@ -542,7 +543,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
     setOffsetX(Math.max(0, Math.min(x, maxX)));
     setOffsetY(Math.max(0, Math.min(y, maxY)));
   };
-  
+
   const handleMouseUp = () => {
     setIsDragging(false);
     setDraggingPoint(null);
@@ -567,10 +568,10 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         const img = imgRef.current;
         const targetW = selectedPreset.width;
         const targetH = selectedPreset.height;
-        
+
         // Scale normalized points to target resolution
-        const scalePoint = (p: {x:number, y:number}) => ({ x: p.x * targetW, y: p.y * targetH });
-        
+        const scalePoint = (p: { x: number, y: number }) => ({ x: p.x * targetW, y: p.y * targetH });
+
         const scaledPoints = {
           tl: scalePoint(wallPoints.topLeft),
           tr: scalePoint(wallPoints.topRight),
@@ -661,7 +662,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
           <h2 className="text-3xl font-bold text-white mb-2">Загрузите фото для Etsy</h2>
           <p className="text-slate-400">Мы нарежем его под все необходимые форматы (3000px+)</p>
         </div>
-        
+
         <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-slate-700 rounded-3xl cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-indigo-500/50 transition-all group">
           <div className="flex flex-col items-center justify-center pt-5 pb-6">
             <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -676,7 +677,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         </label>
 
         {onBack && (
-          <button 
+          <button
             onClick={onBack}
             className="mt-8 w-full py-4 bg-slate-800 text-slate-300 rounded-2xl hover:bg-slate-700 transition-all font-medium border border-slate-700"
           >
@@ -695,14 +696,14 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
           <p className="text-sm text-slate-400">Подготовка листинга по стандартам Etsy</p>
         </div>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={() => setSourceImage(null)}
             className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 transition-colors"
           >
             Заменить фото
           </button>
           {onBack && (
-            <button 
+            <button
               onClick={onBack}
               className="px-4 py-2 bg-indigo-600/20 text-indigo-300 rounded-lg hover:bg-indigo-600/30 transition-colors"
             >
@@ -716,21 +717,19 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
         <div className="flex gap-1 p-1 bg-slate-900/50 rounded-xl border border-slate-700 w-full sm:w-auto">
           <button
             onClick={() => setShowBatchMode(false)}
-            className={`flex-1 sm:flex-none px-6 py-2 rounded-lg font-medium transition-all ${
-              !showBatchMode
+            className={`flex-1 sm:flex-none px-6 py-2 rounded-lg font-medium transition-all ${!showBatchMode
                 ? 'bg-indigo-600 text-white shadow-lg'
                 : 'text-slate-400 hover:text-slate-200'
-            }`}
+              }`}
           >
             ✏️ Ручной
           </button>
           <button
             onClick={() => setShowBatchMode(true)}
-            className={`flex-1 sm:flex-none px-6 py-2 rounded-lg font-medium transition-all ${
-              showBatchMode
+            className={`flex-1 sm:flex-none px-6 py-2 rounded-lg font-medium transition-all ${showBatchMode
                 ? 'bg-indigo-600 text-white shadow-lg'
                 : 'text-slate-400 hover:text-slate-200'
-            }`}
+              }`}
           >
             ⚡ Batch Mode
           </button>
@@ -741,21 +740,19 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
           <div className="flex gap-1">
             <button
               onClick={() => setExportFormat('png')}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                exportFormat === 'png'
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${exportFormat === 'png'
                   ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                   : 'text-slate-500 hover:text-slate-300'
-              }`}
+                }`}
             >
               PNG (Max)
             </button>
             <button
               onClick={() => setExportFormat('jpeg')}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                exportFormat === 'jpeg'
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${exportFormat === 'jpeg'
                   ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                   : 'text-slate-500 hover:text-slate-300'
-              }`}
+                }`}
             >
               JPG (100%)
             </button>
@@ -779,13 +776,13 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
                         Загрузите паттерн и расставьте точки на стене
                       </p>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       {patternImage ? (
                         <div className="flex items-center gap-2 bg-slate-900 p-1.5 rounded-lg border border-slate-700">
                           <img src={patternImage} className="w-8 h-8 object-cover rounded" alt="Pattern" />
-                          <button 
-                            onClick={() => setPatternImage(null)} 
+                          <button
+                            onClick={() => setPatternImage(null)}
                             className="text-[10px] bg-slate-800 hover:bg-red-900/40 text-slate-400 hover:text-red-400 px-2 py-1 rounded transition-colors"
                           >
                             Заменить
@@ -796,7 +793,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
                           Выбрать паттерн...
                           <input type="file" className="hidden" accept="image/*" onChange={(e) => {
                             const file = e.target.files?.[0];
-                            if(file) {
+                            if (file) {
                               const reader = new FileReader();
                               reader.onload = (ev) => setPatternImage(ev.target?.result as string);
                               reader.readAsDataURL(file);
@@ -804,8 +801,8 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
                           }} />
                         </label>
                       )}
-                      
-                      <button 
+
+                      <button
                         onClick={() => setWallPoints({
                           topLeft: { x: 0.2, y: 0.2 },
                           topRight: { x: 0.8, y: 0.2 },
@@ -848,16 +845,16 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
               {/* Zoom Control */}
               <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 flex items-center gap-4">
                 <span className="text-sm font-medium text-slate-400 min-w-[3rem]">Zoom</span>
-                <input 
-                  type="range" 
-                  min="1" 
-                  max="4" 
-                  step="0.05" 
+                <input
+                  type="range"
+                  min="1"
+                  max="4"
+                  step="0.05"
                   value={zoom}
                   onChange={(e) => {
                     const newZoom = parseFloat(e.target.value);
                     setZoom(newZoom);
-                    
+
                     // Корректируем смещение при зуме, чтобы рамка не выходила за края
                     if (imgRef.current) {
                       const img = imgRef.current;
@@ -870,7 +867,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
                         dw = img.width; dh = img.width / targetRatio;
                       }
                       dw /= newZoom; dh /= newZoom;
-                      
+
                       const maxX = Math.max(0, img.width - dw);
                       const maxY = Math.max(0, img.height - dh);
                       setOffsetX(prev => Math.max(0, Math.min(prev, maxX)));
@@ -882,7 +879,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
                 <span className="text-sm font-bold text-indigo-400 min-w-[2.5rem]">{zoom.toFixed(2)}x</span>
               </div>
             </div>
-            
+
             <button
               onClick={handleApplyCrop}
               disabled={isProcessing}
@@ -893,37 +890,37 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
           </div>
 
           <div className="space-y-4">
-            <CategoryTabs 
-              activeCategory={activeCategory} 
-              setActiveCategory={setActiveCategory} 
-              onPresetSelect={setSelectedPreset} 
+            <CategoryTabs
+              activeCategory={activeCategory}
+              setActiveCategory={setActiveCategory}
+              onPresetSelect={setSelectedPreset}
             />
 
             <div className="grid gap-2">
               {getPresetsByCategory(activeCategory).map((preset) => (
-                <PresetButton 
-                  key={preset.id} 
-                  preset={preset} 
-                  isSelected={selectedPreset.id === preset.id} 
-                  onClick={() => setSelectedPreset(preset)} 
+                <PresetButton
+                  key={preset.id}
+                  preset={preset}
+                  isSelected={selectedPreset.id === preset.id}
+                  onClick={() => setSelectedPreset(preset)}
                 />
               ))}
             </div>
           </div>
         </div>
       ) : (
-        <BatchModeView 
-          selectedForBatch={selectedForBatch} 
-          setSelectedForBatch={setSelectedForBatch} 
-          isProcessing={isProcessing} 
-          onGenerate={handleGenerateBatchCrops} 
+        <BatchModeView
+          selectedForBatch={selectedForBatch}
+          setSelectedForBatch={setSelectedForBatch}
+          isProcessing={isProcessing}
+          onGenerate={handleGenerateBatchCrops}
         />
       )}
 
-      <ResultsGallery 
-        crops={crops} 
-        exportFormat={exportFormat} 
-        onClear={() => setCrops({})} 
+      <ResultsGallery
+        crops={crops}
+        exportFormat={exportFormat}
+        onClear={() => setCrops({})}
       />
     </div>
   );

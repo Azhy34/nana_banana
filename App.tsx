@@ -7,13 +7,15 @@ import { ResultStep } from './components/ResultStep';
 import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState, ViewMode } from './types';
 import { generateImageComposition } from './services/geminiService';
 import { EtsyCropper } from './components/EtsyCropper';
+import { Upscaler } from './components/Upscaler';
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('generator');
   const [step, setStep] = useState<Step>(Step.Prompt);
-  
+
   // Data State
   const [apiKey, setApiKey] = useState<string>('');
+  const [replicateToken, setReplicateToken] = useState<string>('');
   const [referenceImages, setReferenceImages] = useState<UploadedImage[]>([]);
   const [settings, setSettings] = useState<GenerationSettings>({
     prompt: "",
@@ -21,7 +23,7 @@ function App() {
     aspectRatio: '1:1',
     imageSize: '1K',
   });
-  
+
   const [generationState, setGenerationState] = useState<GenerationState>({
     isLoading: false,
     error: null,
@@ -34,12 +36,12 @@ function App() {
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
       const base64Data = dataUrl.split(',')[1];
-      
+
       const newImage: UploadedImage = {
-          id: Math.random().toString(36).substring(7),
-          data: base64Data,
-          mimeType: file.type,
-          previewUrl: dataUrl,
+        id: Math.random().toString(36).substring(7),
+        data: base64Data,
+        mimeType: file.type,
+        previewUrl: dataUrl,
       };
 
       // Limit to 1 reference image
@@ -54,12 +56,12 @@ function App() {
 
   const handleGenerate = async () => {
     if (!apiKey) {
-        setGenerationState({
-            isLoading: false,
-            error: "Please enter your Gemini API Key in the top right corner.",
-            resultImage: null
-        });
-        return;
+      setGenerationState({
+        isLoading: false,
+        error: "Please enter your Gemini API Key in the top right corner.",
+        resultImage: null
+      });
+      return;
     }
 
     setStep(Step.Result);
@@ -73,10 +75,10 @@ function App() {
       );
       setGenerationState({ isLoading: false, error: null, resultImage: result });
     } catch (err: any) {
-      setGenerationState({ 
-        isLoading: false, 
-        error: err.message || "Something went wrong", 
-        resultImage: null 
+      setGenerationState({
+        isLoading: false,
+        error: err.message || "Something went wrong",
+        resultImage: null
       });
     }
   };
@@ -86,16 +88,16 @@ function App() {
     switch (step) {
       case Step.Prompt:
         return (
-          <PromptStep 
-            settings={settings} 
-            setSettings={setSettings} 
-            setStep={setStep} 
+          <PromptStep
+            settings={settings}
+            setSettings={setSettings}
+            setStep={setStep}
           />
         );
 
       case Step.Reference:
         return (
-          <ReferenceStep 
+          <ReferenceStep
             referenceImages={referenceImages}
             handleUpload={handleUpload}
             removeImage={removeImage}
@@ -107,7 +109,7 @@ function App() {
 
       case Step.Result:
         return (
-          <ResultStep 
+          <ResultStep
             generationState={generationState}
             referenceImages={referenceImages}
             setStep={setStep}
@@ -119,7 +121,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-indigo-500/30">
-      <Header apiKey={apiKey} setApiKey={setApiKey} />
+      <Header apiKey={apiKey} setApiKey={setApiKey} replicateToken={replicateToken} setReplicateToken={setReplicateToken} />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* View Mode Switcher */}
@@ -127,28 +129,35 @@ function App() {
           <div className="inline-flex bg-slate-800/50 p-1.5 rounded-2xl border border-slate-700 shadow-xl">
             <button
               onClick={() => setViewMode('generator')}
-              className={`px-8 py-3 rounded-xl font-bold transition-all duration-300 ${
-                viewMode === 'generator'
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 ${viewMode === 'generator'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                : 'text-slate-400 hover:text-slate-200'
+                }`}
             >
               🎨 Generator
             </button>
             <button
               onClick={() => setViewMode('cropper')}
-              className={`px-8 py-3 rounded-xl font-bold transition-all duration-300 ${
-                viewMode === 'cropper'
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 ${viewMode === 'cropper'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                : 'text-slate-400 hover:text-slate-200'
+                }`}
             >
-              ✂️ Etsy Cropper
+              ✂️ Cropper
+            </button>
+            <button
+              onClick={() => setViewMode('upscaler')}
+              className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 ${viewMode === 'upscaler'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                : 'text-slate-400 hover:text-slate-200'
+                }`}
+            >
+              🔬 Upscale
             </button>
           </div>
         </div>
 
-        {viewMode === 'generator' ? (
+        {viewMode === 'generator' && (
           <>
             <div className="mb-12 text-center animate-fadeIn">
               <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
@@ -172,10 +181,22 @@ function App() {
               {renderStepContent()}
             </div>
           </>
-        ) : (
+        )}
+
+        {viewMode === 'cropper' && (
           <div className="animate-fadeIn">
-            <EtsyCropper 
-              initialImage={generationState.resultImage} 
+            <EtsyCropper
+              initialImage={generationState.resultImage}
+              onBack={() => setViewMode('generator')}
+            />
+          </div>
+        )}
+
+        {viewMode === 'upscaler' && (
+          <div className="animate-fadeIn">
+            <Upscaler
+              replicateToken={replicateToken}
+              initialImage={generationState.resultImage}
               onBack={() => setViewMode('generator')}
             />
           </div>
