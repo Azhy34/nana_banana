@@ -2,7 +2,6 @@
  * Replicate Service - Handles image upscaling via Topaz Labs
  * 
  * Model: topazlabs/image-upscale
- * Version: 2fdc3b86c2e74addd29d4c728e945c7afc7b8971578f7e208b0c29f046039407
  * 
  * Features:
  * - Professional-grade upscaling without tiling artifacts.
@@ -11,10 +10,9 @@
  */
 
 const CORS_PROXY = 'https://corsproxy.io/?';
-const REPLICATE_API_URL = 'https://api.replicate.com/v1/predictions';
-const PROXIED_API_URL = CORS_PROXY + encodeURIComponent(REPLICATE_API_URL);
-
-const TOPAZ_MODEL_VERSION = '2fdc3b86c2e74addd29d4c728e945c7afc7b8971578f7e208b0c29f046039407';
+// Using the model-specific endpoint to always use the latest version
+const REPLICATE_MODEL_URL = 'https://api.replicate.com/v1/models/topazlabs/image-upscale/predictions';
+const PROXIED_API_URL = CORS_PROXY + encodeURIComponent(REPLICATE_MODEL_URL);
 
 export type TopazEnhanceModel =
     | 'Standard V2'
@@ -39,6 +37,10 @@ interface ReplicatePrediction {
     status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled';
     output?: string | string[];
     error?: string;
+    urls?: {
+        get: string;
+        cancel: string;
+    };
 }
 
 /**
@@ -50,7 +52,7 @@ export async function startUpscale(
     upscaleFactor: '2x' | '4x' | '6x' = '4x',
     enhanceModel: TopazEnhanceModel = 'High Fidelity V2',
     faceEnhance: boolean = false
-): Promise<string> {
+): Promise<{ id: string, pollUrl: string }> {
     const input: TopazUpscaleInput = {
         image: imageUrl,
         upscale_factor: upscaleFactor,
@@ -65,9 +67,9 @@ export async function startUpscale(
         headers: {
             'Authorization': `Bearer ${apiToken}`,
             'Content-Type': 'application/json',
+            'Prefer': 'wait=5' // Suggest wait for 5s to maybe get result immediately
         },
         body: JSON.stringify({
-            version: TOPAZ_MODEL_VERSION,
             input: input,
         }),
     });
@@ -78,7 +80,15 @@ export async function startUpscale(
     }
 
     const prediction: ReplicatePrediction = await response.json();
-    return prediction.id;
+
+    if (!prediction.urls?.get) {
+        throw new Error('No polling URL returned from Replicate');
+    }
+
+    return {
+        id: prediction.id,
+        pollUrl: prediction.urls.get
+    };
 }
 
 /**
@@ -86,13 +96,14 @@ export async function startUpscale(
  */
 export async function pollPrediction(
     apiToken: string,
-    predictionId: string,
+    initialPollUrl: string,
     onProgress?: (status: string) => void,
     maxAttempts: number = 100,
-    intervalMs: number = 2500
+    intervalMs: number = 3000
 ): Promise<string> {
     for (let i = 0; i < maxAttempts; i++) {
-        const pollUrl = CORS_PROXY + encodeURIComponent(`${REPLICATE_API_URL}/${predictionId}`);
+        // Use the polling URL provided by the API response
+        const pollUrl = CORS_PROXY + encodeURIComponent(initialPollUrl);
         const response = await fetch(pollUrl, {
             headers: {
                 'Authorization': `Bearer ${apiToken}`,
@@ -150,7 +161,7 @@ export async function upscaleImage(
     else if (scaleFactorValue <= 4) upscaleFactor = '4x';
     else upscaleFactor = '6x';
 
-    const predictionId = await startUpscale(
+    const { pollUrl } = await startUpscale(
         apiToken,
         imageUrl,
         upscaleFactor,
@@ -162,5 +173,5 @@ export async function upscaleImage(
         onProgress('processing');
     }
 
-    return await pollPrediction(apiToken, predictionId, onProgress);
+    return await pollPrediction(apiToken, pollUrl, onProgress);
 }
