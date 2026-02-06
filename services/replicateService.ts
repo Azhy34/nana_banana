@@ -33,13 +33,13 @@ export async function startUpscale(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiToken}`,
     },
     body: JSON.stringify({
       image: imageUrl,
       upscaleFactor,
       enhanceModel,
       faceEnhance,
-      apiToken,
     }),
   });
 
@@ -115,7 +115,7 @@ export async function upscaleImage(
   faceEnhance: boolean = false,
   onProgress?: (status: string) => void
 ): Promise<string> {
-  // Replicate accepts data URLs
+  // Replicate accepts data URLs or plain URLs
   const imageUrl = imageData.startsWith('http')
     ? imageData
     : `data:${mimeType};base64,${imageData}`;

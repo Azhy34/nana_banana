@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { upload } from '@vercel/blob/client';
 import { upscaleImage } from '../services/replicateService';
 import { UpscaleSettings, UpscaleState } from '../types';
 
@@ -31,7 +32,9 @@ export const Upscaler: React.FC<UpscalerProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [sourceImage, setSourceImage] = useState<string | null>(initialImage || null);
+    const [sourceFile, setSourceFile] = useState<File | null>(null);
     const [sourceMimeType, setSourceMimeType] = useState<string>('image/png');
+    
     const [settings, setSettings] = useState<UpscaleSettings>({
         targetSize: '16K',
         format: 'jpg',
@@ -49,6 +52,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setSourceFile(file);
             setSourceMimeType(file.type);
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -74,20 +78,40 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         setState({ isUpscaling: true, progress: 0, error: null, upscaledImage: null });
 
         try {
-            // Extract base64 from data URL
-            const base64Data = sourceImage.includes(',')
-                ? sourceImage.split(',')[1]
-                : sourceImage;
+            let finalImageUrl = sourceImage;
 
-            // Determine scale factor based on target size
+            // Step 1: Upload to Vercel Blob if it's a local file or base64 to avoid 413 error
+            // Replicate needs a publicly accessible URL for best results with large files
+            if (sourceImage.startsWith('data:') || sourceFile) {
+                setState(prev => ({ ...prev, progress: 5, error: null }));
+                
+                try {
+                    const fileToUpload = sourceFile || await (await fetch(sourceImage)).blob();
+                    const fileName = sourceFile?.name || `upscale-${Date.now()}.png`;
+                    
+                    const blob = await upload(fileName, fileToUpload, {
+                        access: 'public',
+                        handleUploadUrl: '/api/upload',
+                    });
+                    
+                    finalImageUrl = blob.url;
+                } catch (blobError: any) {
+                    console.error('Blob upload failed:', blobError);
+                    // If Blob fails, we try to fall back to base64 if it's small enough,
+                    // but usually it's better to fail here and explain why.
+                    throw new Error(`Ошибка загрузки в облако: ${blobError.message}. Проверьте BLOB_READ_WRITE_TOKEN.`);
+                }
+            }
+
+            // Step 2: Call Replicate Upscale via our API
             const selectedOption = SIZE_OPTIONS.find(o => o.value === settings.targetSize);
             const scaleFactor = selectedOption?.multiplier || 4;
 
-            setState(prev => ({ ...prev, progress: 10 }));
+            setState(prev => ({ ...prev, progress: 20 }));
 
             const result = await upscaleImage(
                 replicateToken,
-                base64Data,
+                finalImageUrl,
                 sourceMimeType,
                 scaleFactor,
                 settings.model,
@@ -185,7 +209,10 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                 </div>
                 <div className="flex gap-2">
                     <button
-                        onClick={() => setSourceImage(null)}
+                        onClick={() => {
+                            setSourceImage(null);
+                            setSourceFile(null);
+                        }}
                         className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 transition-colors"
                     >
                         Заменить фото
@@ -306,7 +333,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                             <span className="text-2xl">💎</span>
                             <div className="text-sm">
                                 <p className="text-slate-300 font-medium">Профессиональный апскейл</p>
-                                <p className="text-slate-500">Технология Topaz Labs восстанавливает детали без "мыла" и артефактов склейки.</p>
+                                <p className="text-slate-500">Изображение будет загружено в Vercel Blob для стабильной обработки больших файлов.</p>
                             </div>
                         </div>
                     </div>
@@ -324,7 +351,9 @@ export const Upscaler: React.FC<UpscalerProps> = ({
             {state.isUpscaling && (
                 <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 p-6">
                     <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-white">Обработка...</span>
+                        <span className="text-sm font-medium text-white">
+                            {state.progress < 20 ? 'Загрузка в облако...' : 'Обработка Replicate...'}
+                        </span>
                         <span className="text-sm text-indigo-400">{state.progress}%</span>
                     </div>
                     <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden">

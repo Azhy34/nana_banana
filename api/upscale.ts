@@ -3,7 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 const REPLICATE_API_URL = 'https://api.replicate.com/v1/models/topazlabs/image-upscale/predictions';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Enable CORS for your domain
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -16,14 +16,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { image, upscaleFactor, enhanceModel, faceEnhance, apiToken } = req.body;
+  // Get token from Authorization header instead of body
+  const apiToken = req.headers.authorization?.replace('Bearer ', '');
+  const { image, upscaleFactor, enhanceModel, faceEnhance } = req.body;
 
   if (!apiToken) {
-    return res.status(400).json({ error: 'API token is required' });
+    return res.status(401).json({ error: 'Replicate API token is required in Authorization header' });
   }
 
   if (!image) {
-    return res.status(400).json({ error: 'Image is required' });
+    return res.status(400).json({ error: 'Image (URL or base64) is required' });
   }
 
   try {
