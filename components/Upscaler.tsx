@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { upload } from '@vercel/blob/client';
 import { upscaleImage } from '../services/replicateService';
 import { UpscaleSettings, UpscaleState } from '../types';
+import { downloadImage } from '../services/downloadService';
 
 interface UpscalerProps {
     replicateToken: string;
@@ -48,6 +49,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         error: null,
         upscaledImage: null,
     });
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -116,6 +118,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                 scaleFactor,
                 settings.model,
                 settings.faceCorrection,
+                settings.format,
                 (status) => {
                     setState(prev => ({
                         ...prev,
@@ -140,14 +143,18 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         }
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         if (!state.upscaledImage) return;
 
-        const link = document.createElement('a');
-        link.href = state.upscaledImage;
-        link.download = `upscaled-${settings.targetSize}.${settings.format}`;
-        link.target = '_blank';
-        link.click();
+        setIsDownloading(true);
+        try {
+            await downloadImage(
+                state.upscaledImage,
+                `upscaled-${settings.targetSize}.${settings.format}`
+            );
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     // Upload Screen
@@ -381,9 +388,20 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                         </div>
                         <button
                             onClick={handleDownload}
-                            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/20"
+                            disabled={isDownloading}
+                            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                         >
-                            📥 Скачать
+                            {isDownloading ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    Скачивание...
+                                </>
+                            ) : (
+                                <>📥 Скачать</>
+                            )}
                         </button>
                     </div>
 

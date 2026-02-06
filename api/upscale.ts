@@ -18,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Get token from Authorization header instead of body
   const apiToken = req.headers.authorization?.replace('Bearer ', '');
-  const { image, upscaleFactor, enhanceModel, faceEnhance } = req.body;
+  const { image, upscaleFactor, enhanceModel, faceEnhance, outputFormat } = req.body;
 
   if (!apiToken) {
     return res.status(401).json({ error: 'Replicate API token is required in Authorization header' });
@@ -42,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           image,
           upscale_factor: upscaleFactor,
           enhance_model: enhanceModel,
-          output_format: 'png',
+          output_format: outputFormat || 'png',
           face_enhancement: faceEnhance,
           subject_detection: 'All'
         }

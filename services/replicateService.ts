@@ -27,7 +27,8 @@ export async function startUpscale(
   imageUrl: string,
   upscaleFactor: '2x' | '4x' | '6x' = '4x',
   enhanceModel: TopazEnhanceModel = 'High Fidelity V2',
-  faceEnhance: boolean = false
+  faceEnhance: boolean = false,
+  outputFormat: 'jpg' | 'png' = 'png'
 ): Promise<{ id: string }> {
   const response = await fetch(`${API_BASE_URL}/upscale`, {
     method: 'POST',
@@ -40,6 +41,7 @@ export async function startUpscale(
       upscaleFactor,
       enhanceModel,
       faceEnhance,
+      outputFormat,
     }),
   });
 
@@ -113,6 +115,7 @@ export async function upscaleImage(
   scaleFactorValue: number = 4,
   enhanceModel: TopazEnhanceModel = 'High Fidelity V2',
   faceEnhance: boolean = false,
+  outputFormat: 'jpg' | 'png' = 'png',
   onProgress?: (status: string) => void
 ): Promise<string> {
   // Replicate accepts data URLs or plain URLs
@@ -131,7 +134,8 @@ export async function upscaleImage(
     imageUrl,
     upscaleFactor,
     enhanceModel,
-    faceEnhance
+    faceEnhance,
+    outputFormat
   );
 
   if (onProgress) {
