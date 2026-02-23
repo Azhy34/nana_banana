@@ -77,6 +77,48 @@ export const generateImageComposition = async (
   }
 };
 
+export const generateBatchImage = async (
+  apiKey: string,
+  wallpaper: UploadedImage,
+  prompt: string,
+  aspectRatio: string,
+): Promise<string> => {
+  if (!apiKey) throw new Error("API Key is required.");
+
+  const ai = new GoogleGenAI({ apiKey });
+
+  const parts: Part[] = [
+    { text: "WALLPAPER_PATTERN: The following image is the wallpaper product to place on the wall. Apply it exactly as instructed." },
+    { inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } },
+    { text: prompt },
+  ];
+
+  try {
+    const response = await ai.models.generateContent({
+      model: ModelType.Pro,
+      contents: { parts },
+      config: {
+        imageConfig: {
+          aspectRatio: aspectRatio as any,
+          imageSize: '2K',
+        },
+      },
+    });
+
+    if (response.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData?.data) {
+          return `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+        }
+      }
+    }
+    throw new Error("No image generated in the response.");
+  } catch (error) {
+    console.error("Gemini Batch API Error:", error);
+    throw error;
+  }
+};
+
 export interface WallCoordinates {
   topLeft: { x: number; y: number };
   topRight: { x: number; y: number };

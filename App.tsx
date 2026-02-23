@@ -8,6 +8,7 @@ import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState, Vi
 import { generateImageComposition } from './services/geminiService';
 import { EtsyCropper } from './components/EtsyCropper';
 import { Upscaler } from './components/Upscaler';
+import { BatchGenerator } from './components/BatchGenerator';
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('generator');
@@ -29,6 +30,14 @@ function App() {
     error: null,
     resultImage: null,
   });
+
+  // Image sent from Batch to Upscaler/Cropper
+  const [batchToolImage, setBatchToolImage] = useState<string | null>(null);
+
+  const handleSendToTool = (mode: ViewMode, image: string) => {
+    setBatchToolImage(image);
+    setViewMode(mode);
+  };
 
   // Handlers
   const handleUpload = async (file: File) => {
@@ -119,6 +128,20 @@ function App() {
     }
   };
 
+  const switchTab = (mode: ViewMode) => {
+    // Clear batch image when leaving batch-related flow
+    if (mode === 'generator' || mode === 'batch') {
+      setBatchToolImage(null);
+    }
+    setViewMode(mode);
+  };
+
+  const tabClass = (mode: ViewMode) =>
+    `px-6 py-3 rounded-xl font-bold transition-all duration-300 ${viewMode === mode
+      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+      : 'text-slate-400 hover:text-slate-200'
+    }`;
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-indigo-500/30">
       <Header apiKey={apiKey} setApiKey={setApiKey} replicateToken={replicateToken} setReplicateToken={setReplicateToken} />
@@ -127,33 +150,10 @@ function App() {
         {/* View Mode Switcher */}
         <div className="flex justify-center mb-10">
           <div className="inline-flex bg-slate-800/50 p-1.5 rounded-2xl border border-slate-700 shadow-xl">
-            <button
-              onClick={() => setViewMode('generator')}
-              className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 ${viewMode === 'generator'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                : 'text-slate-400 hover:text-slate-200'
-                }`}
-            >
-              🎨 Generator
-            </button>
-            <button
-              onClick={() => setViewMode('cropper')}
-              className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 ${viewMode === 'cropper'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                : 'text-slate-400 hover:text-slate-200'
-                }`}
-            >
-              ✂️ Cropper
-            </button>
-            <button
-              onClick={() => setViewMode('upscaler')}
-              className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 ${viewMode === 'upscaler'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                : 'text-slate-400 hover:text-slate-200'
-                }`}
-            >
-              🔬 Upscale
-            </button>
+            <button onClick={() => switchTab('generator')} className={tabClass('generator')}>🎨 Generator</button>
+            <button onClick={() => switchTab('batch')} className={tabClass('batch')}>⚡ Batch</button>
+            <button onClick={() => switchTab('cropper')} className={tabClass('cropper')}>✂️ Cropper</button>
+            <button onClick={() => switchTab('upscaler')} className={tabClass('upscaler')}>🔬 Upscale</button>
           </div>
         </div>
 
@@ -183,10 +183,21 @@ function App() {
           </>
         )}
 
+        {viewMode === 'batch' && (
+          <div className="animate-fadeIn">
+            <BatchGenerator
+              apiKey={apiKey}
+              replicateToken={replicateToken}
+              onViewModeChange={setViewMode}
+              onSendToTool={handleSendToTool}
+            />
+          </div>
+        )}
+
         {viewMode === 'cropper' && (
           <div className="animate-fadeIn">
             <EtsyCropper
-              initialImage={generationState.resultImage}
+              initialImage={batchToolImage || generationState.resultImage}
               onBack={() => setViewMode('generator')}
             />
           </div>
@@ -196,7 +207,7 @@ function App() {
           <div className="animate-fadeIn">
             <Upscaler
               replicateToken={replicateToken}
-              initialImage={generationState.resultImage}
+              initialImage={batchToolImage || generationState.resultImage}
               onBack={() => setViewMode('generator')}
             />
           </div>

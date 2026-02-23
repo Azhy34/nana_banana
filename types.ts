@@ -5,7 +5,36 @@ export enum Step {
   Crop = 4,
 }
 
-export type ViewMode = 'generator' | 'cropper' | 'upscaler';
+export type ViewMode = 'generator' | 'cropper' | 'upscaler' | 'batch';
+export type AgeGroupKey = 'baby' | 'vorschul' | 'schulkind';
+export type BatchAspectRatio = '9:16' | '16:9' | '1:1';
+
+export interface BatchPromptTags {
+  color: string;
+  style: string;
+  brand: string;
+  ageGroup: AgeGroupKey;
+  keyObject: string;
+  roomZone: string;
+  lighting: string;
+  cameraAngle: string;
+  cameraDistance: string;
+  depthOfField: string;
+  accessories: string[];
+  aspectRatio: BatchAspectRatio;
+}
+
+export type BatchCardStatus = 'idle' | 'loading' | 'done' | 'error';
+
+export interface BatchCard {
+  id: string;
+  tags: BatchPromptTags;
+  promptText: string;
+  status: BatchCardStatus;
+  resultImage: string | null;
+  error: string | null;
+  selected: boolean;
+}
 
 export enum ModelType {
   Flash = 'gemini-2.5-flash-image',

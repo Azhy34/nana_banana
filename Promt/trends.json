@@ -1,0 +1,279 @@
+{
+  "colors": [
+    {
+      "name": "Wales Grey",
+      "description": "soft grey with blue undertone, modern and calm"
+    },
+    {
+      "name": "Barberry",
+      "description": "soft berry-red, warm and elegant accent"
+    },
+    {
+      "name": "Bumblebee",
+      "description": "sunny yellow, soft and mood-lifting"
+    },
+    {
+      "name": "Sage",
+      "description": "muted sage green, natural and fresh"
+    },
+    {
+      "name": "Eucalyptus",
+      "description": "deep eucalyptus green, grounding and organic"
+    },
+    {
+      "name": "Cool Blue",
+      "description": "fresh cool blue, trending 2026 statement color"
+    },
+    {
+      "name": "Olivbraun",
+      "description": "olive-brown, earthy and warm"
+    },
+    {
+      "name": "Mustard",
+      "description": "warm mustard yellow, retro and cozy"
+    },
+    {
+      "name": "Cocoa",
+      "description": "warm brown, mushroom-cocoa tone, earthy base"
+    }
+  ],
+
+  "styles": [
+    {
+      "name": "Japandi 2.0",
+      "description": "warm minimalism with character — light wood, soft tones, balance between warmth and freshness"
+    },
+    {
+      "name": "Minimalismus 2.0",
+      "description": "bold colors in minimal interiors, matte metal accents, clean lines"
+    },
+    {
+      "name": "Boho 2026",
+      "description": "ordered boho — structured, natural textiles, wood, plants, soft blankets — NO chaos"
+    },
+    {
+      "name": "Retro 2026",
+      "description": "warm autumn tones, mustard and caramel, wood and geometric patterns"
+    },
+    {
+      "name": "Gender-Neutral",
+      "description": "nature-inspired motifs, flexible elements, grows with the child"
+    },
+    {
+      "name": "Montessori",
+      "description": "child-level shelves, floor bed, open access to toys, natural materials throughout"
+    }
+  ],
+
+  "brands": [
+    {
+      "name": "Oliver Furniture",
+      "origin": "Denmark",
+      "aesthetic": "nordische Leichtigkeit — filigree forms, light birch and white, 100% Made in Europe",
+      "collections": ["Wood Original", "Seaside Classic", "Mini+"],
+      "material": "solid birch + MDF, water-based lacquer"
+    },
+    {
+      "name": "Paidi",
+      "origin": "Germany",
+      "aesthetic": "climate-neutral, toxin-free, mitwachsende Möbel (furniture that grows with the child)",
+      "collections": ["Fionn", "Sten", "Kira"],
+      "material": "solid wood, Blauer Engel certified"
+    },
+    {
+      "name": "Flexa",
+      "origin": "Denmark",
+      "aesthetic": "minimal forms, trendy, modular systems",
+      "material": "solid pine, certified"
+    },
+    {
+      "name": "Leander",
+      "origin": "Denmark",
+      "aesthetic": "Scandinavian style, soft rounded lines",
+      "material": "solid beech"
+    },
+    {
+      "name": "Sirch",
+      "origin": "Germany",
+      "aesthetic": "handmade in Bavaria, extreme minimalism",
+      "material": "solid birch and ash"
+    },
+    {
+      "name": "Geuther",
+      "origin": "Germany",
+      "aesthetic": "traditional Bavarian quality since 1881",
+      "material": "solid beech"
+    },
+    {
+      "name": "IKEA",
+      "origin": "Sweden",
+      "aesthetic": "practical base furniture, popular Kura and Kallax combinations",
+      "collections": ["Kura", "Kallax", "Sundvik"],
+      "material": "solid pine, MDF"
+    }
+  ],
+
+  "ageGroups": {
+    "baby": {
+      "label": "Baby (0–3 years)",
+      "furniture": "low crib or Bodenbett floor bed, soft padded rug, mobile above bed",
+      "storage": "low open shelves at floor level, small rattan baskets",
+      "extras": "soft stuffed animals, wooden mobile, gentle lighting"
+    },
+    "vorschul": {
+      "label": "Preschool (3–6 years)",
+      "furniture": "low halbhohes Hochbett, play zone with open shelves, small table and chairs",
+      "storage": "Kallax-style open shelving, toy bins at child level",
+      "extras": "building blocks, wooden toys, small bookshelf at child height"
+    },
+    "schulkind": {
+      "label": "School age (6–10 years)",
+      "furniture": "halbhohes Hochbett with desk underneath, modular system",
+      "storage": "combination of open and closed storage, wall shelves",
+      "extras": "desk lamp, school backpack hook, reading corner"
+    }
+  },
+
+  "keyObjects": [
+    {
+      "name": "halbhohes Hochbett",
+      "description": "semi-high loft bed, desk or play space underneath — very popular in Germany for small rooms"
+    },
+    {
+      "name": "Bodenbett",
+      "description": "Montessori floor bed at ground level, child can get in and out independently"
+    },
+    {
+      "name": "modular system",
+      "description": "modular furniture units that can be rearranged as the child grows"
+    },
+    {
+      "name": "transformer bed",
+      "description": "convertible bed that grows with the child from crib to single bed"
+    },
+    {
+      "name": "reading nook",
+      "description": "cozy enclosed reading corner with soft cushions and warm lamp"
+    }
+  ],
+
+  "roomZones": [
+    {
+      "name": "sleep zone",
+      "description": "bed as focal point against the wallpaper wall, calm and cozy atmosphere"
+    },
+    {
+      "name": "play zone",
+      "description": "open floor space, low shelves with toys, wallpaper visible as backdrop"
+    },
+    {
+      "name": "reading nook",
+      "description": "small armchair or bean bag, floor lamp or wall lamp, wallpaper behind"
+    }
+  ],
+
+  "lighting": [
+    {
+      "name": "warm afternoon sunlight",
+      "description": "15:00 soft sunlight through linen curtains, golden tones, gentle shadows on parquet"
+    },
+    {
+      "name": "overcast Nordic daylight",
+      "description": "diffused cloudy light, even and cool, no harsh shadows — typical German autumn day"
+    },
+    {
+      "name": "warm pendant lamp at dusk",
+      "description": "evening, main ceiling lamp glowing warm amber, cozy Gemütlichkeit atmosphere"
+    },
+    {
+      "name": "morning soft light",
+      "description": "early morning, pale soft sunlight, fresh and calm"
+    },
+    {
+      "name": "fairy lights evening",
+      "description": "dark outside, warm fairy lights strung around the room, magical cozy mood"
+    },
+    {
+      "name": "golden hour",
+      "description": "sunset light streaming in at low angle, rich warm gold tones across the room"
+    }
+  ],
+
+  "cameraAngles": [
+    "frontal — straight-on view of the wallpaper wall",
+    "corner view — shot from corner of room, two walls visible, wallpaper wall dominant",
+    "side view — shot from the side, wallpaper wall in the background"
+  ],
+
+  "cameraDistances": [
+    {
+      "name": "close-up",
+      "description": "shows wallpaper pattern in detail plus one furniture piece, pattern texture clearly visible"
+    },
+    {
+      "name": "medium shot",
+      "description": "main furniture piece and full wallpaper wall visible, balanced composition"
+    },
+    {
+      "name": "wide shot",
+      "description": "full room view, wallpaper as backdrop, full spatial context"
+    }
+  ],
+
+  "depthOfField": [
+    {
+      "name": "shallow depth of field",
+      "setting": "f/1.8",
+      "description": "foreground accessory sharp, wallpaper wall softly in focus — draws eye to pattern"
+    },
+    {
+      "name": "medium depth of field",
+      "setting": "f/4.0",
+      "description": "bed and wall both sharp, slight background blur — balanced interior shot"
+    },
+    {
+      "name": "deep depth of field",
+      "setting": "f/8.0",
+      "description": "entire room sharp from foreground to wall — used for wide shots showing full context"
+    }
+  ],
+
+  "accessories": [
+    "woven jute basket with toys",
+    "small rattan shelf with books",
+    "linen curtains in neutral tone",
+    "velvet blanket draped on bed",
+    "large format nature poster (single, not gallery wall)",
+    "wooden toy train or stacking blocks",
+    "soft knit throw in muted color",
+    "macramé wall hanging (small, above bed)",
+    "ceramic plant pot with small leafy plant",
+    "woven cotton rug in warm neutral",
+    "linen lampshade with warm bulb",
+    "wooden name letters on wall",
+    "small wooden step stool",
+    "canvas storage bin in linen fabric"
+  ],
+
+  "materials": [
+    "solid birch (Birke Massivholz)",
+    "solid oak (Eiche Massivholz)",
+    "solid beech (Buche Massivholz)",
+    "rattan",
+    "jute",
+    "bamboo",
+    "linen",
+    "cotton",
+    "cork",
+    "FSC-certified wood"
+  ],
+
+  "germanApartmentContext": {
+    "floorType": "light oak parquet (Eichenparkett)",
+    "roomSize": "approx. 10–14 m²",
+    "ceilingHeight": "2.6–3.0 m high ceiling",
+    "windows": "large window with deep sill, typical German apartment style"
+  },
+
+  "negativePrompt": "no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces"
+}
