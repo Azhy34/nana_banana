@@ -46,6 +46,7 @@ export const generateImageComposition = async (
   parts.push({ text: fullPrompt });
 
   try {
+    console.log(`[Gemini] Generating with model: ${model}, aspectRatio: ${aspectRatio}, imageSize: ${imageSize}`);
     // Call API
     const response = await ai.models.generateContent({
       model: model,
