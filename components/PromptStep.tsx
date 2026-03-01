@@ -1,6 +1,6 @@
 import React from 'react';
 import { ModelType, GenerationSettings, Step } from '../types';
-import { MODEL_OPTIONS, ASPECT_RATIOS, IMAGE_SIZES } from '../constants';
+import { MODEL_OPTIONS, ASPECT_RATIOS, IMAGE_SIZES, IMAGE_SIZES_FLASH31 } from '../constants';
 
 interface PromptStepProps {
   settings: GenerationSettings;
@@ -65,11 +65,11 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
           </select>
         </div>
 
-        {settings.model === ModelType.Pro && (
+        {(settings.model === ModelType.Pro || settings.model === ModelType.Flash31) && (
           <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 md:col-span-2">
             <label className="block text-sm font-medium text-slate-300 mb-2">Resolution</label>
             <div className="flex gap-4">
-              {IMAGE_SIZES.map(size => (
+              {(settings.model === ModelType.Flash31 ? IMAGE_SIZES_FLASH31 : IMAGE_SIZES).map(size => (
                 <label key={size} className={`
                                     flex-1 cursor-pointer rounded-lg border p-3 text-center transition-all
                                     ${settings.imageSize === size

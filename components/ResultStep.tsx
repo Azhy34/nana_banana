@@ -76,6 +76,22 @@ export const ResultStep: React.FC<ResultStepProps> = ({
           className="w-full h-auto rounded-lg"
         />
       </div>
+
+      {generationState.estimatedCostUsd !== undefined && (
+        <div className="mb-6 flex items-center gap-4 bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">Cost:</span>
+            <span className="font-bold text-green-400">${generationState.estimatedCostUsd.toFixed(4)}</span>
+          </div>
+          {generationState.usage && (
+            <div className="flex items-center gap-2 text-slate-500 border-l border-slate-700 pl-4">
+              <span>{generationState.usage.promptTokens.toLocaleString()} input tokens</span>
+              <span>·</span>
+              <span>{generationState.usage.totalTokens.toLocaleString()} total</span>
+            </div>
+          )}
+        </div>
+      )}
       <div className="flex justify-center gap-4">
         <button
           onClick={() => setStep(Step.Prompt)}

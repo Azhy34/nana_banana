@@ -6,6 +6,7 @@ import { ReferenceStep } from './components/ReferenceStep';
 import { ResultStep } from './components/ResultStep';
 import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState, ViewMode } from './types';
 import { generateImageComposition } from './services/geminiService';
+import { MODEL_PRICING } from './constants';
 import { EtsyCropper } from './components/EtsyCropper';
 import { Upscaler } from './components/Upscaler';
 import { BatchGenerator } from './components/BatchGenerator';
@@ -77,12 +78,15 @@ function App() {
     setGenerationState({ isLoading: true, error: null, resultImage: null });
 
     try {
-      const result = await generateImageComposition(
+      const { image, usage } = await generateImageComposition(
         apiKey,
         referenceImages[0] || null,
         settings
       );
-      setGenerationState({ isLoading: false, error: null, resultImage: result });
+      const pricing = MODEL_PRICING[settings.model];
+      const estimatedCostUsd =
+        (usage.promptTokens / 1_000_000) * pricing.inputPer1M + pricing.outputPerImage;
+      setGenerationState({ isLoading: false, error: null, resultImage: image, usage, estimatedCostUsd });
     } catch (err: any) {
       setGenerationState({
         isLoading: false,

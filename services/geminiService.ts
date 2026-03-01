@@ -1,11 +1,16 @@
 import { GoogleGenAI, Part } from "@google/genai";
-import { GenerationSettings, ModelType, UploadedImage } from "../types";
+import { GenerationSettings, GenerationUsage, ModelType, UploadedImage } from "../types";
+
+export interface GenerationResult {
+  image: string;
+  usage: GenerationUsage;
+}
 
 export const generateImageComposition = async (
   apiKey: string,
   referenceImage: UploadedImage | null,
   settings: GenerationSettings
-): Promise<string> => {
+): Promise<GenerationResult> => {
   const { model, prompt, aspectRatio, imageSize } = settings;
 
   if (!apiKey) {
@@ -54,7 +59,7 @@ export const generateImageComposition = async (
       config: {
         imageConfig: {
           aspectRatio: aspectRatio,
-          ...(model === ModelType.Pro ? { imageSize: imageSize } : {}),
+          ...(model === ModelType.Pro || model === ModelType.Flash31 ? { imageSize: imageSize } : {}),
         },
       },
     });
@@ -65,12 +70,20 @@ export const generateImageComposition = async (
       if (content && content.parts) {
         for (const part of content.parts) {
           if (part.inlineData && part.inlineData.data) {
-            return `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+            const usage: GenerationUsage = {
+              promptTokens: response.usageMetadata?.promptTokenCount ?? 0,
+              candidateTokens: response.usageMetadata?.candidatesTokenCount ?? 0,
+              totalTokens: response.usageMetadata?.totalTokenCount ?? 0,
+            };
+            return {
+              image: `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`,
+              usage,
+            };
           }
         }
       }
     }
-    
+
     throw new Error("No image generated in the response.");
   } catch (error) {
     console.error("Gemini API Error:", error);
