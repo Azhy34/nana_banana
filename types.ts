@@ -38,6 +38,7 @@ export interface BatchCard {
 
 export enum ModelType {
   Flash = 'gemini-2.5-flash-image',
+  Flash31 = 'gemini-3.1-flash-image-preview',
   Pro = 'gemini-3-pro-image-preview',
 }
 

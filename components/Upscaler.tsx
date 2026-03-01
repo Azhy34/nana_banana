@@ -97,6 +97,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                     });
                     
                     finalImageUrl = blob.url;
+                    
                 } catch (blobError: any) {
                     console.error('Blob upload failed:', blobError);
                     // If Blob fails, we try to fall back to base64 if it's small enough,

@@ -13,6 +13,9 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
     if (model === ModelType.Pro) {
       return "✨ Best for high fidelity, complex instructions, and 4K resolution. (Recommended)";
     }
+    if (model === ModelType.Flash31) {
+      return "🆕 Gemini 3.1 Flash — new generation, fast with improved quality.";
+    }
     return "⚡️ Optimized for speed. Good for quick experiments.";
   };
 
