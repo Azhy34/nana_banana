@@ -116,44 +116,90 @@
   "ageGroups": {
     "baby": {
       "label": "Baby (0–3 years)",
-      "furniture": "low crib or Bodenbett floor bed, soft padded rug, mobile above bed",
-      "storage": "low open shelves at floor level, small rattan baskets",
-      "extras": "soft stuffed animals, wooden mobile, gentle lighting"
+      "furniture": "low Bodenbett floor bed or classic crib, soft padded rug, mobile above bed — all furniture very low",
+      "storage": "low open shelves at floor level, small rattan baskets, no climbing structures",
+      "extras": "soft stuffed animals, wooden mobile, nightlight, linen curtains"
     },
     "vorschul": {
       "label": "Preschool (3–6 years)",
-      "furniture": "low halbhohes Hochbett, play zone with open shelves, small table and chairs",
-      "storage": "Kallax-style open shelving, toy bins at child level",
-      "extras": "building blocks, wooden toys, small bookshelf at child height"
+      "furniture": "simple low single bed, small play table with two chairs, open shelving at child height",
+      "storage": "Kallax-style open shelving with toy bins at child level, small rattan baskets",
+      "extras": "building blocks, wooden toys, small bookshelf, soft floor rug"
     },
     "schulkind": {
       "label": "School age (6–10 years)",
-      "furniture": "halbhohes Hochbett with desk underneath, modular system",
-      "storage": "combination of open and closed storage, wall shelves",
-      "extras": "desk lamp, school backpack hook, reading corner"
+      "furniture": "single bed, desk with chair and task lamp, small bookshelf",
+      "storage": "combination of open and closed storage, wall shelves for books",
+      "extras": "desk lamp, school backpack hook, reading corner with bean bag"
+    },
+    "teenager": {
+      "label": "Teenager (10–16 years)",
+      "furniture": "low single bed or sofa-bed, full desk setup, ergonomic chair, shelving with books and decor",
+      "storage": "modular wall shelves, closed wardrobe, desk organizer",
+      "extras": "plants, posters, LED ambient lighting strip, headphones on desk stand, minimal personal items"
     }
   },
 
   "keyObjects": [
     {
-      "name": "halbhohes Hochbett",
-      "description": "semi-high loft bed, desk or play space underneath — very popular in Germany for small rooms"
-    },
-    {
       "name": "Bodenbett",
-      "description": "Montessori floor bed at ground level, child can get in and out independently"
+      "description": "Montessori floor bed at ground level — baby can get in and out independently, very low profile, wallpaper wall fully visible above",
+      "ageGroup": "baby"
     },
     {
-      "name": "modular system",
-      "description": "modular furniture units that can be rearranged as the child grows"
+      "name": "Kinderbett mit Gitterstäben",
+      "description": "classic wooden crib with slatted sides, placed against wallpaper wall — simple and safe for infants",
+      "ageGroup": "baby"
     },
     {
-      "name": "transformer bed",
-      "description": "convertible bed that grows with the child from crib to single bed"
+      "name": "Kuschelecke mit Spielmatte",
+      "description": "soft play mat on the floor with a few plush toys and a low rattan shelf — open and airy, wallpaper wall as backdrop",
+      "ageGroup": "baby"
     },
     {
-      "name": "reading nook",
-      "description": "cozy enclosed reading corner with soft cushions and warm lamp"
+      "name": "Spieltisch mit Stühlen",
+      "description": "small children's play table with two small chairs — creative zone in front of the wallpaper wall, building blocks and art supplies",
+      "ageGroup": "vorschul"
+    },
+    {
+      "name": "Einzelbett mit Baldachin",
+      "description": "simple low single bed with a fabric canopy above — fairy-tale atmosphere, headboard against wallpaper wall",
+      "ageGroup": "vorschul"
+    },
+    {
+      "name": "Spielecke mit Regal",
+      "description": "open play zone with low Kallax-style shelving unit displaying toys, woven baskets and books — wallpaper fills the entire back wall",
+      "ageGroup": "vorschul"
+    },
+    {
+      "name": "Leseecke mit Sitzsack",
+      "description": "cozy reading corner — large bean bag or floor cushion, bookshelf at child height, wall lamp, wallpaper wall as full backdrop",
+      "ageGroup": "schulkind"
+    },
+    {
+      "name": "Schreibtisch-Ecke",
+      "description": "children's desk with chair, task lamp and small open shelf — homework zone with wallpaper wall visible behind",
+      "ageGroup": "schulkind"
+    },
+    {
+      "name": "Einzelbett mit Kopfteil-Regal",
+      "description": "low single bed with integrated headboard shelf for books and a small lamp — calm and organized, wallpaper wall above headboard",
+      "ageGroup": "schulkind"
+    },
+    {
+      "name": "Teenager Schreibtisch mit All-in-One PC",
+      "description": "modern desk setup: wide wooden desk, iMac-style All-in-One PC, desk lamp, small plant, minimal accessories — wallpaper wall dominant as full backdrop behind the setup",
+      "ageGroup": "teenager"
+    },
+    {
+      "name": "Gaming-Ecke",
+      "description": "teenager gaming setup: ergonomic chair, wide desk, 27\" monitor, subtle warm lighting — modern and stylish, wallpaper wall fills the background",
+      "ageGroup": "teenager"
+    },
+    {
+      "name": "Teenager Bett mit Lese-Ecke",
+      "description": "low single bed plus a small reading nook area beside it — a poster or plant on the desk, wallpaper wall visible behind",
+      "ageGroup": "teenager"
     }
   ],
 
@@ -164,11 +210,15 @@
     },
     {
       "name": "play zone",
-      "description": "open floor space, low shelves with toys, wallpaper visible as backdrop"
+      "description": "open floor space, low shelves with toys, wallpaper visible as full backdrop"
     },
     {
       "name": "reading nook",
-      "description": "small armchair or bean bag, floor lamp or wall lamp, wallpaper behind"
+      "description": "small armchair or bean bag, floor lamp or wall lamp, wallpaper prominently behind"
+    },
+    {
+      "name": "study zone",
+      "description": "desk as focal point against the wallpaper wall, focused and minimal atmosphere — wallpaper fills the background"
     }
   ],
 
@@ -239,20 +289,22 @@
   ],
 
   "accessories": [
-    "woven jute basket with toys",
+    "woven jute basket",
     "small rattan shelf with books",
     "linen curtains in neutral tone",
-    "velvet blanket draped on bed",
+    "velvet blanket draped on bed or chair",
     "large format nature poster (single, not gallery wall)",
-    "wooden toy train or stacking blocks",
     "soft knit throw in muted color",
-    "macramé wall hanging (small, above bed)",
+    "macramé wall hanging (small)",
     "ceramic plant pot with small leafy plant",
     "woven cotton rug in warm neutral",
     "linen lampshade with warm bulb",
-    "wooden name letters on wall",
-    "small wooden step stool",
-    "canvas storage bin in linen fabric"
+    "canvas storage bin in linen fabric",
+    "small succulent or cactus plant",
+    "minimalist framed art print (single)",
+    "small globe or world map on shelf",
+    "desk organizer with books and small plant",
+    "small wooden decorative objects on shelf"
   ],
 
   "materials": [
@@ -275,5 +327,5 @@
     "windows": "large window with deep sill, typical German apartment style"
   },
 
-  "negativePrompt": "no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces"
+  "negativePrompt": "no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders"
 }

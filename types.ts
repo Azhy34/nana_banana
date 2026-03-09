@@ -6,7 +6,7 @@ export enum Step {
 }
 
 export type ViewMode = 'generator' | 'cropper' | 'upscaler' | 'batch';
-export type AgeGroupKey = 'baby' | 'vorschul' | 'schulkind';
+export type AgeGroupKey = 'baby' | 'vorschul' | 'schulkind' | 'teenager';
 export type BatchAspectRatio = '9:16' | '16:9' | '1:1';
 
 export interface BatchPromptTags {

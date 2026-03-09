@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ViewMode } from '../types';
-import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, AGE_GROUP_LABELS } from '../services/promptGenerator';
+import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ViewMode, ModelType } from '../types';
+import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, AGE_GROUP_LABELS, getKeyObjectsForAge } from '../services/promptGenerator';
 import { generateBatchImage } from '../services/geminiService';
 import { downloadImage } from '../services/downloadService';
 
@@ -26,13 +26,13 @@ const TAG_KEYS: Array<{ key: keyof Omit<BatchPromptTags, 'accessories' | 'aspect
   { key: 'depthOfField', label: 'DoF' },
 ];
 
-function getOptionsForKey(key: keyof Omit<BatchPromptTags, 'accessories' | 'aspectRatio'>): string[] {
+function getOptionsForKey(key: keyof Omit<BatchPromptTags, 'accessories' | 'aspectRatio'>, card: BatchCard): string[] {
   switch (key) {
     case 'color': return TAG_OPTIONS.colors;
     case 'style': return TAG_OPTIONS.styles;
     case 'brand': return TAG_OPTIONS.brands;
     case 'ageGroup': return TAG_OPTIONS.ageGroups;
-    case 'keyObject': return TAG_OPTIONS.keyObjects;
+    case 'keyObject': return getKeyObjectsForAge(card.tags.ageGroup);
     case 'roomZone': return TAG_OPTIONS.roomZones;
     case 'lighting': return TAG_OPTIONS.lighting;
     case 'cameraAngle': return TAG_OPTIONS.cameraAngles;
@@ -49,6 +49,7 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
   // Setup
   const [wallpaper, setWallpaper] = useState<UploadedImage | null>(null);
   const [count, setCount] = useState(12);
+  const [model, setModel] = useState<ModelType>(ModelType.Flash31);
   const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '9:16': 6, '16:9': 4, '1:1': 2 });
 
   // Cards
@@ -97,8 +98,10 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
       ...Array(formatDist['1:1']).fill('1:1'),
     ].sort(() => Math.random() - 0.5);
 
-    setCards(formats.map(ar => {
-      const tags = generateRandomTags(ar);
+    const ageGroupCycle: AgeGroupKey[] = ['baby', 'vorschul', 'schulkind', 'teenager'];
+    setCards(formats.map((ar, idx) => {
+      const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
+      const tags = generateRandomTags(ar, ageGroup);
       return { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true };
     }));
     setBatchStep('cards');
@@ -110,6 +113,10 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
     setCards(prev => prev.map(c => {
       if (c.id !== cardId) return c;
       const newTags = { ...c.tags, [key]: value };
+      if (key === 'ageGroup') {
+        const ageOptions = getKeyObjectsForAge(value as AgeGroupKey);
+        newTags.keyObject = ageOptions[Math.floor(Math.random() * ageOptions.length)];
+      }
       return { ...c, tags: newTags, promptText: buildGeminiPrompt(newTags) };
     }));
   };
@@ -153,7 +160,7 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
 
     await Promise.allSettled(cards.map(async (card) => {
       try {
-        const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio);
+        const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio, model);
         setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
       } catch (err: any) {
         setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
@@ -169,7 +176,7 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
     if (!card) return;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
-      const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio);
+      const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio, model);
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img } : c));
     } catch (err: any) {
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message } : c));
@@ -255,6 +262,24 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
           </div>
         </div>
 
+        {/* Model */}
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
+          <h3 className="text-white font-semibold mb-3">Model</h3>
+          <div className="flex gap-3">
+            {([
+              { value: ModelType.Flash31, label: '3.1 Flash', sub: 'Fast & cheap' },
+              { value: ModelType.Pro, label: 'Pro', sub: 'High quality' },
+              { value: ModelType.Flash, label: 'Flash', sub: 'Legacy' },
+            ] as const).map(({ value, label, sub }) => (
+              <button key={value} onClick={() => setModel(value)}
+                className={`flex-1 py-3 px-2 rounded-xl transition-all text-center ${model === value ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
+                <div className="font-bold text-sm">{label}</div>
+                <div className="text-xs opacity-70 mt-0.5">{sub}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <button onClick={generateCards} disabled={!wallpaper || formatTotal === 0}
           className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 text-lg">
           🎲 Generate Prompts ({formatTotal})
@@ -303,7 +328,7 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
                   <div key={key}>
                     <label className="text-slate-500 text-xs block mb-1">{label}</label>
                     <select value={card.tags[key] as string} onChange={e => updateTag(card.id, key, e.target.value)} className={selectClass}>
-                      {getOptionsForKey(key).map(opt => (
+                      {getOptionsForKey(key, card).map(opt => (
                         <option key={opt} value={opt}>
                           {key === 'ageGroup' ? AGE_GROUP_LABELS[opt as AgeGroupKey] : opt}
                         </option>
