@@ -23,6 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const clientToken = await generateClientTokenFromReadWriteToken({
         pathname: payload.pathname,
         allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp'],
+        addRandomSuffix: true,
         token: blobToken,
       });
 
