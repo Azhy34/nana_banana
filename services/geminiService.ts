@@ -8,7 +8,7 @@ export interface GenerationResult {
 
 export const generateImageComposition = async (
   apiKey: string,
-  referenceImage: UploadedImage | null,
+  referenceImages: UploadedImage[],
   settings: GenerationSettings
 ): Promise<GenerationResult> => {
   const { model, prompt, aspectRatio, imageSize } = settings;
@@ -20,35 +20,24 @@ export const generateImageComposition = async (
   // Initialize client with user provided key
   const ai = new GoogleGenAI({ apiKey: apiKey });
 
-  // Construct Parts
   const parts: Part[] = [];
 
-  // 1. Add Reference Image (Optional)
-  if (referenceImage) {
-    parts.push({ text: "REFERENCE_IMAGE: This is the EXACT image that must be used as the base/reference." });
-    parts.push({
-      inlineData: {
-        data: referenceImage.data,
-        mimeType: referenceImage.mimeType,
-      },
-    });
-  }
+  // Reference images: first = style base, rest = objects to include
+  referenceImages.forEach((img, i) => {
+    const role = i === 0
+      ? "REFERENCE_IMAGE_1 (style/composition base): match the atmosphere and scene structure of this image."
+      : `REFERENCE_IMAGE_${i + 1} (object to include): extract the main subject from this image and place it naturally into the scene.`;
+    parts.push({ text: role });
+    parts.push({ inlineData: { data: img.data, mimeType: img.mimeType } });
+  });
 
-  // 2. Add Text Prompt
-  const fullPrompt = `
-    TASK: Image Generation based on user instructions and an EXACT reference image.
+  const instructions = referenceImages.length === 0
+    ? "Generate the image solely based on USER PROMPT."
+    : referenceImages.length === 1
+      ? "Use REFERENCE_IMAGE_1 as the style and composition base. Apply USER PROMPT on top of it."
+      : `Use REFERENCE_IMAGE_1 as the style/composition base. Extract subjects from REFERENCE_IMAGE_2–${referenceImages.length} and place them naturally into the generated scene.`;
 
-    USER PROMPT: ${prompt}
-
-    INSTRUCTIONS:
-    1. If a REFERENCE_IMAGE is provided, you MUST use it 1:1 as the base for the generation. Maintain the exact composition, key elements, and perspective of the REFERENCE_IMAGE.
-    2. Apply the styles, lighting, or modifications requested in the USER PROMPT while strictly preserving the identity and structure of the REFERENCE_IMAGE.
-    3. If no REFERENCE_IMAGE is provided, generate the image solely based on the USER PROMPT.
-    4. Ensure maximum visual fidelity and adherence to the specified aspect ratio.
-    
-    ${referenceImage ? "CRITICAL: The REFERENCE_IMAGE must be preserved 1:1 in its core structure. Integrate the prompt into this specific image." : ""}
-  `;
-  parts.push({ text: fullPrompt });
+  parts.push({ text: `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: ${instructions}` });
 
   try {
     console.log(`[Gemini] Generating with model: ${model}, aspectRatio: ${aspectRatio}, imageSize: ${imageSize}`);
@@ -96,6 +85,7 @@ export const generateBatchImage = async (
   wallpaper: UploadedImage,
   prompt: string,
   aspectRatio: string,
+  model: ModelType = ModelType.Flash31,
 ): Promise<string> => {
   if (!apiKey) throw new Error("API Key is required.");
 
@@ -109,7 +99,7 @@ export const generateBatchImage = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: ModelType.Pro,
+      model: model,
       contents: { parts },
       config: {
         imageConfig: {

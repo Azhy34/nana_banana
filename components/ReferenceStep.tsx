@@ -5,7 +5,7 @@ import { Step, UploadedImage } from '../types';
 interface ReferenceStepProps {
   referenceImages: UploadedImage[];
   handleUpload: (file: File) => Promise<void>;
-  removeImage: () => void;
+  removeImage: (id: string) => void;
   setStep: (step: Step) => void;
   handleGenerate: () => Promise<void>;
   apiKey: string;
@@ -27,8 +27,8 @@ export const ReferenceStep: React.FC<ReferenceStepProps> = ({
         uploadedImages={referenceImages}
         onUpload={handleUpload}
         onRemove={removeImage}
-        maxImages={1}
-        multiple={false}
+        maxImages={5}
+        multiple={true}
       />
       <div className="flex justify-between">
         <button onClick={() => setStep(Step.Prompt)} className="px-6 py-3 text-slate-400 hover:text-white font-medium transition-colors">

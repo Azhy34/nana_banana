@@ -54,14 +54,13 @@ function App() {
         previewUrl: dataUrl,
       };
 
-      // Limit to 1 reference image
-      setReferenceImages([newImage]);
+      setReferenceImages(prev => prev.length < 5 ? [...prev, newImage] : prev);
     };
     reader.readAsDataURL(file);
   };
 
-  const removeImage = () => {
-    setReferenceImages([]);
+  const removeImage = (id: string) => {
+    setReferenceImages(prev => prev.filter(img => img.id !== id));
   };
 
   const handleGenerate = async () => {
@@ -80,7 +79,7 @@ function App() {
     try {
       const { image, usage } = await generateImageComposition(
         apiKey,
-        referenceImages[0] || null,
+        referenceImages,
         settings
       );
       const pricing = MODEL_PRICING[settings.model];
