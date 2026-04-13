@@ -6,6 +6,7 @@ export enum Step {
 }
 
 export type ViewMode = 'generator' | 'cropper' | 'upscaler' | 'batch';
+export type AIProvider = 'openrouter' | 'gemini';
 export type AgeGroupKey = 'baby' | 'vorschul' | 'schulkind' | 'teenager';
 export type BatchAspectRatio = '9:16' | '16:9' | '1:1';
 
@@ -37,9 +38,8 @@ export interface BatchCard {
 }
 
 export enum ModelType {
-  Flash = 'gemini-2.5-flash-image',
-  Flash31 = 'gemini-3.1-flash-image-preview',
-  Pro = 'gemini-3-pro-image-preview',
+  Flash31 = 'google/gemini-3.1-flash-image-preview',
+  Pro = 'google/gemini-3-pro-image-preview',
 }
 
 export type AspectRatio = '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9' | '21:9';
@@ -88,4 +88,3 @@ export interface UpscaleState {
   error: string | null;
   upscaledImage: string | null;
 }
-

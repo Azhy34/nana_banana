@@ -1,23 +1,67 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { WizardSteps } from './components/WizardSteps';
 import { PromptStep } from './components/PromptStep';
 import { ReferenceStep } from './components/ReferenceStep';
 import { ResultStep } from './components/ResultStep';
-import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState, ViewMode } from './types';
+import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState, ViewMode, AIProvider } from './types';
 import { generateImageComposition } from './services/geminiService';
 import { MODEL_PRICING } from './constants';
 import { EtsyCropper } from './components/EtsyCropper';
 import { Upscaler } from './components/Upscaler';
 import { BatchGenerator } from './components/BatchGenerator';
 
+const readSecret = (storageKeys: string[], envValue = ''): string => {
+  if (typeof window === 'undefined') return envValue;
+  for (const key of storageKeys) {
+    const stored = window.localStorage.getItem(key);
+    if (stored && stored.trim()) return stored;
+  }
+  return envValue;
+};
+
+const writeSecret = (storageKey: string, value: string) => {
+  if (typeof window === 'undefined') return;
+  if (value.trim()) {
+    window.localStorage.setItem(storageKey, value);
+    return;
+  }
+  window.localStorage.removeItem(storageKey);
+};
+
+const readProvider = (): AIProvider => {
+  if (typeof window === 'undefined') return 'openrouter';
+  const raw = window.localStorage.getItem('ai_provider');
+  return raw === 'gemini' ? 'gemini' : 'openrouter';
+};
+
 function App() {
+  const envOpenRouterApiKey =
+    (((import.meta as any).env?.VITE_OPENROUTER_API_KEY as string | undefined) ||
+      (process.env.OPENROUTER_API_KEY as string | undefined) ||
+      '');
+  const envGeminiApiKey =
+    (((import.meta as any).env?.VITE_GEMINI_API_KEY as string | undefined) ||
+      (process.env.GEMINI_API_KEY as string | undefined) ||
+      '');
+  const envReplicateToken =
+    (((import.meta as any).env?.VITE_REPLICATE_API_TOKEN as string | undefined) ||
+      (process.env.REPLICATE_API_TOKEN as string | undefined) ||
+      '');
+
   const [viewMode, setViewMode] = useState<ViewMode>('generator');
   const [step, setStep] = useState<Step>(Step.Prompt);
 
+  // Router / Keys
+  const [provider, setProvider] = useState<AIProvider>(() => readProvider());
+  const [openRouterApiKey, setOpenRouterApiKey] = useState<string>(() => readSecret(['openrouter_api_key'], envOpenRouterApiKey));
+  const [geminiApiKey, setGeminiApiKey] = useState<string>(() => readSecret(['gemini_api_key'], envGeminiApiKey));
+  const [replicateToken, setReplicateToken] = useState<string>(() => readSecret(['replicate_token'], envReplicateToken));
+
+  const activeApiKey = provider === 'openrouter' ? openRouterApiKey : geminiApiKey;
+  const providerLabel = provider === 'openrouter' ? 'OpenRouter' : 'Gemini';
+
   // Data State
-  const [apiKey, setApiKey] = useState<string>('');
-  const [replicateToken, setReplicateToken] = useState<string>('');
   const [referenceImages, setReferenceImages] = useState<UploadedImage[]>([]);
   const [settings, setSettings] = useState<GenerationSettings>({
     prompt: "",
@@ -35,12 +79,29 @@ function App() {
   // Image sent from Batch to Upscaler/Cropper
   const [batchToolImage, setBatchToolImage] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('ai_provider', provider);
+    }
+  }, [provider]);
+
+  useEffect(() => {
+    writeSecret('openrouter_api_key', openRouterApiKey);
+  }, [openRouterApiKey]);
+
+  useEffect(() => {
+    writeSecret('gemini_api_key', geminiApiKey);
+  }, [geminiApiKey]);
+
+  useEffect(() => {
+    writeSecret('replicate_token', replicateToken);
+  }, [replicateToken]);
+
   const handleSendToTool = (mode: ViewMode, image: string) => {
     setBatchToolImage(image);
     setViewMode(mode);
   };
 
-  // Handlers
   const handleUpload = async (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -64,10 +125,10 @@ function App() {
   };
 
   const handleGenerate = async () => {
-    if (!apiKey) {
+    if (!activeApiKey) {
       setGenerationState({
         isLoading: false,
-        error: "Please enter your Gemini API Key in the top right corner.",
+        error: `Please enter your ${providerLabel} API Key in the top right corner.`,
         resultImage: null
       });
       return;
@@ -78,9 +139,10 @@ function App() {
 
     try {
       const { image, usage } = await generateImageComposition(
-        apiKey,
+        activeApiKey,
         referenceImages,
-        settings
+        settings,
+        provider
       );
       const pricing = MODEL_PRICING[settings.model];
       const estimatedCostUsd =
@@ -95,7 +157,6 @@ function App() {
     }
   };
 
-  // Render Steps
   const renderStepContent = () => {
     switch (step) {
       case Step.Prompt:
@@ -115,7 +176,7 @@ function App() {
             removeImage={removeImage}
             setStep={setStep}
             handleGenerate={handleGenerate}
-            apiKey={apiKey}
+            apiKey={activeApiKey}
           />
         );
 
@@ -132,7 +193,6 @@ function App() {
   };
 
   const switchTab = (mode: ViewMode) => {
-    // Clear batch image when leaving batch-related flow
     if (mode === 'generator' || mode === 'batch') {
       setBatchToolImage(null);
     }
@@ -147,16 +207,24 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-indigo-500/30">
-      <Header apiKey={apiKey} setApiKey={setApiKey} replicateToken={replicateToken} setReplicateToken={setReplicateToken} />
+      <Header
+        provider={provider}
+        setProvider={setProvider}
+        openRouterApiKey={openRouterApiKey}
+        setOpenRouterApiKey={setOpenRouterApiKey}
+        geminiApiKey={geminiApiKey}
+        setGeminiApiKey={setGeminiApiKey}
+        replicateToken={replicateToken}
+        setReplicateToken={setReplicateToken}
+      />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* View Mode Switcher */}
         <div className="flex justify-center mb-10">
           <div className="inline-flex bg-slate-800/50 p-1.5 rounded-2xl border border-slate-700 shadow-xl">
-            <button onClick={() => switchTab('generator')} className={tabClass('generator')}>🎨 Generator</button>
-            <button onClick={() => switchTab('batch')} className={tabClass('batch')}>⚡ Batch</button>
-            <button onClick={() => switchTab('cropper')} className={tabClass('cropper')}>✂️ Cropper</button>
-            <button onClick={() => switchTab('upscaler')} className={tabClass('upscaler')}>🔬 Upscale</button>
+            <button onClick={() => switchTab('generator')} className={tabClass('generator')}>Generator</button>
+            <button onClick={() => switchTab('batch')} className={tabClass('batch')}>Batch</button>
+            <button onClick={() => switchTab('cropper')} className={tabClass('cropper')}>Cropper</button>
+            <button onClick={() => switchTab('upscaler')} className={tabClass('upscaler')}>Upscale</button>
           </div>
         </div>
 
@@ -169,10 +237,10 @@ function App() {
               <p className="text-slate-400 max-w-2xl mx-auto text-lg">
                 Generate high-quality images from text prompts and optional reference photos.
               </p>
-              {!apiKey && (
+              {!activeApiKey && (
                 <div className="mt-4 inline-block bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-2">
                   <p className="text-yellow-200 text-sm">
-                    ⚠️ Please enter your API Key in the top right to start generating.
+                    Please enter your {providerLabel} API Key in the header to start generating.
                   </p>
                 </div>
               )}
@@ -189,7 +257,8 @@ function App() {
         {viewMode === 'batch' && (
           <div className="animate-fadeIn">
             <BatchGenerator
-              apiKey={apiKey}
+              provider={provider}
+              apiKey={activeApiKey}
               replicateToken={replicateToken}
               onViewModeChange={setViewMode}
               onSendToTool={handleSendToTool}
@@ -200,6 +269,8 @@ function App() {
         {viewMode === 'cropper' && (
           <div className="animate-fadeIn">
             <EtsyCropper
+              provider={provider}
+              apiKey={activeApiKey}
               initialImage={batchToolImage || generationState.resultImage}
               onBack={() => setViewMode('generator')}
             />

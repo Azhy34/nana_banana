@@ -13,8 +13,11 @@ import {
   Point,
 } from '../services/imageCropService';
 import { detectWallCoordinates, WallCoordinates } from '../services/geminiService';
+import { AIProvider } from '../types';
 
 interface EtsyCropperProps {
+  provider?: AIProvider;
+  apiKey?: string;
   initialImage?: string | null;
   onBack?: () => void;
 }
@@ -197,6 +200,8 @@ const ResultsGallery = ({
 };
 
 export const EtsyCropper: React.FC<EtsyCropperProps> = ({
+  provider = 'openrouter',
+  apiKey,
   initialImage,
   onBack,
 }) => {
@@ -232,9 +237,9 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       const detect = async () => {
         setIsDetectingWall(true);
         try {
-          const apiKey = localStorage.getItem('gemini_api_key');
-          if (apiKey) {
-            const points = await detectWallCoordinates(apiKey, sourceImage);
+          const activeKey = apiKey || localStorage.getItem('openrouter_api_key') || localStorage.getItem('gemini_api_key');
+          if (activeKey) {
+            const points = await detectWallCoordinates(activeKey, sourceImage, provider);
             setWallPoints(points);
           }
         } catch (e) {
@@ -252,7 +257,7 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       };
       detect();
     }
-  }, [selectedPreset.specialMode, sourceImage]);
+  }, [selectedPreset.specialMode, sourceImage, apiKey, provider]);
 
   // Load pattern image ref
   useEffect(() => {

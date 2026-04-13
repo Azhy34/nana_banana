@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ViewMode, ModelType } from '../types';
+import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ViewMode, ModelType, AIProvider } from '../types';
 import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, AGE_GROUP_LABELS, getKeyObjectsForAge } from '../services/promptGenerator';
 import { generateBatchImage } from '../services/geminiService';
 import { downloadImage } from '../services/downloadService';
@@ -7,6 +7,7 @@ import { downloadImage } from '../services/downloadService';
 type BatchStep = 'setup' | 'cards' | 'results';
 
 interface Props {
+  provider: AIProvider;
   apiKey: string;
   replicateToken: string;
   onViewModeChange: (mode: ViewMode) => void;
@@ -43,7 +44,7 @@ function getOptionsForKey(key: keyof Omit<BatchPromptTags, 'accessories' | 'aspe
 
 const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500 w-full truncate";
 
-export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSendToTool }) => {
+export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, onViewModeChange, onSendToTool }) => {
   const [batchStep, setBatchStep] = useState<BatchStep>('setup');
 
   // Setup
@@ -152,7 +153,11 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
   // ── Generation ──────────────────────────────────────────────────────────────
 
   const handleGenerateAll = async () => {
-    if (!apiKey) { alert('Please enter your Gemini API Key first.'); return; }
+    if (!apiKey) {
+      const providerLabel = provider === 'openrouter' ? 'OpenRouter' : 'Gemini';
+      alert(`Please enter your ${providerLabel} API Key first.`);
+      return;
+    }
     if (!wallpaper) return;
     setIsGenerating(true);
     setCards(prev => prev.map(c => ({ ...c, status: 'loading', resultImage: null, error: null })));
@@ -160,7 +165,7 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
 
     await Promise.allSettled(cards.map(async (card) => {
       try {
-        const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio, model);
+        const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
         setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
       } catch (err: any) {
         setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
@@ -176,7 +181,7 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
     if (!card) return;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
-      const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio, model);
+      const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img } : c));
     } catch (err: any) {
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message } : c));
@@ -269,7 +274,6 @@ export const BatchGenerator: React.FC<Props> = ({ apiKey, onViewModeChange, onSe
             {([
               { value: ModelType.Flash31, label: '3.1 Flash', sub: 'Fast & cheap' },
               { value: ModelType.Pro, label: 'Pro', sub: 'High quality' },
-              { value: ModelType.Flash, label: 'Flash', sub: 'Legacy' },
             ] as const).map(({ value, label, sub }) => (
               <button key={value} onClick={() => setModel(value)}
                 className={`flex-1 py-3 px-2 rounded-xl transition-all text-center ${model === value ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
