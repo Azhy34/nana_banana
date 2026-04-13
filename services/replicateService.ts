@@ -4,9 +4,6 @@
  */
 
 const API_BASE_URL = '/api';
-const REPLICATE_API_URL = 'https://api.replicate.com/v1/predictions';
-const REPLICATE_MODELS_URL = 'https://api.replicate.com/v1/models';
-const QWEN_IMAGE_2_MODEL = 'qwen/qwen-image-2';
 const MAX_INLINE_IMAGE_BYTES = 1024 * 1024 * 4;
 
 export type TopazEnhanceModel =
@@ -54,51 +51,6 @@ const getPredictionOutputUrl = (prediction: ReplicatePrediction): string => {
 };
 
 
-async function getPrediction(apiToken: string, predictionId: string): Promise<ReplicatePrediction> {
-  const response = await fetch(`${REPLICATE_API_URL}/${predictionId}`, {
-    headers: {
-      'Authorization': `Bearer ${apiToken}`,
-    },
-  });
-
-  const prediction = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      prediction?.detail ||
-      prediction?.error ||
-      'Failed to fetch Replicate prediction.'
-    );
-  }
-
-  return prediction as ReplicatePrediction;
-}
-
-async function waitForPrediction(
-  apiToken: string,
-  prediction: ReplicatePrediction,
-  intervalMs = 2000,
-  maxAttempts = 60
-): Promise<ReplicatePrediction> {
-  if (prediction.status === 'succeeded') return prediction;
-  if (prediction.status === 'failed' || prediction.status === 'canceled') {
-    throw new Error(prediction.error || 'Replicate prediction failed.');
-  }
-
-  let current = prediction;
-  for (let i = 0; i < maxAttempts; i++) {
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
-    current = await getPrediction(apiToken, current.id);
-
-    if (current.status === 'succeeded') return current;
-    if (current.status === 'failed' || current.status === 'canceled') {
-      throw new Error(current.error || 'Replicate prediction failed.');
-    }
-  }
-
-  throw new Error('Replicate prediction timed out.');
-}
-
 const buildQwenInput = ({
   prompt,
   aspectRatio,
@@ -123,7 +75,7 @@ const buildQwenInput = ({
   if (referenceImageDataUrl) {
     const bytes = estimateDataUrlBytes(referenceImageDataUrl);
     if (bytes > MAX_INLINE_IMAGE_BYTES) {
-      throw new Error('Qwen reference image is too large for direct Replicate upload. Please use a smaller image.');
+      throw new Error('Reference image is too large. Please use a smaller image (max 4MB).');
     }
     input.image = referenceImageDataUrl;
     input.match_input_image = matchInputImage;
@@ -134,30 +86,49 @@ const buildQwenInput = ({
   return input;
 };
 
+async function pollQwenPrediction(
+  predictionId: string,
+  intervalMs = 2000,
+  maxAttempts = 60
+): Promise<ReplicatePrediction> {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    const response = await fetch(`${API_BASE_URL}/qwen/poll?id=${predictionId}`);
+    const current: ReplicatePrediction = await response.json();
+
+    if (!response.ok) throw new Error((current as any).error || 'Failed to poll Qwen prediction.');
+    if (current.status === 'succeeded') return current;
+    if (current.status === 'failed' || current.status === 'canceled') {
+      throw new Error(current.error || 'Qwen prediction failed.');
+    }
+  }
+  throw new Error('Qwen prediction timed out.');
+}
+
 export async function generateQwenImage(
-  apiToken: string,
+  _apiToken: string,
   options: QwenGenerateOptions
 ): Promise<QwenGenerationResult> {
-  const response = await fetch(`${REPLICATE_MODELS_URL}/${QWEN_IMAGE_2_MODEL}/predictions`, {
+  const response = await fetch(`${API_BASE_URL}/qwen`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiToken}`,
-      'Prefer': 'wait=60',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ input: buildQwenInput(options) }),
   });
 
   const predictionRaw = await response.json();
   if (!response.ok) {
-    throw new Error(predictionRaw?.detail || predictionRaw?.error || 'Failed to create Qwen prediction.');
+    throw new Error(predictionRaw?.error || 'Failed to create Qwen prediction.');
   }
 
-  const prediction = predictionRaw as ReplicatePrediction;
-  const finalPrediction = await waitForPrediction(apiToken, prediction);
+  let prediction = predictionRaw as ReplicatePrediction;
+
+  if (prediction.status !== 'succeeded') {
+    prediction = await pollQwenPrediction(prediction.id);
+  }
+
   return {
-    url: getPredictionOutputUrl(finalPrediction),
-    predictTimeSeconds: finalPrediction.metrics?.predict_time,
+    url: getPredictionOutputUrl(prediction),
+    predictTimeSeconds: prediction.metrics?.predict_time,
   };
 }
 
