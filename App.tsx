@@ -5,11 +5,11 @@ import { PromptStep } from './components/PromptStep';
 import { ReferenceStep } from './components/ReferenceStep';
 import { ResultStep } from './components/ResultStep';
 import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState, ViewMode, AIProvider } from './types';
-import { generateImageComposition } from './services/geminiService';
 import { MODEL_PRICING } from './constants';
 import { EtsyCropper } from './components/EtsyCropper';
 import { Upscaler } from './components/Upscaler';
 import { BatchGenerator } from './components/BatchGenerator';
+import { generateImageComposition, isQwenModel } from './services/generationRouter';
 
 const readSecret = (storageKeys: string[], envValue = ''): string => {
   if (typeof window === 'undefined') return envValue;
@@ -69,6 +69,8 @@ function App() {
     aspectRatio: '1:1',
     imageSize: '1K',
   });
+  const generationCredential = isQwenModel(settings.model) ? replicateToken : activeApiKey;
+  const generationCredentialLabel = isQwenModel(settings.model) ? 'Replicate Token' : `${providerLabel} API Key`;
 
   const [generationState, setGenerationState] = useState<GenerationState>({
     isLoading: false,
@@ -125,7 +127,16 @@ function App() {
   };
 
   const handleGenerate = async () => {
-    if (!activeApiKey) {
+    if (isQwenModel(settings.model) && !replicateToken) {
+      setGenerationState({
+        isLoading: false,
+        error: 'Please enter your Replicate Token in the top right corner.',
+        resultImage: null
+      });
+      return;
+    }
+
+    if (!isQwenModel(settings.model) && !activeApiKey) {
       setGenerationState({
         isLoading: false,
         error: `Please enter your ${providerLabel} API Key in the top right corner.`,
@@ -138,8 +149,9 @@ function App() {
     setGenerationState({ isLoading: true, error: null, resultImage: null });
 
     try {
-      const { image, usage } = await generateImageComposition(
+      const { image, usage, predictTimeSeconds } = await generateImageComposition(
         activeApiKey,
+        replicateToken,
         referenceImages,
         settings,
         provider
@@ -147,7 +159,7 @@ function App() {
       const pricing = MODEL_PRICING[settings.model];
       const estimatedCostUsd =
         (usage.promptTokens / 1_000_000) * pricing.inputPer1M + pricing.outputPerImage;
-      setGenerationState({ isLoading: false, error: null, resultImage: image, usage, estimatedCostUsd });
+      setGenerationState({ isLoading: false, error: null, resultImage: image, usage, estimatedCostUsd, predictTimeSeconds });
     } catch (err: any) {
       setGenerationState({
         isLoading: false,
@@ -170,15 +182,15 @@ function App() {
 
       case Step.Reference:
         return (
-          <ReferenceStep
-            referenceImages={referenceImages}
-            handleUpload={handleUpload}
-            removeImage={removeImage}
-            setStep={setStep}
-            handleGenerate={handleGenerate}
-            apiKey={activeApiKey}
-          />
-        );
+            <ReferenceStep
+              referenceImages={referenceImages}
+              handleUpload={handleUpload}
+              removeImage={removeImage}
+              setStep={setStep}
+              handleGenerate={handleGenerate}
+              apiKey={generationCredential}
+            />
+          );
 
       case Step.Result:
         return (
@@ -237,10 +249,10 @@ function App() {
               <p className="text-slate-400 max-w-2xl mx-auto text-lg">
                 Generate high-quality images from text prompts and optional reference photos.
               </p>
-              {!activeApiKey && (
+              {!generationCredential && (
                 <div className="mt-4 inline-block bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-2">
                   <p className="text-yellow-200 text-sm">
-                    Please enter your {providerLabel} API Key in the header to start generating.
+                    Please enter your {generationCredentialLabel} in the header to start generating.
                   </p>
                 </div>
               )}

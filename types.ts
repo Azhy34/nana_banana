@@ -40,6 +40,7 @@ export interface BatchCard {
 export enum ModelType {
   Flash31 = 'google/gemini-3.1-flash-image-preview',
   Pro = 'google/gemini-3-pro-image-preview',
+  QwenImage2 = 'qwen/qwen-image-2',
 }
 
 export type AspectRatio = '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9' | '21:9';
@@ -73,6 +74,7 @@ export interface GenerationState {
   resultImage: string | null;
   usage?: GenerationUsage;
   estimatedCostUsd?: number;
+  predictTimeSeconds?: number;
 }
 
 export interface UpscaleSettings {

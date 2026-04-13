@@ -1,6 +1,6 @@
 import React from 'react';
 import { ModelType, GenerationSettings, Step } from '../types';
-import { MODEL_OPTIONS, ASPECT_RATIOS, IMAGE_SIZES, IMAGE_SIZES_FLASH31 } from '../constants';
+import { MODEL_OPTIONS, ASPECT_RATIOS, IMAGE_SIZES, IMAGE_SIZES_FLASH31, QWEN_ASPECT_RATIOS } from '../constants';
 
 interface PromptStepProps {
   settings: GenerationSettings;
@@ -11,12 +11,31 @@ interface PromptStepProps {
 export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, setStep }) => {
   const getModelDescription = (model: ModelType) => {
     if (model === ModelType.Pro) {
-      return "✨ Best for high fidelity, complex instructions, and 4K resolution. (Recommended)";
+      return 'Best for high fidelity, complex instructions, and 4K resolution. (Recommended)';
     }
     if (model === ModelType.Flash31) {
-      return "🆕 Gemini 3.1 Flash — new generation, fast with improved quality.";
+      return 'Gemini 3.1 Flash: fast generation with lower cost.';
     }
-    return "⚡️ Optimized for speed. Good for quick experiments.";
+    if (model === ModelType.QwenImage2) {
+      return 'Qwen Image 2 via Replicate: photorealistic generation and editing for $0.035 per image.';
+    }
+    return 'Optimized for quick experiments.';
+  };
+
+  const availableAspectRatios = settings.model === ModelType.QwenImage2 ? QWEN_ASPECT_RATIOS : ASPECT_RATIOS;
+  const showResolutionSelector = settings.model === ModelType.Pro || settings.model === ModelType.Flash31;
+
+  const handleModelChange = (model: ModelType) => {
+    const nextAspectRatios = model === ModelType.QwenImage2 ? QWEN_ASPECT_RATIOS : ASPECT_RATIOS;
+    const nextAspectRatio = nextAspectRatios.includes(settings.aspectRatio) ? settings.aspectRatio : nextAspectRatios[0];
+    const nextImageSize = model === ModelType.Flash31 ? '1K' : settings.imageSize;
+
+    setSettings({
+      ...settings,
+      model,
+      aspectRatio: nextAspectRatio,
+      imageSize: nextImageSize,
+    });
   };
 
   return (
@@ -24,7 +43,8 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
       <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50">
         <label className="block text-sm font-medium text-indigo-300 mb-2">Image Description (Prompt)</label>
         <p className="text-xs text-slate-400 mb-3">
-          Describe the image you want to generate in detail.<br />
+          Describe the image you want to generate in detail.
+          <br />
           <span className="text-indigo-400 font-medium">TIP:</span> Be specific about subject, style, colors, and lighting.
         </p>
         <textarea
@@ -40,10 +60,10 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
           <label className="block text-sm font-medium text-slate-300 mb-2">Model</label>
           <select
             value={settings.model}
-            onChange={(e) => setSettings({ ...settings, model: e.target.value as ModelType })}
+            onChange={(e) => handleModelChange(e.target.value as ModelType)}
             className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white outline-none focus:border-indigo-500"
           >
-            {MODEL_OPTIONS.map(opt => (
+            {MODEL_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
@@ -59,23 +79,26 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
             onChange={(e) => setSettings({ ...settings, aspectRatio: e.target.value as any })}
             className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white outline-none focus:border-indigo-500"
           >
-            {ASPECT_RATIOS.map(r => (
-              <option key={r} value={r}>{r}</option>
+            {availableAspectRatios.map((ratio) => (
+              <option key={ratio} value={ratio}>{ratio}</option>
             ))}
           </select>
         </div>
 
-        {(settings.model === ModelType.Pro || settings.model === ModelType.Flash31) && (
+        {showResolutionSelector && (
           <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 md:col-span-2">
             <label className="block text-sm font-medium text-slate-300 mb-2">Resolution</label>
             <div className="flex gap-4">
-              {(settings.model === ModelType.Flash31 ? IMAGE_SIZES_FLASH31 : IMAGE_SIZES).map(size => (
-                <label key={size} className={`
-                                    flex-1 cursor-pointer rounded-lg border p-3 text-center transition-all
-                                    ${settings.imageSize === size
-                    ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
-                    : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'}
-                                `}>
+              {(settings.model === ModelType.Flash31 ? IMAGE_SIZES_FLASH31 : IMAGE_SIZES).map((size) => (
+                <label
+                  key={size}
+                  className={`
+                    flex-1 cursor-pointer rounded-lg border p-3 text-center transition-all
+                    ${settings.imageSize === size
+                      ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
+                      : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'}
+                  `}
+                >
                   <input
                     type="radio"
                     name="imageSize"

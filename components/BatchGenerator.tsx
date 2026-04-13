@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ViewMode, ModelType, AIProvider } from '../types';
 import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, AGE_GROUP_LABELS, getKeyObjectsForAge } from '../services/promptGenerator';
-import { generateBatchImage } from '../services/geminiService';
+import { generateBatchImage, isQwenModel } from '../services/generationRouter';
 import { downloadImage } from '../services/downloadService';
 
 type BatchStep = 'setup' | 'cards' | 'results';
@@ -44,7 +44,7 @@ function getOptionsForKey(key: keyof Omit<BatchPromptTags, 'accessories' | 'aspe
 
 const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500 w-full truncate";
 
-export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, onViewModeChange, onSendToTool }) => {
+export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, onViewModeChange, onSendToTool }) => {
   const [batchStep, setBatchStep] = useState<BatchStep>('setup');
 
   // Setup
@@ -153,7 +153,11 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, onViewModeCh
   // ── Generation ──────────────────────────────────────────────────────────────
 
   const handleGenerateAll = async () => {
-    if (!apiKey) {
+    if (isQwenModel(model) && !replicateToken) {
+      alert('Please enter your Replicate Token first.');
+      return;
+    }
+    if (!isQwenModel(model) && !apiKey) {
       const providerLabel = provider === 'openrouter' ? 'OpenRouter' : 'Gemini';
       alert(`Please enter your ${providerLabel} API Key first.`);
       return;
@@ -165,7 +169,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, onViewModeCh
 
     await Promise.allSettled(cards.map(async (card) => {
       try {
-        const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
+        const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
         setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
       } catch (err: any) {
         setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
@@ -176,12 +180,12 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, onViewModeCh
   };
 
   const regenerate = async (cardId: string) => {
-    if (!apiKey || !wallpaper) return;
+    if ((!apiKey && !isQwenModel(model)) || !wallpaper || (isQwenModel(model) && !replicateToken)) return;
     const card = cards.find(c => c.id === cardId);
     if (!card) return;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
-      const img = await generateBatchImage(apiKey, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
+      const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img } : c));
     } catch (err: any) {
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message } : c));
@@ -274,6 +278,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, onViewModeCh
             {([
               { value: ModelType.Flash31, label: '3.1 Flash', sub: 'Fast & cheap' },
               { value: ModelType.Pro, label: 'Pro', sub: 'High quality' },
+              { value: ModelType.QwenImage2, label: 'Qwen 2', sub: 'Replicate' },
             ] as const).map(({ value, label, sub }) => (
               <button key={value} onClick={() => setModel(value)}
                 className={`flex-1 py-3 px-2 rounded-xl transition-all text-center ${model === value ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>

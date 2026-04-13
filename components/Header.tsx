@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="bg-slate-800 border border-purple-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none w-36 transition-all"
             />
             <div className="absolute right-0 top-full mt-2 w-56 p-2 bg-slate-800 text-xs text-slate-400 rounded border border-slate-700 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-              Replicate token for upscaling.
+              Replicate token for upscaling and Qwen Image 2 generation.
             </div>
           </div>
 

@@ -83,7 +83,13 @@ export const ResultStep: React.FC<ResultStepProps> = ({
             <span className="text-slate-400">Cost:</span>
             <span className="font-bold text-green-400">${generationState.estimatedCostUsd.toFixed(4)}</span>
           </div>
-          {generationState.usage && (
+          {generationState.predictTimeSeconds !== undefined && (
+            <div className="flex items-center gap-2 text-slate-500 border-l border-slate-700 pl-4">
+              <span className="text-slate-400">Time:</span>
+              <span className="font-medium text-sky-400">{generationState.predictTimeSeconds.toFixed(1)}s</span>
+            </div>
+          )}
+          {generationState.usage && generationState.usage.totalTokens > 0 && (
             <div className="flex items-center gap-2 text-slate-500 border-l border-slate-700 pl-4">
               <span>{generationState.usage.promptTokens.toLocaleString()} input tokens</span>
               <span>·</span>
