@@ -5,7 +5,7 @@ import { PromptStep } from './components/PromptStep';
 import { ReferenceStep } from './components/ReferenceStep';
 import { ResultStep } from './components/ResultStep';
 import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState, ViewMode, AIProvider } from './types';
-import { MODEL_PRICING } from './constants';
+import { MODEL_OPTIONS, MODEL_PRICING } from './constants';
 import { EtsyCropper } from './components/EtsyCropper';
 import { Upscaler } from './components/Upscaler';
 import { BatchGenerator } from './components/BatchGenerator';
@@ -65,7 +65,7 @@ function App() {
   const [referenceImages, setReferenceImages] = useState<UploadedImage[]>([]);
   const [settings, setSettings] = useState<GenerationSettings>({
     prompt: "",
-    model: ModelType.Pro,
+    model: MODEL_OPTIONS[0].value,
     aspectRatio: '1:1',
     imageSize: '1K',
   });
@@ -102,6 +102,12 @@ function App() {
   const handleSendToTool = (mode: ViewMode, image: string) => {
     setBatchToolImage(image);
     setViewMode(mode);
+  };
+
+  const handleGoHome = () => {
+    setViewMode('generator');
+    setStep(Step.Prompt);
+    setBatchToolImage(null);
   };
 
   const handleUpload = async (file: File) => {
@@ -220,6 +226,7 @@ function App() {
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-indigo-500/30">
       <Header
+        onGoHome={handleGoHome}
         provider={provider}
         setProvider={setProvider}
         openRouterApiKey={openRouterApiKey}
