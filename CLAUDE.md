@@ -50,7 +50,7 @@ App.tsx
 │   └── ResultStep.tsx      — Shows generated image, download, crop, upscale actions
 ├── Batch mode:
 │   └── BatchGenerator.tsx  — 3-step wizard: Setup → Prompt Cards → Results
-│       Step 1: upload wallpaper, choose count (6/9/12/15), set format distribution (9:16/16:9/1:1)
+│       Step 1: upload wallpaper, choose count (6/9/12/15), set format distribution (9:16/2:3/4:3)
 │       Step 2: editable prompt cards — each card has TAG_KEYS selects + accessories + full prompt textarea
 │       Step 3: results grid — parallel generation, per-card download/upscale/crop/regenerate
 ├── Cropper mode:

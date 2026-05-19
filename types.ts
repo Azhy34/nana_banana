@@ -8,7 +8,7 @@ export enum Step {
 export type ViewMode = 'generator' | 'cropper' | 'upscaler' | 'batch';
 export type AIProvider = 'openrouter' | 'gemini';
 export type AgeGroupKey = 'baby' | 'vorschul' | 'schulkind' | 'teenager';
-export type BatchAspectRatio = '9:16' | '16:9' | '1:1';
+export type BatchAspectRatio = '9:16' | '2:3' | '4:3';
 
 export interface BatchPromptTags {
   color: string;
@@ -23,6 +23,8 @@ export interface BatchPromptTags {
   depthOfField: string;
   accessories: string[];
   aspectRatio: BatchAspectRatio;
+  compositionStrategy: 'unobstructed' | 'natural';
+  cinematicDetail: string;
 }
 
 export type BatchCardStatus = 'idle' | 'loading' | 'done' | 'error';

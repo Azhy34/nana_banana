@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useBatch } from '../hooks/useBatch';
 import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ViewMode, ModelType, AIProvider } from '../types';
 import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, AGE_GROUP_LABELS, getKeyObjectsForAge } from '../services/promptGenerator';
 import { generateBatchImage, isQwenModel } from '../services/generationRouter';
@@ -45,164 +46,14 @@ function getOptionsForKey(key: keyof Omit<BatchPromptTags, 'accessories' | 'aspe
 const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500 w-full truncate";
 
 export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, onViewModeChange, onSendToTool }) => {
-  const [batchStep, setBatchStep] = useState<BatchStep>('setup');
-
-  // Setup
-  const [wallpaper, setWallpaper] = useState<UploadedImage | null>(null);
-  const [count, setCount] = useState(12);
-  const [model, setModel] = useState<ModelType>(ModelType.Flash31);
-  const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '9:16': 6, '16:9': 4, '1:1': 2 });
-
-  // Cards
-  const [cards, setCards] = useState<BatchCard[]>([]);
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const formatTotal = formatDist['9:16'] + formatDist['16:9'] + formatDist['1:1'];
-
-  // ── Setup handlers ──────────────────────────────────────────────────────────
-
-  const handleWallpaperUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
-      setWallpaper({ id: Math.random().toString(36).substring(7), data: dataUrl.split(',')[1], mimeType: file.type, previewUrl: dataUrl });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const updateFormat = (key: BatchAspectRatio, delta: number) => {
-    setFormatDist(prev => ({ ...prev, [key]: Math.max(0, prev[key] + delta) }));
-  };
-
-  const selectCount = (n: number) => {
-    setCount(n);
-    // Rescale distribution proportionally to new count
-    const total = formatDist['9:16'] + formatDist['16:9'] + formatDist['1:1'];
-    if (total === 0) {
-      setFormatDist({ '9:16': Math.round(n * 0.5), '16:9': Math.round(n * 0.33), '1:1': n - Math.round(n * 0.5) - Math.round(n * 0.33) });
-      return;
-    }
-    const p9 = Math.round((formatDist['9:16'] / total) * n);
-    const p16 = Math.round((formatDist['16:9'] / total) * n);
-    const p1 = n - p9 - p16;
-    setFormatDist({ '9:16': p9, '16:9': p16, '1:1': Math.max(0, p1) });
-  };
-
-  const generateCards = () => {
-    if (!wallpaper || formatTotal === 0) return;
-    const formats: BatchAspectRatio[] = [
-      ...Array(formatDist['9:16']).fill('9:16'),
-      ...Array(formatDist['16:9']).fill('16:9'),
-      ...Array(formatDist['1:1']).fill('1:1'),
-    ].sort(() => Math.random() - 0.5);
-
-    const ageGroupCycle: AgeGroupKey[] = ['baby', 'vorschul', 'schulkind', 'teenager'];
-    setCards(formats.map((ar, idx) => {
-      const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
-      const tags = generateRandomTags(ar, ageGroup);
-      return { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true };
-    }));
-    setBatchStep('cards');
-  };
-
-  // ── Card handlers ───────────────────────────────────────────────────────────
-
-  const updateTag = (cardId: string, key: keyof BatchPromptTags, value: string | string[]) => {
-    setCards(prev => prev.map(c => {
-      if (c.id !== cardId) return c;
-      const newTags = { ...c.tags, [key]: value };
-      if (key === 'ageGroup') {
-        const ageOptions = getKeyObjectsForAge(value as AgeGroupKey);
-        newTags.keyObject = ageOptions[Math.floor(Math.random() * ageOptions.length)];
-      }
-      return { ...c, tags: newTags, promptText: buildGeminiPrompt(newTags) };
-    }));
-  };
-
-  const rerandomize = (cardId: string) => {
-    setCards(prev => prev.map(c => {
-      if (c.id !== cardId) return c;
-      const tags = generateRandomTags(c.tags.aspectRatio);
-      return { ...c, tags, promptText: buildGeminiPrompt(tags) };
-    }));
-  };
-
-  const rerandomizeAccessories = (cardId: string) => {
-    setCards(prev => prev.map(c => {
-      if (c.id !== cardId) return c;
-      const acc = [...TAG_OPTIONS.accessories].sort(() => Math.random() - 0.5).slice(0, 2 + Math.floor(Math.random() * 2));
-      const newTags = { ...c.tags, accessories: acc };
-      return { ...c, tags: newTags, promptText: buildGeminiPrompt(newTags) };
-    }));
-  };
-
-  const deleteCard = (cardId: string) => setCards(prev => prev.filter(c => c.id !== cardId));
-
-  const addCard = () => {
-    const tags = generateRandomTags('9:16');
-    setCards(prev => [...prev, { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true }]);
-  };
-
-  const updatePromptText = (cardId: string, text: string) => {
-    setCards(prev => prev.map(c => c.id === cardId ? { ...c, promptText: text } : c));
-  };
-
-  // ── Generation ──────────────────────────────────────────────────────────────
-
-  const handleGenerateAll = async () => {
-    if (isQwenModel(model) && !replicateToken) {
-      alert('Please enter your Replicate Token first.');
-      return;
-    }
-    if (!isQwenModel(model) && !apiKey) {
-      const providerLabel = provider === 'openrouter' ? 'OpenRouter' : 'Gemini';
-      alert(`Please enter your ${providerLabel} API Key first.`);
-      return;
-    }
-    if (!wallpaper) return;
-    setIsGenerating(true);
-    setCards(prev => prev.map(c => ({ ...c, status: 'loading', resultImage: null, error: null })));
-    setBatchStep('results');
-
-    await Promise.allSettled(cards.map(async (card) => {
-      try {
-        const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
-        setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
-      } catch (err: any) {
-        setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
-      }
-    }));
-
-    setIsGenerating(false);
-  };
-
-  const regenerate = async (cardId: string) => {
-    if ((!apiKey && !isQwenModel(model)) || !wallpaper || (isQwenModel(model) && !replicateToken)) return;
-    const card = cards.find(c => c.id === cardId);
-    if (!card) return;
-    setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
-    try {
-      const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
-      setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img } : c));
-    } catch (err: any) {
-      setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message } : c));
-    }
-  };
-
-  const toggleSelected = (cardId: string) => {
-    setCards(prev => prev.map(c => c.id === cardId ? { ...c, selected: !c.selected } : c));
-  };
-
-  const downloadSelected = async () => {
-    const toDownload = cards.filter(c => c.selected && c.resultImage);
-    for (let i = 0; i < toDownload.length; i++) {
-      await downloadImage(toDownload[i].resultImage!, `wallpaper-${i + 1}-${toDownload[i].tags.aspectRatio.replace(':', 'x')}.png`);
-      await new Promise(r => setTimeout(r, 200));
-    }
-  };
+  const { state, actions } = useBatch(provider, apiKey, replicateToken);
+  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal } = state;
+  const {
+    setBatchStep, setWallpaper, setModel, setExpandedCard,
+    handleWallpaperUpload, updateFormat, selectCount, generateCards,
+    updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
+    updatePromptText, handleGenerateAll, regenerate, toggleSelected, downloadSelected
+  } = actions;
 
   // ── Render: SETUP ───────────────────────────────────────────────────────────
 
@@ -252,11 +103,11 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
         {/* Format Distribution */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
           <h3 className="text-white font-semibold mb-4">Format Distribution</h3>
-          {(['9:16', '16:9', '1:1'] as BatchAspectRatio[]).map(ar => (
+          {(['9:16', '2:3', '4:3'] as BatchAspectRatio[]).map(ar => (
             <div key={ar} className="flex items-center gap-3 mb-3 last:mb-0">
               <span className="text-slate-300 text-sm font-mono w-10 shrink-0">{ar}</span>
               <span className="text-slate-500 text-xs flex-1 truncate">
-                {ar === '9:16' ? 'Portrait — mobile, vertical shots' : ar === '16:9' ? 'Landscape — wide room views' : 'Square — Etsy main thumbnail'}
+                {ar === '9:16' ? 'Portrait — mobile, vertical shots' : ar === '2:3' ? 'Portrait — vertical room views' : 'Landscape — Etsy main thumbnail'}
               </span>
               <div className="flex items-center gap-2 shrink-0">
                 <button onClick={() => updateFormat(ar, -1)} className="w-7 h-7 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold transition-colors">−</button>
@@ -419,7 +270,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           <div key={card.id}
             className={`bg-slate-800 rounded-xl border overflow-hidden transition-all ${card.selected && card.resultImage ? 'border-indigo-500/60 shadow-lg shadow-indigo-500/10' : 'border-slate-700'}`}>
             {/* Image Area */}
-            <div className={`relative bg-slate-900 ${card.tags.aspectRatio === '9:16' ? 'aspect-[9/16]' : card.tags.aspectRatio === '16:9' ? 'aspect-video' : 'aspect-square'}`}>
+            <div className={`relative bg-slate-900 ${card.tags.aspectRatio === '9:16' ? 'aspect-[9/16]' : card.tags.aspectRatio === '2:3' ? 'aspect-[2/3]' : 'aspect-[4/3]'}`}>
               {card.status === 'loading' && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                   <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />

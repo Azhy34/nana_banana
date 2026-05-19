@@ -37,6 +37,16 @@ export function getKeyObjectsForAge(ageGroup: AgeGroupKey): string[] {
   return filtered.length > 0 ? filtered : trendsData.keyObjects.map(k => k.name);
 }
 
+export const CINEMATIC_DETAILS = [
+  "Dappled sunlight filters through unseen tree leaves, casting organic shadow play across the floor.",
+  "A subtly blurred edge of a sheer linen canopy in the extreme foreground creates incredible cinematic depth.",
+  "Cool, crisp morning light fills the room, enhancing the fresh and airy atmosphere.",
+  "A warm late-afternoon amber glow sweeps across the room, highlighting the textures of the natural wood.",
+  "A soft, diffused overcast light provides perfectly even illumination, mimicking a high-end studio softbox.",
+  "Dust motes dance in a single, focused shaft of sunlight cutting across the room.",
+  "A partially obscured pendant light in the foreground frames the shot, adding a layer of architectural realism."
+];
+
 export function generateRandomTags(aspectRatio: BatchAspectRatio, ageGroup?: AgeGroupKey): BatchPromptTags {
   const resolvedAgeGroup = ageGroup ?? pick(TAG_OPTIONS.ageGroups);
   return {
@@ -52,6 +62,8 @@ export function generateRandomTags(aspectRatio: BatchAspectRatio, ageGroup?: Age
     depthOfField: pick(TAG_OPTIONS.depthOfField),
     accessories: pickN(trendsData.accessories, 2 + Math.floor(Math.random() * 2)),
     aspectRatio,
+    compositionStrategy: Math.random() < 0.4 ? 'unobstructed' : 'natural',
+    cinematicDetail: pick(CINEMATIC_DETAILS),
   };
 }
 
@@ -73,27 +85,19 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     ? 'wood, matte metal accents, minimal textile'
     : 'solid wood, rattan, jute, linen, cotton';
 
-  return `WALLPAPER PRODUCT LISTING PHOTO. The wallpaper pattern on the wall IS the product being sold — it must be the visual hero of this image. The room and furniture exist only to show the wallpaper in context.
+  const compositionText = tags.compositionStrategy === 'unobstructed'
+    ? "The composition is strictly optimized for selling the wallpaper: furniture is strategically kept low or positioned at dynamic angles to guarantee a massive, unobstructed, panoramic view of the feature wall. The wall occupies the absolute majority of the frame."
+    : "The shot is composed from a slightly lower, waist-level perspective (adapted for a child's scale), expanding the spatial depth and elevating the grandeur of the wallpapered wall while maintaining a natural room layout.";
 
-Reference image role: this is the wallpaper pattern. Seamlessly apply it to the ENTIRE feature wall, preserving every detail of the pattern, colors, scale and texture exactly. Do not alter, recolor, rescale, blur or simplify the pattern in any way.
+  return `This is a high-end product listing photograph for an interior wallpaper. The provided reference image IS the exact wallpaper pattern. It is strictly mandatory that this pattern is applied flawlessly to the entire feature wall, completely 1:1, without any alteration, recoloring, rescaling, or distortion. The wallpaper is the absolute visual hero of this image.
 
-Professional interior photography, 8K, photorealistic.
-${ageData?.label ?? tags.ageGroup} bedroom, ${roomZoneData?.name ?? tags.roomZone} focus.
-Style: ${styleData?.name ?? tags.style} — ${styleData?.description ?? ''}.
+A breathtaking, photorealistic 8K architectural interior shot of a ${ageData?.label ?? tags.ageGroup} bedroom, specifically focusing on the ${roomZoneData?.name ?? tags.roomZone}. The scene is masterfully designed in a ${styleData?.name ?? tags.style} style (${styleData?.description ?? ''}), radiating an atmosphere of Nachhaltigkeit (eco-friendliness), Gemütlichkeit (coziness), and quiet sophistication.
 
-Subject: ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject}, ${material}.
-Scene: ${keyObjData?.description ?? tags.keyObject}.
-Location: ${trendsData.germanApartmentContext.floorType}, approx. ${trendsData.germanApartmentContext.roomSize}, ${trendsData.germanApartmentContext.ceilingHeight}.
-Action: beautifully styled, calm and organized room scene. The wallpapered wall is clearly and fully visible — it is the main visual element.
-Room accent color: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}). Natural materials: ${naturalMaterials}.
-Accessories: ${tags.accessories.join(', ')}. Room context: ${ageData?.extras ?? ''}.
+The room features a ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material}. This central piece is situated on a classic ${trendsData.germanApartmentContext.floorType} within a spacious room boasting a ${trendsData.germanApartmentContext.ceilingHeight}. The overall scene unfolds as: ${keyObjData?.description ?? tags.keyObject}. ${compositionText}
 
-Camera: ${tags.cameraAngle}, ${camDistData?.name ?? tags.cameraDistance} (${camDistData?.description ?? ''}), ${dofData?.name ?? tags.depthOfField} ${dofData?.setting ?? ''}.
-Lighting: ${lightingData?.description ?? tags.lighting}.
-Color grading: warm natural tones, soft contrast.
-Aspect ratio: ${tags.aspectRatio}.
+The space is immaculately styled and exceptionally organized, strictly utilizing natural materials such as ${naturalMaterials}. The decor is tastefully accented with ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}) and thoughtfully placed accessories, including ${tags.accessories.join(', ')}. The room blends magazine-level styling with curated, authentic lifestyle touches—a softly draped linen throw, an open beautifully illustrated book, or a wooden toy catching a stray sunbeam. It feels incredibly inviting and playful yet serene, avoiding sterile 3D-render aesthetics entirely. Additional context: ${ageData?.extras ?? ''}. The environment is completely devoid of plastic, clutter, or visual noise, maintaining a premium and flawless look.
 
-Atmosphere: Nachhaltigkeit (eco-friendly), Gemütlichkeit (coziness), Multifunktionalität.
+The photograph is taken from a ${tags.cameraAngle} using a ${camDistData?.name ?? tags.cameraDistance} (${camDistData?.description ?? ''}), combined with a ${dofData?.name ?? tags.depthOfField} (${dofData?.setting ?? ''}) to ensure the majestic wallpapered wall remains perfectly sharp and clearly visible. ${tags.cinematicDetail}
 
-Negative prompt: ${trendsData.negativePrompt}.`;
+Soft, directional natural light gently grazes the wallpaper, creating subtle ambient occlusion and authentic room shadows that ground the pattern into the physical 3D space. This lighting proves the wall is a physical object, yet flawlessly preserves the true, exact colors of the original design. The space is gorgeously illuminated by ${lightingData?.description ?? tags.lighting}, yielding warm natural tones, soft contrast, and highly realistic textures throughout. Aspect ratio: ${tags.aspectRatio}.`;
 }
