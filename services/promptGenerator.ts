@@ -116,5 +116,9 @@ Soft, directional natural light gently grazes the wallpaper, creating subtle amb
     promptText += ` In the ${tags.overlayPosition} corner of the image, there is a small, subtle ${matchingColor} watercolor brushstroke. On top of the brushstroke, the text '${tags.overlayText}' is written in a clear, highly readable, elegant handwritten cursive font, in a warm charcoal-grey color. Balanced and clean.`;
   }
 
+  if (promptText.toLowerCase().includes('pc') || promptText.toLowerCase().includes('monitor') || promptText.toLowerCase().includes('screen') || promptText.toLowerCase().includes('schreibtisch')) {
+    promptText += " The computer screen is turned on, displaying a beautiful, soft, high-resolution aesthetic lockscreen image with warm tones. The screen glass features realistic, subtle, natural reflections of the room's window and surrounding light to ensure a highly realistic look, avoiding any flat gray blank panels.";
+  }
+
   return promptText;
 }
