@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { put, list } from '@vercel/blob';
 import fs from 'fs';
 import path from 'path';
 
@@ -30,7 +31,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log(`Prompt:   "${prompt}"`);
   console.log(`=========================================\n`);
 
-  // 2. Persist to local JSON file during development
+  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+
+  // 2. Persist to Vercel Blob (Cloud Storage) if available
+  if (blobToken) {
+    try {
+      // Find if there is an existing blob for this session
+      const { blobs } = await list({
+        prefix: `sessions/${sessionId}.json`,
+        token: blobToken
+      });
+
+      let sessionLogs = { createdTime: timestamp, events: [] as any[] };
+      if (blobs.length > 0) {
+        const response = await fetch(blobs[0].url);
+        if (response.ok) {
+          sessionLogs = await response.json();
+        }
+      }
+
+      sessionLogs.events.push({
+        timestamp,
+        model,
+        prompt,
+        cost,
+        duration,
+        status,
+        error
+      });
+
+      // Write back to Vercel Blob (overwriting the old one)
+      await put(`sessions/${sessionId}.json`, JSON.stringify(sessionLogs, null, 2), {
+        access: 'public',
+        contentType: 'application/json',
+        addRandomSuffix: false, // Prevents hash suffix so we can overwrite
+        token: blobToken
+      });
+    } catch (blobErr) {
+      console.error('Failed to log to Vercel Blob:', blobErr);
+    }
+  }
+
+  // 3. Persist to local JSON file during development fallback
   const isDev = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
   if (isDev) {
     try {

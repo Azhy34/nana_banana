@@ -64,6 +64,25 @@
 						"description": "Logs a failed Gemini image generation event with error diagnostics."
 					},
 					"response": []
+				},
+				{
+					"name": "Retrieve Cloud Session Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/list-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"list-sessions"
+							]
+						},
+						"description": "Retrieves and compiles all session logs stored in Vercel Blob cloud storage."
+					},
+					"response": []
 				}
 			]
 		},
