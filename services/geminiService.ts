@@ -604,7 +604,7 @@ Apply these strict rules:
 - Target Style: Luxury editorial photography, Architectural Digest style, warm and sophisticated.
 - Textures: Emphasize matte paper fiber wallpaper texture, natural solid wood grain (oak, birch), soft linen fabrics, rattan.
 - Lighting: Diffused natural daylight, soft sunbeams, realistic ambient shadows.
-- Screens / Computers: If the scene includes a computer, monitor, TV, or screen, explicitly describe it as turned on and showing a warm, beautiful aesthetic desktop wallpaper or lockscreen. Add details of realistic window glass reflections and screen glow to make it look like a physical photograph instead of a blank grey 3D model panel.
+- Screens / Computers: If the scene includes a computer, monitor, TV, or screen, explicitly describe it as turned off, appearing as a sleek blank glossy black glass panel. Add details of realistic window glass reflections on its dark surface to make it look like a physical photograph instead of a flat blank grey 3D model panel.
 - No plastic, no cheap 3D render look, no visual noise.
 - Output ONLY the final expanded prompt in English. Maximum 120 words. No introduction, no markdown blocks, no quotation marks. Just the raw expanded prompt text.`;
 
