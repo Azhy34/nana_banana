@@ -306,7 +306,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               <div className="flex items-center gap-2">
                 <span className="text-slate-500 text-xs font-mono shrink-0">{card.tags.aspectRatio}</span>
                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${card.model === ModelType.Pro ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-teal-500/20 text-teal-400 border-teal-500/30'}`}>
-                  {card.model === ModelType.Pro ? 'Pro' : 'Flash'}
+                  {card.model === ModelType.Pro ? 'Pro ($0.13)' : 'Flash ($0.05)'}
                 </span>
               </div>
               <div className="flex gap-1">
