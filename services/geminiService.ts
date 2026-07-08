@@ -1,5 +1,7 @@
 import { GoogleGenAI, Part } from "@google/genai";
 import { AIProvider, GenerationSettings, GenerationUsage, ModelType, UploadedImage } from "../types";
+import { MODEL_PRICING } from "../constants";
+import { getSessionId } from "./sessionTracker";
 
 export interface GenerationResult {
   image: string;
@@ -62,6 +64,36 @@ const normalizeImageInput = (imageInput: string): string => {
 };
 
 const toGeminiModel = (model: ModelType): string => model.replace(/^google\//, "");
+
+const logGeminiEvent = async (
+  model: string,
+  prompt: string,
+  cost: number,
+  duration: number,
+  status: "success" | "error",
+  error: string | null = null
+) => {
+  try {
+    const sessionId = getSessionId();
+    await fetch("/api/log-event", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId,
+        model,
+        prompt,
+        cost,
+        duration,
+        status,
+        error,
+      }),
+    });
+  } catch (err) {
+    console.error("Failed to send log event to backend:", err);
+  }
+};
 
 const getErrorMessage = (status: number, payload: any) => {
   const apiMessage =
@@ -453,10 +485,27 @@ export const generateImageComposition = async (
     throw new Error(`${label} API Key is required.`);
   }
 
-  if (provider === "gemini") {
-    return generateImageCompositionWithGemini(apiKey, referenceImages, settings);
+  const startTime = Date.now();
+  const pricing = MODEL_PRICING[settings.model] || { inputPer1M: 0, outputPerImage: 0 };
+
+  try {
+    let result: GenerationResult;
+    if (provider === "gemini") {
+      result = await generateImageCompositionWithGemini(apiKey, referenceImages, settings);
+    } else {
+      result = await generateImageCompositionWithOpenRouter(apiKey, referenceImages, settings);
+    }
+
+    const duration = (Date.now() - startTime) / 1000;
+    const cost = (result.usage.promptTokens / 1_000_000) * pricing.inputPer1M + pricing.outputPerImage;
+
+    logGeminiEvent(settings.model, settings.prompt, cost, duration, "success");
+    return result;
+  } catch (err: any) {
+    const duration = (Date.now() - startTime) / 1000;
+    logGeminiEvent(settings.model, settings.prompt, 0.0, duration, "error", err.message || "Unknown error");
+    throw err;
   }
-  return generateImageCompositionWithOpenRouter(apiKey, referenceImages, settings);
 };
 
 export const generateBatchImage = async (
@@ -473,10 +522,26 @@ export const generateBatchImage = async (
     throw new Error(`${label} API Key is required.`);
   }
 
-  if (provider === "gemini") {
-    return generateBatchWithGemini(apiKey, wallpaper, prompt, aspectRatio, model, draftImage);
+  const startTime = Date.now();
+
+  try {
+    let result: string;
+    if (provider === "gemini") {
+      result = await generateBatchWithGemini(apiKey, wallpaper, prompt, aspectRatio, model, draftImage);
+    } else {
+      result = await generateBatchWithOpenRouter(apiKey, wallpaper, prompt, aspectRatio, model, draftImage);
+    }
+
+    const duration = (Date.now() - startTime) / 1000;
+    const estimatedCost = model === ModelType.Pro ? 0.134 : 0.0672;
+
+    logGeminiEvent(model, prompt, estimatedCost, duration, "success");
+    return result;
+  } catch (err: any) {
+    const duration = (Date.now() - startTime) / 1000;
+    logGeminiEvent(model, prompt, 0.0, duration, "error", err.message || "Unknown error");
+    throw err;
   }
-  return generateBatchWithOpenRouter(apiKey, wallpaper, prompt, aspectRatio, model, draftImage);
 };
 
 export const detectWallCoordinates = async (
@@ -514,6 +579,8 @@ export const enhancePromptText = async (
     throw new Error("API Key is required to enhance prompt.");
   }
 
+  const startTime = Date.now();
+  const modelName = provider === "gemini" ? "gemini-2.5-flash" : "google/gemini-2.5-flash";
   const systemInstruction = `You are an expert prompt engineer for Gemini Image Generation. Translate (if needed) and expand the user's short prompt into a high-end, detailed architectural interior photography prompt for children's room wallpaper mockups.
 
 Apply these strict rules:
@@ -524,6 +591,7 @@ Apply these strict rules:
 - Output ONLY the final expanded prompt in English. Maximum 120 words. No introduction, no markdown blocks, no quotation marks. Just the raw expanded prompt text.`;
 
   try {
+    let resultText = userPrompt;
     if (provider === "gemini") {
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
@@ -533,7 +601,7 @@ Apply these strict rules:
           { text: `USER PROMPT: ${userPrompt}` }
         ]
       });
-      return response.text?.trim() || userPrompt;
+      resultText = response.text?.trim() || userPrompt;
     } else {
       const response = await postToOpenRouter(apiKey, {
         model: "google/gemini-2.5-flash",
@@ -542,9 +610,15 @@ Apply these strict rules:
           { role: "user", content: `USER PROMPT: ${userPrompt}` }
         ]
       });
-      return extractOpenRouterText(response) || userPrompt;
+      resultText = extractOpenRouterText(response) || userPrompt;
     }
-  } catch (error) {
+
+    const duration = (Date.now() - startTime) / 1000;
+    logGeminiEvent(modelName, `Enhanced: "${userPrompt}" -> "${resultText}"`, 0.0001, duration, "success");
+    return resultText;
+  } catch (error: any) {
+    const duration = (Date.now() - startTime) / 1000;
+    logGeminiEvent(modelName, `Enhance Failed: "${userPrompt}"`, 0.0, duration, "error", error.message || "Unknown error");
     console.error("Failed to enhance prompt:", error);
     return userPrompt;
   }

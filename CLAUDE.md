@@ -21,16 +21,19 @@ No test runner or linter is configured.
 
 ```
 Browser (React) → geminiService.ts → Google Gemini API (direct)
+                → log-event API (background) → /api/log-event → gemini_sessions.json (dev)
                 → replicateService.ts → /api/upscale (Vercel proxy) → Replicate.com / Topaz Labs
 ```
 
-The Vercel API routes (`/api`) exist solely as CORS proxies to Replicate. Gemini is called directly from the browser.
+The Vercel API routes (`/api`) exist as CORS proxies to Replicate, and a `/api/log-event` background logger. Gemini is called directly from the browser for stability.
 
 ### Key Files
 
 - **[App.tsx](App.tsx)** — Root component. Holds global state (API keys, view mode, wizard step, generation state, `batchToolImage`). Tab switching uses `switchTab()` which clears `batchToolImage` when leaving batch flow to prevent stale images in Cropper/Upscaler.
 - **[types.ts](types.ts)** — All shared TypeScript types: `Step`, `ViewMode` (`generator|cropper|upscaler|batch`), `ModelType`, `AspectRatio`, `BatchCard`, `BatchPromptTags`, `BatchAspectRatio`, `AgeGroupKey`
-- **[services/geminiService.ts](services/geminiService.ts)** — `generateImageComposition()` for Generator mode; `generateBatchImage()` for Batch mode (wallpaper as reference + custom prompt); `detectWallCoordinates()` for EtsyCropper wall detection
+- **[services/geminiService.ts](services/geminiService.ts)** — `generateImageComposition()` for Generator mode; `generateBatchImage()` for Batch mode (wallpaper as reference + custom prompt); `detectWallCoordinates()` for EtsyCropper wall detection; sends background log telemetry
+- **[services/sessionTracker.ts](services/sessionTracker.ts)** — Tracks/generates unique client session IDs (`sess_*`) per page session to organize logs.
+- **[gemini_sessions.json](gemini_sessions.json)** — Generated local JSON file containing structured session logs for subsequent AI agent analysis (dev mode only).
 - **[services/promptGenerator.ts](services/promptGenerator.ts)** — `generateRandomTags(aspectRatio)` picks random values from `trends.json`; `buildGeminiPrompt(tags)` assembles the final English prompt string; exports `TAG_OPTIONS` and `AGE_GROUP_LABELS` for dropdowns
 - **[services/replicateService.ts](services/replicateService.ts)** — Replicate/Topaz upscaling: starts job, polls for completion, returns result URL
 - **[services/downloadService.ts](services/downloadService.ts)** — Blob-based download helper (avoids cross-origin download issues)
