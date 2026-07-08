@@ -45,6 +45,8 @@ const OPENROUTER_TITLE = "Nana Banana Composer";
 const GEMINI_WALL_DETECT_MODEL = "gemini-2.0-flash";
 const OPENROUTER_WALL_DETECT_MODEL = "google/gemini-2.5-flash-lite";
 
+const GEMINI_NEGATIVE_PROMPT = "no plastic toys, no distorted furniture, no messy rooms, no low quality, no seams, no tiling, no repeating wallpaper patterns, no cheap 3D render look, no cartoon style";
+
 const toDataUrl = (image: UploadedImage): string =>
   `data:${image.mimeType || "image/png"};base64,${image.data}`;
 
@@ -222,6 +224,7 @@ const generateImageCompositionWithGemini = async (
       imageConfig: {
         aspectRatio,
         ...(model === ModelType.Pro || model === ModelType.Flash31 ? { imageSize } : {}),
+        negativePrompt: GEMINI_NEGATIVE_PROMPT,
       },
     },
   });
@@ -301,6 +304,7 @@ const generateBatchWithGemini = async (
       imageConfig: {
         aspectRatio: aspectRatio as any,
         imageSize: "2K",
+        negativePrompt: GEMINI_NEGATIVE_PROMPT,
       },
     },
   });

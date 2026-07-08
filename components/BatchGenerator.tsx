@@ -125,14 +125,15 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
         {/* Model */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
           <h3 className="text-white font-semibold mb-3">Model</h3>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             {([
               { value: ModelType.Flash31, label: '3.1 Flash', sub: 'Fast & cheap' },
               { value: ModelType.Pro, label: 'Pro', sub: 'High quality' },
+              { value: ModelType.ABTest, label: '50/50 Split', sub: 'Pro & Flash A/B' },
               { value: ModelType.QwenImage2, label: 'Qwen 2', sub: 'Replicate' },
             ] as const).map(({ value, label, sub }) => (
               <button key={value} onClick={() => setModel(value)}
-                className={`flex-1 py-3 px-2 rounded-xl transition-all text-center ${model === value ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
+                className={`flex-1 min-w-[100px] py-3 px-2 rounded-xl transition-all text-center ${model === value ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
                 <div className="font-bold text-sm">{label}</div>
                 <div className="text-xs opacity-70 mt-0.5">{sub}</div>
               </button>
@@ -166,9 +167,12 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
             <div key={card.id} className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <span className="text-slate-400 text-sm font-medium">#{idx + 1}</span>
                   <span className="bg-indigo-500/20 text-indigo-300 text-xs font-mono px-2 py-0.5 rounded-full border border-indigo-500/30">{card.tags.aspectRatio}</span>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${card.model === ModelType.Pro ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-teal-500/20 text-teal-300 border-teal-500/30'}`}>
+                    {card.model === ModelType.Pro ? 'Pro' : 'Flash'}
+                  </span>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => rerandomize(card.id)}
@@ -298,8 +302,13 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
             </div>
 
             {/* Footer */}
-            <div className="p-2.5 flex items-center justify-between gap-1.5">
-              <span className="text-slate-500 text-xs font-mono shrink-0">{card.tags.aspectRatio}</span>
+            <div className="p-2.5 flex items-center justify-between gap-1.5 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500 text-xs font-mono shrink-0">{card.tags.aspectRatio}</span>
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${card.model === ModelType.Pro ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-teal-500/20 text-teal-400 border-teal-500/30'}`}>
+                  {card.model === ModelType.Pro ? 'Pro' : 'Flash'}
+                </span>
+              </div>
               <div className="flex gap-1">
                 {card.status === 'done' && card.resultImage && (
                   <>

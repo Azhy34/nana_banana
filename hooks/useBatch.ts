@@ -97,7 +97,12 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         tags.overlayPosition = Math.random() < 0.5 ? 'bottom left' : 'bottom right';
       }
 
-      return { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true };
+      // Разделение 50/50 для моделей при A/B-тесте
+      const cardModel = model === ModelType.ABTest
+        ? (idx < formats.length / 2 ? ModelType.Pro : ModelType.Flash31)
+        : model;
+
+      return { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel };
     }));
     setBatchStep('cards');
   };
@@ -137,7 +142,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   const addCard = () => {
     const tags = generateRandomTags('9:16');
-    setCards(prev => [...prev, { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true }]);
+    const cardModel = model === ModelType.ABTest ? ModelType.Pro : model;
+    setCards(prev => [...prev, { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel }]);
   };
 
   const updatePromptText = (cardId: string, text: string) => {
@@ -163,7 +169,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
     await Promise.allSettled(cards.map(async (card) => {
       try {
-        const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
+        const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, card.model, provider);
         setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
       } catch (err: any) {
         setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
@@ -179,7 +185,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     if (!card) return;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
-      const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, model, provider);
+      const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, card.model, provider);
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img } : c));
     } catch (err: any) {
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message } : c));
