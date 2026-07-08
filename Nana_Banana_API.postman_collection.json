@@ -1,0 +1,159 @@
+{
+	"info": {
+		"_postman_id": "8f249b6d-a7e8-4632-a52d-986c757c91a0",
+		"name": "Nana Banana API",
+		"description": "API collection for testing and logging endpoints in the Nana Banana wallpaper composer application.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Telemetry & Logs",
+			"item": [
+				{
+					"name": "Log Gemini Generation Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sessionId\": \"sess_test_123456\",\n  \"model\": \"gemini-3.1-flash-image\",\n  \"prompt\": \"A premium photograph of a cozy nursery with wild floral wallpaper, natural daylight, Canon EOS R5.\",\n  \"cost\": 0.0504,\n  \"duration\": 11.2,\n  \"status\": \"success\",\n  \"error\": null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/log-event",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"log-event"
+							]
+						},
+						"description": "Logs a Gemini image generation event. In local development, this appends the details structured by session to `gemini_sessions.json` on disk."
+					},
+					"response": []
+				},
+				{
+					"name": "Log Generation Error",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sessionId\": \"sess_test_123456\",\n  \"model\": \"gemini-3-pro-image\",\n  \"prompt\": \"A high-fidelity photo of a children's playroom with animal wallpaper.\",\n  \"cost\": 0.0,\n  \"duration\": 4.5,\n  \"status\": \"error\",\n  \"error\": \"API Error: 429 Quota Exceeded\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/log-event",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"log-event"
+							]
+						},
+						"description": "Logs a failed Gemini image generation event with error diagnostics."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Replicate Proxies",
+			"item": [
+				{
+					"name": "Qwen Image 2 Prediction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input\": {\n    \"prompt\": \"A cozy Scandinavian style children room with soft wallpaper\",\n    \"aspect_ratio\": \"1:1\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/qwen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"qwen"
+							]
+						},
+						"description": "Proxies a prediction request to Qwen Image 2 on Replicate."
+					},
+					"response": []
+				},
+				{
+					"name": "Topaz Labs Image Upscale",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input\": {\n    \"image\": \"https://example.com/generated-room.png\",\n    \"scale\": 2,\n    \"model\": \"High Fidelity V2\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/upscale",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"upscale"
+							]
+						},
+						"description": "Proxies an image upscale request to Topaz Labs via Replicate."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}

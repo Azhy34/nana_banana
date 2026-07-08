@@ -83,6 +83,10 @@ App.tsx
 
 State lives in React `useState` hooks in `App.tsx` and individual components — no external state library. API keys are stored in component state (Gemini) and `localStorage` (Replicate token).
 
+### Postman Integration
+
+- **[Nana_Banana_API.postman_collection.json](Nana_Banana_API.postman_collection.json)** — Global Postman collection to test and log API endpoints, including the session background logger, Qwen, and Topaz upscaler.
+
 ### Deployment
 
 Configured for Vercel. Serverless functions in `/api` are auto-deployed. The `vercel.json` rewrites all non-API routes to `index.html` for SPA routing. The `BLOB_READ_WRITE_TOKEN` environment variable enables optional Vercel Blob storage (used by `api/upload.ts`).
