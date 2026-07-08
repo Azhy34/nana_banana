@@ -295,6 +295,23 @@ const generateImageCompositionWithGemini = async (
   throw new Error("No image generated in the Gemini response.");
 };
 
+const buildRefinementPrompt = (prompt: string): string => {
+  // Parse overlay if exists in prompt
+  const overlayMatch = prompt.match(/text '([^']+)'/);
+  const positionMatch = prompt.match(/in the (bottom left|bottom right|top left|top right) corner/i);
+  const overlayText = overlayMatch ? overlayMatch[1] : null;
+  const overlayPosition = positionMatch ? positionMatch[1] : null;
+
+  let textInstruction = "";
+  if (overlayText && overlayPosition) {
+    const colorMatch = prompt.match(/soft (olivbraun|olivgrün|rosa|blau|gelb|grau|pastel pink|charcoal-grey|pastel)/i);
+    const colorName = colorMatch ? `soft ${colorMatch[1]}` : "soft pastel color";
+    textInstruction = ` On the bottom corner or where specified in REFERENCE_IMAGE_1, render the text '${overlayText}' written in an elegant, clear handwritten cursive script on top of a subtle ${colorName} watercolor brushstroke. The text spelling must be exactly '${overlayText}'.`;
+  }
+
+  return `A premium, high-resolution editorial photograph of the children's bedroom. You MUST preserve the exact same room layout, furniture items, window position, toys, floor parquet, and camera perspective shown in REFERENCE_IMAGE_1. Do not generate a different room or change the layout. Seamlessly apply the wallpaper pattern from REFERENCE_IMAGE_2 onto the wall matching the perspective.${textInstruction} Render the scene with premium photorealistic textures (rich solid wood grain, soft woven linen) and soft diffused lighting, avoiding any CGI look.`;
+};
+
 const generateBatchWithOpenRouter = async (
   apiKey: string,
   wallpaper: UploadedImage,
@@ -306,13 +323,13 @@ const generateBatchWithOpenRouter = async (
   const content: OpenRouterContentPart[] = [];
 
   if (draftImage) {
-    content.push({ type: "text", text: "REFERENCE_IMAGE_1 (style and composition base): match the room layout, camera angle, furniture placement, and perspective of this image." });
+    content.push({ type: "text", text: "REFERENCE_IMAGE_1 (structure and composition base): match the room layout, camera angle, furniture placement, and perspective of this image exactly." });
     content.push({ type: "image_url", image_url: { url: normalizeImageInput(draftImage) } });
     content.push({ type: "text", text: "REFERENCE_IMAGE_2 (wallpaper product): place this wallpaper pattern seamlessly onto the wall from REFERENCE_IMAGE_1." });
     content.push({ type: "image_url", image_url: { url: toDataUrl(wallpaper) } });
     content.push({
       type: "text",
-      text: `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: Using REFERENCE_IMAGE_1 as the exact composition, layout, and furniture placement guide, completely rebuild and render the scene with luxury photo quality. Extract the wallpaper pattern from REFERENCE_IMAGE_2 and map it flawlessly onto the wall, matching the perspective. Re-render any text overlays with perfect spelling, clean margins, and crisp, elegant typography. Enhance all textures (wood grain, linen, paper) and cast realistic soft shadows.`
+      text: buildRefinementPrompt(prompt)
     });
   } else {
     content.push({ type: "text", text: "WALLPAPER_PATTERN: The following image is the wallpaper product to place on the wall. Apply it exactly as instructed." });
@@ -354,12 +371,12 @@ const generateBatchWithGemini = async (
     const cleanBase64 = draftImage.replace(/^data:image\/\w+;base64,/, "");
     const match = draftImage.match(/^data:(image\/\w+);base64,/);
     const mimeType = match ? match[1] : "image/png";
-    parts.push({ text: "REFERENCE_IMAGE_1 (style and composition base): match the room layout, camera angle, furniture placement, and perspective of this image." });
+    parts.push({ text: "REFERENCE_IMAGE_1 (structure and composition base): match the room layout, camera angle, furniture placement, and perspective of this image exactly." });
     parts.push({ inlineData: { data: cleanBase64, mimeType } });
     parts.push({ text: "REFERENCE_IMAGE_2 (wallpaper product): place this wallpaper pattern seamlessly onto the wall from REFERENCE_IMAGE_1." });
     parts.push({ inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } });
     parts.push({
-      text: `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: Using REFERENCE_IMAGE_1 as the exact composition, layout, and furniture placement guide, completely rebuild and render the scene with luxury photo quality. Extract the wallpaper pattern from REFERENCE_IMAGE_2 and map it flawlessly onto the wall, matching the perspective. Re-render any text overlays with perfect spelling, clean margins, and crisp, elegant typography. Enhance all textures (wood grain, linen, paper) and cast realistic soft shadows.`
+      text: buildRefinementPrompt(prompt)
     });
   } else {
     parts.push({ text: "WALLPAPER_PATTERN: The following image is the wallpaper product to place on the wall. Apply it exactly as instructed." });
