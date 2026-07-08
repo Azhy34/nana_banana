@@ -25,6 +25,8 @@ export interface BatchPromptTags {
   aspectRatio: BatchAspectRatio;
   compositionStrategy: 'unobstructed' | 'natural';
   cinematicDetail: string;
+  overlayText?: string;
+  overlayPosition?: 'bottom left' | 'bottom right';
 }
 
 export type BatchCardStatus = 'idle' | 'loading' | 'done' | 'error';

@@ -89,7 +89,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     ? "The composition is strictly optimized for selling the wallpaper: furniture is strategically kept low or positioned at dynamic angles to guarantee a massive, unobstructed, panoramic view of the feature wall. The wall occupies the absolute majority of the frame."
     : "The shot is composed from a slightly lower, waist-level perspective (adapted for a child's scale), expanding the spatial depth and elevating the grandeur of the wallpapered wall while maintaining a natural room layout.";
 
-  return `This is a high-end product listing photograph for an interior wallpaper. The provided reference image IS the exact wallpaper pattern. It is strictly mandatory that this pattern is applied flawlessly to the entire feature wall, completely 1:1, without any alteration, recoloring, rescaling, or distortion. The wallpaper is the absolute visual hero of this image.
+  let promptText = `This is a high-end product listing photograph for an interior wallpaper. The provided reference image IS the exact wallpaper pattern. It is strictly mandatory that this pattern is applied flawlessly to the entire feature wall, completely 1:1, without any alteration, recoloring, rescaling, or distortion. The wallpaper is the absolute visual hero of this image.
 
 A breathtaking, photorealistic 8K architectural interior shot of a ${ageData?.label ?? tags.ageGroup} bedroom, specifically focusing on the ${roomZoneData?.name ?? tags.roomZone}. The scene is masterfully designed in a ${styleData?.name ?? tags.style} style (${styleData?.description ?? ''}), radiating an atmosphere of Nachhaltigkeit (eco-friendliness), Gemütlichkeit (coziness), and quiet sophistication.
 
@@ -100,4 +100,11 @@ The space is immaculately styled and exceptionally organized, strictly utilizing
 The photograph is taken from a ${tags.cameraAngle} using a ${camDistData?.name ?? tags.cameraDistance} (${camDistData?.description ?? ''}), combined with a ${dofData?.name ?? tags.depthOfField} (${dofData?.setting ?? ''}) to ensure the majestic wallpapered wall remains perfectly sharp and clearly visible. ${tags.cinematicDetail}
 
 Soft, directional natural light gently grazes the wallpaper, creating subtle ambient occlusion and authentic room shadows that ground the pattern into the physical 3D space. This lighting proves the wall is a physical object, yet flawlessly preserves the true, exact colors of the original design. The space is gorgeously illuminated by ${lightingData?.description ?? tags.lighting}, yielding warm natural tones, soft contrast, and highly realistic textures throughout. Aspect ratio: ${tags.aspectRatio}.`;
+
+  if (tags.overlayText && tags.overlayPosition) {
+    const matchingColor = tags.color ? `soft ${tags.color.toLowerCase()}` : 'soft pastel pink';
+    promptText += ` In the ${tags.overlayPosition} corner of the image, there is a small, subtle ${matchingColor} watercolor brushstroke. On top of the brushstroke, the text '${tags.overlayText}' is written in a clear, highly readable, elegant handwritten cursive font, in a warm charcoal-grey color. Balanced and clean.`;
+  }
+
+  return promptText;
 }

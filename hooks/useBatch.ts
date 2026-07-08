@@ -71,10 +71,32 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       ...Array(formatDist['4:3']).fill('4:3'),
     ].sort(() => Math.random() - 0.5);
 
+    const USP_OPTIONS = [
+      '5% OFF: MOONPIN5',
+      'Custom Sizes Available',
+      'Washable & Easy to Clean',
+      'Easy Paste-the-Wall'
+    ];
+
     const ageGroupCycle: AgeGroupKey[] = ['baby', 'vorschul', 'schulkind', 'teenager'];
+    
+    // Вычисляем, сколько карточек должны получить надпись (30%)
+    const textCardsCount = Math.round(formats.length * 0.3);
+    const textIndices = new Set<number>();
+    while (textIndices.size < textCardsCount) {
+      textIndices.add(Math.floor(Math.random() * formats.length));
+    }
+
     setCards(formats.map((ar, idx) => {
       const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
       const tags = generateRandomTags(ar, ageGroup);
+      
+      // Если карточка выбрана для A/B-теста, вешаем УТП и угол
+      if (textIndices.has(idx)) {
+        tags.overlayText = USP_OPTIONS[Math.floor(Math.random() * USP_OPTIONS.length)];
+        tags.overlayPosition = Math.random() < 0.5 ? 'bottom left' : 'bottom right';
+      }
+
       return { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true };
     }));
     setBatchStep('cards');
