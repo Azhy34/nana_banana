@@ -490,3 +490,48 @@ export const detectWallCoordinates = async (
     };
   }
 };
+
+export const enhancePromptText = async (
+  apiKey: string,
+  userPrompt: string,
+  provider: AIProvider = "openrouter"
+): Promise<string> => {
+  if (!apiKey) {
+    throw new Error("API Key is required to enhance prompt.");
+  }
+
+  const systemInstruction = `You are an expert prompt engineer for Gemini Image Generation. Translate (if needed) and expand the user's short prompt into a high-end, detailed architectural interior photography prompt for children's room wallpaper mockups.
+
+Apply these strict rules:
+- Target Style: Luxury editorial photography, Architectural Digest style, warm and sophisticated.
+- Textures: Emphasize matte paper fiber wallpaper texture, natural solid wood grain (oak, birch), soft linen fabrics, rattan.
+- Lighting: Diffused natural daylight, soft sunbeams, realistic ambient shadows.
+- No plastic, no cheap 3D render look, no visual noise.
+- Output ONLY the final expanded prompt in English. Maximum 120 words. No introduction, no markdown blocks, no quotation marks. Just the raw expanded prompt text.`;
+
+  try {
+    if (provider === "gemini") {
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [
+          { text: systemInstruction },
+          { text: `USER PROMPT: ${userPrompt}` }
+        ]
+      });
+      return response.text?.trim() || userPrompt;
+    } else {
+      const response = await postToOpenRouter(apiKey, {
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user", content: `USER PROMPT: ${userPrompt}` }
+        ]
+      });
+      return extractOpenRouterText(response) || userPrompt;
+    }
+  } catch (error) {
+    console.error("Failed to enhance prompt:", error);
+    return userPrompt;
+  }
+};

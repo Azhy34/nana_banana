@@ -183,6 +183,8 @@ function App() {
             settings={settings}
             setSettings={setSettings}
             setStep={setStep}
+            apiKey={activeApiKey}
+            provider={provider}
           />
         );
 

@@ -50,7 +50,7 @@ export enum ModelType {
 }
 
 export type AspectRatio = '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9' | '21:9';
-export type ImageSize = '1K' | '2K' | '4K' | '8K' | '12K' | '16K' | '24K';
+export type ImageSize = '512' | '1K' | '2K' | '4K' | '8K' | '12K' | '16K' | '24K';
 
 export type TopazModel = 'Standard V2' | 'High Fidelity V2' | 'Low Resolution V2' | 'CGI' | 'Text Refine';
 

@@ -1,14 +1,32 @@
-import React from 'react';
-import { ModelType, GenerationSettings, Step } from '../types';
+import React, { useState } from 'react';
+import { ModelType, GenerationSettings, Step, AIProvider } from '../types';
 import { MODEL_OPTIONS, ASPECT_RATIOS, IMAGE_SIZES, IMAGE_SIZES_FLASH31, QWEN_ASPECT_RATIOS } from '../constants';
+import { enhancePromptText } from '../services/geminiService';
 
 interface PromptStepProps {
   settings: GenerationSettings;
   setSettings: (settings: GenerationSettings) => void;
   setStep: (step: Step) => void;
+  apiKey: string;
+  provider: AIProvider;
 }
 
-export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, setStep }) => {
+export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, setStep, apiKey, provider }) => {
+  const [isEnhancing, setIsEnhancing] = useState(false);
+
+  const handleEnhance = async () => {
+    if (!settings.prompt.trim() || !apiKey) return;
+    setIsEnhancing(true);
+    try {
+      const enhanced = await enhancePromptText(apiKey, settings.prompt, provider);
+      setSettings({ ...settings, prompt: enhanced });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
   const getModelDescription = (model: ModelType) => {
     if (model === ModelType.Pro) {
       return 'Best for high fidelity, complex instructions, and 4K resolution. (Recommended)';
@@ -41,7 +59,24 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
   return (
     <div className="space-y-6 animate-fadeIn max-w-2xl mx-auto">
       <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50">
-        <label className="block text-sm font-medium text-indigo-300 mb-2">Image Description (Prompt)</label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-medium text-indigo-300">Image Description (Prompt)</label>
+          <button
+            onClick={handleEnhance}
+            disabled={isEnhancing || !settings.prompt.trim() || !apiKey}
+            title={!apiKey ? "Please enter your API key first" : ""}
+            className="text-xs font-semibold px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 rounded border border-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+          >
+            {isEnhancing ? (
+              <>
+                <svg className="animate-spin h-3 w-3 text-indigo-300" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
+                Enhancing...
+              </>
+            ) : (
+              <>✨ Enhance</>
+            )}
+          </button>
+        </div>
         <p className="text-xs text-slate-400 mb-3">
           Describe the image you want to generate in detail.
           <br />
