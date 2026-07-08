@@ -117,7 +117,7 @@ Soft, directional natural light gently grazes the wallpaper, creating subtle amb
   }
 
   if (promptText.toLowerCase().includes('pc') || promptText.toLowerCase().includes('monitor') || promptText.toLowerCase().includes('screen') || promptText.toLowerCase().includes('schreibtisch')) {
-    promptText += " The computer screen is turned off, appearing as a sleek blank glossy black glass panel. The screen glass features realistic, subtle, natural reflections of the room's window and surrounding light to ensure a highly realistic look, avoiding any flat gray blank panels.";
+    promptText += " The computer screen is turned off, appearing as a clean, blank matte dark screen with no glossy reflections.";
   }
 
   return promptText;
