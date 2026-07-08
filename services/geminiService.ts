@@ -142,13 +142,21 @@ const isWallCoordinates = (value: any): value is WallCoordinates => {
 };
 
 const buildReferenceInstructions = (referenceImages: UploadedImage[], prompt: string): string => {
-  const instructions = referenceImages.length === 0
-    ? "Generate the image solely based on USER PROMPT."
-    : referenceImages.length === 1
-      ? "Use REFERENCE_IMAGE_1 as the style and composition base. Apply USER PROMPT on top of it."
-      : `Use REFERENCE_IMAGE_1 as the style/composition base. Extract subjects from REFERENCE_IMAGE_2-${referenceImages.length} and place them naturally into the generated scene.`;
+  if (referenceImages.length === 0) {
+    return `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: Generate the image solely based on USER PROMPT.`;
+  }
 
-  return `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: ${instructions}`;
+  const isWallpaperPrompt = prompt.toLowerCase().includes("wallpaper") || prompt.toLowerCase().includes("mural");
+
+  if (referenceImages.length === 1) {
+    const instruction = isWallpaperPrompt
+      ? "REFERENCE_IMAGE_1 is a single full-scale wallpaper mural (not a repeating tileable pattern). Flawlessly map and stretch this entire reference image onto the feature wall from edge to edge as a single, continuous, seamless mural without any repeating, tiling, cuts, or visible seams. The bottom of REFERENCE_IMAGE_1 must align perfectly with the floor/baseboard, and the top must reach the ceiling. Apply USER PROMPT to style the room around it."
+      : "Use REFERENCE_IMAGE_1 as the style and composition base. Apply USER PROMPT on top of it.";
+    return `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: ${instruction}`;
+  }
+
+  const instruction = `Use REFERENCE_IMAGE_1 as the style/composition base. Extract subjects from REFERENCE_IMAGE_2-${referenceImages.length} and place them naturally into the generated scene.`;
+  return `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: ${instruction}`;
 };
 
 const generateImageCompositionWithOpenRouter = async (
@@ -163,8 +171,11 @@ const generateImageCompositionWithOpenRouter = async (
   ];
 
   referenceImages.forEach((img, i) => {
+    const isWallpaperPrompt = settings.prompt.toLowerCase().includes("wallpaper") || settings.prompt.toLowerCase().includes("mural");
     const roleText = i === 0
-      ? "REFERENCE_IMAGE_1 (style/composition base): match the atmosphere and scene structure of this image."
+      ? (isWallpaperPrompt
+          ? "REFERENCE_IMAGE_1 (wallpaper mural): this is the wallpaper product. Flawlessly stretch it across the entire feature wall from edge to edge without tiling or repeating."
+          : "REFERENCE_IMAGE_1 (style/composition base): match the atmosphere and scene structure of this image.")
       : `REFERENCE_IMAGE_${i + 1} (object to include): extract the main subject from this image and place it naturally into the scene.`;
     content.push({ type: "text", text: roleText });
     content.push({ type: "image_url", image_url: { url: toDataUrl(img) } });
@@ -206,8 +217,11 @@ const generateImageCompositionWithGemini = async (
   const parts: Part[] = [];
 
   referenceImages.forEach((img, i) => {
+    const isWallpaperPrompt = settings.prompt.toLowerCase().includes("wallpaper") || settings.prompt.toLowerCase().includes("mural");
     const role = i === 0
-      ? "REFERENCE_IMAGE_1 (style/composition base): match the atmosphere and scene structure of this image."
+      ? (isWallpaperPrompt
+          ? "REFERENCE_IMAGE_1 (wallpaper mural): this is the wallpaper product. Flawlessly stretch it across the entire feature wall from edge to edge without tiling or repeating."
+          : "REFERENCE_IMAGE_1 (style/composition base): match the atmosphere and scene structure of this image.")
       : `REFERENCE_IMAGE_${i + 1} (object to include): extract the main subject from this image and place it naturally into the scene.`;
     parts.push({ text: role });
     parts.push({ inlineData: { data: img.data, mimeType: img.mimeType } });
