@@ -65,6 +65,7 @@ App.tsx
 - All cards generate in parallel via `Promise.allSettled` — each callback uses functional `setCards(prev => ...)` to safely update individual card state from async context
 - `batchToolImage` in `App.tsx` holds the image sent from Batch results to Cropper/Upscaler; cleared by `switchTab()` when navigating to Generator or Batch
 - Prompt structure (from `Promt/Promt.md`): starts with explicit reference image role declaration, then Subject/Location/Action/Camera/Lighting per Google Nano Banana Pro prompting guide
+- **A/B Testing Text Overlays:** Automatically selects ~30% of generated cards during card creation and assigns a marketing USP/Promo Code and corner position (`bottom left`/`bottom right`). The `buildGeminiPrompt` function appends instructions to generate a small matching color watercolor brushstroke underlay with readable cursive handwritten text.
 
 ### AI Models in Use
 
