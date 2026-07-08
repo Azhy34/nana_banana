@@ -80,8 +80,20 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
     const ageGroupCycle: AgeGroupKey[] = ['baby', 'vorschul', 'schulkind', 'teenager'];
     
-    // Вычисляем, сколько карточек должны получить надпись (30%)
-    const textCardsCount = Math.round(formats.length * 0.3);
+    // Вычисляем, сколько карточек должны получить надпись
+    let textCardsCount = 3;
+    if (formats.length === 6) {
+      textCardsCount = 3;
+    } else if (formats.length === 9) {
+      textCardsCount = 3;
+    } else if (formats.length === 12) {
+      textCardsCount = 4;
+    } else if (formats.length === 15) {
+      textCardsCount = 5;
+    } else {
+      textCardsCount = Math.max(1, Math.round(formats.length * 0.33));
+    }
+
     const textIndices = new Set<number>();
     while (textIndices.size < textCardsCount) {
       textIndices.add(Math.floor(Math.random() * formats.length));
