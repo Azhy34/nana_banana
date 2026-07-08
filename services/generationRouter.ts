@@ -54,7 +54,8 @@ export async function generateBatchImage(
   prompt: string,
   aspectRatio: string,
   model: ModelType,
-  provider: AIProvider = 'openrouter'
+  provider: AIProvider = 'openrouter',
+  draftImage?: string
 ): Promise<string> {
   if (isQwenModel(model)) {
     if (!replicateToken) {
@@ -70,5 +71,5 @@ export async function generateBatchImage(
     return url;
   }
 
-  return generateGeminiFamilyBatch(providerApiKey, wallpaper, prompt, aspectRatio, model, provider);
+  return generateGeminiFamilyBatch(providerApiKey, wallpaper, prompt, aspectRatio, model, provider, draftImage);
 }

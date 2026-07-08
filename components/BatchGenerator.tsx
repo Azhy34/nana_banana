@@ -52,7 +52,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
     setBatchStep, setWallpaper, setModel, setExpandedCard,
     handleWallpaperUpload, updateFormat, selectCount, generateCards,
     updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
-    updatePromptText, handleGenerateAll, regenerate, toggleSelected, downloadSelected
+    updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadSelected
   } = actions;
 
   // ── Render: SETUP ───────────────────────────────────────────────────────────
@@ -312,6 +312,11 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               <div className="flex gap-1">
                 {card.status === 'done' && card.resultImage && (
                   <>
+                    {card.model === ModelType.Flash31 && (
+                      <button onClick={() => refineInPro(card.id)}
+                        className="px-2 py-1 bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 text-xs rounded border border-amber-500/20 transition-colors font-medium" 
+                        title="Refine in Pro model">✨ Refine</button>
+                    )}
                     <button onClick={() => downloadImage(card.resultImage!, `wallpaper-${idx + 1}-${card.tags.aspectRatio.replace(':', 'x')}.png`)}
                       className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors" title="Download">⬇</button>
                     <button onClick={() => onSendToTool('upscaler', card.resultImage!)}

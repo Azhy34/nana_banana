@@ -254,13 +254,25 @@ const generateBatchWithOpenRouter = async (
   wallpaper: UploadedImage,
   prompt: string,
   aspectRatio: string,
-  model: ModelType
+  model: ModelType,
+  draftImage?: string
 ): Promise<string> => {
-  const content: OpenRouterContentPart[] = [
-    { type: "text", text: "WALLPAPER_PATTERN: The following image is the wallpaper product to place on the wall. Apply it exactly as instructed." },
-    { type: "text", text: prompt },
-    { type: "image_url", image_url: { url: toDataUrl(wallpaper) } },
-  ];
+  const content: OpenRouterContentPart[] = [];
+
+  if (draftImage) {
+    content.push({ type: "text", text: "REFERENCE_IMAGE_1 (style and composition base): match the room layout, camera angle, furniture placement, and perspective of this image." });
+    content.push({ type: "image_url", image_url: { url: normalizeImageInput(draftImage) } });
+    content.push({ type: "text", text: "REFERENCE_IMAGE_2 (wallpaper product): place this wallpaper pattern seamlessly onto the wall from REFERENCE_IMAGE_1." });
+    content.push({ type: "image_url", image_url: { url: toDataUrl(wallpaper) } });
+    content.push({
+      type: "text",
+      text: `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: Using REFERENCE_IMAGE_1 as the exact composition, layout, and furniture placement guide, completely rebuild and render the scene with luxury photo quality. Extract the wallpaper pattern from REFERENCE_IMAGE_2 and map it flawlessly onto the wall, matching the perspective. Re-render any text overlays with perfect spelling, clean margins, and crisp, elegant typography. Enhance all textures (wood grain, linen, paper) and cast realistic soft shadows.`
+    });
+  } else {
+    content.push({ type: "text", text: "WALLPAPER_PATTERN: The following image is the wallpaper product to place on the wall. Apply it exactly as instructed." });
+    content.push({ type: "text", text: prompt });
+    content.push({ type: "image_url", image_url: { url: toDataUrl(wallpaper) } });
+  }
 
   console.log(`[OpenRouter Batch] model=${model} aspectRatio=${aspectRatio}`);
 
@@ -286,14 +298,26 @@ const generateBatchWithGemini = async (
   wallpaper: UploadedImage,
   prompt: string,
   aspectRatio: string,
-  model: ModelType
+  model: ModelType,
+  draftImage?: string
 ): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey });
-  const parts: Part[] = [
-    { text: "WALLPAPER_PATTERN: The following image is the wallpaper product to place on the wall. Apply it exactly as instructed." },
-    { inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } },
-    { text: prompt },
-  ];
+  const parts: Part[] = [];
+
+  if (draftImage) {
+    const cleanBase64 = draftImage.replace(/^data:image\/\w+;base64,/, "");
+    parts.push({ text: "REFERENCE_IMAGE_1 (style and composition base): match the room layout, camera angle, furniture placement, and perspective of this image." });
+    parts.push({ inlineData: { data: cleanBase64, mimeType: "image/png" } });
+    parts.push({ text: "REFERENCE_IMAGE_2 (wallpaper product): place this wallpaper pattern seamlessly onto the wall from REFERENCE_IMAGE_1." });
+    parts.push({ inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } });
+    parts.push({
+      text: `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: Using REFERENCE_IMAGE_1 as the exact composition, layout, and furniture placement guide, completely rebuild and render the scene with luxury photo quality. Extract the wallpaper pattern from REFERENCE_IMAGE_2 and map it flawlessly onto the wall, matching the perspective. Re-render any text overlays with perfect spelling, clean margins, and crisp, elegant typography. Enhance all textures (wood grain, linen, paper) and cast realistic soft shadows.`
+    });
+  } else {
+    parts.push({ text: "WALLPAPER_PATTERN: The following image is the wallpaper product to place on the wall. Apply it exactly as instructed." });
+    parts.push({ inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } });
+    parts.push({ text: prompt });
+  }
 
   console.log(`[Gemini Direct Batch] model=${toGeminiModel(model)} aspectRatio=${aspectRatio}`);
 
@@ -425,7 +449,8 @@ export const generateBatchImage = async (
   prompt: string,
   aspectRatio: string,
   model: ModelType = ModelType.Flash31,
-  provider: AIProvider = "openrouter"
+  provider: AIProvider = "openrouter",
+  draftImage?: string
 ): Promise<string> => {
   if (!apiKey) {
     const label = provider === "openrouter" ? "OpenRouter" : "Gemini";
@@ -433,9 +458,9 @@ export const generateBatchImage = async (
   }
 
   if (provider === "gemini") {
-    return generateBatchWithGemini(apiKey, wallpaper, prompt, aspectRatio, model);
+    return generateBatchWithGemini(apiKey, wallpaper, prompt, aspectRatio, model, draftImage);
   }
-  return generateBatchWithOpenRouter(apiKey, wallpaper, prompt, aspectRatio, model);
+  return generateBatchWithOpenRouter(apiKey, wallpaper, prompt, aspectRatio, model, draftImage);
 };
 
 export const detectWallCoordinates = async (

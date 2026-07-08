@@ -192,6 +192,29 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     }
   };
 
+  const refineInPro = async (cardId: string) => {
+    if (!apiKey || !wallpaper) return;
+    const card = cards.find(c => c.id === cardId);
+    if (!card || !card.resultImage) return;
+
+    setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
+    try {
+      const img = await generateBatchImage(
+        apiKey,
+        replicateToken,
+        wallpaper,
+        card.promptText,
+        card.tags.aspectRatio,
+        ModelType.Pro,
+        provider,
+        card.resultImage
+      );
+      setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img, model: ModelType.Pro } : c));
+    } catch (err: any) {
+      setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message || 'Refinement failed' } : c));
+    }
+  };
+
   const toggleSelected = (cardId: string) => {
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, selected: !c.selected } : c));
   };
@@ -210,7 +233,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       setBatchStep, setWallpaper, setModel, setExpandedCard,
       handleWallpaperUpload, updateFormat, selectCount, generateCards,
       updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
-      updatePromptText, handleGenerateAll, regenerate, toggleSelected, downloadSelected
+      updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadSelected
     }
   };
 }
