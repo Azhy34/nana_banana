@@ -306,8 +306,10 @@ const generateBatchWithGemini = async (
 
   if (draftImage) {
     const cleanBase64 = draftImage.replace(/^data:image\/\w+;base64,/, "");
+    const match = draftImage.match(/^data:(image\/\w+);base64,/);
+    const mimeType = match ? match[1] : "image/png";
     parts.push({ text: "REFERENCE_IMAGE_1 (style and composition base): match the room layout, camera angle, furniture placement, and perspective of this image." });
-    parts.push({ inlineData: { data: cleanBase64, mimeType: "image/png" } });
+    parts.push({ inlineData: { data: cleanBase64, mimeType } });
     parts.push({ text: "REFERENCE_IMAGE_2 (wallpaper product): place this wallpaper pattern seamlessly onto the wall from REFERENCE_IMAGE_1." });
     parts.push({ inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } });
     parts.push({

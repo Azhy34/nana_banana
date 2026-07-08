@@ -43,8 +43,8 @@ export interface BatchCard {
 }
 
 export enum ModelType {
-  Flash31 = 'google/gemini-3.1-flash-image-preview',
-  Pro = 'google/gemini-3-pro-image-preview',
+  Flash31 = 'google/gemini-3.1-flash-image',
+  Pro = 'google/gemini-3-pro-image',
   QwenImage2 = 'qwen/qwen-image-2',
   ABTest = 'ab-test',
 }

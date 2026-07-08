@@ -71,8 +71,8 @@ App.tsx
 
 | Model | Used For |
 |---|---|
-| `gemini-2.5-flash-image` (Flash) | Fast image generation / editing |
-| `gemini-3-pro-image-preview` (Pro) | High-quality generation, Batch mode (2K) |
+| `gemini-3.1-flash-image` (Flash) | Fast image generation / editing |
+| `gemini-3-pro-image` (Pro) | High-quality generation, Batch mode (2K) |
 | `gemini-2.0-flash` | Vision tasks (wall detection in EtsyCropper) |
 | `topazlabs/image-upscale` via Replicate | Image upscaling up to 16K |
 
