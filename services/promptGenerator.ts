@@ -67,6 +67,13 @@ export function generateRandomTags(aspectRatio: BatchAspectRatio, ageGroup?: Age
   };
 }
 
+const PROFESSIONAL_CAMERAS = [
+  "Shot on Canon EOS R5, 35mm lens, f/5.6 aperture, professional interior photography, sharp focus, natural color fidelity.",
+  "Shot on Sony A7R V, 24mm lens, f/4 aperture, editorial interior design magazine showcase, neutral white balance, sharp details.",
+  "Shot on Fujifilm GFX 100S, 45mm lens, f/5.6 aperture, medium format texture detail, soft natural contrast.",
+  "Shot on Hasselblad H6D, 50mm lens, f/4 aperture, premium architectural interior photography, clean shadows."
+];
+
 export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const colorData = trendsData.colors.find(c => c.name === tags.color);
   const styleData = trendsData.styles.find(s => s.name === tags.style);
@@ -100,6 +107,9 @@ The space is immaculately styled and exceptionally organized, strictly utilizing
 The photograph is taken from a ${tags.cameraAngle} using a ${camDistData?.name ?? tags.cameraDistance} (${camDistData?.description ?? ''}), combined with a ${dofData?.name ?? tags.depthOfField} (${dofData?.setting ?? ''}) to ensure the majestic wallpapered wall remains perfectly sharp and clearly visible. ${tags.cinematicDetail}
 
 Soft, directional natural light gently grazes the wallpaper, creating subtle ambient occlusion and authentic room shadows that ground the pattern into the physical 3D space. This lighting proves the wall is a physical object, yet flawlessly preserves the true, exact colors of the original design. The space is gorgeously illuminated by ${lightingData?.description ?? tags.lighting}, yielding warm natural tones, soft contrast, and highly realistic textures throughout. Aspect ratio: ${tags.aspectRatio}.`;
+
+  let cameraSetup = PROFESSIONAL_CAMERAS[Math.floor(Math.random() * PROFESSIONAL_CAMERAS.length)];
+  promptText += ` ${cameraSetup}`;
 
   if (tags.overlayText && tags.overlayPosition) {
     const matchingColor = tags.color ? `soft ${tags.color.toLowerCase()}` : 'soft pastel pink';

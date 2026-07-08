@@ -45,7 +45,7 @@ const OPENROUTER_TITLE = "Nana Banana Composer";
 const GEMINI_WALL_DETECT_MODEL = "gemini-2.0-flash";
 const OPENROUTER_WALL_DETECT_MODEL = "google/gemini-2.5-flash-lite";
 
-const GEMINI_NEGATIVE_PROMPT = "no plastic toys, no distorted furniture, no messy rooms, no low quality, no seams, no tiling, no repeating wallpaper patterns, no cheap 3D render look, no cartoon style";
+const GEMINI_NEGATIVE_PROMPT = "plastic toys, distorted furniture, messy room, low quality, seams, tiling, repeating wallpaper patterns, cheap 3D render look, cartoon style, CGI, blurry textures";
 
 const toDataUrl = (image: UploadedImage): string =>
   `data:${image.mimeType || "image/png"};base64,${image.data}`;
