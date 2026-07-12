@@ -3,6 +3,7 @@ import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImag
 import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, getKeyObjectsForAge } from '../services/promptGenerator';
 import { generateBatchImage, isQwenModel } from '../services/generationRouter';
 import { downloadImage } from '../services/downloadService';
+import { compressImageFile } from '../services/imageCompressor';
 
 export type BatchStep = 'setup' | 'cards' | 'results';
 
@@ -34,15 +35,20 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   // ── Setup handlers ──────────────────────────────────────────────────────────
 
-  const handleWallpaperUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWallpaperUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
-      setWallpaper({ id: Math.random().toString(36).substring(7), data: dataUrl.split(',')[1], mimeType: file.type, previewUrl: dataUrl });
-    };
-    reader.readAsDataURL(file);
+    try {
+      const { dataUrl, base64 } = await compressImageFile(file);
+      setWallpaper({ 
+        id: Math.random().toString(36).substring(7), 
+        data: base64, 
+        mimeType: 'image/jpeg', // Canvas compresses to JPEG
+        previewUrl: dataUrl 
+      });
+    } catch (error) {
+      console.error('Failed to compress uploaded wallpaper:', error);
+    }
   };
 
   const updateFormat = (key: BatchAspectRatio, delta: number) => {

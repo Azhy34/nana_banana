@@ -11,6 +11,7 @@ import { Upscaler } from './components/Upscaler';
 import { BatchGenerator } from './components/BatchGenerator';
 import { VideoTool } from './components/VideoTool';
 import { generateImageComposition, isQwenModel } from './services/generationRouter';
+import { compressImageFile } from './services/imageCompressor';
 
 const readSecret = (storageKeys: string[], envValue = ''): string => {
   if (typeof window === 'undefined') return envValue;
@@ -112,21 +113,20 @@ function App() {
   };
 
   const handleUpload = async (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      const base64Data = dataUrl.split(',')[1];
+    try {
+      const { dataUrl, base64 } = await compressImageFile(file);
 
       const newImage: UploadedImage = {
         id: Math.random().toString(36).substring(7),
-        data: base64Data,
-        mimeType: file.type,
+        data: base64,
+        mimeType: 'image/jpeg', // Canvas compresses to JPEG
         previewUrl: dataUrl,
       };
 
       setReferenceImages(prev => prev.length < 5 ? [...prev, newImage] : prev);
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Failed to compress uploaded image:', error);
+    }
   };
 
   const removeImage = (id: string) => {
