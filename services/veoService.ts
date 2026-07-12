@@ -34,7 +34,7 @@ export async function generateVeoVideoOnClient(
 
   // 3. Trigger video generation LRO
   const operation = await ai.models.generateVideos({
-    model: 'veo-3.1-fast-generate-001',
+    model: 'veo-3.1-fast-generate-preview',
     prompt: combinedPrompt,
     image: {
       imageBytes: cleanBase64,
@@ -44,8 +44,7 @@ export async function generateVeoVideoOnClient(
       aspectRatio: '9:16',
       durationSeconds: 6,
       personGeneration: 'allow_adult',
-      enhancedPrompt: false,
-      ...(settings.seed !== undefined && settings.seed !== null ? { seed: Number(settings.seed) } : {})
+      enhancedPrompt: false
     }
   });
 

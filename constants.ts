@@ -23,7 +23,7 @@ export const MODEL_OPTIONS = [
 
 // Veo Video Generation Constants
 export const VEO_MODEL_OPTIONS = [
-  { value: 'veo-3.1-fast-generate-001', label: 'Veo 3.1 Fast' }
+  { value: 'veo-3.1-fast-generate-preview', label: 'Veo 3.1 Fast' }
 ];
 
 export const VEO_PRICING_PER_SECOND_USD = 0.10; // Video + Audio rate
