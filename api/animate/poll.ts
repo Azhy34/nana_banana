@@ -16,11 +16,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const veoApiKey = process.env.GEMINI_VEO_API_KEY;
+  const authHeader = req.headers.authorization;
+  const clientApiKey = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
+  const veoApiKey = process.env.GEMINI_VEO_API_KEY || clientApiKey;
   const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
   if (!veoApiKey) {
-    return res.status(500).json({ error: 'GEMINI_VEO_API_KEY is not configured.' });
+    return res.status(500).json({ error: 'GEMINI_VEO_API_KEY is not configured. Пожалуйста, введите ваш API-ключ Gemini в шапке сайта.' });
   }
 
   if (!blobToken) {

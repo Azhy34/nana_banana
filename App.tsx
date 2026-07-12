@@ -315,6 +315,7 @@ function App() {
             <VideoTool
               initialImage={batchToolImage}
               onBack={handleGoHome}
+              geminiApiKey={geminiApiKey}
             />
           </div>
         )}

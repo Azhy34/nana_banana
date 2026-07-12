@@ -7,9 +7,10 @@ import { downloadImage } from '../services/downloadService';
 interface VideoToolProps {
   initialImage?: string | null;
   onBack?: () => void;
+  geminiApiKey?: string;
 }
 
-export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack }) => {
+export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, geminiApiKey }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Settings
@@ -86,7 +87,12 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack }) =>
 
       // Step 2: Trigger operation in backend
       setState(prev => ({ ...prev, progress: 15 }));
-      const { operationId, traceId } = await startVeoAnimation(publicImageUrl, settings, VEO_NEGATIVE_PROMPT);
+      const { operationId, traceId } = await startVeoAnimation(
+        publicImageUrl, 
+        settings, 
+        VEO_NEGATIVE_PROMPT,
+        geminiApiKey
+      );
 
       // Step 3: Polling loop until finished
       let isDone = false;
@@ -102,7 +108,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack }) =>
           throw new Error('Превышено время ожидания рендеринга видео (Timeout). Пожалуйста, проверьте статус операции позже.');
         }
 
-        const pollResult = await pollVeoOperation(operationId, traceId);
+        const pollResult = await pollVeoOperation(operationId, traceId, geminiApiKey);
 
         if (pollResult.status === 'done') {
           isDone = true;

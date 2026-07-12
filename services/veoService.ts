@@ -75,14 +75,19 @@ export async function ensurePublicUrl(imagePayload: string): Promise<string> {
 export async function startVeoAnimation(
   imageUrl: string,
   settings: VideoJobSettings,
-  negativePrompt: string
+  negativePrompt: string,
+  geminiApiKey?: string
 ): Promise<{ operationId: string; traceId: string }> {
-  // Translate presets to prompts
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (geminiApiKey) {
+    headers['Authorization'] = `Bearer ${geminiApiKey}`;
+  }
+
   const response = await fetch('/api/animate', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       imageUrl,
       prompt: settings.customPrompt,
@@ -103,12 +108,24 @@ export async function startVeoAnimation(
  * Polls the backend operation status.
  * Returns { status: 'processing' } or { status: 'done', videoUrl: '...' }
  */
-export async function pollVeoOperation(operationId: string, traceId: string): Promise<{
+export async function pollVeoOperation(
+  operationId: string, 
+  traceId: string,
+  geminiApiKey?: string
+): Promise<{
   status: 'processing' | 'done';
   videoUrl?: string;
   error?: string;
 }> {
-  const response = await fetch(`/api/animate/poll?operationId=${encodeURIComponent(operationId)}&traceId=${encodeURIComponent(traceId)}`);
+  const headers: Record<string, string> = {};
+  if (geminiApiKey) {
+    headers['Authorization'] = `Bearer ${geminiApiKey}`;
+  }
+
+  const response = await fetch(
+    `/api/animate/poll?operationId=${encodeURIComponent(operationId)}&traceId=${encodeURIComponent(traceId)}`,
+    { headers }
+  );
 
   if (!response.ok) {
     const errorData = await response.json();
