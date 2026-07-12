@@ -9,6 +9,7 @@ import { MODEL_OPTIONS, MODEL_PRICING } from './constants';
 import { EtsyCropper } from './components/EtsyCropper';
 import { Upscaler } from './components/Upscaler';
 import { BatchGenerator } from './components/BatchGenerator';
+import { VideoTool } from './components/VideoTool';
 import { generateImageComposition, isQwenModel } from './services/generationRouter';
 
 const readSecret = (storageKeys: string[], envValue = ''): string => {
@@ -246,6 +247,7 @@ function App() {
             <button onClick={() => switchTab('batch')} className={tabClass('batch')}>Batch</button>
             <button onClick={() => switchTab('cropper')} className={tabClass('cropper')}>Cropper</button>
             <button onClick={() => switchTab('upscaler')} className={tabClass('upscaler')}>Upscale</button>
+            <button onClick={() => switchTab('video')} className={tabClass('video')}>Video</button>
           </div>
         </div>
 
@@ -304,6 +306,15 @@ function App() {
               replicateToken={replicateToken}
               initialImage={batchToolImage || generationState.resultImage}
               onBack={() => setViewMode('generator')}
+            />
+          </div>
+        )}
+
+        {viewMode === 'video' && (
+          <div className="animate-fadeIn">
+            <VideoTool
+              initialImage={batchToolImage}
+              onBack={handleGoHome}
             />
           </div>
         )}

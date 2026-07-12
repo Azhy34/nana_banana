@@ -20,3 +20,29 @@ export const MODEL_OPTIONS = [
   { value: ModelType.Pro, label: 'Gemini 3 Pro (High Quality, 4K)' },
   { value: ModelType.QwenImage2, label: 'Qwen Image 2 (Replicate)' },
 ];
+
+// Veo Video Generation Constants
+export const VEO_MODEL_OPTIONS = [
+  { value: 'veo-3.1-fast-generate-001', label: 'Veo 3.1 Fast' }
+];
+
+export const VEO_PRICING_PER_SECOND_USD = 0.10; // Video + Audio rate
+
+export const VEO_NEGATIVE_PROMPT = 
+  "morphing wallpaper pattern, different wall color, morphing wall texture, warped walls, shifting print, repainted wall, new wall art appearing, camera shake, scene change, furniture moving, objects appearing or disappearing, text, watermark, bad quality, blurry";
+
+export const VEO_PRESETS = {
+  dolly_in: {
+    label: "Медленный наезд камеры (Dolly-In)",
+    prompt: "An extremely slow, steady, and smooth cinematic camera push-in towards the center of the room. The camera moves forward very slowly. The wallpaper design is a flat, non-moving print on the wall. It behaves strictly as a static flat print, showing zero changes, zero morphing, and no new details during the camera flight. High quality, premium interior design catalog style."
+  },
+  ambient: {
+    label: "Легкое оживление / Живое фото (Ambient)",
+    prompt: "A static cinematic shot with very subtle ambient camera drift. The camera is nearly still, capturing gentle natural micro-movements in the room. The wallpaper design on the back wall remains perfectly static, flat, and unchanged. High-end lifestyle catalog style."
+  },
+  dolly_out: {
+    label: "Плавный отъезд камеры (Dolly-Out)",
+    prompt: "An extremely slow, steady, and smooth cinematic camera pull-back moving away from the bed. The camera moves backward very slowly. The wallpaper design remains a flat, non-moving print on the wall, behaving strictly as a static flat print with zero morphing or details changing. High quality."
+  }
+};
+

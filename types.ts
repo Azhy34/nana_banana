@@ -5,7 +5,7 @@ export enum Step {
   Crop = 4,
 }
 
-export type ViewMode = 'generator' | 'cropper' | 'upscaler' | 'batch';
+export type ViewMode = 'generator' | 'cropper' | 'upscaler' | 'batch' | 'video';
 export type AIProvider = 'openrouter' | 'gemini';
 export type AgeGroupKey = 'baby' | 'vorschul' | 'schulkind' | 'teenager';
 export type BatchAspectRatio = '9:16' | '2:3' | '4:3';
@@ -96,3 +96,25 @@ export interface UpscaleState {
   error: string | null;
   upscaledImage: string | null;
 }
+
+export type VeoModel = 'veo-3.1-fast-generate-001';
+export type VeoAspectRatio = '9:16';
+export type VeoDuration = 6;
+
+export interface VideoJobSettings {
+  promptPreset: 'dolly_in' | 'ambient' | 'dolly_out';
+  customPrompt: string;
+  seed: number;
+}
+
+export interface VideoToolPayload {
+  image: string; // Base64 or URL
+}
+
+export interface VideoGenerationState {
+  isLoading: boolean;
+  progress: number; // 0 to 100
+  error: string | null;
+  resultVideoUrl: string | null;
+}
+
