@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ensurePublicUrl, startVeoAnimation, pollVeoOperation } from '../services/veoService';
+import { generateVeoVideoOnClient } from '../services/veoService';
 import { VEO_PRESETS, VEO_NEGATIVE_PROMPT, VEO_PRICING_PER_SECOND_USD } from '../constants';
 import { VideoJobSettings, VideoGenerationState } from '../types';
 import { downloadImage } from '../services/downloadService';
@@ -65,75 +65,47 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       return;
     }
 
-    setState({ isLoading: true, progress: 0, error: null, resultVideoUrl: null });
-
-    // Progress bar fake animation
-    const progressInterval = setInterval(() => {
-      setState(prev => {
-        if (!prev.isLoading) return prev;
-        if (prev.progress < 95) {
-          // Slows down as it approaches 95%
-          const increment = prev.progress < 50 ? 3 : (prev.progress < 80 ? 1.5 : 0.5);
-          return { ...prev, progress: Math.min(prev.progress + increment, 95) };
-        }
-        return prev;
+    if (!geminiApiKey) {
+      setState({
+        isLoading: false,
+        progress: 0,
+        error: 'Пожалуйста, введите ваш API-ключ Gemini в шапке сайта для запуска генерации видео.',
+        resultVideoUrl: null
       });
-    }, 1000);
+      return;
+    }
+
+    setState({
+      isLoading: true,
+      progress: 0,
+      error: null,
+      resultVideoUrl: null,
+    });
 
     try {
-      // Step 1: Ensure image is public JPEG (compress if base64)
-      setState(prev => ({ ...prev, progress: 5 }));
-      const publicImageUrl = await ensurePublicUrl(sourceImage);
-
-      // Step 2: Trigger operation in backend
-      setState(prev => ({ ...prev, progress: 15 }));
-      const { operationId, traceId } = await startVeoAnimation(
-        publicImageUrl, 
-        settings, 
+      const videoUrl = await generateVeoVideoOnClient(
+        sourceImage,
+        settings,
         VEO_NEGATIVE_PROMPT,
-        geminiApiKey
+        geminiApiKey,
+        (progress) => {
+          setState(prev => ({ ...prev, progress }));
+        }
       );
 
-      // Step 3: Polling loop until finished
-      let isDone = false;
-      let checkCount = 0;
-
-      while (!isDone) {
-        // Wait 4 seconds between checks
-        await new Promise(resolve => setTimeout(resolve, 4000));
-        checkCount++;
-
-        // Safety break after 4 minutes (60 poll loops)
-        if (checkCount > 60) {
-          throw new Error('Превышено время ожидания рендеринга видео (Timeout). Пожалуйста, проверьте статус операции позже.');
-        }
-
-        const pollResult = await pollVeoOperation(operationId, traceId, geminiApiKey);
-
-        if (pollResult.status === 'done') {
-          isDone = true;
-          clearInterval(progressInterval);
-
-          if (pollResult.videoUrl) {
-            setState({
-              isLoading: false,
-              progress: 100,
-              error: null,
-              resultVideoUrl: pollResult.videoUrl
-            });
-          } else {
-            throw new Error(pollResult.error || 'Видео завершено, но ссылка на файл пуста.');
-          }
-        }
-      }
+      setState({
+        isLoading: false,
+        progress: 100,
+        error: null,
+        resultVideoUrl: videoUrl
+      });
 
     } catch (err: any) {
-      clearInterval(progressInterval);
       setState({
         isLoading: false,
         progress: 0,
         error: err.message || 'Ошибка генерации видео',
-        resultVideoUrl: null
+        resultVideoUrl: null,
       });
     }
   };
