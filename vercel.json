@@ -5,6 +5,8 @@
     "api/upscale.ts": { "maxDuration": 30 },
     "api/upscale/poll.ts": { "maxDuration": 60 }
   },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
