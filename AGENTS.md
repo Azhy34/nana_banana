@@ -41,3 +41,25 @@ This file tracks significant changes, architectural decisions, and logic updates
 - **Location:** [C:\Users\Mikhail\OneDrive\nocode\Etsy\listings_trend_catalog.md](file:///C:/Users/Mikhail/OneDrive/nocode/Etsy/listings_trend_catalog.md) maps all 27+ active listings to their respective design themes, trend status (Hot, Stable, Declining), and action plans.
 - **Rule:** Future agents must keep this catalog updated when adding new listings or modifying styles. Use this catalog to audit low-performing or declining designs (e.g. replacing basic geometric mountains/balloons with high-volume biophilic forests/Japandi arches) and optimize their SEO metadata.
 
+## [2026-07-13 - Part 2] Nursery Realism & Psychology Guidelines
+
+### 1. Child Psychology & Age-Appropriate Attributes
+- **Decision:** Mapped specific furniture assets to children's age groups in `trends.json` and programmatically enforced them in `promptGenerator.ts`.
+- **Enforcements:**
+  - **Baby (0-3 years):** Force a classic wooden crib with slatted sides and a changing table dresser (`Wickelkommode`) with a changing mat. Use desaturated, low-contrast pastel tones to prevent sensory overstimulation.
+  - **Preschool (3-6 years):** Montessori floor bed, small children's play table and two chairs.
+  - **School Child (6-10 years):** Low wooden bed, compact desk, chair, desk lamp, and cozy reading floor cushion.
+  - **Teenager (10-16 years):** Platform bed, writing desk, modular bookshelves.
+
+### 2. Elimination of AI Hallmarks (Wicker Baskets Ban)
+- **Decision:** Banned wicker, straw, and rattan baskets from both the positive accessories list and negative prompts.
+- **Reasoning:** AI image generators often struggle with rendering woven materials, resulting in asymmetric and warped textures that scream "AI-generated". We replaced these with solid wood toy boxes and organic linen canvas bags, which render cleanly.
+
+### 3. Lighting Design & Coziness
+- **Decision:** Removed overcast, gray, or cool light presets (like "overcast Nordic daylight") and added warm, sunny presets (golden morning sunbeams, sunset glows).
+- **Rule:** Appended a mandatory white balance instruction to all prompts: *«The white balance is strictly adjusted to warm, cozy tones, avoiding any cold, sterile, or blue cast lighting to maximize comfort (Gemütlichkeit).»*
+
+### 4. Raw Wood Texturing (Preventing Plastic CGI Look)
+- **Decision:** Replaced generic "wood" material references with desaturated, raw, tactile descriptions: *«solid wood with rich visible organic wood grain, tactile raw matte finish (unlackiertes Massivholz, komplett matt, keine Reflexionen)»*.
+
+

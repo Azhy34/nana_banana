@@ -235,14 +235,20 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     setCards(prev => prev.map(c => ({ ...c, status: 'loading', resultImage: null, error: null })));
     setBatchStep('results');
 
-    await Promise.allSettled(cards.map(async (card) => {
-      try {
-        const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, card.model, provider);
-        setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
-      } catch (err: any) {
-        setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
-      }
-    }));
+    const concurrencyLimit = 2;
+    const selectedCards = cards.filter(c => c.selected);
+    
+    for (let i = 0; i < selectedCards.length; i += concurrencyLimit) {
+      const chunk = selectedCards.slice(i, i + concurrencyLimit);
+      await Promise.allSettled(chunk.map(async (card) => {
+        try {
+          const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, card.model, provider);
+          setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
+        } catch (err: any) {
+          setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
+        }
+      }));
+    }
 
     setIsGenerating(false);
   };
