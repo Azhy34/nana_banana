@@ -34,15 +34,15 @@ export const VEO_NEGATIVE_PROMPT =
 export const VEO_PRESETS = {
   dolly_in: {
     label: "Медленный наезд камеры (Dolly-In)",
-    prompt: "An extremely slow, steady, and smooth cinematic camera push-in towards the center of the room. The camera moves forward very slowly. The wallpaper design is a flat, non-moving print on the wall. It behaves strictly as a static flat print, showing zero changes, zero morphing, and no new details during the camera flight. High quality, premium interior design catalog style."
+    prompt: "An extremely slow, steady, and smooth cinematic camera push-in while gently panning and sliding sideways to reveal the extended wallpaper mural. The camera tracks diagonally across the room, focusing on showing the wallpaper pattern. The wallpaper behaves strictly as a static flat print on the wall with zero changes, zero morphing, and no new details appearing. High-end catalog style."
   },
   ambient: {
     label: "Легкое оживление / Живое фото (Ambient)",
-    prompt: "A static cinematic shot with very subtle ambient camera drift. The camera is nearly still, capturing gentle natural micro-movements in the room. The wallpaper design on the back wall remains perfectly static, flat, and unchanged. High-end lifestyle catalog style."
+    prompt: "A static cinematic shot with a very slow, subtle horizontal camera drift (panning gently left-to-right). The camera captures gentle natural micro-movements in the room. The wallpaper design on the back wall remains perfectly static, flat, and unchanged. High-end lifestyle catalog style."
   },
   dolly_out: {
     label: "Плавный отъезд камеры (Dolly-Out)",
-    prompt: "An extremely slow, steady, and smooth cinematic camera pull-back moving away from the bed. The camera moves backward very slowly. The wallpaper design remains a flat, non-moving print on the wall, behaving strictly as a static flat print with zero morphing or details changing. High quality."
+    prompt: "An extremely slow, steady, and smooth cinematic camera pull-back while gently tracking sideways to show more of the room and the full width of the wallpaper mural. The camera moves backward and slides horizontally. The wallpaper design remains a flat, non-moving print on the wall with zero morphing or details changing. High quality."
   }
 };
 
