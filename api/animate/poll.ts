@@ -76,11 +76,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (generatedVideo.video.videoBytes) {
         videoBuffer = Buffer.from(generatedVideo.video.videoBytes, 'base64');
       } else if (generatedVideo.video.uri) {
-        // Fetch the file content using ?alt=media and the API key
+        // Fetch the file content using :download?alt=media and the API key
         let fetchUrl = generatedVideo.video.uri;
         if (fetchUrl.startsWith('http')) {
-          const separator = fetchUrl.includes('?') ? '&' : '?';
-          fetchUrl = `${fetchUrl}${separator}alt=media&key=${veoApiKey}`;
+          const baseUrl = fetchUrl.split('?')[0];
+          const queryParams = fetchUrl.split('?')[1] || '';
+          
+          let downloadUrl = baseUrl;
+          if (!downloadUrl.endsWith(':download')) {
+            downloadUrl = `${downloadUrl}:download`;
+          }
+          
+          const separator = queryParams ? `?${queryParams}&` : '?';
+          fetchUrl = `${downloadUrl}${separator}alt=media&key=${veoApiKey}`;
         }
         
         logMessage(`[Veo Poll] Fetching video bytes from: ${fetchUrl.split('key=')[0]}key=[REDACTED]`);
