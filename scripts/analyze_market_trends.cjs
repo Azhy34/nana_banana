@@ -23,13 +23,19 @@ async function run() {
   console.log("Analyzing market trends via OpenRouter... (Processing US, Germany and EU data)");
 
   const prompt = `
-  Analyze the current nursery and kids room design trends for 2026/2027 in the USA, Germany, and the EU.
-  US trends usually lead the market (e.g. bold colors, playful themes), while Germany/EU trends focus heavily on sustainability (Nachhaltigkeit), eco-friendly materials (solid wood, linen), and soft warm neutrals (Japandi, Montessori).
+  Analyze the Google Search and Google Trends data from the last 3 months (latest 90 days) in the USA, Germany, and the EU, focusing strictly on these core keywords:
+  1. "nursery wallpaper" / "tapete kinderzimmer"
+  2. "boho nursery" / "modern boho"
+  3. "woodland nursery" / "forest wallpaper" / "fototapete wald"
+  4. "safari wallpaper" / "safari jungle"
+  5. "cloud wallpaper" / "wolken tapete"
   
-  Please extract and merge these trends into a structured JSON database that matches this exact schema:
+  For each of these keyword areas, analyze what specific styles, design aesthetics, colors, materials, and accessories have shown the highest relative search volume and growth in the last 3 months.
+  
+  Please extract and merge these targeted trends into a structured JSON database that matches this exact schema:
   {
-    "colors": [{"name": "Color Name", "description": "short description"}],
-    "styles": [{"name": "Style Name", "description": "short description"}],
+    "colors": [{"name": "Color Name", "description": "short description of why it is trending for these keys"}],
+    "styles": [{"name": "Style Name", "description": "short description of how it fits these keys"}],
     "accessories": ["accessory 1", "accessory 2"],
     "materials": ["material 1", "material 2"]
   }

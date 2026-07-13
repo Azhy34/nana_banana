@@ -1,58 +1,42 @@
 {
   "colors": [
     {
-      "name": "Soft Warm Neutrals",
-      "description": "Including muted beiges, gentle greys, and creamy off-whites, often forming a calming and sophisticated base."
+      "name": "Earthy Tones (Terracotta, Sage Green, Muted Ochre)",
+      "description": "Dominant in 'boho nursery' and 'woodland nursery' searches, reflecting a desire for natural, calming environments."
     },
     {
-      "name": "Earthy Tones",
-      "description": "Such as terracotta, olive green, dusty rose, and muted blues, connecting to nature and providing a grounding feel."
+      "name": "Neutral Hues (Beige, Grey, White, Cream)",
+      "description": "Consistently high in search volume across all keywords, forming a versatile base for various nursery themes."
     },
     {
-      "name": "Bold, Playful Colors",
-      "description": "Vibrant and energetic hues like mustard yellow, emerald green, deep teals, and rich berry tones used as accents or for statement pieces."
+      "name": "Soft Pastels (Dusty Rose, Sky Blue, Mint)",
+      "description": "Trending with 'cloud wallpaper' and traditional 'nursery wallpaper' searches, indicating a preference for gentle, soothing palettes."
     },
     {
-      "name": "Pastels with Depth",
-      "description": "More sophisticated variations of traditional pastels, like dusty lavender, sage green, and muted peach."
-    },
-    {
-      "name": "Deep Jewel Tones",
-      "description": "Rich and luxurious colors like sapphire blue, amethyst purple, and ruby red, used sparingly for impact and elegance."
+      "name": "Deep Greens and Blues (Forest Green, Navy)",
+      "description": "Showing growth, particularly with 'forest wallpaper' and 'safari wallpaper', adding depth and sophistication to nature-inspired themes."
     }
   ],
   "styles": [
     {
-      "name": "Japandi",
-      "description": "A harmonious blend of Japanese minimalism and Scandinavian warmth, emphasizing clean lines, natural materials, and a serene atmosphere."
+      "name": "Bohemian/Boho Chic",
+      "description": "Highest relative search volume and growth, especially in US/EU. Characterized by natural textures, global patterns, and a relaxed, eclectic feel. Often combined with 'modern boho' for a refined touch."
     },
     {
-      "name": "Montessori Inspired",
-      "description": "Focuses on creating an environment that fosters independence, exploration, and learning. Low-to-the-ground furniture, accessible storage, and natural materials are key."
+      "name": "Woodland/Forest Themed",
+      "description": "Strong and consistent interest across all regions, particularly with 'woodland nursery' and 'forest wallpaper'. Focuses on nature-inspired motifs, animals, and earthy palettes."
     },
     {
-      "name": "Nature-Inspired / Biophilic",
-      "description": "Bringing the outdoors in with natural elements, patterns, and colors. Think botanical prints, wooden accents, and earthy palettes."
+      "name": "Safari/Jungle Themed",
+      "description": "Significant search volume, particularly with 'safari wallpaper' and 'safari jungle'. Features exotic animals, lush foliage, and adventurous vibes."
     },
     {
-      "name": "Playful Modern",
-      "description": "Combines clean modern aesthetics with bold colors, whimsical patterns, and imaginative themes, often incorporating modular or multi-functional furniture."
+      "name": "Minimalist/Modern",
+      "description": "Underpins 'modern boho' and is evident in searches for clean lines and understated patterns within 'nursery wallpaper' and 'cloud wallpaper'."
     },
     {
-      "name": "Whimsical Fantasy",
-      "description": "Themes like enchanted forests, outer space adventures, or fairy tales, often with hand-painted murals, themed textiles, and unique decorative elements."
-    },
-    {
-      "name": "Vintage/Retro Revival",
-      "description": "Incorporating elements reminiscent of mid-century modern or 70s aesthetics, with vibrant colors, geometric patterns, and unique furniture shapes."
-    },
-    {
-      "name": "Geometric Minimalism",
-      "description": "Clean lines, geometric patterns, and a pared-down aesthetic, often with a focus on functionality and clear space."
-    },
-    {
-      "name": "Modern Boho",
-      "description": "Clean, structured bohemian style with natural textiles, rattan, jute, and warm earthy clay/terracotta accents. Focuses on warmth and texture without visual clutter or chaos."
+      "name": "Whimsical/Dreamy",
+      "description": "Heavily associated with 'cloud wallpaper' and some traditional 'nursery wallpaper' searches, emphasizing soft forms, ethereal motifs, and a serene atmosphere."
     }
   ],
   "brands": [
@@ -283,35 +267,25 @@
     }
   ],
   "accessories": [
-    "Textured rugs (wool, jute, cotton)",
-    "Wall decals and removable wallpaper (animal, botanical, geometric patterns)",
-    "Felt garlands and mobiles",
-    "Floor cushions and poufs",
-    "Open shelving for book and toy display",
-    "Montessori-friendly floor beds",
-    "Soft sculptural lighting fixtures",
-    "Hand-knitted or crocheted blankets",
-    "Wooden toys and play kitchens",
-    "Statement art prints (abstract, whimsical, nature-themed)",
-    "Woven baskets for storage",
-    "Plant hangers with indoor plants (child-safe varieties)",
-    "Canopies and play tents",
-    "Personalized items (name banners, custom art)",
-    "Modular storage units"
+    "Macrame hangings/wall art",
+    "Wooden shelves/toy storage",
+    "Rattan furniture (cribs, chairs)",
+    "Faux fur rugs/sheepskin throws",
+    "Animal-themed plush toys (forest, safari animals)",
+    "Canopies/bedside nets",
+    "Botanical prints/dried botanicals",
+    "Hot air balloon mobiles",
+    "Cloud-shaped pillows/decor",
+    "Boho-style poufs/floor cushions"
   ],
   "materials": [
-    "Solid wood (FSC-certified)",
-    "Organic cotton",
+    "Cotton (organic cotton being a growing preference)",
     "Linen",
-    "Bamboo",
-    "Wool",
-    "Jute",
-    "Rattan",
-    "Cork",
-    "Recycled plastics (for durable toys/storage)",
-    "Water-based, non-toxic paints and finishes",
-    "Natural rubber",
-    "Felt made from recycled materials"
+    "Wood (light-toned, natural finishes)",
+    "Rattan/Wicker",
+    "Jute/Seagrass",
+    "Wool (for rugs and throws)",
+    "Non-woven wallpaper"
   ],
   "germanApartmentContext": {
     "floorType": "light oak parquet (Eichenparkett)",
