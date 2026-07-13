@@ -78,7 +78,8 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const colorData = trendsData.colors.find(c => c.name === tags.color);
   const styleData = trendsData.styles.find(s => s.name === tags.style);
   const brandData = trendsData.brands.find(b => b.name === tags.brand);
-  const keyObjData = (trendsData.keyObjects as Array<{ name: string; description: string; ageGroup?: string }>).find(k => k.name === tags.keyObject);
+  const keyObjectToUse = tags.ageGroup === 'baby' ? 'Kinderbett mit Gitterstäben' : tags.keyObject;
+  const keyObjData = (trendsData.keyObjects as Array<{ name: string; description: string; ageGroup?: string }>).find(k => k.name === keyObjectToUse);
   const roomZoneData = trendsData.roomZones.find(r => r.name === tags.roomZone);
   const lightingData = trendsData.lighting.find(l => l.name === tags.lighting);
   const camDistData = trendsData.cameraDistances.find(d => d.name === tags.cameraDistance);
@@ -90,7 +91,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     : 'solid wood, soft rounded edges (Weiche Formen)';
   const naturalMaterials = tags.ageGroup === 'teenager'
     ? 'wood, matte metal accents, minimal textile'
-    : 'solid wood, rattan, jute, linen, cotton';
+    : 'solid wood, organic canvas, linen, cotton';
 
   const compositionText = tags.compositionStrategy === 'unobstructed'
     ? "The composition is strictly optimized for selling the wallpaper: furniture is strategically kept low or positioned at dynamic angles to guarantee a massive, unobstructed, panoramic view of the feature wall. The wall occupies the absolute majority of the frame."
@@ -161,6 +162,9 @@ Soft, directional natural light gently grazes the wallpaper, creating subtle amb
   if (promptText.toLowerCase().includes('pc') || promptText.toLowerCase().includes('monitor') || promptText.toLowerCase().includes('screen') || promptText.toLowerCase().includes('schreibtisch')) {
     promptText += " The computer screen is turned off, appearing as a clean, blank matte dark screen with no glossy reflections.";
   }
+
+  const negativeConstraints = "Absolutely avoid: wicker baskets, straw baskets, warped woven baskets, asymmetric baskets, rattan furniture, bunk beds, ladders, plastic toys, cluttered surfaces.";
+  promptText += ` ${negativeConstraints}`;
 
   return promptText;
 }

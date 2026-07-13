@@ -291,7 +291,7 @@
     }
   ],
   "accessories": [
-    "woven jute basket",
+    "solid light oak wooden toy chest with smooth rounded corners",
     "small rattan shelf with books",
     "linen curtains in neutral tone",
     "velvet blanket draped on bed or chair",
@@ -326,7 +326,7 @@
     "ceilingHeight": "2.6–3.0 m high ceiling",
     "windows": "large window with deep sill, typical German apartment style"
   },
-  "negativePrompt": "no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders",
+  "negativePrompt": "no wicker baskets, no straw baskets, no warped woven baskets, no asymmetric baskets, no rattan baskets, no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders",
   "latestMarketInsights": {
     "updatedAt": "2026-07-13",
     "colors": [
@@ -371,7 +371,7 @@
     ],
     "accessories": [
       "Macrame hangings",
-      "Rattan furniture/decor",
+      "Solid wood furniture/decor",
       "Stuffed animal wall mounts (especially woodland or safari animals)",
       "Wooden shelves/storage",
       "Botanical prints/artwork",
@@ -381,7 +381,7 @@
     ],
     "materials": [
       "Wood (natural, light-colored)",
-      "Rattan/Wicker",
+      "Organic Canvas",
       "Linen/Cotton (organic where possible)",
       "Bamboo",
       "Wool/Felt"
