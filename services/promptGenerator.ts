@@ -87,11 +87,11 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const ageData = (trendsData.ageGroups as Record<string, { label: string; furniture: string; storage: string; extras: string }>)[tags.ageGroup];
 
   const material = tags.ageGroup === 'teenager'
-    ? 'modern materials, clean lines'
-    : 'solid wood, soft rounded edges (Weiche Formen)';
+    ? 'modern natural wood with rich visible grain, matte metal, clean lines'
+    : 'solid wood with rich visible organic wood grain, tactile raw matte finish (unlackiertes Massivholz, komplett matt, keine Reflexionen), soft rounded edges (Weiche Formen)';
   const naturalMaterials = tags.ageGroup === 'teenager'
-    ? 'wood, matte metal accents, minimal textile'
-    : 'solid wood, organic canvas, linen, cotton';
+    ? 'solid wood with visible grain, matte metal accents, minimal textile'
+    : 'solid wood with visible organic grain, organic canvas, linen, cotton';
 
   const compositionText = tags.compositionStrategy === 'unobstructed'
     ? "The composition is strictly optimized for selling the wallpaper: furniture is strategically kept low or positioned at dynamic angles to guarantee a massive, unobstructed, panoramic view of the feature wall. The wall occupies the absolute majority of the frame."
