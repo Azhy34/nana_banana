@@ -56,6 +56,7 @@ function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('generator');
   const [step, setStep] = useState<Step>(Step.Prompt);
   const [currentTraceId, setCurrentTraceId] = useState<string>('');
+  const [lastViewMode, setLastViewMode] = useState<ViewMode>('generator');
 
   // Router / Keys
   const [provider, setProvider] = useState<AIProvider>(() => readProvider());
@@ -105,13 +106,16 @@ function App() {
   }, [replicateToken]);
 
   const handleSendToTool = (mode: ViewMode, image: string) => {
+    setLastViewMode(viewMode);
     setBatchToolImage(image);
     setViewMode(mode);
   };
 
   const handleGoHome = () => {
-    setViewMode('generator');
-    setStep(Step.Prompt);
+    setViewMode(lastViewMode);
+    if (lastViewMode === 'generator') {
+      setStep(Step.Prompt);
+    }
     setBatchToolImage(null);
   };
 
@@ -257,75 +261,65 @@ function App() {
           </div>
         </div>
 
-        {viewMode === 'generator' && (
-          <>
-            <div className="mb-12 text-center animate-fadeIn">
-              <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
-                AI Image Generation
-              </h2>
-              <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-                Generate high-quality images from text prompts and optional reference photos.
-              </p>
-              {!generationCredential && (
-                <div className="mt-4 inline-block bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-2">
-                  <p className="text-yellow-200 text-sm">
-                    Please enter your {generationCredentialLabel} in the header to start generating.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <WizardSteps currentStep={step} setStep={setStep} />
-
-            <div className="max-w-4xl mx-auto transition-all duration-500">
-              {renderStepContent()}
-            </div>
-          </>
-        )}
-
-        {viewMode === 'batch' && (
-          <div className="animate-fadeIn">
-            <BatchGenerator
-              provider={provider}
-              apiKey={activeApiKey}
-              replicateToken={replicateToken}
-              onViewModeChange={setViewMode}
-              onSendToTool={handleSendToTool}
-            />
+        <div style={{ display: viewMode === 'generator' ? 'block' : 'none' }}>
+          <div className="mb-12 text-center animate-fadeIn">
+            <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
+              AI Image Generation
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+              Generate high-quality images from text prompts and optional reference photos.
+            </p>
+            {!generationCredential && (
+              <div className="mt-4 inline-block bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-2">
+                <p className="text-yellow-200 text-sm">
+                  Please enter your {generationCredentialLabel} in the header to start generating.
+                </p>
+              </div>
+            )}
           </div>
-        )}
 
-        {viewMode === 'cropper' && (
-          <div className="animate-fadeIn">
-            <EtsyCropper
-              provider={provider}
-              apiKey={activeApiKey}
-              initialImage={batchToolImage || generationState.resultImage}
-              onBack={() => setViewMode('generator')}
-            />
-          </div>
-        )}
+          <WizardSteps currentStep={step} setStep={setStep} />
 
-        {viewMode === 'upscaler' && (
-          <div className="animate-fadeIn">
-            <Upscaler
-              replicateToken={replicateToken}
-              initialImage={batchToolImage || generationState.resultImage}
-              onBack={() => setViewMode('generator')}
-            />
+          <div className="max-w-4xl mx-auto transition-all duration-500">
+            {renderStepContent()}
           </div>
-        )}
+        </div>
 
-        {viewMode === 'video' && (
-          <div className="animate-fadeIn">
-            <VideoTool
-              initialImage={batchToolImage}
-              onBack={handleGoHome}
-              geminiApiKey={geminiApiKey}
-              traceId={currentTraceId}
-            />
-          </div>
-        )}
+        <div style={{ display: viewMode === 'batch' ? 'block' : 'none' }}>
+          <BatchGenerator
+            provider={provider}
+            apiKey={activeApiKey}
+            replicateToken={replicateToken}
+            onViewModeChange={setViewMode}
+            onSendToTool={handleSendToTool}
+          />
+        </div>
+
+        <div style={{ display: viewMode === 'cropper' ? 'block' : 'none' }}>
+          <EtsyCropper
+            provider={provider}
+            apiKey={activeApiKey}
+            initialImage={batchToolImage || generationState.resultImage}
+            onBack={() => setViewMode(lastViewMode)}
+          />
+        </div>
+
+        <div style={{ display: viewMode === 'upscaler' ? 'block' : 'none' }}>
+          <Upscaler
+            replicateToken={replicateToken}
+            initialImage={batchToolImage || generationState.resultImage}
+            onBack={() => setViewMode(lastViewMode)}
+          />
+        </div>
+
+        <div style={{ display: viewMode === 'video' ? 'block' : 'none' }}>
+          <VideoTool
+            initialImage={batchToolImage}
+            onBack={handleGoHome}
+            geminiApiKey={geminiApiKey}
+            traceId={currentTraceId}
+          />
+        </div>
       </main>
     </div>
   );
