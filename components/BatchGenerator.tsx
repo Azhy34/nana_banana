@@ -324,18 +324,9 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                     <button onClick={() => onSendToTool('cropper', card.resultImage!)}
                       className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors" title="Send to Cropper">✂</button>
                     <button 
-                      onClick={() => card.tags.aspectRatio === '9:16' ? onSendToTool('video', card.resultImage!) : null}
-                      disabled={card.tags.aspectRatio !== '9:16'}
-                      className={`px-2 py-1 text-xs rounded transition-colors font-medium ${
-                        card.tags.aspectRatio === '9:16'
-                          ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                          : 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                      }`}
-                      title={
-                        card.tags.aspectRatio === '9:16'
-                          ? 'Анимировать пролет камеры (Veo 3.1)'
-                          : 'Анимация доступна только для вертикального формата 9:16 (Pinterest)'
-                      }
+                      onClick={() => onSendToTool('video', card.resultImage!)}
+                      className="px-2 py-1 text-xs rounded transition-colors font-medium bg-indigo-600 hover:bg-indigo-500 text-white"
+                      title="Анимировать пролет камеры (Veo 3.1)"
                     >
                       🎬 Animate
                     </button>

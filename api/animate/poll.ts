@@ -76,13 +76,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (generatedVideo.video.videoBytes) {
         videoBuffer = Buffer.from(generatedVideo.video.videoBytes, 'base64');
       } else if (generatedVideo.video.uri) {
-        // Fetch using the API key for authentication
-        const fetchUrl = generatedVideo.video.uri.startsWith('http') 
-          ? `${generatedVideo.video.uri}?key=${veoApiKey}` 
-          : generatedVideo.video.uri;
-        const fetchRes = await fetch(fetchUrl);
+        // Fetch the file content using ?alt=media and the API key
+        let fetchUrl = generatedVideo.video.uri;
+        if (fetchUrl.startsWith('http')) {
+          const separator = fetchUrl.includes('?') ? '&' : '?';
+          fetchUrl = `${fetchUrl}${separator}alt=media&key=${veoApiKey}`;
+        }
+        
+        logMessage(`[Veo Poll] Fetching video bytes from: ${fetchUrl.split('key=')[0]}key=[REDACTED]`);
+        
+        const fetchRes = await fetch(fetchUrl, {
+          headers: {
+            'x-goog-api-key': veoApiKey
+          }
+        });
         if (!fetchRes.ok) {
-          throw new Error(`Failed to fetch video content from Google API: ${fetchRes.statusText}`);
+          const errorText = await fetchRes.text();
+          throw new Error(`Failed to fetch video content from Google API: ${fetchRes.statusText} - ${errorText}`);
         }
         const arrayBuf = await fetchRes.arrayBuffer();
         videoBuffer = Buffer.from(arrayBuf);
