@@ -54,3 +54,9 @@ When reading Google Trends metrics, keep these data design facts in mind:
 2. **Population Normalization**: Because Google normalizes data by total regional volume, you can directly compare smaller markets (like Germany or specific EU countries) with giant markets (like the USA) without population skewing the results.
 3. **Sampling Accuracy**: Google Trends uses a representative, randomized sample of daily Google search data. This ensures fast, real-time feedback that is statistically equivalent to the full search volume database.
 4. **Topics vs Search Terms**: Prefer "Topics" (e.g. general design concepts) for broad international trend research, but use exact "Search Terms" (using punctuation operators) for precise SEO copywriting and keyphrase placement.
+
+## 🔄 Automatic Trend Deprecation & Cleaning
+
+*   **Zero-Maintenance Deactivation**: The prompt generator (`promptGenerator.ts`) reads active trends *exclusively* from `trends.json.latestMarketInsights`.
+*   **No Hardcoding**: Because no specific trend values (like "Sage Green" or "Terracotta") are hardcoded in the codebase, running the analysis script (`node scripts/analyze_market_trends.cjs`) will automatically overwrite `latestMarketInsights` with new, fresh trends.
+*   **Deactivation Flow**: Old, declining trends are automatically removed from the JSON during the overwrite. The generator immediately stops weaving deprecated elements into prompts, ensuring zero manual cleanup in code.
