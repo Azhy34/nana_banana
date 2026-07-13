@@ -87,15 +87,39 @@ export async function generateVeoVideoOnClient(
         throw new Error("No video returned in the Gemini API response.");
       }
 
-      logGeminiEvent('veo-3.1-fast-generate-preview', `Video Success: ${settings.customPrompt}`, 0.60, 6.0, 'success', null, traceId, negativePrompt);
-
       const videoBytes = generatedVideo.video.videoBytes;
+      let downloadUrl = "";
+
       if (videoBytes) {
-        return `data:video/mp4;base64,${videoBytes}`;
+        downloadUrl = `data:video/mp4;base64,${videoBytes}`;
+      } else if (generatedVideo.video.uri) {
+        let uri = generatedVideo.video.uri;
+        if (uri.startsWith('http')) {
+          const baseUrl = uri.split('?')[0];
+          const queryParams = uri.split('?')[1] || '';
+          if (!baseUrl.endsWith(':download')) {
+            uri = `${baseUrl}:download`;
+          }
+          const separator = queryParams ? `?${queryParams}&` : '?';
+          downloadUrl = `${uri}${separator}alt=media&key=${apiKey}`;
+        } else {
+          downloadUrl = uri;
+        }
       }
 
-      if (generatedVideo.video.uri) {
-        return generatedVideo.video.uri;
+      logGeminiEvent(
+        'veo-3.1-fast-generate-preview', 
+        `Video Success: ${settings.customPrompt} | Output: ${downloadUrl.split('key=')[0]}${downloadUrl.includes('key=') ? 'key=[REDACTED]' : ''}`, 
+        0.60, 
+        6.0, 
+        'success', 
+        null, 
+        traceId, 
+        negativePrompt
+      );
+
+      if (downloadUrl) {
+        return downloadUrl;
       }
 
       throw new Error("Video output data is empty in the response.");
