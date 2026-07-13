@@ -125,27 +125,27 @@
   "ageGroups": {
     "baby": {
       "label": "Baby (0–3 years)",
-      "furniture": "low Bodenbett floor bed or classic crib, soft padded rug, mobile above bed — all furniture very low",
-      "storage": "low open shelves at floor level, small rattan baskets, no climbing structures",
-      "extras": "soft stuffed animals, wooden mobile, nightlight, linen curtains"
+      "furniture": "classic wooden baby crib with slatted sides, premium wooden changing table dresser with a soft cream changing mat (Wickelkommode), cozy fabric nursing glider chair",
+      "storage": "low open wooden shelves, canvas storage bins in linen fabric, solid wood toy chest",
+      "extras": "wooden mobile above the crib, organic cotton bedding, soft nightlight, desaturated linen curtains"
     },
     "vorschul": {
       "label": "Preschool (3–6 years)",
-      "furniture": "simple low single bed, small play table with two chairs, open shelving at child height",
-      "storage": "Kallax-style open shelving with toy bins at child level, small rattan baskets",
-      "extras": "building blocks, wooden toys, small bookshelf, soft floor rug"
+      "furniture": "low Montessori floor bed, small children's play table with two matching small chairs, open shelving at child's height",
+      "storage": "open wooden shelves with linen/canvas toy bins at child level, solid wooden toy chest",
+      "extras": "wooden building blocks, wooden toys on shelf, small children's bookshelf, soft cotton floor rug"
     },
     "schulkind": {
       "label": "School age (6–10 years)",
-      "furniture": "single bed, desk with chair and task lamp, small bookshelf",
-      "storage": "combination of open and closed storage, wall shelves for books",
-      "extras": "desk lamp, school backpack hook, reading corner with bean bag"
+      "furniture": "low single wooden bed, children's study desk with matching chair and desk lamp, study bookshelf",
+      "storage": "modular wooden wall shelves, closed wooden drawers, desk organizer",
+      "extras": "desk lamp, school backpack hook, cozy reading corner with a large fabric bean bag cushion"
     },
     "teenager": {
       "label": "Teenager (10–16 years)",
-      "furniture": "low single bed or sofa-bed, full desk setup, ergonomic chair, shelving with books and decor",
-      "storage": "modular wall shelves, closed wardrobe, desk organizer",
-      "extras": "plants, posters, LED ambient lighting strip, headphones on desk stand, minimal personal items"
+      "furniture": "low platform single bed, wide wooden study desk, comfortable desk chair, modular wall bookshelves",
+      "storage": "modular shelving units, closed wardrobe, desk organizer",
+      "extras": "small potted plants, minimal books, LED ambient light strip (turned off), headphones on stand"
     }
   },
   "keyObjects": [
