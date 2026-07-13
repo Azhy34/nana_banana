@@ -80,6 +80,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         durationSeconds: 6,
         personGeneration: 'allow_adult',
         negativePrompt: negativePrompt || undefined,
+        generateAudio: false,
         ...(seed !== undefined && seed !== null ? { seed: Number(seed) } : {})
       }
     });

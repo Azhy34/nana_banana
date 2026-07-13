@@ -44,7 +44,8 @@ export async function generateVeoVideoOnClient(
         aspectRatio: '9:16',
         durationSeconds: 6,
         personGeneration: 'allow_adult',
-        negativePrompt: negativePrompt || undefined
+        negativePrompt: negativePrompt || undefined,
+        generateAudio: false
       }
     });
 
