@@ -79,16 +79,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Fetch the file content using :download?alt=media and the API key
         let fetchUrl = generatedVideo.video.uri;
         if (fetchUrl.startsWith('http')) {
+          // The Google API URI looks like: https://generativelanguage.googleapis.com/v1beta/files/file-xxxx
+          // We need to strip any existing query params and cleanly append :download?alt=media
           const baseUrl = fetchUrl.split('?')[0];
-          const queryParams = fetchUrl.split('?')[1] || '';
-          
           let downloadUrl = baseUrl;
           if (!downloadUrl.endsWith(':download')) {
             downloadUrl = `${downloadUrl}:download`;
           }
-          
-          const separator = queryParams ? `?${queryParams}&` : '?';
-          fetchUrl = `${downloadUrl}${separator}alt=media&key=${veoApiKey}`;
+          fetchUrl = `${downloadUrl}?alt=media&key=${veoApiKey}`;
         }
         
         logMessage(`[Veo Poll] Fetching video bytes from: ${fetchUrl.split('key=')[0]}key=[REDACTED]`);
