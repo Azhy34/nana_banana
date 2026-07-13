@@ -269,6 +269,10 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                     controls
                   />
                 </div>
+                <div className="text-center bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-xl">
+                  <p className="text-slate-400 text-xs mb-0.5">Итоговая стоимость генерации:</p>
+                  <p className="text-green-400 font-bold font-mono text-base">${estimatedCost.toFixed(2)}</p>
+                </div>
                 <button
                   onClick={handleDownload}
                   disabled={isDownloading}
