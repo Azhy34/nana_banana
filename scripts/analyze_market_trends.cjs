@@ -32,7 +32,7 @@ async function run() {
   
   For each of these keyword areas, analyze what specific styles, design aesthetics, colors, materials, and accessories have shown the highest relative search volume and growth in the last 3 months.
   
-  Please extract and merge these targeted trends into a structured JSON database that matches this exact schema:
+  Please extract and merge these targeted trends into a structured JSON object that matches this exact schema:
   {
     "colors": [{"name": "Color Name", "description": "short description of why it is trending for these keys"}],
     "styles": [{"name": "Style Name", "description": "short description of how it fits these keys"}],
@@ -72,14 +72,17 @@ async function run() {
     const trendsPath = path.join(process.cwd(), 'Promt', 'trends.json');
     const currentTrends = JSON.parse(fs.readFileSync(trendsPath, 'utf8'));
 
-    // Update with fresh data
-    currentTrends.colors = freshTrends.colors || currentTrends.colors;
-    currentTrends.styles = freshTrends.styles || currentTrends.styles;
-    currentTrends.accessories = freshTrends.accessories || currentTrends.accessories;
-    currentTrends.materials = freshTrends.materials || currentTrends.materials;
+    // Update the dedicated latestMarketInsights key, leaving original pools intact
+    currentTrends.latestMarketInsights = {
+      updatedAt: new Date().toISOString().split('T')[0],
+      colors: freshTrends.colors || [],
+      styles: freshTrends.styles || [],
+      accessories: freshTrends.accessories || [],
+      materials: freshTrends.materials || []
+    };
 
     fs.writeFileSync(trendsPath, JSON.stringify(currentTrends, null, 2), 'utf8');
-    console.log("Successfully updated Promt/trends.json with latest US/EU trends via OpenRouter!");
+    console.log("Successfully updated Promt/trends.json latestMarketInsights key with latest US/EU trends!");
 
   } catch (error) {
     console.error("Error running trend analysis:", error);

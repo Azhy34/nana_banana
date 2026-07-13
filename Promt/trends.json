@@ -1,62 +1,66 @@
 {
   "colors": [
     {
-      "name": "Sage Green",
-      "description": "Consistently trending across 'woodland', 'forest', and 'boho' nursery themes, reflecting a desire for natural, calming, and earthy tones."
+      "name": "Wales Grey",
+      "description": "soft grey with blue undertone, modern and calm"
     },
     {
-      "name": "Terracotta",
-      "description": "Strongly linked to 'boho nursery' and 'modern boho', indicating a preference for warm, earthy, and sun-baked hues."
+      "name": "Barberry",
+      "description": "soft berry-red, warm and elegant accent"
     },
     {
-      "name": "Muted Neutrals (Beige, Cream, Greige)",
-      "description": "High search volume across all keywords, particularly 'boho' and 'nursery wallpaper', for creating versatile, serene, and sophisticated backdrops."
+      "name": "Bumblebee",
+      "description": "sunny yellow, soft and mood-lifting"
     },
     {
-      "name": "Dusty Rose/Blush",
-      "description": "Appears within 'boho nursery' and general 'nursery wallpaper' searches, suggesting a softer, romantic, and gentle aesthetic."
+      "name": "Sage",
+      "description": "muted sage green, natural and fresh"
     },
     {
-      "name": "Warm Whites",
-      "description": "Fundamental to 'modern boho' and providing a clean, bright canvas for various nursery themes."
+      "name": "Eucalyptus",
+      "description": "deep eucalyptus green, grounding and organic"
     },
     {
-      "name": "Soft Blues (Sky Blue, Light Teal)",
-      "description": "Prominent in 'cloud wallpaper' and general 'nursery wallpaper', conveying a sense of calm, spaciousness, and dreaminess."
+      "name": "Cool Blue",
+      "description": "fresh cool blue, trending 2026 statement color"
     },
     {
-      "name": "Deep Forest Green / Emerald Green",
-      "description": "Gaining traction in 'woodland nursery' and 'forest wallpaper' for creating immersive, natural, and rich environments."
+      "name": "Olivbraun",
+      "description": "olive-brown, earthy and warm"
+    },
+    {
+      "name": "Mustard",
+      "description": "warm mustard yellow, retro and cozy"
+    },
+    {
+      "name": "Cocoa",
+      "description": "warm brown, mushroom-cocoa tone, earthy base"
     }
   ],
   "styles": [
     {
-      "name": "Modern Boho",
-      "description": "The most dominant trend, appearing directly in searches and influencing 'nursery wallpaper' as a whole, characterized by natural elements, textures, and a relaxed, eclectic feel."
+      "name": "Japandi 2.0",
+      "description": "warm minimalism with character — light wood, soft tones, balance between warmth and freshness"
     },
     {
-      "name": "Minimalist Woodland",
-      "description": "A refined version of 'woodland nursery' focusing on clean lines, fewer but impactful natural motifs, and a sophisticated, modern aesthetic."
+      "name": "Minimalismus 2.0",
+      "description": "bold colors in minimal interiors, matte metal accents, clean lines"
     },
     {
-      "name": "Earthy & Organic",
-      "description": "A cross-cutting trend evident in 'boho', 'woodland', and 'safari' nurseries, emphasizing natural materials, muted palettes, and a connection to nature."
+      "name": "Boho 2026",
+      "description": "ordered boho — structured, natural textiles, wood, plants, soft blankets — NO chaos"
     },
     {
-      "name": "Abstract / Watercolor",
-      "description": "Increasingly popular within 'cloud wallpaper' and general 'nursery wallpaper' for creating soft, dreamy, and artful backdrops without specific, literal motifs."
+      "name": "Retro 2026",
+      "description": "warm autumn tones, mustard and caramel, wood and geometric patterns"
     },
     {
-      "name": "Scandinavian (Scandi-Boho)",
-      "description": "Influences 'minimalist woodland' and 'modern boho' with its emphasis on light colors, natural wood, and simple, functional design."
+      "name": "Gender-Neutral",
+      "description": "nature-inspired motifs, flexible elements, grows with the child"
     },
     {
-      "name": "Whimsical Forest / Enchanted Woodland",
-      "description": "A more illustrative and imaginative approach within 'woodland' and 'forest wallpaper', often featuring charming animal illustrations and playful elements."
-    },
-    {
-      "name": "Global/Tribal Boho",
-      "description": "A subset of 'boho nursery' with patterns and textures suggesting influences from diverse cultures, often integrated with natural materials."
+      "name": "Montessori",
+      "description": "child-level shelves, floor bed, open access to toys, natural materials throughout"
     }
   ],
   "brands": [
@@ -287,30 +291,34 @@
     }
   ],
   "accessories": [
-    "Macrame wall hangings",
-    "Wooden shelves (floating or ladder style)",
-    "Rattan or wicker furniture (cribs, changing tables, shelving)",
-    "Textured throw blankets (chunky knit, velvet)",
-    "Dried floral arrangements (pampas grass, eucalyptus)",
-    "Animal prints/figurines (safari animals, forest creatures)",
-    "Round jute or wool rugs",
-    "Linen curtains (sheer or light-filtering)",
-    "Fairy lights or string lights",
-    "Felt garlands (clouds, stars, animals)",
-    "Moon and star decor",
-    "Botanical prints/artworks",
-    "Woven baskets for storage"
+    "woven jute basket",
+    "small rattan shelf with books",
+    "linen curtains in neutral tone",
+    "velvet blanket draped on bed or chair",
+    "large format nature poster (single, not gallery wall)",
+    "soft knit throw in muted color",
+    "macramé wall hanging (small)",
+    "ceramic plant pot with small leafy plant",
+    "woven cotton rug in warm neutral",
+    "linen lampshade with warm bulb",
+    "canvas storage bin in linen fabric",
+    "small succulent or cactus plant",
+    "minimalist framed art print (single)",
+    "small globe or world map on shelf",
+    "desk organizer with books and small plant",
+    "small wooden decorative objects on shelf"
   ],
   "materials": [
-    "Rattan",
-    "Wicker",
-    "Natural wood (light oak, birch, pine)",
-    "Linen",
-    "Cotton (organic preferred)",
-    "Jute",
-    "Wool",
-    "Felt",
-    "Bamboo"
+    "solid birch (Birke Massivholz)",
+    "solid oak (Eiche Massivholz)",
+    "solid beech (Buche Massivholz)",
+    "rattan",
+    "jute",
+    "bamboo",
+    "linen",
+    "cotton",
+    "cork",
+    "FSC-certified wood"
   ],
   "germanApartmentContext": {
     "floorType": "light oak parquet (Eichenparkett)",
@@ -318,5 +326,65 @@
     "ceilingHeight": "2.6–3.0 m high ceiling",
     "windows": "large window with deep sill, typical German apartment style"
   },
-  "negativePrompt": "no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders"
+  "negativePrompt": "no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders",
+  "latestMarketInsights": {
+    "updatedAt": "2026-07-13",
+    "colors": [
+      {
+        "name": "Earthy Tones (Terracotta, Sage Green, Muted Ochre)",
+        "description": "Dominant in 'boho nursery' and 'woodland nursery' searches, indicating a preference for natural, calming palettes."
+      },
+      {
+        "name": "Soft Neutrals (Beige, Greige, Warm White)",
+        "description": "Consistently high search volume across all nursery-related keywords, serving as a versatile base for various design styles, especially for 'cloud wallpaper' and more subdued 'nursery wallpaper' options."
+      },
+      {
+        "name": "Deep Greens (Forest Green, Emerald)",
+        "description": "Strongly associated with 'woodland nursery' and 'forest wallpaper' searches, highlighting a desire for lush, nature-inspired environments."
+      },
+      {
+        "name": "Dusty Pinks and Blues",
+        "description": "Appearing in searches for 'nursery wallpaper' and 'cloud wallpaper', suggesting a continued interest in classic, gentle pastels."
+      }
+    ],
+    "styles": [
+      {
+        "name": "Bohemian (Boho Chic)",
+        "description": "High relative search volume for 'boho nursery' and 'modern boho', characterized by natural textures, global patterns, and a relaxed, eclectic feel."
+      },
+      {
+        "name": "Woodland/Forest Themed",
+        "description": "Significantly trending with 'woodland nursery', 'forest wallpaper', and 'fototapete wald', focusing on depictions of trees, animals (deer, bears, foxes), and nature scenes."
+      },
+      {
+        "name": "Safari/Jungle Themed",
+        "description": "Consistent interest in 'safari wallpaper' and 'safari jungle', featuring exotic animals (giraffes, elephants, lions) and lush foliage, often in more muted or artistic interpretations."
+      },
+      {
+        "name": "Minimalist/Scandinavian-inspired",
+        "description": "Underlying trend across multiple keywords, especially with plain or subtly patterned 'nursery wallpaper' and 'cloud wallpaper', emphasizing clean lines, natural materials, and functional design."
+      },
+      {
+        "name": "Whimsical/Dreamy (e.g., Cloud motifs)",
+        "description": "Driven by 'cloud wallpaper' and 'wolken tapete' searches, aiming for serene, imaginative spaces often with soft colors and ethereal patterns."
+      }
+    ],
+    "accessories": [
+      "Macrame hangings",
+      "Rattan furniture/decor",
+      "Stuffed animal wall mounts (especially woodland or safari animals)",
+      "Wooden shelves/storage",
+      "Botanical prints/artwork",
+      "Fairy lights/string lights",
+      "Mobile cribs (often with animal or cloud themes)",
+      "Textured throw blankets/rugs"
+    ],
+    "materials": [
+      "Wood (natural, light-colored)",
+      "Rattan/Wicker",
+      "Linen/Cotton (organic where possible)",
+      "Bamboo",
+      "Wool/Felt"
+    ]
+  }
 }
