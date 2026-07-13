@@ -30,6 +30,20 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     resultVideoUrl: null,
   });
 
+  // Sync prop initialImage to sourceImage state when it changes
+  useEffect(() => {
+    if (initialImage) {
+      setSourceImage(initialImage);
+      // Reset previous animation results so they don't show on a new card
+      setState({
+        isLoading: false,
+        progress: 0,
+        error: null,
+        resultVideoUrl: null
+      });
+    }
+  }, [initialImage]);
+
   const [estimatedCost] = useState(6 * VEO_PRICING_PER_SECOND_USD);
   const [isDownloading, setIsDownloading] = useState(false);
 

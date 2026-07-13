@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ModelType, AIProvider } from '../types';
 import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, getKeyObjectsForAge } from '../services/promptGenerator';
 import { generateBatchImage, isQwenModel } from '../services/generationRouter';
@@ -18,18 +18,68 @@ export type BatchStep = 'setup' | 'cards' | 'results';
  * @returns An object containing the current state and action handlers for the UI.
  */
 export function useBatch(provider: AIProvider, apiKey: string, replicateToken: string) {
-  const [batchStep, setBatchStep] = useState<BatchStep>('setup');
+  const [batchStep, setBatchStep] = useState<BatchStep>(() => {
+    try {
+      const saved = localStorage.getItem('nana_banana_batch_step');
+      return (saved as BatchStep) || 'setup';
+    } catch {
+      return 'setup';
+    }
+  });
 
   // Setup
-  const [wallpaper, setWallpaper] = useState<UploadedImage | null>(null);
+  const [wallpaper, setWallpaper] = useState<UploadedImage | null>(() => {
+    try {
+      const saved = localStorage.getItem('nana_banana_batch_wallpaper');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [count, setCount] = useState(12);
   const [model, setModel] = useState<ModelType>(ModelType.Flash31);
   const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '9:16': 6, '2:3': 4, '4:3': 2 });
 
   // Cards
-  const [cards, setCards] = useState<BatchCard[]>([]);
+  const [cards, setCards] = useState<BatchCard[]>(() => {
+    try {
+      const saved = localStorage.getItem('nana_banana_batch_cards');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Sync state to localStorage on changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('nana_banana_batch_step', batchStep);
+    } catch (e) {
+      console.warn('Failed to save batchStep to localStorage:', e);
+    }
+  }, [batchStep]);
+
+  useEffect(() => {
+    try {
+      if (wallpaper) {
+        localStorage.setItem('nana_banana_batch_wallpaper', JSON.stringify(wallpaper));
+      } else {
+        localStorage.removeItem('nana_banana_batch_wallpaper');
+      }
+    } catch (e) {
+      console.warn('Failed to save wallpaper to localStorage:', e);
+    }
+  }, [wallpaper]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('nana_banana_batch_cards', JSON.stringify(cards));
+    } catch (e) {
+      console.warn('Failed to save cards to localStorage:', e);
+    }
+  }, [cards]);
 
   const formatTotal = formatDist['9:16'] + formatDist['2:3'] + formatDist['4:3'];
 
