@@ -8,9 +8,10 @@ interface VideoToolProps {
   initialImage?: string | null;
   onBack?: () => void;
   geminiApiKey?: string;
+  traceId?: string;
 }
 
-export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, geminiApiKey }) => {
+export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, geminiApiKey, traceId }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Settings
@@ -75,6 +76,16 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       return;
     }
 
+    if (geminiApiKey.startsWith('sk-or-')) {
+      setState({
+        isLoading: false,
+        progress: 0,
+        error: 'Ключ не подходит! Похоже, вы используете API-ключ OpenRouter для Gemini Veo. Пожалуйста, введите API-ключ Gemini (начинается с AIzaSy) в настройках или файле .env.local.',
+        resultVideoUrl: null
+      });
+      return;
+    }
+
     setState({
       isLoading: true,
       progress: 0,
@@ -90,7 +101,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         geminiApiKey,
         (progress) => {
           setState(prev => ({ ...prev, progress }));
-        }
+        },
+        traceId
       );
 
       setState({

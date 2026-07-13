@@ -17,19 +17,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { sessionId, model, prompt, cost, duration, status, error } = req.body;
+  const { sessionId, model, prompt, cost, duration, status, error, traceId } = req.body;
   const timestamp = new Date().toISOString();
 
-  // 1. Format and write to server/console stdout
-  console.log(`\n=== [GEMINI LOG] [${timestamp}] ===`);
-  console.log(`Session:  ${sessionId}`);
-  console.log(`Model:    ${model}`);
-  console.log(`Status:   ${status}`);
-  console.log(`Cost:     $${Number(cost).toFixed(4)}`);
-  console.log(`Duration: ${Number(duration).toFixed(1)}s`);
-  if (error) console.log(`Error:    ${error}`);
-  console.log(`Prompt:   "${prompt}"`);
-  console.log(`=========================================\n`);
+  // 1. Format and write to server/console stdout in structured JSON format
+  console.log(JSON.stringify({
+    message: `[GEMINI LOG] [Session: ${sessionId}] [Model: ${model}] [Status: ${status}] cost=$${Number(cost).toFixed(4)} duration=${Number(duration).toFixed(1)}s ${error ? `error="${error}"` : ''} prompt="${prompt}"`,
+    severity: status === 'error' ? 'ERROR' : 'INFO',
+    "logging.googleapis.com/trace": traceId ? `projects/pro-import-agent/traces/${traceId}` : undefined,
+    labels: {
+      sessionId,
+      model,
+      status
+    }
+  }));
 
   const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
@@ -57,7 +58,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         cost,
         duration,
         status,
-        error
+        error,
+        traceId
       });
 
       // Write back to Vercel Blob (overwriting the old one)
@@ -98,7 +100,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         cost,
         duration,
         status,
-        error
+        error,
+        traceId
       });
 
       fs.writeFileSync(logFilePath, JSON.stringify(data, null, 2), 'utf8');

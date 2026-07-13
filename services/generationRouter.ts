@@ -19,7 +19,8 @@ export async function generateImageComposition(
   replicateToken: string,
   referenceImages: UploadedImage[],
   settings: GenerationSettings,
-  provider: AIProvider = 'openrouter'
+  provider: AIProvider = 'openrouter',
+  traceId?: string
 ): Promise<RoutedGenerationResult> {
   if (isQwenModel(settings.model)) {
     if (!replicateToken) {
@@ -44,7 +45,7 @@ export async function generateImageComposition(
     };
   }
 
-  return generateGeminiFamilyImage(providerApiKey, referenceImages, settings, provider);
+  return generateGeminiFamilyImage(providerApiKey, referenceImages, settings, provider, traceId);
 }
 
 export async function generateBatchImage(
@@ -55,7 +56,8 @@ export async function generateBatchImage(
   aspectRatio: string,
   model: ModelType,
   provider: AIProvider = 'openrouter',
-  draftImage?: string
+  draftImage?: string,
+  traceId?: string
 ): Promise<string> {
   if (isQwenModel(model)) {
     if (!replicateToken) {
@@ -71,5 +73,5 @@ export async function generateBatchImage(
     return url;
   }
 
-  return generateGeminiFamilyBatch(providerApiKey, wallpaper, prompt, aspectRatio, model, provider, draftImage);
+  return generateGeminiFamilyBatch(providerApiKey, wallpaper, prompt, aspectRatio, model, provider, draftImage, traceId);
 }

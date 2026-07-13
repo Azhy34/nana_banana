@@ -65,13 +65,14 @@ const normalizeImageInput = (imageInput: string): string => {
 
 const toGeminiModel = (model: ModelType): string => model.replace(/^google\//, "");
 
-const logGeminiEvent = async (
+export const logGeminiEvent = async (
   model: string,
   prompt: string,
   cost: number,
   duration: number,
   status: "success" | "error",
-  error: string | null = null
+  error: string | null = null,
+  traceId?: string
 ) => {
   try {
     const sessionId = getSessionId();
@@ -88,6 +89,7 @@ const logGeminiEvent = async (
         duration,
         status,
         error,
+        traceId,
       }),
     });
   } catch (err) {
@@ -271,7 +273,7 @@ const generateImageCompositionWithGemini = async (
         aspectRatio,
         ...(model === ModelType.Pro || model === ModelType.Flash31 ? { imageSize } : {}),
         negativePrompt: GEMINI_NEGATIVE_PROMPT,
-      },
+      } as any,
     },
   });
 
@@ -394,7 +396,7 @@ const generateBatchWithGemini = async (
         aspectRatio: aspectRatio as any,
         imageSize: "2K",
         negativePrompt: GEMINI_NEGATIVE_PROMPT,
-      },
+      } as any,
     },
   });
 
@@ -495,7 +497,8 @@ export const generateImageComposition = async (
   apiKey: string,
   referenceImages: UploadedImage[],
   settings: GenerationSettings,
-  provider: AIProvider = "openrouter"
+  provider: AIProvider = "openrouter",
+  traceId?: string
 ): Promise<GenerationResult> => {
   if (!apiKey) {
     const label = provider === "openrouter" ? "OpenRouter" : "Gemini";
@@ -516,11 +519,11 @@ export const generateImageComposition = async (
     const duration = (Date.now() - startTime) / 1000;
     const cost = (result.usage.promptTokens / 1_000_000) * pricing.inputPer1M + pricing.outputPerImage;
 
-    logGeminiEvent(settings.model, settings.prompt, cost, duration, "success");
+    logGeminiEvent(settings.model, settings.prompt, cost, duration, "success", null, traceId);
     return result;
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(settings.model, settings.prompt, 0.0, duration, "error", err.message || "Unknown error");
+    logGeminiEvent(settings.model, settings.prompt, 0.0, duration, "error", err.message || "Unknown error", traceId);
     throw err;
   }
 };
@@ -532,7 +535,8 @@ export const generateBatchImage = async (
   aspectRatio: string,
   model: ModelType = ModelType.Flash31,
   provider: AIProvider = "openrouter",
-  draftImage?: string
+  draftImage?: string,
+  traceId?: string
 ): Promise<string> => {
   if (!apiKey) {
     const label = provider === "openrouter" ? "OpenRouter" : "Gemini";
@@ -552,11 +556,11 @@ export const generateBatchImage = async (
     const duration = (Date.now() - startTime) / 1000;
     const estimatedCost = model === ModelType.Pro ? 0.134 : 0.0672;
 
-    logGeminiEvent(model, prompt, estimatedCost, duration, "success");
+    logGeminiEvent(model, prompt, estimatedCost, duration, "success", null, traceId);
     return result;
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(model, prompt, 0.0, duration, "error", err.message || "Unknown error");
+    logGeminiEvent(model, prompt, 0.0, duration, "error", err.message || "Unknown error", traceId);
     throw err;
   }
 };

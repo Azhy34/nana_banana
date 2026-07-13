@@ -20,12 +20,13 @@ No test runner or linter is configured.
 ### Data Flow
 
 ```
-Browser (React) → geminiService.ts → Google Gemini API (direct)
-                → log-event API (background) → /api/log-event → gemini_sessions.json (dev)
+Browser (React) → geminiService.ts (traceId) → Google Gemini API (direct)
+                → log-event API (background) → /api/log-event (JSON log with traceId) → gemini_sessions.json
+                → veoService.ts (traceId) → Google Veo API (direct video generation + poll status + log start/success/error)
                 → replicateService.ts → /api/upscale (Vercel proxy) → Replicate.com / Topaz Labs
 ```
 
-The Vercel API routes (`/api`) exist as CORS proxies to Replicate, and a `/api/log-event` background logger. Gemini is called directly from the browser for stability.
+The Vercel API routes (`/api`) exist as CORS proxies to Replicate, and a `/api/log-event` background logger. Gemini is called directly from the browser for stability. Log tracing context propagates via W3C traceparent headers.
 
 ### Key Files
 
@@ -38,6 +39,8 @@ The Vercel API routes (`/api`) exist as CORS proxies to Replicate, and a `/api/l
 - **[services/replicateService.ts](services/replicateService.ts)** — Replicate/Topaz upscaling: starts job, polls for completion, returns result URL
 - **[services/downloadService.ts](services/downloadService.ts)** — Blob-based download helper (avoids cross-origin download issues)
 - **[api/upscale.ts](api/upscale.ts)** — Vercel serverless POST handler; proxies to Replicate
+- **[utils/tracing.ts](utils/tracing.ts)** — Helper for generating traceId, spanId, and W3C `traceparent` headers for distributed tracing.
+- **[.agents/skills/log-trace-debugger/SKILL.md](.agents/skills/log-trace-debugger/SKILL.md)** — Project-scoped skill for trace-based log analysis and debugging API errors.
 - **[Promt/trends.json](Promt/trends.json)** — Data source for random prompt generation: colors, styles, furniture brands, age groups, key objects, room zones, lighting, camera angles/distances, depth of field, accessories, German apartment context, negative prompt
 - **[Promt/Promt.md](Promt/Promt.md)** — Rules for prompt generation: wallpaper preservation rules, random variable algorithm, final prompt template
 

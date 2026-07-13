@@ -52,25 +52,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Poll the operation status from Google
     logMessage(`[Veo Poll] Checking operation: ${operationId}`);
-    const operation = await ai.operations.get({ name: operationId });
+    const operation = await ai.operations.getVideosOperation({
+      operation: { name: operationId } as any
+    });
 
     if (operation.done) {
       if (operation.error) {
         logMessage(`[Veo Poll] Operation failed on Google side: ${operation.error.message || operation.error}`, 'ERROR', { error: operation.error });
         return res.status(500).json({ 
-          error: operation.error.message || 'Video generation failed on Google servers' 
+          error: (operation.error.message as string) || 'Video generation failed on Google servers' 
         });
       }
 
       const generatedVideo = operation.response?.generatedVideos?.[0];
-      if (!generatedVideo) {
+      if (!generatedVideo || !generatedVideo.video) {
         return res.status(500).json({ error: 'No video output returned from completed operation' });
       }
 
-      logMessage(`[Veo Poll] Video generated on Google. File URI: ${generatedVideo.video.uri}`);
+      logMessage(`[Veo Poll] Video generated on Google. File URI: ${generatedVideo.video.uri || 'N/A'}`);
 
-      // 1. Download the video file from Google
-      const videoBuffer = await ai.files.download({ file: generatedVideo.video });
+      // 1. Get the video buffer
+      let videoBuffer: Buffer;
+      if (generatedVideo.video.videoBytes) {
+        videoBuffer = Buffer.from(generatedVideo.video.videoBytes, 'base64');
+      } else if (generatedVideo.video.uri) {
+        // Fetch using the API key for authentication
+        const fetchUrl = generatedVideo.video.uri.startsWith('http') 
+          ? `${generatedVideo.video.uri}?key=${veoApiKey}` 
+          : generatedVideo.video.uri;
+        const fetchRes = await fetch(fetchUrl);
+        if (!fetchRes.ok) {
+          throw new Error(`Failed to fetch video content from Google API: ${fetchRes.statusText}`);
+        }
+        const arrayBuf = await fetchRes.arrayBuffer();
+        videoBuffer = Buffer.from(arrayBuf);
+      } else {
+        throw new Error('No video data or URI available in the response');
+      }
 
       // 2. Upload the buffer to Vercel Blob to get a public URL
       const filename = `veo-${Date.now()}-${operationId.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`;

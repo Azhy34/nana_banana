@@ -12,6 +12,7 @@ import { BatchGenerator } from './components/BatchGenerator';
 import { VideoTool } from './components/VideoTool';
 import { generateImageComposition, isQwenModel } from './services/generationRouter';
 import { compressImageFile } from './services/imageCompressor';
+import { generateTraceId } from './utils/tracing';
 
 const readSecret = (storageKeys: string[], envValue = ''): string => {
   if (typeof window === 'undefined') return envValue;
@@ -45,6 +46,7 @@ function App() {
   const envGeminiApiKey =
     (((import.meta as any).env?.VITE_GEMINI_API_KEY as string | undefined) ||
       (process.env.GEMINI_API_KEY as string | undefined) ||
+      (process.env.GEMINI_VEO_API_KEY as string | undefined) ||
       '');
   const envReplicateToken =
     (((import.meta as any).env?.VITE_REPLICATE_API_TOKEN as string | undefined) ||
@@ -53,6 +55,7 @@ function App() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('generator');
   const [step, setStep] = useState<Step>(Step.Prompt);
+  const [currentTraceId, setCurrentTraceId] = useState<string>('');
 
   // Router / Keys
   const [provider, setProvider] = useState<AIProvider>(() => readProvider());
@@ -152,6 +155,8 @@ function App() {
       return;
     }
 
+    const traceId = generateTraceId();
+    setCurrentTraceId(traceId);
     setStep(Step.Result);
     setGenerationState({ isLoading: true, error: null, resultImage: null });
 
@@ -161,7 +166,8 @@ function App() {
         replicateToken,
         referenceImages,
         settings,
-        provider
+        provider,
+        traceId
       );
       const pricing = MODEL_PRICING[settings.model];
       const estimatedCostUsd =
@@ -316,6 +322,7 @@ function App() {
               initialImage={batchToolImage}
               onBack={handleGoHome}
               geminiApiKey={geminiApiKey}
+              traceId={currentTraceId}
             />
           </div>
         )}

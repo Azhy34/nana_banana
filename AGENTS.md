@@ -20,3 +20,9 @@ This file tracks significant changes, architectural decisions, and logic updates
 ### 3. Architectural Refactoring: `useBatch.ts`
 - **Decision:** Extracted all state management, image processing, and event handler logic from `BatchGenerator.tsx` into a custom hook `hooks/useBatch.ts`.
 - **Reasoning:** `BatchGenerator.tsx` had become a "God Component" handling complex state and a 3-step wizard UI. This separation of concerns (Business Logic vs. UI) makes the component purely responsible for rendering and drastically improves maintainability.
+
+## Debugging & Log Analysis Rules
+
+- **Trigger:** Если пользователь просит проверить логи, выяснить причину ошибки/сбоя, проанализировать API-запросы или при фразах "почему ошибка?", "в чем проблема?" и подобных, вы **обязаны** первым делом прочитать инструкции в локальном скилле:
+  [log-trace-debugger](file:///.agents/skills/log-trace-debugger/SKILL.md)
+  и действовать строго по описанному там регламенту.
