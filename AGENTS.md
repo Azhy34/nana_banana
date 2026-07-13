@@ -26,3 +26,18 @@ This file tracks significant changes, architectural decisions, and logic updates
 - **Trigger:** Если пользователь просит проверить логи, выяснить причину ошибки/сбоя, проанализировать API-запросы или при фразах "почему ошибка?", "в чем проблема?" и подобных, вы **обязаны** первым делом прочитать инструкции в локальном скилле:
   [log-trace-debugger](file:///.agents/skills/log-trace-debugger/SKILL.md)
   и действовать строго по описанному там регламенту.
+
+## [2026-07-13] Trend Auditing & SEO Optimization Pipeline
+
+### 1. Trend Tracking Database
+- **Location:** [Promt/trends.json](file:///c:/Users/Mikhail/OneDrive/nocode/nana_banana/Promt/trends.json) contains the active database of styles, colors, materials, and keyObjects used to enrich wallpaper generator prompts.
+- **Goal:** Periodically update this database with fresh market data (USA, Germany, EU) to enrich prompts for wallpaper generation, design styles, and SEO listings.
+
+### 2. Market Trend Analysis Scripts
+- **OpenRouter Analyst Script:** [scripts/analyze_market_trends.cjs](file:///c:/Users/Mikhail/OneDrive/nocode/nana_banana/scripts/analyze_market_trends.cjs) queries Gemini via OpenRouter using core SEO keywords over the last 90 days (USA & EU) and updates the trends database dynamically.
+- **Google Trends RSS Script:** [scripts/fetch_google_trends_rss.cjs](file:///c:/Users/Mikhail/OneDrive/nocode/nana_banana/scripts/fetch_google_trends_rss.cjs) demonstrates how to safely retrieve real-time daily trending search feeds from Google Trends without requiring API keys.
+
+### 3. Etsy Listings Trend Catalog
+- **Location:** [C:\Users\Mikhail\OneDrive\nocode\Etsy\listings_trend_catalog.md](file:///C:/Users/Mikhail/OneDrive/nocode/Etsy/listings_trend_catalog.md) maps all 27+ active listings to their respective design themes, trend status (Hot, Stable, Declining), and action plans.
+- **Rule:** Future agents must keep this catalog updated when adding new listings or modifying styles. Use this catalog to audit low-performing or declining designs (e.g. replacing basic geometric mountains/balloons with high-volume biophilic forests/Japandi arches) and optimize their SEO metadata.
+
