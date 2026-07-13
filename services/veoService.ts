@@ -48,8 +48,7 @@ export async function generateVeoVideoOnClient(
       config: {
         aspectRatio: '9:16',
         durationSeconds: 6,
-        personGeneration: 'allow_adult',
-        enhancePrompt: false
+        personGeneration: 'allow_adult'
       }
     });
 

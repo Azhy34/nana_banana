@@ -82,7 +82,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         aspectRatio: '9:16',
         durationSeconds: 6,
         personGeneration: 'allow_adult',
-        enhancePrompt: false,
         ...(seed !== undefined && seed !== null ? { seed: Number(seed) } : {})
       }
     });
