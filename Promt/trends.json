@@ -1,83 +1,77 @@
 {
   "colors": [
     {
-      "name": "Wales Grey",
-      "description": "soft grey with blue undertone, modern and calm"
+      "name": "Soft Warm Neutrals",
+      "description": "Including muted beiges, gentle greys, and creamy off-whites, often forming a calming and sophisticated base."
     },
     {
-      "name": "Barberry",
-      "description": "soft berry-red, warm and elegant accent"
+      "name": "Earthy Tones",
+      "description": "Such as terracotta, olive green, dusty rose, and muted blues, connecting to nature and providing a grounding feel."
     },
     {
-      "name": "Bumblebee",
-      "description": "sunny yellow, soft and mood-lifting"
+      "name": "Bold, Playful Colors",
+      "description": "Vibrant and energetic hues like mustard yellow, emerald green, deep teals, and rich berry tones used as accents or for statement pieces."
     },
     {
-      "name": "Sage",
-      "description": "muted sage green, natural and fresh"
+      "name": "Pastels with Depth",
+      "description": "More sophisticated variations of traditional pastels, like dusty lavender, sage green, and muted peach."
     },
     {
-      "name": "Eucalyptus",
-      "description": "deep eucalyptus green, grounding and organic"
-    },
-    {
-      "name": "Cool Blue",
-      "description": "fresh cool blue, trending 2026 statement color"
-    },
-    {
-      "name": "Olivbraun",
-      "description": "olive-brown, earthy and warm"
-    },
-    {
-      "name": "Mustard",
-      "description": "warm mustard yellow, retro and cozy"
-    },
-    {
-      "name": "Cocoa",
-      "description": "warm brown, mushroom-cocoa tone, earthy base"
+      "name": "Deep Jewel Tones",
+      "description": "Rich and luxurious colors like sapphire blue, amethyst purple, and ruby red, used sparingly for impact and elegance."
     }
   ],
-
   "styles": [
     {
-      "name": "Japandi 2.0",
-      "description": "warm minimalism with character — light wood, soft tones, balance between warmth and freshness"
+      "name": "Japandi",
+      "description": "A harmonious blend of Japanese minimalism and Scandinavian warmth, emphasizing clean lines, natural materials, and a serene atmosphere."
     },
     {
-      "name": "Minimalismus 2.0",
-      "description": "bold colors in minimal interiors, matte metal accents, clean lines"
+      "name": "Montessori Inspired",
+      "description": "Focuses on creating an environment that fosters independence, exploration, and learning. Low-to-the-ground furniture, accessible storage, and natural materials are key."
     },
     {
-      "name": "Boho 2026",
-      "description": "ordered boho — structured, natural textiles, wood, plants, soft blankets — NO chaos"
+      "name": "Nature-Inspired / Biophilic",
+      "description": "Bringing the outdoors in with natural elements, patterns, and colors. Think botanical prints, wooden accents, and earthy palettes."
     },
     {
-      "name": "Retro 2026",
-      "description": "warm autumn tones, mustard and caramel, wood and geometric patterns"
+      "name": "Playful Modern",
+      "description": "Combines clean modern aesthetics with bold colors, whimsical patterns, and imaginative themes, often incorporating modular or multi-functional furniture."
     },
     {
-      "name": "Gender-Neutral",
-      "description": "nature-inspired motifs, flexible elements, grows with the child"
+      "name": "Whimsical Fantasy",
+      "description": "Themes like enchanted forests, outer space adventures, or fairy tales, often with hand-painted murals, themed textiles, and unique decorative elements."
     },
     {
-      "name": "Montessori",
-      "description": "child-level shelves, floor bed, open access to toys, natural materials throughout"
+      "name": "Vintage/Retro Revival",
+      "description": "Incorporating elements reminiscent of mid-century modern or 70s aesthetics, with vibrant colors, geometric patterns, and unique furniture shapes."
+    },
+    {
+      "name": "Geometric Minimalism",
+      "description": "Clean lines, geometric patterns, and a pared-down aesthetic, often with a focus on functionality and clear space."
     }
   ],
-
   "brands": [
     {
       "name": "Oliver Furniture",
       "origin": "Denmark",
       "aesthetic": "nordische Leichtigkeit — filigree forms, light birch and white, 100% Made in Europe",
-      "collections": ["Wood Original", "Seaside Classic", "Mini+"],
+      "collections": [
+        "Wood Original",
+        "Seaside Classic",
+        "Mini+"
+      ],
       "material": "solid birch + MDF, water-based lacquer"
     },
     {
       "name": "Paidi",
       "origin": "Germany",
       "aesthetic": "climate-neutral, toxin-free, mitwachsende Möbel (furniture that grows with the child)",
-      "collections": ["Fionn", "Sten", "Kira"],
+      "collections": [
+        "Fionn",
+        "Sten",
+        "Kira"
+      ],
       "material": "solid wood, Blauer Engel certified"
     },
     {
@@ -108,11 +102,14 @@
       "name": "IKEA",
       "origin": "Sweden",
       "aesthetic": "practical base furniture, popular Kura and Kallax combinations",
-      "collections": ["Kura", "Kallax", "Sundvik"],
+      "collections": [
+        "Kura",
+        "Kallax",
+        "Sundvik"
+      ],
       "material": "solid pine, MDF"
     }
   ],
-
   "ageGroups": {
     "baby": {
       "label": "Baby (0–3 years)",
@@ -139,7 +136,6 @@
       "extras": "plants, posters, LED ambient lighting strip, headphones on desk stand, minimal personal items"
     }
   },
-
   "keyObjects": [
     {
       "name": "Bodenbett",
@@ -202,7 +198,6 @@
       "ageGroup": "teenager"
     }
   ],
-
   "roomZones": [
     {
       "name": "sleep zone",
@@ -221,7 +216,6 @@
       "description": "desk as focal point against the wallpaper wall, focused and minimal atmosphere — wallpaper fills the background"
     }
   ],
-
   "lighting": [
     {
       "name": "warm afternoon sunlight",
@@ -248,13 +242,11 @@
       "description": "sunset light streaming in at low angle, rich warm gold tones across the room"
     }
   ],
-
   "cameraAngles": [
     "frontal — straight-on view of the wallpaper wall",
     "corner view — shot from corner of room, two walls visible, wallpaper wall dominant",
     "side view — shot from the side, wallpaper wall in the background"
   ],
-
   "cameraDistances": [
     {
       "name": "close-up",
@@ -269,7 +261,6 @@
       "description": "full room view, wallpaper as backdrop, full spatial context"
     }
   ],
-
   "depthOfField": [
     {
       "name": "shallow depth of field",
@@ -287,45 +278,42 @@
       "description": "entire room sharp from foreground to wall — used for wide shots showing full context"
     }
   ],
-
   "accessories": [
-    "woven jute basket",
-    "small rattan shelf with books",
-    "linen curtains in neutral tone",
-    "velvet blanket draped on bed or chair",
-    "large format nature poster (single, not gallery wall)",
-    "soft knit throw in muted color",
-    "macramé wall hanging (small)",
-    "ceramic plant pot with small leafy plant",
-    "woven cotton rug in warm neutral",
-    "linen lampshade with warm bulb",
-    "canvas storage bin in linen fabric",
-    "small succulent or cactus plant",
-    "minimalist framed art print (single)",
-    "small globe or world map on shelf",
-    "desk organizer with books and small plant",
-    "small wooden decorative objects on shelf"
+    "Textured rugs (wool, jute, cotton)",
+    "Wall decals and removable wallpaper (animal, botanical, geometric patterns)",
+    "Felt garlands and mobiles",
+    "Floor cushions and poufs",
+    "Open shelving for book and toy display",
+    "Montessori-friendly floor beds",
+    "Soft sculptural lighting fixtures",
+    "Hand-knitted or crocheted blankets",
+    "Wooden toys and play kitchens",
+    "Statement art prints (abstract, whimsical, nature-themed)",
+    "Woven baskets for storage",
+    "Plant hangers with indoor plants (child-safe varieties)",
+    "Canopies and play tents",
+    "Personalized items (name banners, custom art)",
+    "Modular storage units"
   ],
-
   "materials": [
-    "solid birch (Birke Massivholz)",
-    "solid oak (Eiche Massivholz)",
-    "solid beech (Buche Massivholz)",
-    "rattan",
-    "jute",
-    "bamboo",
-    "linen",
-    "cotton",
-    "cork",
-    "FSC-certified wood"
+    "Solid wood (FSC-certified)",
+    "Organic cotton",
+    "Linen",
+    "Bamboo",
+    "Wool",
+    "Jute",
+    "Rattan",
+    "Cork",
+    "Recycled plastics (for durable toys/storage)",
+    "Water-based, non-toxic paints and finishes",
+    "Natural rubber",
+    "Felt made from recycled materials"
   ],
-
   "germanApartmentContext": {
     "floorType": "light oak parquet (Eichenparkett)",
     "roomSize": "approx. 10–14 m²",
     "ceilingHeight": "2.6–3.0 m high ceiling",
     "windows": "large window with deep sill, typical German apartment style"
   },
-
   "negativePrompt": "no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders"
 }
