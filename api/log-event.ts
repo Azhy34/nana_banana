@@ -17,12 +17,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { sessionId, model, prompt, cost, duration, status, error, traceId } = req.body;
+  const { sessionId, model, prompt, cost, duration, status, error, traceId, negativePrompt } = req.body;
   const timestamp = new Date().toISOString();
 
   // 1. Format and write to server/console stdout in structured JSON format
   console.log(JSON.stringify({
-    message: `[GEMINI LOG] [Session: ${sessionId}] [Model: ${model}] [Status: ${status}] cost=$${Number(cost).toFixed(4)} duration=${Number(duration).toFixed(1)}s ${error ? `error="${error}"` : ''} prompt="${prompt}"`,
+    message: `[GEMINI LOG] [Session: ${sessionId}] [Model: ${model}] [Status: ${status}] cost=$${Number(cost).toFixed(4)} duration=${Number(duration).toFixed(1)}s ${error ? `error="${error}"` : ''} prompt="${prompt}"${negativePrompt ? ` negativePrompt="${negativePrompt}"` : ''}`,
     severity: status === 'error' ? 'ERROR' : 'INFO',
     "logging.googleapis.com/trace": traceId ? `projects/pro-import-agent/traces/${traceId}` : undefined,
     labels: {
@@ -55,6 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         timestamp,
         model,
         prompt,
+        negativePrompt,
         cost,
         duration,
         status,
@@ -97,6 +98,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         timestamp,
         model,
         prompt,
+        negativePrompt,
         cost,
         duration,
         status,

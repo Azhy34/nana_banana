@@ -72,7 +72,8 @@ export const logGeminiEvent = async (
   duration: number,
   status: "success" | "error",
   error: string | null = null,
-  traceId?: string
+  traceId?: string,
+  negativePrompt?: string
 ) => {
   try {
     const sessionId = getSessionId();
@@ -90,6 +91,7 @@ export const logGeminiEvent = async (
         status,
         error,
         traceId,
+        negativePrompt,
       }),
     });
   } catch (err) {
@@ -519,11 +521,11 @@ export const generateImageComposition = async (
     const duration = (Date.now() - startTime) / 1000;
     const cost = (result.usage.promptTokens / 1_000_000) * pricing.inputPer1M + pricing.outputPerImage;
 
-    logGeminiEvent(settings.model, settings.prompt, cost, duration, "success", null, traceId);
+    logGeminiEvent(settings.model, settings.prompt, cost, duration, "success", null, traceId, undefined);
     return result;
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(settings.model, settings.prompt, 0.0, duration, "error", err.message || "Unknown error", traceId);
+    logGeminiEvent(settings.model, settings.prompt, 0.0, duration, "error", err.message || "Unknown error", traceId, undefined);
     throw err;
   }
 };

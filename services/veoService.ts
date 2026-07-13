@@ -31,7 +31,7 @@ export async function generateVeoVideoOnClient(
  
   // 3. Trigger video generation LRO
   try {
-    logGeminiEvent('veo-3.1-fast-generate-preview', `Video Start: ${settings.customPrompt}`, 0, 0, 'success', null, traceId);
+    logGeminiEvent('veo-3.1-fast-generate-preview', `Video Start: ${settings.customPrompt}`, 0, 0, 'success', null, traceId, negativePrompt);
  
     const operation = await ai.models.generateVideos({
       model: 'veo-3.1-fast-generate-preview',
@@ -87,7 +87,7 @@ export async function generateVeoVideoOnClient(
         throw new Error("No video returned in the Gemini API response.");
       }
 
-      logGeminiEvent('veo-3.1-fast-generate-preview', `Video Success: ${settings.customPrompt}`, 0.60, 6.0, 'success', null, traceId);
+      logGeminiEvent('veo-3.1-fast-generate-preview', `Video Success: ${settings.customPrompt}`, 0.60, 6.0, 'success', null, traceId, negativePrompt);
 
       const videoBytes = generatedVideo.video.videoBytes;
       if (videoBytes) {
@@ -104,7 +104,7 @@ export async function generateVeoVideoOnClient(
       throw error;
     }
   } catch (error: any) {
-    logGeminiEvent('veo-3.1-fast-generate-preview', `Video Error: ${settings.customPrompt}`, 0, 0, 'error', error.message || String(error), traceId);
+    logGeminiEvent('veo-3.1-fast-generate-preview', `Video Error: ${settings.customPrompt}`, 0, 0, 'error', error.message || String(error), traceId, negativePrompt);
     throw error;
   }
 }
