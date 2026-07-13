@@ -29,20 +29,20 @@ export const VEO_MODEL_OPTIONS = [
 export const VEO_PRICING_PER_SECOND_USD = 0.10; // Video + Audio rate
 
 export const VEO_NEGATIVE_PROMPT = 
-  "morphing wallpaper pattern, different wall color, morphing wall texture, warped walls, shifting print, repainted wall, new wall art appearing, camera shake, scene change, furniture moving, objects appearing or disappearing, text, watermark, bad quality, blurry";
+  "morphing wallpaper pattern, drawing new elements on the wall, new moons appearing, doubling moon, shifting moon, morphing arches, changing wallpaper motifs, animating the wallpaper design, moving wall prints, different wall color, morphing wall texture, warped walls, shifting print, repainted wall, new wall art appearing, camera shake, scene change, furniture moving, objects appearing or disappearing, text, watermark, bad quality, blurry";
 
 export const VEO_PRESETS = {
   dolly_in: {
     label: "Медленный наезд камеры (Dolly-In)",
-    prompt: "An extremely slow, steady, and smooth cinematic camera push-in while gently panning and sliding sideways to reveal the extended wallpaper mural. The camera tracks diagonally across the room, focusing on showing the wallpaper pattern. The wallpaper behaves strictly as a static flat print on the wall with zero changes, zero morphing, and no new details appearing. High-end catalog style."
+    prompt: "An extremely slow, steady, and smooth cinematic camera push-in while gently panning and sliding sideways to reveal the extended wallpaper mural. The camera tracks diagonally across the room, focusing on showing the wallpaper pattern. The wallpaper behaves strictly as a static flat print on the wall with zero changes, zero morphing, and no new details appearing. All design elements on the wallpaper, including the arches, moon, and stars, are completely static and fixed, and do not move, shift, double, or animate. High-end catalog style."
   },
   ambient: {
     label: "Легкое оживление / Живое фото (Ambient)",
-    prompt: "A static cinematic shot with a very slow, subtle horizontal camera drift (panning gently left-to-right). The camera captures gentle natural micro-movements in the room. The wallpaper design on the back wall remains perfectly static, flat, and unchanged. High-end lifestyle catalog style."
+    prompt: "A static cinematic shot with a very slow, subtle horizontal camera drift (panning gently left-to-right). The camera captures gentle natural micro-movements in the room. The wallpaper design on the back wall remains perfectly static, flat, and unchanged. All design elements on the wallpaper, including the arches, moon, and stars, are completely static and fixed, and do not move, shift, double, or animate. High-end lifestyle catalog style."
   },
   dolly_out: {
     label: "Плавный отъезд камеры (Dolly-Out)",
-    prompt: "An extremely slow, steady, and smooth cinematic camera pull-back while gently tracking sideways to show more of the room and the full width of the wallpaper mural. The camera moves backward and slides horizontally. The wallpaper design remains a flat, non-moving print on the wall with zero morphing or details changing. High quality."
+    prompt: "An extremely slow, steady, and smooth cinematic camera pull-back while gently tracking sideways to show more of the room and the full width of the wallpaper mural. The camera moves backward and slides horizontally. The wallpaper design remains a flat, non-moving print on the wall with zero morphing or details changing. All design elements on the wallpaper, including the arches, moon, and stars, are completely static and fixed, and do not move, shift, double, or animate. High quality."
   }
 };
 
