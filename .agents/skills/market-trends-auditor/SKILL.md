@@ -35,3 +35,15 @@ Use the updated styles and colors in `trends.json` to feed the Batch Generator. 
 *   **Modern Boho** focuses on clean, structured textures (rattan, jute, linen) with warm clay/terracotta accents.
 *   **Japandi** balances warm wood, neutral tones, and low-profile furniture.
 *   **Biophilic Forest** focuses on realistic misty watercolor layers instead of cartoons.
+
+---
+
+## 🔍 Google Trends Advanced Querying (Punctuation & Syntax)
+
+To get accurate, clean, and relevant search volume trends from Google Trends (either via manual export or scripting), always use these operators:
+
+1. **Exact Match (`"phrase"`)**: Use double quotes (e.g., `"nursery wallpaper"`) to track the exact keyword phrase. This excludes variants with words in between and shows accurate SEO search demand.
+2. **Logical OR (`+` or `OR`)**: Combine similar terms to assess total niche size (e.g., `"boho nursery" + "modern boho"`).
+3. **Exclude Term (`-`)**: Strip out unwanted terms (e.g., `wallpaper -peel` or `tapete -selbstklebend`). This is critical because our wallpapers are strictly traditional paste-the-wall.
+4. **Google Image Filter**: When analyzing trends manually on the Google Trends portal, change the search property filter from *Web Search* to *Image Search* to see visual-first interest trends.
+
