@@ -65,15 +65,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 2. Initialize Google Gen AI client
     const ai = new GoogleGenAI({ apiKey: veoApiKey });
 
-    // 3. Combine prompt and negative prompt
-    const combinedPrompt = negativePrompt ? `${prompt} Negative prompt: ${negativePrompt}` : prompt;
-
-    logMessage(`[Veo API] Triggering generation on Google. Seed=${seed}, Prompt length=${combinedPrompt.length}`);
+    logMessage(`[Veo API] Triggering generation on Google. Seed=${seed}, Prompt length=${prompt.length}`);
 
     // 4. Trigger Long-Running Operation (LRO)
     const operation = await ai.models.generateVideos({
       model: 'veo-3.1-fast-generate-001',
-      prompt: combinedPrompt,
+      prompt: prompt,
       image: {
         imageBytes: base64Image,
         mimeType: 'image/jpeg'
@@ -82,6 +79,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         aspectRatio: '9:16',
         durationSeconds: 6,
         personGeneration: 'allow_adult',
+        negativePrompt: negativePrompt || undefined,
         ...(seed !== undefined && seed !== null ? { seed: Number(seed) } : {})
       }
     });
