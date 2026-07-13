@@ -96,12 +96,11 @@ export async function generateVeoVideoOnClient(
         let uri = generatedVideo.video.uri;
         if (uri.startsWith('http')) {
           const baseUrl = uri.split('?')[0];
-          const queryParams = uri.split('?')[1] || '';
-          if (!baseUrl.endsWith(':download')) {
-            uri = `${baseUrl}:download`;
+          let downloadUrlBase = baseUrl;
+          if (!downloadUrlBase.endsWith(':download')) {
+            downloadUrlBase = `${downloadUrlBase}:download`;
           }
-          const separator = queryParams ? `?${queryParams}&` : '?';
-          downloadUrl = `${uri}${separator}alt=media&key=${apiKey}`;
+          downloadUrl = `${downloadUrlBase}?alt=media&key=${apiKey}`;
         } else {
           downloadUrl = uri;
         }
