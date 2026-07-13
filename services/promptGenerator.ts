@@ -96,13 +96,43 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     ? "The composition is strictly optimized for selling the wallpaper: furniture is strategically kept low or positioned at dynamic angles to guarantee a massive, unobstructed, panoramic view of the feature wall. The wall occupies the absolute majority of the frame."
     : "The shot is composed from a slightly lower, waist-level perspective (adapted for a child's scale), expanding the spatial depth and elevating the grandeur of the wallpapered wall while maintaining a natural room layout.";
 
+  const insights = (trendsData as any).latestMarketInsights as {
+    colors?: Array<{ name: string; description: string }>;
+    styles?: Array<{ name: string; description: string }>;
+    accessories?: string[];
+    materials?: string[];
+  } | undefined;
+  let trendingNotes = '';
+  let activeAccessories = [...tags.accessories];
+  let activeMaterials = naturalMaterials;
+
+  if (insights) {
+    // 50% chance to weave in a trending color accent
+    if (Math.random() < 0.5 && insights.colors && insights.colors.length > 0) {
+      const trendingColor = pick(insights.colors);
+      trendingNotes += ` Subtle color accents of ${trendingColor.name} (${trendingColor.description}) are woven throughout the decor to align with current 90-day design trends.`;
+    }
+    // 50% chance to add a trending accessory
+    if (Math.random() < 0.5 && insights.accessories && insights.accessories.length > 0) {
+      const trendingAcc = pick(insights.accessories);
+      if (!activeAccessories.includes(trendingAcc)) {
+        activeAccessories.push(trendingAcc);
+      }
+    }
+    // 50% chance to add a trending organic material
+    if (Math.random() < 0.5 && insights.materials && insights.materials.length > 0) {
+      const trendingMat = pick(insights.materials);
+      activeMaterials += `, ${trendingMat.toLowerCase()}`;
+    }
+  }
+
   let promptText = `This is a high-end product listing photograph for an interior wallpaper. The provided reference image is a single full-scale wall mural (not a repeating tileable pattern). It is strictly mandatory that this entire reference image is mapped and stretched onto the feature wall from edge to edge, as a single, continuous, seamless mural without any repeating, tiling, cuts, or visible seams. The bottom of the reference image must align perfectly with the floor/baseboard, and the top of the reference image must reach the ceiling. Do not alter the colors, scale, or design details. The wallpaper is the absolute visual hero of this image.
 
 This is a premium, high-end editorial photograph of a children's bedroom for a luxury interior design magazine like Architectural Digest. The scene is masterfully designed in a ${styleData?.name ?? tags.style} style (${styleData?.description ?? ''}), radiating an atmosphere of Nachhaltigkeit (eco-friendliness), Gemütlichkeit (coziness), and quiet sophistication. The lighting is exceptionally natural, soft, and balanced, highlighting the matte paper texture of the wallpaper and the natural grain of the solid wood furniture. Avoid any cheap plastic surfaces, artificial lighting, or digital clutter. The room is sophisticated, warm, and inviting.
 
 The room features a ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material}. This central piece is situated on a classic ${trendsData.germanApartmentContext.floorType} within a spacious room boasting a ${trendsData.germanApartmentContext.ceilingHeight}. The overall scene unfolds as: ${keyObjData?.description ?? tags.keyObject}. ${compositionText}
 
-The space is immaculately styled and exceptionally organized, strictly utilizing natural materials such as ${naturalMaterials}. The decor is tastefully accented with ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}) and thoughtfully placed accessories, including ${tags.accessories.join(', ')}. The room blends magazine-level styling with curated, authentic lifestyle touches—a softly draped linen throw, an open beautifully illustrated book, or a wooden toy catching a stray sunbeam. It feels incredibly inviting and playful yet serene, avoiding sterile 3D-render aesthetics entirely. Additional context: ${ageData?.extras ?? ''}. The environment is completely devoid of plastic, clutter, or visual noise, maintaining a premium and flawless look.
+The space is immaculately styled and exceptionally organized, strictly utilizing natural materials such as ${activeMaterials}. The decor is tastefully accented with ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}) and thoughtfully placed accessories, including ${activeAccessories.join(', ')}.${trendingNotes} The room blends magazine-level styling with curated, authentic lifestyle touches—a softly draped linen throw, an open beautifully illustrated book, or a wooden toy catching a stray sunbeam. It feels incredibly inviting and playful yet serene, avoiding sterile 3D-render aesthetics entirely. Additional context: ${ageData?.extras ?? ''}. The environment is completely devoid of plastic, clutter, or visual noise, maintaining a premium and flawless look.
 
 The photograph is taken from a ${tags.cameraAngle} using a ${camDistData?.name ?? tags.cameraDistance} (${camDistData?.description ?? ''}), combined with a ${dofData?.name ?? tags.depthOfField} (${dofData?.setting ?? ''}) to ensure the majestic wallpapered wall remains perfectly sharp and clearly visible. ${tags.cinematicDetail}
 
