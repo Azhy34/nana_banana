@@ -47,3 +47,10 @@ To get accurate, clean, and relevant search volume trends from Google Trends (ei
 3. **Exclude Term (`-`)**: Strip out unwanted terms (e.g., `wallpaper -peel` or `tapete -selbstklebend`). This is critical because our wallpapers are strictly traditional paste-the-wall.
 4. **Google Image Filter**: When analyzing trends manually on the Google Trends portal, change the search property filter from *Web Search* to *Image Search* to see visual-first interest trends.
 
+## 📊 Google Trends Data Mechanics (Normalization & Relative Indexing)
+
+When reading Google Trends metrics, keep these data design facts in mind:
+1. **Not Absolute Search Volume**: The index (0 to 100) does not represent the absolute number of searches. It represents the relative search interest (the ratio of a query's search volume to the total search volume of that region at that specific time).
+2. **Population Normalization**: Because Google normalizes data by total regional volume, you can directly compare smaller markets (like Germany or specific EU countries) with giant markets (like the USA) without population skewing the results.
+3. **Sampling Accuracy**: Google Trends uses a representative, randomized sample of daily Google search data. This ensures fast, real-time feedback that is statistically equivalent to the full search volume database.
+4. **Topics vs Search Terms**: Prefer "Topics" (e.g. general design concepts) for broad international trend research, but use exact "Search Terms" (using punctuation operators) for precise SEO copywriting and keyphrase placement.
