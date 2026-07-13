@@ -231,27 +231,27 @@
   "lighting": [
     {
       "name": "warm afternoon sunlight",
-      "description": "15:00 soft sunlight through linen curtains, golden tones, gentle shadows on parquet"
+      "description": "soft golden sunlight at 15:00 streaming through linen curtains, warm amber tones, gentle soft shadows on parquet"
     },
     {
-      "name": "overcast Nordic daylight",
-      "description": "diffused cloudy light, even and cool, no harsh shadows — typical German autumn day"
+      "name": "warm morning sunbeams",
+      "description": "bright golden morning sunbeams streaming through the window, creating a warm, vibrant, and cozy glow across the room"
     },
     {
       "name": "warm pendant lamp at dusk",
-      "description": "evening, main ceiling lamp glowing warm amber, cozy Gemütlichkeit atmosphere"
+      "description": "evening, main ceiling lamp glowing warm amber, cozy Gemütlichkeit atmosphere with a warm light balance"
     },
     {
-      "name": "morning soft light",
-      "description": "early morning, pale soft sunlight, fresh and calm"
+      "name": "warm soft morning light",
+      "description": "early morning pale soft sunlight with warm golden undertones, fresh, calm, and cozy"
     },
     {
       "name": "fairy lights evening",
-      "description": "dark outside, warm fairy lights strung around the room, magical cozy mood"
+      "description": "dark outside, warm golden fairy lights glowing around the room, magical cozy mood with warm color balance"
     },
     {
       "name": "golden hour",
-      "description": "sunset light streaming in at low angle, rich warm gold tones across the room"
+      "description": "sunset light streaming in at a low angle, rich warm gold tones and amber lighting across the room"
     }
   ],
   "cameraAngles": [
