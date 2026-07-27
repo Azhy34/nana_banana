@@ -317,7 +317,6 @@ function App() {
             initialImage={batchToolImage}
             onBack={handleGoHome}
             geminiApiKey={geminiApiKey}
-            traceId={currentTraceId}
           />
         </div>
       </main>

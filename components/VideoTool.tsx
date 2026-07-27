@@ -3,15 +3,15 @@ import { generateVeoVideoOnClient } from '../services/veoService';
 import { VEO_PRESETS, VEO_NEGATIVE_PROMPT, VEO_PRICING_PER_SECOND_USD } from '../constants';
 import { VideoJobSettings, VideoGenerationState } from '../types';
 import { downloadImage } from '../services/downloadService';
+import { generateTraceId } from '../utils/tracing';
 
 interface VideoToolProps {
   initialImage?: string | null;
   onBack?: () => void;
   geminiApiKey?: string;
-  traceId?: string;
 }
 
-export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, geminiApiKey, traceId }) => {
+export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, geminiApiKey }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Settings
@@ -108,6 +108,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     });
 
     try {
+      const traceId = generateTraceId();
       const videoUrl = await generateVeoVideoOnClient(
         sourceImage,
         settings,
