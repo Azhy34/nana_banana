@@ -1,5 +1,5 @@
 import { GoogleGenAI, Part } from "@google/genai";
-import { AIProvider, GenerationSettings, GenerationUsage, ModelType, UploadedImage } from "../types";
+import { AIProvider, GenerationSettings, GenerationUsage, GeminiLogDetails, ModelType, UploadedImage } from "../types";
 import { MODEL_PRICING } from "../constants";
 import { getSessionId } from "./sessionTracker";
 
@@ -70,10 +70,11 @@ export const logGeminiEvent = async (
   prompt: string,
   cost: number,
   duration: number,
-  status: "success" | "error",
+  status: "success" | "error" | "started",
   error: string | null = null,
   traceId?: string,
-  negativePrompt?: string
+  negativePrompt?: string,
+  details?: GeminiLogDetails
 ) => {
   try {
     const sessionId = getSessionId();
@@ -92,6 +93,7 @@ export const logGeminiEvent = async (
         error,
         traceId,
         negativePrompt,
+        ...details,
       }),
     });
   } catch (err) {

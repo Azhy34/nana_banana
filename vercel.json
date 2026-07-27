@@ -1,7 +1,5 @@
 {
   "functions": {
-    "api/animate.ts": { "maxDuration": 30 },
-    "api/animate/poll.ts": { "maxDuration": 60 },
     "api/upscale.ts": { "maxDuration": 30 },
     "api/upscale/poll.ts": { "maxDuration": 60 }
   },

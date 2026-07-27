@@ -1,6 +1,13 @@
 import { GoogleGenAI } from '@google/genai';
-import { VideoJobSettings } from '../types';
+import { VideoJobSettings, GeminiLogDetails } from '../types';
 import { logGeminiEvent } from './geminiService';
+import {
+  VEO_MODEL_ID,
+  VEO_FIXED_DURATION_SECONDS,
+  VEO_FIXED_ASPECT_RATIO,
+  VEO_PERSON_GENERATION,
+  getVeoCostUsd
+} from '../constants';
 
 /**
  * Generates Veo video completely on the client side (browser)
@@ -28,25 +35,41 @@ export async function generateVeoVideoOnClient(
  
   // Clean base64 prefix if present
   const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");
- 
+
+  const requestDetails: GeminiLogDetails = {
+    aspectRatio: VEO_FIXED_ASPECT_RATIO,
+    durationSeconds: VEO_FIXED_DURATION_SECONDS,
+    personGeneration: VEO_PERSON_GENERATION,
+    seed: settings.seed,
+  };
+
+  let operationName: string | undefined;
+
   // 3. Trigger video generation LRO
   try {
-    logGeminiEvent('veo-3.1-fast-generate-preview', `Video Start: ${settings.customPrompt}`, 0, 0, 'success', null, traceId, negativePrompt);
- 
+    logGeminiEvent(VEO_MODEL_ID, `Video Start: ${settings.customPrompt}`, 0, 0, 'started', null, traceId, negativePrompt, requestDetails);
+
     const operation = await ai.models.generateVideos({
-      model: 'veo-3.1-fast-generate-preview',
+      model: VEO_MODEL_ID,
       prompt: settings.customPrompt,
       image: {
         imageBytes: cleanBase64,
         mimeType: 'image/jpeg'
       },
       config: {
-        aspectRatio: '9:16',
-        durationSeconds: 6,
-        personGeneration: 'allow_adult',
+        aspectRatio: VEO_FIXED_ASPECT_RATIO,
+        durationSeconds: VEO_FIXED_DURATION_SECONDS,
+        personGeneration: VEO_PERSON_GENERATION,
+        // NOTE: `seed` is intentionally NOT sent — confirmed via live test that the
+        // Gemini Developer API (mldev) backend rejects it client-side with
+        // "seed parameter is not supported in Gemini API." (Vertex AI-only field).
+        // settings.seed is still logged (see requestDetails) purely for correlation
+        // with the download filename, and is used nowhere in the actual request.
         negativePrompt: negativePrompt || undefined
       }
     });
+
+    operationName = operation.name;
 
     if (onProgress) onProgress(30);
 
@@ -71,10 +94,14 @@ export async function generateVeoVideoOnClient(
       if (onProgress) onProgress(100);
 
       if (polledOp.error) {
-        const errMsg = typeof polledOp.error.message === 'string' 
-          ? polledOp.error.message 
-          : JSON.stringify(polledOp.error);
-        throw new Error(`Video generation failed: ${errMsg}`);
+        const errObj = polledOp.error as Record<string, unknown>;
+        const errMsg = typeof errObj.message === 'string'
+          ? errObj.message
+          : JSON.stringify(errObj);
+        const err: any = new Error(`Video generation failed: ${errMsg}`);
+        if (errObj.code !== undefined) err.code = errObj.code;
+        if (errObj.status !== undefined) err.status = errObj.status;
+        throw err;
       }
 
       const result = polledOp.response;
@@ -82,9 +109,15 @@ export async function generateVeoVideoOnClient(
         throw new Error("No response returned from the completed operation.");
       }
 
+      const raiMediaFilteredCount = result.raiMediaFilteredCount;
+      const raiMediaFilteredReasons = result.raiMediaFilteredReasons;
+
       const generatedVideo = result.generatedVideos?.[0];
       if (!generatedVideo || !generatedVideo.video) {
-        throw new Error("No video returned in the Gemini API response.");
+        const err: any = new Error("No video returned in the Gemini API response.");
+        if (raiMediaFilteredCount) err.raiMediaFilteredCount = raiMediaFilteredCount;
+        if (raiMediaFilteredReasons?.length) err.raiMediaFilteredReasons = raiMediaFilteredReasons;
+        throw err;
       }
 
       const videoBytes = generatedVideo.video.videoBytes;
@@ -107,14 +140,20 @@ export async function generateVeoVideoOnClient(
       }
 
       logGeminiEvent(
-        'veo-3.1-fast-generate-preview', 
-        `Video Success: ${settings.customPrompt} | Output: ${downloadUrl.split('key=')[0]}${downloadUrl.includes('key=') ? 'key=[REDACTED]' : ''}`, 
-        0.60, 
-        6.0, 
-        'success', 
-        null, 
-        traceId, 
-        negativePrompt
+        VEO_MODEL_ID,
+        `Video Success: ${settings.customPrompt} | Output: ${downloadUrl.split('key=')[0]}${downloadUrl.includes('key=') ? 'key=[REDACTED]' : ''}`,
+        getVeoCostUsd(VEO_FIXED_DURATION_SECONDS),
+        VEO_FIXED_DURATION_SECONDS,
+        'success',
+        null,
+        traceId,
+        negativePrompt,
+        {
+          ...requestDetails,
+          operationName,
+          raiMediaFilteredCount: raiMediaFilteredCount || undefined,
+          raiMediaFilteredReasons: raiMediaFilteredReasons?.length ? raiMediaFilteredReasons : undefined,
+        }
       );
 
       if (downloadUrl) {
@@ -127,7 +166,22 @@ export async function generateVeoVideoOnClient(
       throw error;
     }
   } catch (error: any) {
-    logGeminiEvent('veo-3.1-fast-generate-preview', `Video Error: ${settings.customPrompt}`, 0, 0, 'error', error.message || String(error), traceId, negativePrompt);
+    logGeminiEvent(
+      VEO_MODEL_ID,
+      `Video Error: ${settings.customPrompt}`,
+      0, 0, 'error',
+      error.message || String(error),
+      traceId,
+      negativePrompt,
+      {
+        ...requestDetails,
+        operationName,
+        errorCode: error.code,
+        errorStatus: error.status,
+        raiMediaFilteredCount: error.raiMediaFilteredCount,
+        raiMediaFilteredReasons: error.raiMediaFilteredReasons,
+      }
+    );
     throw error;
   }
 }

@@ -97,10 +97,6 @@ export interface UpscaleState {
   upscaledImage: string | null;
 }
 
-export type VeoModel = 'veo-3.1-fast-generate-001';
-export type VeoAspectRatio = '9:16';
-export type VeoDuration = 6;
-
 export interface VideoJobSettings {
   promptPreset: 'dolly_in' | 'ambient' | 'dolly_out';
   customPrompt: string;
@@ -116,5 +112,18 @@ export interface VideoGenerationState {
   progress: number; // 0 to 100
   error: string | null;
   resultVideoUrl: string | null;
+  lastRunCostUsd?: number;
+}
+
+export interface GeminiLogDetails {
+  aspectRatio?: string;
+  durationSeconds?: number;
+  personGeneration?: string;
+  seed?: number;
+  operationName?: string;
+  raiMediaFilteredCount?: number;
+  raiMediaFilteredReasons?: string[];
+  errorCode?: string | number;
+  errorStatus?: string;
 }
 

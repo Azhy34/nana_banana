@@ -17,12 +17,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { sessionId, model, prompt, cost, duration, status, error, traceId, negativePrompt } = req.body;
+  const {
+    sessionId, model, prompt, cost, duration, status, error, traceId, negativePrompt,
+    aspectRatio, durationSeconds, personGeneration, seed, operationName,
+    raiMediaFilteredCount, raiMediaFilteredReasons, errorCode, errorStatus
+  } = req.body;
   const timestamp = new Date().toISOString();
 
   // 1. Format and write to server/console stdout in structured JSON format
+  const detailsSummary = [
+    seed !== undefined ? `seed=${seed}` : null,
+    aspectRatio ? `aspectRatio=${aspectRatio}` : null,
+    durationSeconds !== undefined ? `duration=${durationSeconds}s` : null,
+    personGeneration ? `personGeneration=${personGeneration}` : null,
+    operationName ? `operation=${operationName}` : null,
+    raiMediaFilteredCount ? `raiFiltered=${raiMediaFilteredCount}` : null,
+    Array.isArray(raiMediaFilteredReasons) && raiMediaFilteredReasons.length ? `raiReasons="${raiMediaFilteredReasons.join('; ')}"` : null,
+    errorCode !== undefined ? `errorCode=${errorCode}` : null,
+    errorStatus ? `errorStatus=${errorStatus}` : null,
+  ].filter(Boolean).join(' ');
+
   console.log(JSON.stringify({
-    message: `[GEMINI LOG] [Session: ${sessionId}] [Model: ${model}] [Status: ${status}] cost=$${Number(cost).toFixed(4)} duration=${Number(duration).toFixed(1)}s ${error ? `error="${error}"` : ''} prompt="${prompt}"${negativePrompt ? ` negativePrompt="${negativePrompt}"` : ''}`,
+    message: `[GEMINI LOG] [Session: ${sessionId}] [Model: ${model}] [Status: ${status}] cost=$${Number(cost).toFixed(4)} duration=${Number(duration).toFixed(1)}s ${error ? `error="${error}"` : ''} prompt="${prompt}"${negativePrompt ? ` negativePrompt="${negativePrompt}"` : ''}${detailsSummary ? ` ${detailsSummary}` : ''}`,
     severity: status === 'error' ? 'ERROR' : 'INFO',
     "logging.googleapis.com/trace": traceId ? `projects/pro-import-agent/traces/${traceId}` : undefined,
     labels: {
@@ -31,6 +47,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       status
     }
   }));
+
+  const eventRecord = {
+    timestamp,
+    model,
+    prompt,
+    negativePrompt,
+    cost,
+    duration,
+    status,
+    error,
+    traceId,
+    aspectRatio,
+    durationSeconds,
+    personGeneration,
+    seed,
+    operationName,
+    raiMediaFilteredCount,
+    raiMediaFilteredReasons,
+    errorCode,
+    errorStatus
+  };
 
   const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
@@ -51,17 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      sessionLogs.events.push({
-        timestamp,
-        model,
-        prompt,
-        negativePrompt,
-        cost,
-        duration,
-        status,
-        error,
-        traceId
-      });
+      sessionLogs.events.push(eventRecord);
 
       // Write back to Vercel Blob (overwriting the old one)
       await put(`sessions/${sessionId}.json`, JSON.stringify(sessionLogs, null, 2), {
@@ -95,17 +122,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         };
       }
 
-      data[sessionId].events.push({
-        timestamp,
-        model,
-        prompt,
-        negativePrompt,
-        cost,
-        duration,
-        status,
-        error,
-        traceId
-      });
+      data[sessionId].events.push(eventRecord);
 
       fs.writeFileSync(logFilePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (err) {

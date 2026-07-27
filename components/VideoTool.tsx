@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { generateVeoVideoOnClient } from '../services/veoService';
-import { VEO_PRESETS, VEO_NEGATIVE_PROMPT, VEO_PRICING_PER_SECOND_USD } from '../constants';
+import { VEO_PRESETS, VEO_NEGATIVE_PROMPT, VEO_FIXED_DURATION_SECONDS, getVeoCostUsd } from '../constants';
 import { VideoJobSettings, VideoGenerationState } from '../types';
 import { downloadImage } from '../services/downloadService';
 import { generateTraceId } from '../utils/tracing';
@@ -44,7 +44,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     }
   }, [initialImage]);
 
-  const [estimatedCost] = useState(6 * VEO_PRICING_PER_SECOND_USD);
+  const estimatedCost = getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
   const [isDownloading, setIsDownloading] = useState(false);
 
   // Sync preset choice with prompt text
@@ -124,7 +124,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         isLoading: false,
         progress: 100,
         error: null,
-        resultVideoUrl: videoUrl
+        resultVideoUrl: videoUrl,
+        lastRunCostUsd: getVeoCostUsd(VEO_FIXED_DURATION_SECONDS),
       });
 
     } catch (err: any) {
@@ -185,7 +186,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                     {VEO_PRESETS[key].label}
                   </span>
                   <span className="text-xs opacity-75 mt-1 leading-relaxed">
-                    {key === 'dolly_in' ? 'Плавный наезд камеры на кроватку.' : key === 'ambient' ? 'Легкие микро-движения в кадре (идеально для людей).' : 'Камера плавно отдаляется назад.'}
+                    {key === 'dolly_in' ? 'Плавный наезд камеры на кроватку.' : key === 'ambient' ? 'Лёгкое изменение света и тени, без движения объектов.' : 'Камера плавно отдаляется назад.'}
                   </span>
                 </button>
               ))}
@@ -211,7 +212,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               placeholder="Введите число от 0 до 4294967295"
             />
             <span className="text-[10px] text-slate-500 mt-2 block">
-              Фиксированный seed позволяет получать предсказуемое движение камеры на одном и том же макете.
+              Из-за ограничений текущей версии Gemini API этот параметр пока не влияет на саму генерацию — используется только в имени файла при скачивании, для удобства сравнения версий.
             </span>
           </div>
 
@@ -223,7 +224,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Длительность:</span>
-              <span className="text-white font-bold font-mono">6 секунд</span>
+              <span className="text-white font-bold font-mono">{VEO_FIXED_DURATION_SECONDS} секунд</span>
             </div>
             <div className="flex justify-between text-sm pt-2 border-t border-slate-700/50">
               <span className="text-slate-400">Расчетная стоимость:</span>
@@ -286,7 +287,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                 </div>
                 <div className="text-center bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-xl">
                   <p className="text-slate-400 text-xs mb-0.5">Итоговая стоимость генерации:</p>
-                  <p className="text-green-400 font-bold font-mono text-base">${estimatedCost.toFixed(2)}</p>
+                  <p className="text-green-400 font-bold font-mono text-base">${(state.lastRunCostUsd ?? estimatedCost).toFixed(2)}</p>
                 </div>
                 <button
                   onClick={handleDownload}

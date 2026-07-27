@@ -84,7 +84,9 @@ VideoTool.tsx ──▶ veoService.ts ──▶ POST /api/animate  ──▶ Gem
 
 ---
 
-## 📝 План внедрения Veo-анимации на сайт (TODO List)
+> **⚠️ Примечание (актуализация):** реальная реализация пошла другим путём, чем описано в TODO-списке ниже. Видео генерируется **полностью на клиенте** (`services/veoService.ts`, `ai.models.generateVideos` напрямую из браузера через `@google/genai`) — без серверных эндпоинтов `api/animate.ts`/`api/animate/poll.ts` и без Vertex AI/`predictLongRunning` (эти файлы были созданы по первому плану, затем не использовались и удалены как мёртвый код). Модель — `veo-3.1-fast-generate-preview` (не `-001`). Ключ — клиентский `geminiApiKey` пользователя (не серверный `GEMINI_VEO_API_KEY`). Раздел ниже сохранён как исторический план, не как текущее состояние.
+
+## 📝 План внедрения Veo-анимации на сайт (TODO List, исторический)
 
 - [ ] **1. Подготовка конфигурации и типов (`types.ts` & `constants.ts`)**
   - [ ] Добавить в `types.ts` типы для Veo (`VeoModel`, `VeoAspectRatio`, `VeoDuration`, `VideoJobSettings`, `VideoToolPayload`, `VideoGenerationState`).
