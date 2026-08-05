@@ -46,7 +46,7 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
   const handleModelChange = (model: ModelType) => {
     const nextAspectRatios = model === ModelType.QwenImage2 ? QWEN_ASPECT_RATIOS : ASPECT_RATIOS;
     const nextAspectRatio = nextAspectRatios.includes(settings.aspectRatio) ? settings.aspectRatio : nextAspectRatios[0];
-    const nextImageSize = model === ModelType.Flash31 ? '1K' : settings.imageSize;
+    const nextImageSize = settings.imageSize;
 
     setSettings({
       ...settings,

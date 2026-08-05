@@ -39,12 +39,10 @@ export function getKeyObjectsForAge(ageGroup: AgeGroupKey): string[] {
 
 export const CINEMATIC_DETAILS = [
   "Dappled sunlight filters through unseen tree leaves, casting organic shadow play across the floor.",
-  "A subtly blurred edge of a sheer linen canopy in the extreme foreground creates incredible cinematic depth.",
   "Cool, crisp morning light fills the room, enhancing the fresh and airy atmosphere.",
   "A warm late-afternoon amber glow sweeps across the room, highlighting the textures of the natural wood.",
   "A soft, diffused overcast light provides perfectly even illumination, mimicking a high-end studio softbox.",
-  "Dust motes dance in a single, focused shaft of sunlight cutting across the room.",
-  "A partially obscured pendant light in the foreground frames the shot, adding a layer of architectural realism."
+  "Dust motes dance in a single, focused shaft of sunlight cutting across the room."
 ];
 
 export function generateRandomTags(aspectRatio: BatchAspectRatio, ageGroup?: AgeGroupKey): BatchPromptTags {
@@ -163,7 +161,7 @@ Soft, directional natural light gently grazes the wallpaper, creating subtle amb
     promptText += " The computer screen is turned off, appearing as a clean, blank matte dark screen with no glossy reflections.";
   }
 
-  const negativeConstraints = "Absolutely avoid: wicker baskets, straw baskets, warped woven baskets, asymmetric baskets, rattan furniture, bunk beds, ladders, plastic toys, cluttered surfaces.";
+  const negativeConstraints = "Absolutely avoid: bed canopy, sheer fabric canopy, hanging baldachin, hanging curtains over bed, fabric drapes near bed, foreground lamps, foreground hanging lights, hanging objects blocking the wall view, wicker baskets, straw baskets, warped woven baskets, asymmetric baskets, rattan furniture, bunk beds, ladders, plastic toys, cluttered surfaces.";
   promptText += ` ${negativeConstraints}`;
 
   return promptText;

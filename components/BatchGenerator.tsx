@@ -127,8 +127,8 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           <h3 className="text-white font-semibold mb-3">Model</h3>
           <div className="flex gap-3 flex-wrap">
             {([
-              { value: ModelType.Flash31, label: '3.1 Flash', sub: 'Fast & cheap' },
-              { value: ModelType.Pro, label: 'Pro', sub: 'High quality' },
+              { value: ModelType.Flash31, label: '3.1 Flash Image', sub: 'Fast & cheap' },
+              { value: ModelType.Pro, label: '3 Pro Image', sub: 'High quality' },
               { value: ModelType.ABTest, label: '50/50 Split', sub: 'Pro & Flash A/B' },
               { value: ModelType.QwenImage2, label: 'Qwen 2', sub: 'Replicate' },
             ] as const).map(({ value, label, sub }) => (

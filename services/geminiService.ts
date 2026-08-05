@@ -44,10 +44,10 @@ interface OpenRouterResponse {
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_TITLE = "Nana Banana Composer";
-const GEMINI_WALL_DETECT_MODEL = "gemini-2.0-flash";
-const OPENROUTER_WALL_DETECT_MODEL = "google/gemini-2.5-flash-lite";
+const GEMINI_WALL_DETECT_MODEL = "gemini-3.1-flash-image";
+const OPENROUTER_WALL_DETECT_MODEL = "google/gemini-3.1-flash-image";
 
-const GEMINI_NEGATIVE_PROMPT = "plastic toys, distorted furniture, messy room, low quality, seams, tiling, repeating wallpaper patterns, cheap 3D render look, cartoon style, CGI, blurry textures";
+const GEMINI_NEGATIVE_PROMPT = "bed canopy, fabric canopy, baldachin, foreground lamps, foreground hanging lights, plastic toys, distorted furniture, messy room, low quality, seams, tiling, repeating wallpaper patterns, cheap 3D render look, cartoon style, CGI, blurry textures";
 
 const toDataUrl = (image: UploadedImage): string =>
   `data:${image.mimeType || "image/png"};base64,${image.data}`;
@@ -605,7 +605,7 @@ export const enhancePromptText = async (
   }
 
   const startTime = Date.now();
-  const modelName = provider === "gemini" ? "gemini-2.5-flash" : "google/gemini-2.5-flash";
+  const modelName = provider === "gemini" ? "gemini-3.1-flash-image" : "google/gemini-3.1-flash-image";
   const systemInstruction = `You are an expert prompt engineer for Gemini Image Generation. Translate (if needed) and expand the user's short prompt into a high-end, detailed architectural interior photography prompt for children's room wallpaper mockups.
 
 Apply these strict rules:
@@ -621,7 +621,7 @@ Apply these strict rules:
     if (provider === "gemini") {
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.1-flash-image",
         contents: [
           { text: systemInstruction },
           { text: `USER PROMPT: ${userPrompt}` }
