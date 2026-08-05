@@ -47,7 +47,7 @@ export const VEO_PRESETS = {
   },
   ambient: {
     label: "Легкое оживление / Живое фото (Ambient)",
-    prompt: "A static camera shot with an ultra-slow horizontal drift. The product and room remain completely still. Subtle, natural shift of daylight and soft ambient shadows across the scene."
+    prompt: "A subtle, ultra-slow cinematic camera pan across a perfectly frozen, static interior room. Zero morphing, zero artifacts, zero moving furniture or objects. Only a delicate, realistic natural sunlight sweep and soft ambient shadow play grazing across the wall and floor. High-end e-commerce product video showcase."
   },
   dolly_out: {
     label: "Плавный отъезд камеры (Dolly-Out)",
