@@ -346,6 +346,31 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             </div>
           </div>
 
+          {/* Prompt Text Editor */}
+          <div className="bg-slate-800/50 backdrop-blur rounded-2xl border border-slate-700 p-6">
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-white font-semibold text-sm">Промпт движения камеры (Инструкция)</label>
+              <button 
+                onClick={() => handlePresetChange(settings.promptPreset)}
+                className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
+                ↺ Сбросить к пресету
+              </button>
+            </div>
+            <textarea
+              rows={3}
+              value={settings.customPrompt}
+              onChange={e => setSettings(prev => ({ ...prev, customPrompt: e.target.value }))}
+              className="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 text-slate-200 text-xs rounded-xl p-3 focus:outline-none transition-colors leading-relaxed resize-none"
+              placeholder="Введите или скорректируйте промпт анимации..."
+            />
+            <span className="text-[10px] text-slate-500 mt-1.5 block">
+              {engine === 'omni' 
+                ? '✨ Omni 1.1 Flash: зашиты жесткие директивы сохранения обоев 1:1 без дорисовывания лишних деталей.' 
+                : 'Veo 3.1: использует автоматический негативный промпт для предотвращения сворачивания обоев.'}
+            </span>
+          </div>
+
           {/* Seed Input */}
           <div className="bg-slate-800/50 backdrop-blur rounded-2xl border border-slate-700 p-6">
             <div className="flex justify-between items-center mb-2">
