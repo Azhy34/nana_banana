@@ -161,7 +161,7 @@ Soft, directional natural light gently grazes the wallpaper, creating subtle amb
     promptText += " The computer screen is turned off, appearing as a clean, blank matte dark screen with no glossy reflections.";
   }
 
-  const negativeConstraints = "Absolutely avoid: peeling wallpaper, wallpaper peeling off wall, corner curl, page curl, paper curl, bed canopy, sheer fabric canopy, hanging baldachin, hanging curtains over bed, fabric drapes near bed, foreground lamps, foreground hanging lights, hanging objects blocking the wall view, wicker baskets, straw baskets, warped woven baskets, asymmetric baskets, rattan furniture, bunk beds, ladders, plastic toys, cluttered surfaces.";
+  const negativeConstraints = "Absolutely avoid: peeling wallpaper, wallpaper peeling off wall, corner curl, page curl, paper curl, bed canopy, sheer fabric canopy, hanging baldachin, hanging curtains over bed, fabric drapes near bed, foreground lamps, foreground hanging lights, hanging objects blocking the wall view, wicker baskets, straw baskets, warped woven baskets, asymmetric baskets, rattan furniture, bunk beds, ladders, plastic toys, cluttered surfaces, text overlay, watermark, advertising badge, corner stamp, promotional text, watercolor patch, promo brushstroke.";
   promptText += ` ${negativeConstraints}`;
 
   return promptText;

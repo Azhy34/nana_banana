@@ -159,11 +159,10 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
       const tags = generateRandomTags(ar, ageGroup);
       
-      // Если карточка выбрана для A/B-теста, вешаем УТП и угол
-      if (textIndices.has(idx)) {
-        tags.overlayText = USP_OPTIONS[Math.floor(Math.random() * USP_OPTIONS.length)];
-        tags.overlayPosition = Math.random() < 0.5 ? 'bottom left' : 'bottom right';
-      }
+      // Рекламные надписи (overlayText) полностью отключены, чтобы не портить чистоту
+      // генерации интерьера и исключить появление артефактов/дымчатых полос при видео-анимации.
+      tags.overlayText = undefined;
+      tags.overlayPosition = undefined;
 
       // Разделение 50/50 для моделей при A/B-тесте
       const cardModel = model === ModelType.ABTest

@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { generateVeoVideoOnClient } from '../services/veoService';
-import { VEO_PRESETS, VEO_NEGATIVE_PROMPT, VEO_FIXED_DURATION_SECONDS, getVeoCostUsd } from '../constants';
-import { VideoJobSettings, VideoGenerationState } from '../types';
+import { generateOmniVideoOnClient } from '../services/omniService';
+import {
+  VEO_PRESETS,
+  OMNI_PRESETS,
+  VEO_NEGATIVE_PROMPT,
+  VEO_FIXED_DURATION_SECONDS,
+  OMNI_FIXED_DURATION_SECONDS,
+  getVeoCostUsd,
+  getOmniCostUsd
+} from '../constants';
+import { VideoJobSettings, VideoGenerationState, VideoEngine, OmniResolution } from '../types';
 import { downloadImage } from '../services/downloadService';
 import { generateTraceId } from '../utils/tracing';
 
@@ -14,12 +23,18 @@ interface VideoToolProps {
 export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, geminiApiKey }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // Model engine selector: 'omni' by default for cheaper & more stable nursery videos
+  const [engine, setEngine] = useState<VideoEngine>('omni');
+  const [resolution, setResolution] = useState<OmniResolution>('360p');
+
   // Settings
   const [sourceImage, setSourceImage] = useState<string | null>(initialImage || null);
   const [settings, setSettings] = useState<VideoJobSettings>({
-    promptPreset: 'dolly_in',
-    customPrompt: VEO_PRESETS.dolly_in.prompt,
+    engine: 'omni',
+    promptPreset: 'omni_wall_dolly',
+    customPrompt: OMNI_PRESETS.omni_wall_dolly.prompt,
     seed: 133466,
+    resolution: '360p'
   });
 
   // State
@@ -44,16 +59,50 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     }
   }, [initialImage]);
 
-  const estimatedCost = getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
+  const estimatedCost = engine === 'omni'
+    ? getOmniCostUsd(resolution)
+    : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
+
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Handle engine switch
+  const handleEngineChange = (newEngine: VideoEngine) => {
+    setEngine(newEngine);
+    if (newEngine === 'omni') {
+      setSettings(prev => ({
+        ...prev,
+        engine: 'omni',
+        promptPreset: 'omni_wall_dolly',
+        customPrompt: OMNI_PRESETS.omni_wall_dolly.prompt,
+        resolution
+      }));
+    } else {
+      setSettings(prev => ({
+        ...prev,
+        engine: 'veo',
+        promptPreset: 'dolly_in',
+        customPrompt: VEO_PRESETS.dolly_in.prompt
+      }));
+    }
+  };
+
   // Sync preset choice with prompt text
-  const handlePresetChange = (presetKey: keyof typeof VEO_PRESETS) => {
-    setSettings(prev => ({
-      ...prev,
-      promptPreset: presetKey,
-      customPrompt: VEO_PRESETS[presetKey].prompt
-    }));
+  const handlePresetChange = (presetKey: string) => {
+    if (engine === 'omni' && presetKey in OMNI_PRESETS) {
+      const key = presetKey as keyof typeof OMNI_PRESETS;
+      setSettings(prev => ({
+        ...prev,
+        promptPreset: key,
+        customPrompt: OMNI_PRESETS[key].prompt
+      }));
+    } else if (presetKey in VEO_PRESETS) {
+      const key = presetKey as keyof typeof VEO_PRESETS;
+      setSettings(prev => ({
+        ...prev,
+        promptPreset: key,
+        customPrompt: VEO_PRESETS[key].prompt
+      }));
+    }
   };
 
   // Upload custom file if needed
@@ -71,7 +120,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
 
   const handleGenerate = async () => {
     if (!sourceImage) {
-      setState(prev => ({ ...prev, error: 'Загрузите или выберите изображение для анимации' }));
+      setState(prev => ({ ...prev, error: 'Загрузите или выберите изображение обоев/интерьера для анимации' }));
       return;
     }
 
@@ -94,7 +143,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       setState({
         isLoading: false,
         progress: 0,
-        error: 'Ключ не подходит! Похоже, вы используете API-ключ OpenRouter для Gemini Veo. Пожалуйста, введите API-ключ Gemini (начинается с AIzaSy) в настройках или файле .env.local.',
+        error: 'Ключ не подходит! Похоже, вы используете API-ключ OpenRouter для Gemini. Пожалуйста, переключите провайдера на Gemini или введите ключ AIzaSy... в шапке.',
         resultVideoUrl: null
       });
       return;
@@ -109,23 +158,33 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
 
     try {
       const traceId = generateTraceId();
-      const videoUrl = await generateVeoVideoOnClient(
-        sourceImage,
-        settings,
-        VEO_NEGATIVE_PROMPT,
-        geminiApiKey,
-        (progress) => {
-          setState(prev => ({ ...prev, progress }));
-        },
-        traceId
-      );
+      let videoUrl: string;
+
+      if (engine === 'omni') {
+        videoUrl = await generateOmniVideoOnClient(
+          sourceImage,
+          { ...settings, resolution },
+          geminiApiKey,
+          (progress) => setState(prev => ({ ...prev, progress })),
+          traceId
+        );
+      } else {
+        videoUrl = await generateVeoVideoOnClient(
+          sourceImage,
+          settings,
+          VEO_NEGATIVE_PROMPT,
+          geminiApiKey,
+          (progress) => setState(prev => ({ ...prev, progress })),
+          traceId
+        );
+      }
 
       setState({
         isLoading: false,
         progress: 100,
         error: null,
         resultVideoUrl: videoUrl,
-        lastRunCostUsd: getVeoCostUsd(VEO_FIXED_DURATION_SECONDS),
+        lastRunCostUsd: estimatedCost,
       });
 
     } catch (err: any) {
@@ -142,7 +201,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     if (!state.resultVideoUrl) return;
     setIsDownloading(true);
     try {
-      await downloadImage(state.resultVideoUrl, `veo-flight-${settings.promptPreset}-${settings.seed}.mp4`);
+      const prefix = engine === 'omni' ? `omni-${resolution}` : 'veo';
+      await downloadImage(state.resultVideoUrl, `${prefix}-${settings.promptPreset}-${settings.seed}.mp4`);
     } finally {
       setIsDownloading(false);
     }
@@ -151,10 +211,17 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   return (
     <div className="max-w-4xl mx-auto animate-fadeIn">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">🎬 Video Animator</h2>
-          <p className="text-slate-400 text-sm mt-1">Оживите ваши обои плавным 6-секундным пролетом камеры (Veo 3.1)</p>
+          <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
+            <span>🎬 Video Animator</span>
+            <span className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full font-normal">
+              Omni 1.1 Flash & Veo 3.1
+            </span>
+          </h2>
+          <p className="text-slate-400 text-sm mt-1">
+            Оживите текстуру обоев и интерьер детской комнаты плавным движением камеры
+          </p>
         </div>
         {onBack && (
           <button onClick={onBack} className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all border border-slate-700 text-sm">
@@ -163,33 +230,119 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         )}
       </div>
 
+      {/* Model Engine Selector */}
+      <div className="bg-slate-800/60 backdrop-blur rounded-2xl border border-slate-700 p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-slate-300">Модель:</span>
+          <div className="inline-flex bg-slate-900/60 p-1 rounded-xl border border-slate-700">
+            <button
+              onClick={() => handleEngineChange('omni')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                engine === 'omni'
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              ✨ Gemini Omni 1.1 Flash (Быстро & Дёшево)
+            </button>
+            <button
+              onClick={() => handleEngineChange('veo')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                engine === 'veo'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Veo 3.1 Fast
+            </button>
+          </div>
+        </div>
+
+        {engine === 'omni' && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-medium">Качество:</span>
+            <div className="inline-flex bg-slate-900/60 p-1 rounded-xl border border-slate-700">
+              <button
+                onClick={() => setResolution('360p')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  resolution === '360p'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                360p Черновик (~$0.15)
+              </button>
+              <button
+                onClick={() => setResolution('720p')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  resolution === '720p'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                720p Финал Etsy (~$0.45)
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Side: Setup & Settings */}
         <div className="space-y-6">
           {/* Preset Selector */}
           <div className="bg-slate-800/50 backdrop-blur rounded-2xl border border-slate-700 p-6">
-            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-              <span>🎥 Режим анимации</span>
+            <h3 className="text-white font-semibold mb-4 flex items-center justify-between">
+              <span className="flex items-center gap-2">🎥 Режим анимации интерьера</span>
+              {engine === 'omni' && (
+                <span className="text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">
+                  Обои зафиксированы 1:1
+                </span>
+              )}
             </h3>
+
             <div className="space-y-3">
-              {(Object.keys(VEO_PRESETS) as Array<keyof typeof VEO_PRESETS>).map(key => (
-                <button
-                  key={key}
-                  onClick={() => handlePresetChange(key)}
-                  className={`w-full text-left p-4 rounded-xl transition-all border flex flex-col ${
-                    settings.promptPreset === key
-                      ? 'bg-indigo-600/10 border-indigo-500/50 shadow shadow-indigo-500/10'
-                      : 'bg-slate-900/40 border-slate-800 text-slate-400 hover:border-slate-700'
-                  }`}
-                >
-                  <span className={`font-bold text-sm ${settings.promptPreset === key ? 'text-indigo-400' : 'text-slate-300'}`}>
-                    {VEO_PRESETS[key].label}
-                  </span>
-                  <span className="text-xs opacity-75 mt-1 leading-relaxed">
-                    {key === 'dolly_in' ? 'Плавный наезд камеры на кроватку.' : key === 'ambient' ? 'Лёгкое изменение света и тени, без движения объектов.' : 'Камера плавно отдаляется назад.'}
-                  </span>
-                </button>
-              ))}
+              {engine === 'omni' ? (
+                (Object.keys(OMNI_PRESETS) as Array<keyof typeof OMNI_PRESETS>).map(key => (
+                  <button
+                    key={key}
+                    onClick={() => handlePresetChange(key)}
+                    className={`w-full text-left p-4 rounded-xl transition-all border flex flex-col ${
+                      settings.promptPreset === key
+                        ? 'bg-indigo-600/15 border-indigo-500/60 shadow shadow-indigo-500/15'
+                        : 'bg-slate-900/40 border-slate-800 text-slate-400 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`font-bold text-sm ${settings.promptPreset === key ? 'text-indigo-300' : 'text-slate-300'}`}>
+                        {OMNI_PRESETS[key].label}
+                      </span>
+                    </div>
+                    <span className="text-xs opacity-75 mt-1 leading-relaxed text-slate-400">
+                      {OMNI_PRESETS[key].description}
+                    </span>
+                  </button>
+                ))
+              ) : (
+                (Object.keys(VEO_PRESETS) as Array<keyof typeof VEO_PRESETS>).map(key => (
+                  <button
+                    key={key}
+                    onClick={() => handlePresetChange(key)}
+                    className={`w-full text-left p-4 rounded-xl transition-all border flex flex-col ${
+                      settings.promptPreset === key
+                        ? 'bg-indigo-600/10 border-indigo-500/50 shadow shadow-indigo-500/10'
+                        : 'bg-slate-900/40 border-slate-800 text-slate-400 hover:border-slate-700'
+                    }`}
+                  >
+                    <span className={`font-bold text-sm ${settings.promptPreset === key ? 'text-indigo-400' : 'text-slate-300'}`}>
+                      {VEO_PRESETS[key].label}
+                    </span>
+                    <span className="text-xs opacity-75 mt-1 leading-relaxed">
+                      {key === 'dolly_in' ? 'Плавный наезд камеры на кроватку.' : key === 'ambient' ? 'Лёгкое изменение света и тени, без движения объектов.' : 'Камера плавно отдаляется назад.'}
+                    </span>
+                  </button>
+                ))
+              )}
             </div>
           </div>
 
@@ -212,28 +365,32 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               placeholder="Введите число от 0 до 4294967295"
             />
             <span className="text-[10px] text-slate-500 mt-2 block">
-              Из-за ограничений текущей версии Gemini API этот параметр пока не влияет на саму генерацию — используется только в имени файла при скачивании, для удобства сравнения версий.
+              Используется для повторяемости и маркировки имени выходного MP4 файла.
             </span>
           </div>
 
           {/* Generate Action Button */}
           <div className="bg-slate-800/50 backdrop-blur rounded-2xl border border-slate-700 p-6 flex flex-col justify-between h-fit gap-4">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Формат:</span>
-              <span className="text-white font-bold font-mono">9:16 (Pinterest)</span>
+              <span className="text-slate-400">Движок:</span>
+              <span className="text-white font-bold font-mono">
+                {engine === 'omni' ? `Gemini Omni 1.1 (${resolution})` : 'Veo 3.1 Fast'}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Длительность:</span>
-              <span className="text-white font-bold font-mono">{VEO_FIXED_DURATION_SECONDS} секунд</span>
+              <span className="text-white font-bold font-mono">
+                {engine === 'omni' ? OMNI_FIXED_DURATION_SECONDS : VEO_FIXED_DURATION_SECONDS} секунд
+              </span>
             </div>
             <div className="flex justify-between text-sm pt-2 border-t border-slate-700/50">
               <span className="text-slate-400">Расчетная стоимость:</span>
-              <span className="text-green-400 font-bold font-mono">${estimatedCost.toFixed(2)}</span>
+              <span className="text-green-400 font-bold font-mono text-base">${estimatedCost.toFixed(2)}</span>
             </div>
             <button
               onClick={handleGenerate}
               disabled={state.isLoading || !sourceImage}
-              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 text-md mt-2 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 text-md mt-2 flex items-center justify-center gap-2"
             >
               {state.isLoading ? (
                 <>
@@ -241,7 +398,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                   Рендеринг видео... {Math.round(state.progress)}%
                 </>
               ) : (
-                '🚀 Запустить анимацию обоев'
+                engine === 'omni' ? '✨ Запустить анимацию обоев (Omni Flash)' : '🚀 Запустить анимацию обоев (Veo)'
               )}
             </button>
 

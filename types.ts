@@ -97,10 +97,15 @@ export interface UpscaleState {
   upscaledImage: string | null;
 }
 
+export type VideoEngine = 'veo' | 'omni';
+export type OmniResolution = '360p' | '720p';
+
 export interface VideoJobSettings {
-  promptPreset: 'dolly_in' | 'ambient' | 'dolly_out';
+  engine?: VideoEngine;
+  promptPreset: 'dolly_in' | 'ambient' | 'dolly_out' | 'omni_wall_dolly' | 'omni_texture_macro' | 'omni_montessori' | 'omni_sunlight_loop';
   customPrompt: string;
   seed: number;
+  resolution?: OmniResolution;
 }
 
 export interface VideoToolPayload {
@@ -120,6 +125,8 @@ export interface GeminiLogDetails {
   durationSeconds?: number;
   personGeneration?: string;
   seed?: number;
+  resolution?: string;
+  interactionId?: string;
   operationName?: string;
   raiMediaFilteredCount?: number;
   raiMediaFilteredReasons?: string[];

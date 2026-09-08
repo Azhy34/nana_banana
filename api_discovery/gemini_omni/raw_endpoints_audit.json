@@ -1,0 +1,157 @@
+{
+  "successful_responses": [
+    {
+      "scenario": "inline_base64_generation_200",
+      "status_code": 200,
+      "response": {
+        "id": "v1_interactions_sample12345",
+        "status": "completed",
+        "model": "gemini-omni-1.1-flash",
+        "object": "interaction",
+        "created": 1725820000,
+        "output_video": {
+          "mime_type": "video/mp4",
+          "data": "AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAA..."
+        },
+        "steps": [
+          {
+            "type": "user_input",
+            "content": [
+              {
+                "type": "image",
+                "mime_type": "image/jpeg",
+                "data": "sample_base64_image_input"
+              },
+              {
+                "type": "text",
+                "text": "Smooth dolly-in camera motion"
+              }
+            ]
+          },
+          {
+            "type": "thought",
+            "content": [
+              {
+                "type": "thought",
+                "text": "Planning 360p video generation with 16:9 aspect ratio and slow forward camera movement."
+              }
+            ]
+          },
+          {
+            "type": "model_output",
+            "content": [
+              {
+                "type": "video",
+                "mime_type": "video/mp4",
+                "data": "AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAA..."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "uri_delivery_async_file_200",
+      "status_code": 200,
+      "response": {
+        "id": "v1_interactions_sample67890",
+        "status": "completed",
+        "model": "gemini-omni-1.1-flash",
+        "object": "interaction",
+        "created": 1725820050,
+        "output_video": {
+          "uri": "https://generativelanguage.googleapis.com/v1beta/files/abc-123:download?alt=media"
+        },
+        "steps": [
+          {
+            "type": "user_input",
+            "content": [
+              {
+                "type": "text",
+                "text": "Cinematic pan across nursery"
+              }
+            ]
+          },
+          {
+            "type": "model_output",
+            "content": [
+              {
+                "type": "video",
+                "mime_type": "video/mp4",
+                "uri": "https://generativelanguage.googleapis.com/v1beta/files/abc-123:download?alt=media"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "error_responses": [
+    {
+      "scenario": "invalid_argument_400",
+      "status_code": 400,
+      "response": {
+        "error": {
+          "code": 400,
+          "message": "Invalid argument: aspect_ratio '4:3' is not supported. Supported values: '9:16', '16:9'.",
+          "status": "INVALID_ARGUMENT",
+          "details": [
+            {
+              "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+              "reason": "INVALID_ARGUMENT",
+              "domain": "googleapis.com"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "unauthenticated_401",
+      "status_code": 401,
+      "response": {
+        "error": {
+          "code": 401,
+          "message": "API key not valid. Please pass a valid API key.",
+          "status": "UNAUTHENTICATED",
+          "details": [
+            {
+              "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+              "reason": "API_KEY_INVALID",
+              "domain": "googleapis.com"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "rate_limited_429",
+      "status_code": 429,
+      "response": {
+        "error": {
+          "code": 429,
+          "message": "Resource has been exhausted (e.g. check quota).",
+          "status": "RESOURCE_EXHAUSTED",
+          "details": [
+            {
+              "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+              "reason": "RATE_LIMIT_EXCEEDED",
+              "domain": "googleapis.com"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "internal_server_error_500",
+      "status_code": 500,
+      "response": {
+        "error": {
+          "code": 500,
+          "message": "An internal error has occurred.",
+          "status": "INTERNAL",
+          "details": []
+        }
+      }
+    }
+  ]
+}

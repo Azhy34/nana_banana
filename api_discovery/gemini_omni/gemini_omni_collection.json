@@ -1,0 +1,243 @@
+{
+  "info": {
+    "_postman_id": "gemini-omni-1-1-flash-api",
+    "name": "Google Gemini Omni 1.1 Flash (Interactions API)",
+    "description": "Raw endpoints collection for Gemini Omni 1.1 Flash video generation, extension, first/last frame transitions and polling according to api-discovery skill standard.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Text to Video (Draft 360p)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://generativelanguage.googleapis.com/v1beta/interactions?key={{GEMINI_API_KEY}}",
+          "protocol": "https",
+          "host": [
+            "generativelanguage",
+            "googleapis",
+            "com"
+          ],
+          "path": [
+            "v1beta",
+            "interactions"
+          ],
+          "query": [
+            {
+              "key": "key",
+              "value": "{{GEMINI_API_KEY}}"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"model\": \"gemini-omni-1.1-flash\",\n  \"input\": \"A slow cinematic camera dolly-in shot of a Scandinavian children nursery with soft morning sunlight grazing the forest wallpaper.\",\n  \"response_format\": {\n    \"type\": \"video\",\n    \"resolution\": \"360p\",\n    \"aspect_ratio\": \"16:9\"\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "2. Image to Video (Interior Animation)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://generativelanguage.googleapis.com/v1beta/interactions?key={{GEMINI_API_KEY}}",
+          "protocol": "https",
+          "host": [
+            "generativelanguage",
+            "googleapis",
+            "com"
+          ],
+          "path": [
+            "v1beta",
+            "interactions"
+          ],
+          "query": [
+            {
+              "key": "key",
+              "value": "{{GEMINI_API_KEY}}"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"model\": \"gemini-omni-1.1-flash\",\n  \"input\": [\n    {\n      \"type\": \"image\",\n      \"data\": \"{{BASE64_IMAGE_DATA}}\",\n      \"mime_type\": \"image/jpeg\"\n    },\n    {\n      \"type\": \"text\",\n      \"text\": \"Execute a slow forward dolly camera movement. The wallpaper on the wall stays perfectly static and crisp with natural ambient shadow occlusion. Maintain the room structure without adding unwanted furniture.\"\n    }\n  ],\n  \"response_format\": {\n    \"type\": \"video\",\n    \"resolution\": \"360p\",\n    \"aspect_ratio\": \"16:9\"\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "3. First & Last Frame Interpolation (Smooth Transition)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://generativelanguage.googleapis.com/v1beta/interactions?key={{GEMINI_API_KEY}}",
+          "protocol": "https",
+          "host": [
+            "generativelanguage",
+            "googleapis",
+            "com"
+          ],
+          "path": [
+            "v1beta",
+            "interactions"
+          ],
+          "query": [
+            {
+              "key": "key",
+              "value": "{{GEMINI_API_KEY}}"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"model\": \"gemini-omni-1.1-flash\",\n  \"input\": [\n    {\n      \"type\": \"image\",\n      \"data\": \"{{BASE64_FIRST_FRAME}}\",\n      \"mime_type\": \"image/jpeg\"\n    },\n    {\n      \"type\": \"image\",\n      \"data\": \"{{BASE64_LAST_FRAME}}\",\n      \"mime_type\": \"image/jpeg\"\n    },\n    {\n      \"type\": \"text\",\n      \"text\": \"Smooth continuous camera transition from the first frame wide shot to the second frame close-up on the wallpaper texture. No jump cuts.\"\n    }\n  ],\n  \"response_format\": {\n    \"type\": \"video\",\n    \"resolution\": \"720p\"\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "4. Video Scene Extension (Multi-turn by Interaction ID)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://generativelanguage.googleapis.com/v1beta/interactions?key={{GEMINI_API_KEY}}",
+          "protocol": "https",
+          "host": [
+            "generativelanguage",
+            "googleapis",
+            "com"
+          ],
+          "path": [
+            "v1beta",
+            "interactions"
+          ],
+          "query": [
+            {
+              "key": "key",
+              "value": "{{GEMINI_API_KEY}}"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"model\": \"gemini-omni-1.1-flash\",\n  \"previous_interaction_id\": \"{{PREVIOUS_INTERACTION_ID}}\",\n  \"input\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"Continue the scene: the camera gently pivots to the right showing the reading corner.\"\n    }\n  ],\n  \"response_format\": {\n    \"type\": \"video\",\n    \"resolution\": \"360p\"\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "5. Video Delivery URI (Async File Generation)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://generativelanguage.googleapis.com/v1beta/interactions?key={{GEMINI_API_KEY}}",
+          "protocol": "https",
+          "host": [
+            "generativelanguage",
+            "googleapis",
+            "com"
+          ],
+          "path": [
+            "v1beta",
+            "interactions"
+          ],
+          "query": [
+            {
+              "key": "key",
+              "value": "{{GEMINI_API_KEY}}"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"model\": \"gemini-omni-1.1-flash\",\n  \"input\": \"Cinematic pan across a designer baby crib with pastel forest wallpaper.\",\n  \"response_format\": {\n    \"type\": \"video\",\n    \"delivery\": \"uri\",\n    \"resolution\": \"1080p\"\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "6. Check Async File Status (Files API)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://generativelanguage.googleapis.com/v1beta/files/{{FILE_ID}}?key={{GEMINI_API_KEY}}",
+          "protocol": "https",
+          "host": [
+            "generativelanguage",
+            "googleapis",
+            "com"
+          ],
+          "path": [
+            "v1beta",
+            "files",
+            "{{FILE_ID}}"
+          ],
+          "query": [
+            {
+              "key": "key",
+              "value": "{{GEMINI_API_KEY}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Download Generated Video (Files API)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://generativelanguage.googleapis.com/v1beta/files/{{FILE_ID}}:download?alt=media&key={{GEMINI_API_KEY}}",
+          "protocol": "https",
+          "host": [
+            "generativelanguage",
+            "googleapis",
+            "com"
+          ],
+          "path": [
+            "v1beta",
+            "files",
+            "{{FILE_ID}}:download"
+          ],
+          "query": [
+            {
+              "key": "alt",
+              "value": "media"
+            },
+            {
+              "key": "key",
+              "value": "{{GEMINI_API_KEY}}"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

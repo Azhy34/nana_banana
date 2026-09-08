@@ -37,6 +37,16 @@ export function getVeoCostUsd(durationSeconds: number): number {
   return durationSeconds * VEO_PRICING_PER_SECOND_USD;
 }
 
+// Omni 1.1 Flash Constants & Pricing
+export const OMNI_MODEL_ID = 'gemini-omni-1.1-flash';
+export const OMNI_FIXED_DURATION_SECONDS = 5;
+export const OMNI_PRICING_DRAFT_360P_USD = 0.15; // 360p draft ~1/3 price of HD
+export const OMNI_PRICING_FINAL_720P_USD = 0.45; // 720p production output
+
+export function getOmniCostUsd(resolution: '360p' | '720p' = '360p'): number {
+  return resolution === '360p' ? OMNI_PRICING_DRAFT_360P_USD : OMNI_PRICING_FINAL_720P_USD;
+}
+
 export const VEO_NEGATIVE_PROMPT =
   "peeling wallpaper, wallpaper peeling off wall, unrolling paper, corner curl, wallpaper sheet bending, page curl, paper peeling, peeling corner, curling wallpaper, wallpaper tearing, paper lift, lifting corner, peeling paper, paper detachment, page turn, page flip, paper sweep, book page flip, page curl, paper page turning, opening transition, wipe transition, intro transition effect, transition wipe, fade-in, storybook page turn, morphing wallpaper pattern, drawing new elements on the wall, new moons appearing, doubling moon, shifting moon, morphing arches, changing wallpaper motifs, animating the wallpaper design, moving wall prints, different wall color, morphing wall texture, warped walls, shifting print, repainted wall, new wall art appearing, camera shake, scene change, furniture moving, objects appearing or disappearing, text, watermark, bad quality, blurry, beam crossing the frame, ceiling beam blocking the view, wooden beam passing in front of camera, pillar or column blocking the shot, foreground object flying past the camera, obstruction entering the frame, silhouette sweeping across the frame, camera passing through objects, unexpected foreground element, parallax object crossing the shot, toy swinging, hanging toy moving, mobile spinning, mobile toy swaying, crib mobile moving, stuffed toy moving, dangling object swinging, curtains appearing, curtains materializing, new curtains, drapes appearing, new drapery, fabric appearing from nowhere, hanging decoration swinging";
 
@@ -52,6 +62,30 @@ export const VEO_PRESETS = {
   dolly_out: {
     label: "Плавный отъезд камеры (Dolly-Out)",
     prompt: "A smooth, slow cinematic camera pull-back, expanding the view of the room and feature wall. The entire room and product remain perfectly static and sharp."
+  }
+};
+
+// Specialized Nursery & Wallpaper Presets for Gemini Omni 1.1 Flash
+export const OMNI_PRESETS = {
+  omni_wall_dolly: {
+    label: "Архитектурный наезд на стену (Wall Focus)",
+    description: "Плавный наезд с сохранением геометрии стены и жесткой фиксацией паттерна обоев.",
+    prompt: "Execute a smooth, slow architectural camera push-in towards the nursery feature wall. The custom wallpaper pattern is strictly locked and stays completely static, crisp, and unwarped. Solid wood furniture remains perfectly stationary and pinned to the floor. Warm morning sunbeams graze the wall, creating soft ambient occlusion along the baseboards and furniture edges. Clean Scandinavian interior design showcase, photorealistic textures, zero jump cuts, continuous fluid camera motion."
+  },
+  omni_texture_macro: {
+    label: "Макро-пролет по текстуре (Wallpaper Texture Macro)",
+    description: "Крупный план тактильной матовой поверхности обоев (без пластиковых бликов).",
+    prompt: "Cinematic macro gliding shot moving smoothly along the tactile surface of the wallpaper. The camera tracks on a motorized slider, revealing the rich organic paper grain and delicate matte illustration print. Completely eliminate plastic reflections or glare (komplett matt, keine Reflexionen). Soft, diffused warm indoor lighting highlights the tactile depth of the material. Flawless focus tracking, steady fluid motion."
+  },
+  omni_montessori: {
+    label: "Монтессори-ракурс от кроватки (Child Eye-Level Arc)",
+    description: "Низкий детский ракурс, создающий уют и объем вокруг обоев и мебели.",
+    prompt: "Smooth low-angle camera arc shot composed from a child's eye-level perspective. The camera gently sweeps past the natural solid wood slatted crib, expanding the spatial view of the wallpapered room. Zero morphing of furniture, no distorted woven textures. The white balance is strictly adjusted to warm, cozy tones, avoiding any cold sterile cast. Premium editorial nursery showcase, continuous unbroken camera movement."
+  },
+  omni_sunlight_loop: {
+    label: "Живое солнце / Ambient Loop (Etsy Endless)",
+    description: "Статичная камера с плавным ходом солнечных лучей и теней для зацикленного видео.",
+    prompt: "Static architectural camera framing of the stylish children's bedroom feature wall. Gentle, realistic passage of natural warm afternoon sunlight and subtle dappled leaf shadows drifting across the wallpaper and matte floor. The room architecture, furniture, and wallpaper illustration remain 100% frozen and geometrically stable. Hypnotic, calming ambient lighting movement designed for a seamless video loop."
   }
 };
 
