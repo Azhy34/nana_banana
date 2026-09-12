@@ -37,13 +37,22 @@ export function getVeoCostUsd(durationSeconds: number): number {
   return durationSeconds * VEO_PRICING_PER_SECOND_USD;
 }
 
+// Etsy listing video requirements (help.etsy.com — "How to Add Listing Videos")
+// Etsy rejects anything below the minimum with:
+// "Die Auflösung deines Videos ist N Pixel mal M Pixel. Sie muss mindestens 500 Pixel mal 500 Pixel betragen"
+export const ETSY_MIN_VIDEO_SIDE_PX = 500;          // hard reject below this
+export const ETSY_RECOMMENDED_VIDEO_SIDE_PX = 1080; // Etsy's recommended quality
+
 // Omni 1.1 Flash Constants & Pricing
 export const OMNI_MODEL_ID = 'gemini-omni-1.1-flash';
 export const OMNI_FIXED_DURATION_SECONDS = 5;
-export const OMNI_PRICING_DRAFT_360P_USD = 0.15; // 360p draft ~1/3 price of HD
-export const OMNI_PRICING_FINAL_720P_USD = 0.45; // 720p production output
+// Official rate (ai.google.dev/gemini-api/docs/pricing): Omni video output is billed at
+// $17.50 / 1M tokens, at 5,792 tokens per second of 720p video => ~$0.10 per second.
+// 5s @ 720p ≈ $0.50. Google publishes no separate 360p rate, so the draft price stays an estimate.
+export const OMNI_PRICING_DRAFT_360P_USD = 0.15; // estimate — 360p draft, no published rate
+export const OMNI_PRICING_FINAL_720P_USD = 0.50; // 5s x $0.10/s at 720p
 
-export function getOmniCostUsd(resolution: '360p' | '720p' = '360p'): number {
+export function getOmniCostUsd(resolution: '360p' | '720p' = '720p'): number {
   return resolution === '360p' ? OMNI_PRICING_DRAFT_360P_USD : OMNI_PRICING_FINAL_720P_USD;
 }
 

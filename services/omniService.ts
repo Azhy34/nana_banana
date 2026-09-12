@@ -2,6 +2,7 @@ import { VideoJobSettings, GeminiLogDetails } from '../types';
 import { logGeminiEvent } from './geminiService';
 import {
   OMNI_MODEL_ID,
+  OMNI_FIXED_DURATION_SECONDS,
   getOmniCostUsd,
 } from '../constants';
 
@@ -10,8 +11,8 @@ import {
  * using the official Google Interactions API.
  * 
  * Supports:
- * - 360p Draft (Fast & Cost-effective: ~0.15$)
- * - 720p Final (High Quality for Etsy/Pinterest: ~0.45$)
+ * - 720p Final (default — 720x1280, the minimum Etsy accepts: ~0.50$)
+ * - 360p Draft (cheap prompt iteration only — 360x640 is REJECTED by Etsy: ~0.15$)
  * - Image-to-Video with locked wallpaper pattern & nursery physics
  */
 export async function generateOmniVideoOnClient(
@@ -26,12 +27,13 @@ export async function generateOmniVideoOnClient(
   }
 
   const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");
-  const resolution = settings.resolution || '360p';
+  const resolution = settings.resolution || '720p';
   const cost = getOmniCostUsd(resolution);
 
   const requestDetails: GeminiLogDetails = {
-    aspectRatio: '16:9',
-    durationSeconds: 5,
+    // Must mirror what the payload below actually sends, otherwise trace analysis lies
+    aspectRatio: '9:16',
+    durationSeconds: OMNI_FIXED_DURATION_SECONDS,
     seed: settings.seed,
   };
 
@@ -151,7 +153,7 @@ export async function generateOmniVideoOnClient(
       OMNI_MODEL_ID,
       `Omni Video Success [${resolution}]: ${settings.customPrompt}`,
       cost,
-      5,
+      OMNI_FIXED_DURATION_SECONDS,
       'success',
       null,
       traceId,

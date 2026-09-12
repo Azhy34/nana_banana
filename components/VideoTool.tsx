@@ -7,6 +7,8 @@ import {
   VEO_NEGATIVE_PROMPT,
   VEO_FIXED_DURATION_SECONDS,
   OMNI_FIXED_DURATION_SECONDS,
+  ETSY_MIN_VIDEO_SIDE_PX,
+  ETSY_RECOMMENDED_VIDEO_SIDE_PX,
   getVeoCostUsd,
   getOmniCostUsd
 } from '../constants';
@@ -25,7 +27,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   
   // Model engine selector: 'omni' by default for cheaper & more stable nursery videos
   const [engine, setEngine] = useState<VideoEngine>('omni');
-  const [resolution, setResolution] = useState<OmniResolution>('360p');
+  const [resolution, setResolution] = useState<OmniResolution>('720p');
 
   // Settings
   const [sourceImage, setSourceImage] = useState<string | null>(initialImage || null);
@@ -34,7 +36,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     promptPreset: 'omni_wall_dolly',
     customPrompt: OMNI_PRESETS.omni_wall_dolly.prompt,
     seed: 133466,
-    resolution: '360p'
+    resolution: '720p'
   });
 
   // State
@@ -45,11 +47,16 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     resultVideoUrl: null,
   });
 
+  // Real pixel size read off the rendered <video>, not the requested parameter.
+  // Etsy validates the actual file, so this is what we check against.
+  const [videoDims, setVideoDims] = useState<{ w: number; h: number } | null>(null);
+
   // Sync prop initialImage to sourceImage state when it changes
   useEffect(() => {
     if (initialImage) {
       setSourceImage(initialImage);
       // Reset previous animation results so they don't show on a new card
+      setVideoDims(null);
       setState({
         isLoading: false,
         progress: 0,
@@ -64,6 +71,31 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
 
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // Etsy validates the shortest side of the uploaded file: below 500px it rejects the
+  // video outright ("Sie muss mindestens 500 Pixel mal 500 Pixel betragen").
+  const etsyCheck = videoDims && (() => {
+    const shortSide = Math.min(videoDims.w, videoDims.h);
+    if (shortSide < ETSY_MIN_VIDEO_SIDE_PX) {
+      return {
+        ok: false,
+        label: `Etsy отклонит — минимум ${ETSY_MIN_VIDEO_SIDE_PX}px по стороне`,
+        className: 'bg-red-500/10 border-red-500/30 text-red-300'
+      };
+    }
+    if (shortSide < ETSY_RECOMMENDED_VIDEO_SIDE_PX) {
+      return {
+        ok: true,
+        label: 'Etsy примет',
+        className: 'bg-green-500/10 border-green-500/30 text-green-300'
+      };
+    }
+    return {
+      ok: true,
+      label: 'Etsy примет — рекомендуемое качество',
+      className: 'bg-green-500/10 border-green-500/30 text-green-300'
+    };
+  })();
 
   // Handle engine switch
   const handleEngineChange = (newEngine: VideoEngine) => {
@@ -112,6 +144,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       const reader = new FileReader();
       reader.onload = (e) => {
         setSourceImage(e.target?.result as string);
+        setVideoDims(null);
         setState({ isLoading: false, progress: 0, error: null, resultVideoUrl: null });
       };
       reader.readAsDataURL(file);
@@ -149,6 +182,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       return;
     }
 
+    setVideoDims(null);
     setState({
       isLoading: true,
       progress: 0,
@@ -270,7 +304,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                360p Черновик (~$0.15)
+                360p Черновик · не для Etsy
               </button>
               <button
                 onClick={() => setResolution('720p')}
@@ -280,9 +314,12 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                720p Финал Etsy (~$0.45)
+                720p Финал Etsy · 720×1280
               </button>
             </div>
+            <span className="text-[10px] text-slate-500 hidden sm:inline">
+              ~${getOmniCostUsd(resolution).toFixed(2)}
+            </span>
           </div>
         )}
       </div>
@@ -465,8 +502,20 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                     muted 
                     playsInline
                     controls
+                    onLoadedMetadata={e => setVideoDims({
+                      w: e.currentTarget.videoWidth,
+                      h: e.currentTarget.videoHeight
+                    })}
                   />
                 </div>
+                {etsyCheck && (
+                  <div className={`w-full max-w-[280px] text-center border px-3 py-2 rounded-xl ${etsyCheck.className}`}>
+                    <p className="font-mono font-bold text-sm">
+                      {etsyCheck.ok ? '✓' : '✗'} {videoDims!.w}×{videoDims!.h}
+                    </p>
+                    <p className="text-[11px] opacity-80 mt-0.5 leading-snug">{etsyCheck.label}</p>
+                  </div>
+                )}
                 <div className="text-center bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-xl">
                   <p className="text-slate-400 text-xs mb-0.5">Итоговая стоимость генерации:</p>
                   <p className="text-green-400 font-bold font-mono text-base">${(state.lastRunCostUsd ?? estimatedCost).toFixed(2)}</p>
