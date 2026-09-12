@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { readErrorBody, parsePrediction } from '../../shared/upscaleContract';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS
@@ -21,13 +22,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Prediction ID is required' });
   }
 
+  // The id lands in the request path — keep it to the shape Replicate actually issues.
+  if (!/^[a-z0-9]{1,64}$/i.test(id)) {
+    return res.status(400).json({ error: 'Prediction ID is malformed' });
+  }
+
   if (!apiToken) {
     return res.status(401).json({ error: 'Replicate API token is required' });
   }
 
   try {
     // Poll Replicate for status
-    const response = await fetch(`https://api.replicate.com/v1/predictions/${id}`, {
+    const response = await fetch(`https://api.replicate.com/v1/predictions/${encodeURIComponent(id)}`, {
       headers: {
         'Authorization': `Bearer ${apiToken}`,
         'Content-Type': 'application/json'
@@ -35,13 +41,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      return res.status(response.status).json({ 
-        error: error.detail || 'Failed to check prediction status' 
-      });
+      const error = await readErrorBody(response, 'Failed to check prediction status');
+      return res.status(response.status).json({ error });
     }
 
-    const prediction = await response.json();
+    const prediction = parsePrediction(await response.json());
     return res.status(200).json(prediction);
 
   } catch (error: any) {

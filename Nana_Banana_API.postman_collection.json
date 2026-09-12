@@ -125,12 +125,12 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{replicateToken}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"input\": {\n    \"image\": \"https://example.com/generated-room.png\",\n    \"scale\": 2,\n    \"model\": \"High Fidelity V2\"\n  }\n}"
-						},
 						"url": {
 							"raw": "{{baseUrl}}/api/upscale",
 							"host": [
@@ -141,9 +141,365 @@
 								"upscale"
 							]
 						},
-						"description": "Proxies an image upscale request to Topaz Labs via Replicate."
+						"description": "Starts a Topaz upscale via our Vercel proxy. Body is FLAT (image/upscaleFactor/enhanceModel/faceEnhance/outputFormat) — the route maps it onto Replicate's snake_case input itself. Stores the returned id in {{predictionId}}.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"image\": \"{{testImageUrl}}\",\n  \"upscaleFactor\": \"4x\",\n  \"enhanceModel\": \"High Fidelity V2\",\n  \"faceEnhance\": false,\n  \"outputFormat\": \"jpg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
 					},
-					"response": []
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const body = pm.response.json();",
+									"if (body && body.id) {",
+									"    pm.collectionVariables.set('predictionId', body.id);",
+									"}",
+									"pm.test('prediction started', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Poll Upscale Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{replicateToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/upscale/poll?id={{predictionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"upscale",
+								"poll"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{predictionId}}"
+								}
+							]
+						},
+						"description": "Polls the prediction started by the previous request. Expect starting -> processing -> succeeded."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"poll returns 200\", () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Upscale — Error Contract",
+			"description": "Negative probes. Every one of these must fail in OUR route, not inside Replicate. Replicate rejects unknown enums for free, so this is about getting a 400 that names the bad field instead of an opaque proxied 422 — and about never returning a 500 for a bad request.",
+			"item": [
+				{
+					"name": "401 — no Authorization",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/upscale",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"upscale"
+							]
+						},
+						"description": "No token -> 401 from our route.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"image\": \"{{testImageUrl}}\",\n  \"upscaleFactor\": \"4x\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"401 without token\", () => pm.response.to.have.status(401));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "400 — missing image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{replicateToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/upscale",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"upscale"
+							]
+						},
+						"description": "Required field missing -> 400 with the offending field named.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"upscaleFactor\": \"4x\",\n  \"enhanceModel\": \"High Fidelity V2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"400 when image is absent\", () => pm.response.to.have.status(400));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "400 — invalid enhanceModel",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{replicateToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/upscale",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"upscale"
+							]
+						},
+						"description": "Unknown enum value. Before the zod schema this was forwarded to Replicate and came back as a proxied 422; now it must be a 400 from us naming the field.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"image\": \"{{testImageUrl}}\",\n  \"upscaleFactor\": \"4x\",\n  \"enhanceModel\": \"Bogus V9\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"400 on unknown enhanceModel\", () => pm.response.to.have.status(400));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "400 — invalid upscaleFactor 3x",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{replicateToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/upscale",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"upscale"
+							]
+						},
+						"description": "Replicate accepts only None/2x/4x/6x. '3x' is exactly what the old '12K x3' button implied, and it must be rejected here.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"image\": \"{{testImageUrl}}\",\n  \"upscaleFactor\": \"3x\",\n  \"enhanceModel\": \"High Fidelity V2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"400 on 3x\", () => pm.response.to.have.status(400));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "400 — malformed prediction id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{replicateToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/upscale/poll?id=../../secrets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"upscale",
+								"poll"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "../../secrets"
+								}
+							]
+						},
+						"description": "Used to return 500 'Unexpected end of JSON input' because the route called .json() on an empty error body."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"400 on malformed id\", () => pm.response.to.have.status(400));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "404 — unknown prediction id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{replicateToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/upscale/poll?id=aaaaaaaaaaaaaaaaaaaaaaaaaa",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"upscale",
+								"poll"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "aaaaaaaaaaaaaaaaaaaaaaaaaa"
+								}
+							]
+						},
+						"description": "Well-formed but non-existent id -> 404 with a readable message."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"404 on unknown id\", () => pm.response.to.have.status(404));"
+								]
+							}
+						}
+					]
 				}
 			]
 		}
@@ -171,8 +527,26 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:3000",
+			"value": "https://nanabanana-one.vercel.app",
 			"type": "string"
+		},
+		{
+			"key": "replicateToken",
+			"value": "",
+			"type": "string",
+			"description": "Replicate API token. Left empty on purpose — fill it in Postman locally, do not commit it."
+		},
+		{
+			"key": "testImageUrl",
+			"value": "https://psskjzvdme0m7e2w.public.blob.vercel-storage.com/IMG_4733-z0sW1YeU6ifLPxexIXdsZWsk2l3P1B.PNG",
+			"type": "string",
+			"description": "Public Blob URL from a known-good prediction."
+		},
+		{
+			"key": "predictionId",
+			"value": "",
+			"type": "string",
+			"description": "Filled automatically by the upscale request's test script."
 		}
 	]
 }

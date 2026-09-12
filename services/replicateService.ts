@@ -3,21 +3,31 @@
  * Uses Vercel API routes (no CORS proxy needed)
  */
 
+import type {
+  SubjectDetection,
+  TopazEnhanceModel,
+  UpscaleFactor,
+  UpscaleOutputFormat,
+} from '../shared/upscaleContract';
+import {
+  readErrorBody,
+  parsePrediction,
+  predictionErrorText,
+} from '../shared/upscaleContract';
+
 const API_BASE_URL = '/api';
 const MAX_INLINE_IMAGE_BYTES = 1024 * 1024 * 4;
 
-export type TopazEnhanceModel =
-  | 'Standard V2'
-  | 'High Fidelity V2'
-  | 'Low Resolution V2'
-  | 'CGI'
-  | 'Text Refine';
+// Re-exported so existing importers keep working against one definition.
+export type { TopazEnhanceModel, UpscaleFactor, UpscaleOutputFormat, SubjectDetection };
 
 interface ReplicatePrediction {
   id: string;
   status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled';
   output?: string | string[];
-  error?: string;
+  // Usually a string, but Replicate does not contractually promise one —
+  // use predictionErrorText() rather than interpolating it directly.
+  error?: unknown;
   metrics?: { predict_time?: number };
 }
 
@@ -94,12 +104,12 @@ async function pollQwenPrediction(
   for (let i = 0; i < maxAttempts; i++) {
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
     const response = await fetch(`${API_BASE_URL}/qwen/poll?id=${predictionId}`);
-    const current: ReplicatePrediction = await response.json();
+    const current = parsePrediction<ReplicatePrediction>(await response.json());
 
     if (!response.ok) throw new Error((current as any).error || 'Failed to poll Qwen prediction.');
     if (current.status === 'succeeded') return current;
     if (current.status === 'failed' || current.status === 'canceled') {
-      throw new Error(current.error || 'Qwen prediction failed.');
+      throw new Error(predictionErrorText(current, 'Qwen prediction failed.'));
     }
   }
   throw new Error('Qwen prediction timed out.');
@@ -120,7 +130,7 @@ export async function generateQwenImage(
     throw new Error(predictionRaw?.error || 'Failed to create Qwen prediction.');
   }
 
-  let prediction = predictionRaw as ReplicatePrediction;
+  let prediction = parsePrediction<ReplicatePrediction>(predictionRaw);
 
   if (prediction.status !== 'succeeded') {
     prediction = await pollQwenPrediction(prediction.id);
@@ -138,10 +148,11 @@ export async function generateQwenImage(
 export async function startUpscale(
   apiToken: string,
   imageUrl: string,
-  upscaleFactor: '2x' | '4x' | '6x' = '4x',
+  upscaleFactor: UpscaleFactor = '4x',
   enhanceModel: TopazEnhanceModel = 'High Fidelity V2',
   faceEnhance: boolean = false,
-  outputFormat: 'jpg' | 'png' = 'png'
+  outputFormat: UpscaleOutputFormat = 'png',
+  subjectDetection: SubjectDetection = 'All'
 ): Promise<{ id: string }> {
   const response = await fetch(`${API_BASE_URL}/upscale`, {
     method: 'POST',
@@ -155,15 +166,15 @@ export async function startUpscale(
       enhanceModel,
       faceEnhance,
       outputFormat,
+      subjectDetection,
     }),
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to start upscale');
+    throw new Error(await readErrorBody(response, 'Failed to start upscale'));
   }
 
-  const prediction: ReplicatePrediction = await response.json();
+  const prediction = parsePrediction<ReplicatePrediction>(await response.json());
 
   return {
     id: prediction.id,
@@ -182,7 +193,7 @@ export async function pollPrediction(
 ): Promise<string> {
   for (let i = 0; i < maxAttempts; i++) {
     const response = await fetch(
-      `${API_BASE_URL}/upscale/poll?id=${predictionId}`,
+      `${API_BASE_URL}/upscale/poll?id=${encodeURIComponent(predictionId)}`,
       {
         headers: {
           'Authorization': `Bearer ${apiToken}`,
@@ -191,25 +202,23 @@ export async function pollPrediction(
     );
 
     if (!response.ok) {
-      throw new Error('Failed to check prediction status');
+      // Keep the server's message — a bare "failed to check status" makes
+      // upscale failures impossible to debug.
+      throw new Error(await readErrorBody(response, 'Failed to check prediction status'));
     }
 
-    const prediction: ReplicatePrediction = await response.json();
+    const prediction = parsePrediction<ReplicatePrediction>(await response.json());
 
     if (onProgress) {
       onProgress(prediction.status);
     }
 
     if (prediction.status === 'succeeded') {
-      const output = prediction.output;
-      if (Array.isArray(output)) {
-        return output[0];
-      }
-      return output as string;
+      return getPredictionOutputUrl(prediction);
     }
 
     if (prediction.status === 'failed' || prediction.status === 'canceled') {
-      throw new Error(prediction.error || 'Upscale failed');
+      throw new Error(predictionErrorText(prediction, 'Upscale failed'));
     }
 
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
@@ -219,16 +228,20 @@ export async function pollPrediction(
 }
 
 /**
- * Full upscale workflow using our API routes
+ * Full upscale workflow using our API routes.
+ *
+ * `upscaleFactor` is passed straight through — Replicate only accepts 2x/4x/6x,
+ * so the caller picks one of those rather than a number we silently round.
  */
 export async function upscaleImage(
   apiToken: string,
   imageData: string,
   mimeType: string,
-  scaleFactorValue: number = 4,
+  upscaleFactor: UpscaleFactor = '4x',
   enhanceModel: TopazEnhanceModel = 'High Fidelity V2',
   faceEnhance: boolean = false,
-  outputFormat: 'jpg' | 'png' = 'png',
+  outputFormat: UpscaleOutputFormat = 'png',
+  subjectDetection: SubjectDetection = 'All',
   onProgress?: (status: string) => void
 ): Promise<string> {
   // Replicate accepts data URLs or plain URLs
@@ -236,19 +249,14 @@ export async function upscaleImage(
     ? imageData
     : `data:${mimeType};base64,${imageData}`;
 
-  // Map numeric scale to Topaz string factor
-  let upscaleFactor: '2x' | '4x' | '6x' = '4x';
-  if (scaleFactorValue <= 2) upscaleFactor = '2x';
-  else if (scaleFactorValue <= 4) upscaleFactor = '4x';
-  else upscaleFactor = '6x';
-
   const { id } = await startUpscale(
     apiToken,
     imageUrl,
     upscaleFactor,
     enhanceModel,
     faceEnhance,
-    outputFormat
+    outputFormat,
+    subjectDetection
   );
 
   if (onProgress) {

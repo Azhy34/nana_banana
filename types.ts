@@ -52,7 +52,9 @@ export enum ModelType {
 export type AspectRatio = '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9' | '21:9';
 export type ImageSize = '512' | '1K' | '2K' | '4K' | '8K' | '12K' | '16K' | '24K';
 
-export type TopazModel = 'Standard V2' | 'High Fidelity V2' | 'Low Resolution V2' | 'CGI' | 'Text Refine';
+// Mirrors the live Replicate schema — defined once in shared/upscaleContract.ts.
+import type { SubjectDetection, UpscaleFactor } from './shared/upscaleContract';
+export type { UpscaleFactor, SubjectDetection };
 
 export interface UploadedImage {
   id: string;
@@ -84,10 +86,14 @@ export interface GenerationState {
 }
 
 export interface UpscaleSettings {
-  targetSize: '8K' | '12K' | '16K' | '24K';
+  // Only sizes Replicate can actually deliver: 2x, 4x and 6x. There is no 3x,
+  // so a "12K" option would silently resolve to 4x/16K.
+  targetSize: '8K' | '16K' | '24K';
   format: 'jpg' | 'png';
-  model: TopazModel;
-  faceCorrection: boolean;
+  // enhance_model and face_enhancement were dropped from the UI: A/B runs against
+  // the live model returned pixel-identical output for every value of both, so the
+  // controls could not affect the result. subject_detection measurably does.
+  subjectDetection: SubjectDetection;
 }
 
 export interface UpscaleState {

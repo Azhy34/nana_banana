@@ -10,18 +10,26 @@ interface UpscalerProps {
     onBack?: () => void;
 }
 
+// Replicate's upscale_factor enum is None | 2x | 4x | 6x — there is no 3x.
+// Offering a "12K ×3" button would send 4x and silently bill a 16K upscale.
 const SIZE_OPTIONS = [
-    { value: '8K', label: '8K (~7680px)', multiplier: 2 },
-    { value: '12K', label: '12K (~11520px)', multiplier: 3 },
-    { value: '16K', label: '16K (~15360px)', multiplier: 4 },
-    { value: '24K', label: '24K (6x)', multiplier: 6 },
+    { value: '8K', label: '8K (~7680px)', factor: '2x' },
+    { value: '16K', label: '16K (~15360px)', factor: '4x' },
+    { value: '24K', label: '24K (~23040px)', factor: '6x' },
 ] as const;
 
-const MODEL_OPTIONS = [
-    { value: 'High Fidelity V2', label: '💎 High Fidelity', description: 'Идеально для пейзажей и животных (шерсть, детали)' },
-    { value: 'Standard V2', label: '✨ Standard', description: 'Универсально, хорошо убирает шумы' },
-    { value: 'Low Resolution V2', label: '🔍 Low Res', description: 'Для маленьких или мутных фото' },
-    { value: 'CGI', label: '🎨 Art / CGI', description: 'Для иллюстраций и графики' },
+// A/B runs against the live Replicate model showed enhance_model has no effect:
+// 'High Fidelity V2', 'CGI' and 'Low Resolution V2' returned pixel-identical output
+// at both 2x and 4x. It still has to be sent, so it is fixed here rather than
+// offered as a choice the user cannot actually make.
+const ENHANCE_MODEL = 'High Fidelity V2' as const;
+
+// subject_detection, by contrast, does change the result (Foreground vs All
+// differs measurably), and until now it was hardcoded and hidden.
+const SUBJECT_OPTIONS = [
+    { value: 'All', label: '🖼 Всё изображение', description: 'Равномерно по всей площади — для обоев по умолчанию' },
+    { value: 'Foreground', label: '🎯 Передний план', description: 'Сильнее по объектам, мягче по фону' },
+    { value: 'Background', label: '🌫 Фон', description: 'Сильнее по фону, бережнее к объектам' },
 ] as const;
 
 
@@ -39,8 +47,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
     const [settings, setSettings] = useState<UpscaleSettings>({
         targetSize: '16K',
         format: 'jpg',
-        model: 'High Fidelity V2',
-        faceCorrection: false,
+        subjectDetection: 'All',
     });
 
     const [state, setState] = useState<UpscaleState>({
@@ -108,7 +115,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
 
             // Step 2: Call Replicate Upscale via our API
             const selectedOption = SIZE_OPTIONS.find(o => o.value === settings.targetSize);
-            const scaleFactor = selectedOption?.multiplier || 4;
+            const upscaleFactor = selectedOption?.factor ?? '4x';
 
             setState(prev => ({ ...prev, progress: 20 }));
 
@@ -116,10 +123,11 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                 replicateToken,
                 finalImageUrl,
                 sourceMimeType,
-                scaleFactor,
-                settings.model,
-                settings.faceCorrection,
+                upscaleFactor,
+                ENHANCE_MODEL,
+                false,
                 settings.format,
+                settings.subjectDetection,
                 (status) => {
                     setState(prev => ({
                         ...prev,
@@ -164,7 +172,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
             <div className="max-w-2xl mx-auto py-12">
                 <div className="text-center mb-8">
                     <h2 className="text-3xl font-bold text-white mb-2">🔬 AI Upscaler</h2>
-                    <p className="text-slate-400">Увеличьте разрешение до 16K для печати на фотообоях</p>
+                    <p className="text-slate-400">Увеличьте разрешение до 24K для печати на фотообоях</p>
                 </div>
 
                 <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-slate-700 rounded-3xl cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-indigo-500/50 transition-all group">
@@ -256,7 +264,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                     {/* Target Size */}
                     <div className="space-y-3">
                         <label className="text-sm font-medium text-white">Целевое разрешение</label>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-3 gap-2">
                             {SIZE_OPTIONS.map((option) => (
                                 <button
                                     key={option.value}
@@ -267,33 +275,33 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                                         }`}
                                 >
                                     <div className="font-bold text-white text-sm">{option.value}</div>
-                                    <div className="text-[10px] text-slate-500">×{option.multiplier}</div>
+                                    <div className="text-[10px] text-slate-500">{option.factor}</div>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {/* Enhancement Model */}
+                    {/* Subject Detection — the only enhancement control that measurably changes output */}
                     <div className="space-y-3">
-                        <label className="text-sm font-medium text-white">Модель улучшения</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {MODEL_OPTIONS.map((model) => (
+                        <label className="text-sm font-medium text-white">Область обработки</label>
+                        <div className="grid grid-cols-1 gap-2">
+                            {SUBJECT_OPTIONS.map((option) => (
                                 <button
-                                    key={model.value}
-                                    onClick={() => setSettings(prev => ({ ...prev, model: model.value }))}
-                                    className={`p-3 rounded-xl border-2 transition-all text-left group ${settings.model === model.value
+                                    key={option.value}
+                                    onClick={() => setSettings(prev => ({ ...prev, subjectDetection: option.value }))}
+                                    className={`p-3 rounded-xl border-2 transition-all text-left group ${settings.subjectDetection === option.value
                                         ? 'border-purple-500 bg-purple-500/10'
                                         : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
                                         }`}
                                 >
-                                    <div className="font-bold text-white text-sm">{model.label}</div>
-                                    <div className="text-[10px] text-slate-500 leading-tight mt-1">{model.description}</div>
+                                    <div className="font-bold text-white text-sm">{option.label}</div>
+                                    <div className="text-[10px] text-slate-500 leading-tight mt-1">{option.description}</div>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {/* Output Format and Face Correction */}
+                    {/* Output Format */}
                     <div className="space-y-4">
                         <div className="space-y-3">
                             <label className="text-sm font-medium text-white">Формат файла</label>
@@ -321,18 +329,6 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                             </div>
                         </div>
 
-                        <label className="flex items-center gap-3 p-4 bg-slate-900/40 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-800/60 transition-colors">
-                            <input
-                                type="checkbox"
-                                checked={settings.faceCorrection}
-                                onChange={(e) => setSettings(prev => ({ ...prev, faceCorrection: e.target.checked }))}
-                                className="w-5 h-5 rounded border-slate-700 text-indigo-500 focus:ring-indigo-500 bg-slate-800"
-                            />
-                            <div>
-                                <div className="text-sm font-medium text-white">Улучшение лиц</div>
-                                <div className="text-[10px] text-slate-500">Восстанавливает черты лица при апскейле</div>
-                            </div>
-                        </label>
                     </div>
 
                     {/* Info Box */}
