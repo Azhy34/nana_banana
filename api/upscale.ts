@@ -5,7 +5,7 @@ import {
   formatIssues,
   readErrorBody,
   parsePrediction,
-} from '../shared/upscaleContract';
+} from '../shared/upscaleContract.js';
 
 const REPLICATE_API_URL = 'https://api.replicate.com/v1/models/topazlabs/image-upscale/predictions';
 

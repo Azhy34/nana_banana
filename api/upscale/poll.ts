@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { readErrorBody, parsePrediction } from '../../shared/upscaleContract';
+import { readErrorBody, parsePrediction } from '../../shared/upscaleContract.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS

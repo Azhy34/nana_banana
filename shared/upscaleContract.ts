@@ -7,6 +7,11 @@
  *
  * Both the browser service and the serverless route import from here, so the UI
  * cannot offer an option the API does not accept.
+ *
+ * NOTE: package.json sets "type": "module", so the /api routes run as real ESM
+ * on Vercel and MUST import this file with an explicit '.js' extension. `vercel
+ * dev` resolves it without one, so dropping the extension fails only in
+ * production, with ERR_MODULE_NOT_FOUND at runtime and a green build.
  */
 import { z } from 'zod';
 
