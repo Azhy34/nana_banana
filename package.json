@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test --project=ui --project=api",
+    "test:e2e:prod": "playwright test -c playwright.prod.config.ts --project=ui --project=api",
+    "test:e2e:live": "playwright test --project=live",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
@@ -16,6 +20,7 @@
     "zod": "^4.6.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

@@ -9,9 +9,13 @@ npm install       # Install dependencies
 npm run dev       # Start dev server on http://localhost:3000
 npm run build     # Production build (outputs to dist/)
 npm run preview   # Preview production build locally
+
+npm run test:e2e        # Playwright: ui (all AI providers mocked) + api, against a local keyless build
+npm run test:e2e:prod   # same suites against https://nanabanana-one.vercel.app (no paid calls)
+npm run test:e2e:live   # free read-only checks with real keys from .env.local (key validity, model access)
 ```
 
-No test runner or linter is configured.
+E2E tests live in `e2e/` (`support/fixtures.ts` blocks every unmocked request to OpenRouter, Gemini, Replicate, Vercel Blob and `/api/*`). No linter is configured.
 
 ## Architecture
 
