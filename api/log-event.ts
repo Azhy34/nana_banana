@@ -3,6 +3,17 @@ import { put, list } from '@vercel/blob';
 import fs from 'fs';
 import path from 'path';
 
+const DETAIL_FIELDS = [
+  'negativePrompt', 'aspectRatio', 'durationSeconds', 'personGeneration', 'seed', 'resolution', 'interactionId',
+  'operationName', 'raiMediaFilteredCount', 'raiMediaFilteredReasons', 'errorCode', 'errorStatus',
+  // Upscale (Replicate / Topaz)
+  'predictionId', 'upscaleFactor', 'enhanceModel', 'outputFormat', 'subjectDetection',
+  'inputWidth', 'inputHeight', 'outputWidth', 'outputHeight', 'billingUnits', 'predictTimeSeconds', 'stage',
+] as const;
+
+// Short names kept from the original stdout message format.
+const SUMMARY_LABELS: Record<string, string> = { operationName: 'operation', raiMediaFilteredCount: 'raiFiltered' };
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,25 +28,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const {
-    sessionId, model, prompt, cost, duration, status, error, traceId, negativePrompt,
-    aspectRatio, durationSeconds, personGeneration, seed, operationName,
-    raiMediaFilteredCount, raiMediaFilteredReasons, errorCode, errorStatus
-  } = req.body;
+  const { sessionId, model, prompt, cost, duration, status, error, traceId } = req.body;
   const timestamp = new Date().toISOString();
 
+  // Optional fields are persisted only if listed here (mirrors GeminiLogDetails in types.ts).
+  const details = Object.fromEntries(
+    DETAIL_FIELDS.filter((key) => req.body[key] !== undefined && req.body[key] !== null).map((key) => [key, req.body[key]])
+  );
+  const { negativePrompt } = details;
+
   // 1. Format and write to server/console stdout in structured JSON format
-  const detailsSummary = [
-    seed !== undefined ? `seed=${seed}` : null,
-    aspectRatio ? `aspectRatio=${aspectRatio}` : null,
-    durationSeconds !== undefined ? `duration=${durationSeconds}s` : null,
-    personGeneration ? `personGeneration=${personGeneration}` : null,
-    operationName ? `operation=${operationName}` : null,
-    raiMediaFilteredCount ? `raiFiltered=${raiMediaFilteredCount}` : null,
-    Array.isArray(raiMediaFilteredReasons) && raiMediaFilteredReasons.length ? `raiReasons="${raiMediaFilteredReasons.join('; ')}"` : null,
-    errorCode !== undefined ? `errorCode=${errorCode}` : null,
-    errorStatus ? `errorStatus=${errorStatus}` : null,
-  ].filter(Boolean).join(' ');
+  const detailsSummary = Object.entries(details)
+    .map(([key, value]) => {
+      if (key === 'negativePrompt') return null;
+      if (key === 'raiMediaFilteredReasons') return Array.isArray(value) && value.length ? `raiReasons="${value.join('; ')}"` : null;
+      if (key === 'durationSeconds') return `duration=${value}s`;
+      return `${SUMMARY_LABELS[key] ?? key}=${value}`;
+    })
+    .filter(Boolean)
+    .join(' ');
 
   console.log(JSON.stringify({
     message: `[GEMINI LOG] [Session: ${sessionId}] [Model: ${model}] [Status: ${status}] cost=$${Number(cost).toFixed(4)} duration=${Number(duration).toFixed(1)}s ${error ? `error="${error}"` : ''} prompt="${prompt}"${negativePrompt ? ` negativePrompt="${negativePrompt}"` : ''}${detailsSummary ? ` ${detailsSummary}` : ''}`,
@@ -52,21 +63,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     timestamp,
     model,
     prompt,
-    negativePrompt,
     cost,
     duration,
     status,
     error,
     traceId,
-    aspectRatio,
-    durationSeconds,
-    personGeneration,
-    seed,
-    operationName,
-    raiMediaFilteredCount,
-    raiMediaFilteredReasons,
-    errorCode,
-    errorStatus
+    ...details,
   };
 
   const blobToken = process.env.BLOB_READ_WRITE_TOKEN;

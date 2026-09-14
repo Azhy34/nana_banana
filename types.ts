@@ -138,5 +138,19 @@ export interface GeminiLogDetails {
   raiMediaFilteredReasons?: string[];
   errorCode?: string | number;
   errorStatus?: string;
+  // Upscale (Replicate / Topaz)
+  predictionId?: string;
+  upscaleFactor?: string;
+  enhanceModel?: string;
+  outputFormat?: string;
+  subjectDetection?: string;
+  inputWidth?: number;
+  inputHeight?: number;
+  outputWidth?: number;
+  outputHeight?: number;
+  billingUnits?: number;
+  predictTimeSeconds?: number;
+  /** Where a multi-step job failed, e.g. 'upload' or 'upscale'. */
+  stage?: string;
 }
 

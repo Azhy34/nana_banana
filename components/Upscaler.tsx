@@ -1,8 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { upload } from '@vercel/blob/client';
 import { upscaleImage } from '../services/replicateService';
-import { UpscaleSettings, UpscaleState } from '../types';
+import { logGeminiEvent } from '../services/geminiService';
+import { GeminiLogDetails, UpscaleSettings, UpscaleState } from '../types';
 import { downloadImage } from '../services/downloadService';
+import { generateTraceId } from '../utils/tracing';
+import { TOPAZ_UPSCALE_MODEL_ID, TOPAZ_USD_PER_BILLING_UNIT } from '../constants';
 
 interface UpscalerProps {
     replicateToken: string;
@@ -43,6 +46,9 @@ export const Upscaler: React.FC<UpscalerProps> = ({
     const [sourceImage, setSourceImage] = useState<string | null>(initialImage || null);
     const [sourceFile, setSourceFile] = useState<File | null>(null);
     const [sourceMimeType, setSourceMimeType] = useState<string>('image/png');
+    // Natural size of the source, read when the preview loads — logged so the real
+    // output resolution of each run is known.
+    const [sourceSize, setSourceSize] = useState<{ width: number; height: number } | null>(null);
     
     const [settings, setSettings] = useState<UpscaleSettings>({
         targetSize: '16K',
@@ -63,6 +69,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         if (file) {
             setSourceFile(file);
             setSourceMimeType(file.type);
+            setSourceSize(null);
             const reader = new FileReader();
             reader.onload = (e) => {
                 const dataUrl = e.target?.result as string;
@@ -85,6 +92,28 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         }
 
         setState({ isUpscaling: true, progress: 0, error: null, upscaledImage: null });
+
+        const selectedOption = SIZE_OPTIONS.find(o => o.value === settings.targetSize);
+        const upscaleFactor = selectedOption?.factor ?? '4x';
+        const multiplier = Number.parseInt(upscaleFactor, 10);
+        const traceId = generateTraceId();
+        const startedAt = Date.now();
+        const sourceName = sourceFile?.name ?? 'image from another tool';
+        const outputSize = sourceSize && `${sourceSize.width * multiplier}×${sourceSize.height * multiplier}`;
+        const description = `Upscale ${upscaleFactor}${outputSize ? ` → ${outputSize}` : ''} (${settings.format}, ${settings.subjectDetection}): ${sourceName}`;
+        const logDetails: GeminiLogDetails = {
+            upscaleFactor,
+            enhanceModel: ENHANCE_MODEL,
+            outputFormat: settings.format,
+            subjectDetection: settings.subjectDetection,
+            inputWidth: sourceSize?.width,
+            inputHeight: sourceSize?.height,
+            outputWidth: sourceSize ? sourceSize.width * multiplier : undefined,
+            outputHeight: sourceSize ? sourceSize.height * multiplier : undefined,
+        };
+        let stage = 'upload';
+
+        logGeminiEvent(TOPAZ_UPSCALE_MODEL_ID, `${description} [start]`, 0, 0, 'started', null, traceId, undefined, logDetails);
 
         try {
             let finalImageUrl = sourceImage;
@@ -114,9 +143,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
             }
 
             // Step 2: Call Replicate Upscale via our API
-            const selectedOption = SIZE_OPTIONS.find(o => o.value === settings.targetSize);
-            const upscaleFactor = selectedOption?.factor ?? '4x';
-
+            stage = 'upscale';
             setState(prev => ({ ...prev, progress: 20 }));
 
             const result = await upscaleImage(
@@ -136,13 +163,25 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                 }
             );
 
+            const cost = result.billingUnits !== undefined ? result.billingUnits * TOPAZ_USD_PER_BILLING_UNIT : 0;
+            logGeminiEvent(TOPAZ_UPSCALE_MODEL_ID, description, cost, (Date.now() - startedAt) / 1000, 'success', null, traceId, undefined, {
+                ...logDetails,
+                predictionId: result.predictionId,
+                predictTimeSeconds: result.predictTimeSeconds,
+                billingUnits: result.billingUnits,
+            });
+
             setState({
                 isUpscaling: false,
                 progress: 100,
                 error: null,
-                upscaledImage: result,
+                upscaledImage: result.url,
             });
         } catch (err: any) {
+            logGeminiEvent(TOPAZ_UPSCALE_MODEL_ID, description, 0, (Date.now() - startedAt) / 1000, 'error', err.message || 'Unknown error', traceId, undefined, {
+                ...logDetails,
+                stage,
+            });
             setState({
                 isUpscaling: false,
                 progress: 0,
@@ -253,6 +292,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                             src={sourceImage}
                             alt="Source"
                             className="max-w-full max-h-full object-contain"
+                            onLoad={(e) => setSourceSize({ width: e.currentTarget.naturalWidth, height: e.currentTarget.naturalHeight })}
                         />
                     </div>
                 </div>

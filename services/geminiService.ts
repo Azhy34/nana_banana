@@ -415,7 +415,12 @@ const generateBatchWithGemini = async (
   throw new Error("No image generated in the Gemini response.");
 };
 
-const detectWallWithOpenRouter = async (apiKey: string, imageInput: string): Promise<WallCoordinates> => {
+interface WallDetection {
+  coords: WallCoordinates;
+  promptTokens: number;
+}
+
+const detectWallWithOpenRouter = async (apiKey: string, imageInput: string): Promise<WallDetection> => {
   const prompt = `
 Analyze this interior image. Identify the 4 corners of the MAIN wall where wallpaper is or should be applied.
 The wall might be partially obscured by furniture (bed, sofa), but I need the projected corners of the wall plane.
@@ -449,10 +454,10 @@ Format:
   if (!text) throw new Error("No text response from OpenRouter vision model.");
   const coords = JSON.parse(text.replace(/```json/g, "").replace(/```/g, "").trim());
   if (!isWallCoordinates(coords)) throw new Error("Vision response did not match expected coordinate format.");
-  return coords;
+  return { coords, promptTokens: response.usage?.prompt_tokens ?? 0 };
 };
 
-const detectWallWithGemini = async (apiKey: string, imageInput: string): Promise<WallCoordinates> => {
+const detectWallWithGemini = async (apiKey: string, imageInput: string): Promise<WallDetection> => {
   const ai = new GoogleGenAI({ apiKey });
   const normalized = normalizeImageInput(imageInput).replace(/^data:image\/\w+;base64,/, "");
 
@@ -494,7 +499,7 @@ Format:
   if (!text) throw new Error("No text response from Gemini vision model.");
   const coords = JSON.parse(text.replace(/```json/g, "").replace(/```/g, "").trim());
   if (!isWallCoordinates(coords)) throw new Error("Vision response did not match expected coordinate format.");
-  return coords;
+  return { coords, promptTokens: response.usageMetadata?.promptTokenCount ?? 0 };
 };
 
 export const generateImageComposition = async (
@@ -579,13 +584,23 @@ export const detectWallCoordinates = async (
     throw new Error(`${label} API Key is required.`);
   }
 
+  const model = provider === "gemini" ? GEMINI_WALL_DETECT_MODEL : OPENROUTER_WALL_DETECT_MODEL;
+  const startTime = Date.now();
+
   try {
-    if (provider === "gemini") {
-      return await detectWallWithGemini(apiKey, imageBase64);
-    }
-    return await detectWallWithOpenRouter(apiKey, imageBase64);
-  } catch (error) {
+    const { coords, promptTokens } = provider === "gemini"
+      ? await detectWallWithGemini(apiKey, imageBase64)
+      : await detectWallWithOpenRouter(apiKey, imageBase64);
+    const corners = [coords.topLeft, coords.topRight, coords.bottomRight, coords.bottomLeft]
+      .map((p) => `(${p.x.toFixed(2)},${p.y.toFixed(2)})`)
+      .join(" ");
+    // The answer is a few dozen JSON tokens, so only the image input is priced.
+    const cost = (promptTokens / 1_000_000) * MODEL_PRICING[ModelType.Flash31].inputPer1M;
+    logGeminiEvent(model, `Wall detection → ${corners}`, cost, (Date.now() - startTime) / 1000, "success");
+    return coords;
+  } catch (error: any) {
     console.error(`Vision API Error (${provider}):`, error);
+    logGeminiEvent(model, "Wall detection failed — full frame used instead", 0, (Date.now() - startTime) / 1000, "error", error?.message || "Unknown error");
     return {
       topLeft: { x: 0, y: 0 },
       topRight: { x: 1, y: 0 },

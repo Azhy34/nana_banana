@@ -28,7 +28,15 @@ interface ReplicatePrediction {
   // Usually a string, but Replicate does not contractually promise one —
   // use predictionErrorText() rather than interpolating it directly.
   error?: unknown;
-  metrics?: { predict_time?: number };
+  metrics?: { predict_time?: number; unspecified_billing_metric?: number };
+}
+
+export interface UpscaleResult {
+  url: string;
+  predictionId: string;
+  predictTimeSeconds?: number;
+  /** Replicate billing units for this prediction (see TOPAZ_USD_PER_BILLING_UNIT). */
+  billingUnits?: number;
 }
 
 export interface QwenGenerationResult {
@@ -182,7 +190,7 @@ export async function startUpscale(
 }
 
 /**
- * Poll for prediction result via our API route
+ * Poll for prediction result via our API route; resolves with the finished prediction.
  */
 export async function pollPrediction(
   apiToken: string,
@@ -190,7 +198,7 @@ export async function pollPrediction(
   onProgress?: (status: string) => void,
   maxAttempts: number = 100,
   intervalMs: number = 3000
-): Promise<string> {
+): Promise<ReplicatePrediction> {
   for (let i = 0; i < maxAttempts; i++) {
     const response = await fetch(
       `${API_BASE_URL}/upscale/poll?id=${encodeURIComponent(predictionId)}`,
@@ -214,7 +222,7 @@ export async function pollPrediction(
     }
 
     if (prediction.status === 'succeeded') {
-      return getPredictionOutputUrl(prediction);
+      return prediction;
     }
 
     if (prediction.status === 'failed' || prediction.status === 'canceled') {
@@ -243,7 +251,7 @@ export async function upscaleImage(
   outputFormat: UpscaleOutputFormat = 'png',
   subjectDetection: SubjectDetection = 'All',
   onProgress?: (status: string) => void
-): Promise<string> {
+): Promise<UpscaleResult> {
   // Replicate accepts data URLs or plain URLs
   const imageUrl = imageData.startsWith('http')
     ? imageData
@@ -263,5 +271,12 @@ export async function upscaleImage(
     onProgress('processing');
   }
 
-  return await pollPrediction(apiToken, id, onProgress);
+  const prediction = await pollPrediction(apiToken, id, onProgress);
+
+  return {
+    url: getPredictionOutputUrl(prediction),
+    predictionId: prediction.id,
+    predictTimeSeconds: prediction.metrics?.predict_time,
+    billingUnits: prediction.metrics?.unspecified_billing_metric,
+  };
 }

@@ -250,7 +250,12 @@ export class MockedApis {
     });
     await page.route(this.sameOriginApi('/api/upscale/poll'), async (route) => {
       this.upscalePoll.push(capture(route.request()));
-      return json(route, 200, { id: 'e2epred1', status: 'succeeded', output: UPSCALED_URL, metrics: { predict_time: 12.3 } });
+      return json(route, 200, {
+        id: 'e2epred1',
+        status: 'succeeded',
+        output: UPSCALED_URL,
+        metrics: { predict_time: 12.3, unspecified_billing_metric: 2 },
+      });
     });
 
     // ── Static images the app loads from third parties ─────────────────────────
