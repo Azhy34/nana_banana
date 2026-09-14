@@ -62,4 +62,15 @@ This file tracks significant changes, architectural decisions, and logic updates
 ### 4. Raw Wood Texturing (Preventing Plastic CGI Look)
 - **Decision:** Replaced generic "wood" material references with desaturated, raw, tactile descriptions: *«solid wood with rich visible organic wood grain, tactile raw matte finish (unlackiertes Massivholz, komplett matt, keine Reflexionen)»*.
 
+## [2026-09-14] E2E Test Suite & Production Audit
 
+### 1. Playwright suites (`e2e/`)
+- **Decision:** Added `ui` (every AI provider mocked, a guard fails the test on any unmocked request to Gemini/OpenRouter/Replicate/Blob/`/api`), `api` (route contracts and security checks) and `live` (free read-only key/model checks with `.env.local`).
+- **Rule:** Local runs build the bundle with all provider env vars blanked (`playwright.config.ts`); prod runs use `playwright.prod.config.ts`. Tests must never print keys or session logs — compare secrets as booleans and keep `trace` off where responses carry them.
+
+### 2. Intentionally failing tests
+- **Decision:** 6 UI tests and 5 security tests fail on purpose; they pin real bugs and exposed credentials (listed under *Known Issues* in `CLAUDE.md`).
+- **Rule:** Fix the app, not the assertion. Remove the Known Issues entry when its test turns green.
+
+### 3. Production usage
+- Images and video are generated only with Gemini models via the direct Gemini provider. OpenRouter and Qwen code paths are unused; their keys are being revoked.
