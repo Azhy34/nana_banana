@@ -368,7 +368,8 @@ const generateBatchWithGemini = async (
   prompt: string,
   aspectRatio: string,
   model: ModelType,
-  draftImage?: string
+  draftImage?: string,
+  textureImage?: UploadedImage | null
 ): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey });
   const parts: Part[] = [];
@@ -381,16 +382,26 @@ const generateBatchWithGemini = async (
     parts.push({ inlineData: { data: cleanBase64, mimeType } });
     parts.push({ text: "REFERENCE_IMAGE_2 (wallpaper product): place this wallpaper pattern seamlessly onto the wall from REFERENCE_IMAGE_1." });
     parts.push({ inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } });
+    if (textureImage) {
+      parts.push({ text: "REFERENCE_IMAGE_3 (physical material texture): apply this tactile non-woven sand grain texture and ultra-matte surface finish to the wallpaper on the wall. Do not copy any graphic drawings from this reference." });
+      parts.push({ inlineData: { data: textureImage.data, mimeType: textureImage.mimeType } });
+    }
     parts.push({
       text: buildRefinementPrompt(prompt)
     });
+  } else if (textureImage) {
+    parts.push({ text: "REFERENCE_IMAGE_1 (Wallpaper Graphic Artwork): This is the exact wallpaper graphic design to display on the accent wall. Preserve all colors, illustrations, lines, and composition 1:1 without alteration." });
+    parts.push({ inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } });
+    parts.push({ text: "REFERENCE_IMAGE_2 (Physical Material Texture Reference - Craft Lambda Non-Woven Sand Texture): This is a macro photograph of the real physical wallpaper material. Extract and copy ONLY the physical surface micro-relief: the fine-grain sand texture (Sandstruktur), non-woven paper fleece substrate, and ultra-matte chalky finish under natural daylight. DO NOT copy or transfer any graphic drawings or gold leaf designs from REFERENCE_IMAGE_2. Only transfer its physical paper texture and tactile surface grain onto the wall." });
+    parts.push({ inlineData: { data: textureImage.data, mimeType: textureImage.mimeType } });
+    parts.push({ text: prompt });
   } else {
     parts.push({ text: "WALLPAPER_PATTERN: The following image is the wallpaper product to place on the wall. Apply it exactly as instructed." });
     parts.push({ inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } });
     parts.push({ text: prompt });
   }
 
-  console.log(`[Gemini Direct Batch] model=${toGeminiModel(model)} aspectRatio=${aspectRatio}`);
+  console.log(`[Gemini Direct Batch] model=${toGeminiModel(model)} aspectRatio=${aspectRatio}${textureImage ? ' + textureRef (Craft Lambda)' : ''}`);
 
   const response = await ai.models.generateContent({
     model: toGeminiModel(model),
@@ -545,7 +556,8 @@ export const generateBatchImage = async (
   model: ModelType = ModelType.Flash31,
   provider: AIProvider = "openrouter",
   draftImage?: string,
-  traceId?: string
+  traceId?: string,
+  textureImage?: UploadedImage | null
 ): Promise<string> => {
   if (!apiKey) {
     const label = provider === "openrouter" ? "OpenRouter" : "Gemini";
@@ -557,7 +569,7 @@ export const generateBatchImage = async (
   try {
     let result: string;
     if (provider === "gemini") {
-      result = await generateBatchWithGemini(apiKey, wallpaper, prompt, aspectRatio, model, draftImage);
+      result = await generateBatchWithGemini(apiKey, wallpaper, prompt, aspectRatio, model, draftImage, textureImage);
     } else {
       result = await generateBatchWithOpenRouter(apiKey, wallpaper, prompt, aspectRatio, model, draftImage);
     }

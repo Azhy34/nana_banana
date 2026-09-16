@@ -2,6 +2,19 @@
 
 This file tracks significant changes, architectural decisions, and logic updates implemented by AI agents (Gemini/Claude) in the `nana_banana` project. This helps maintain context across sessions and different agents.
 
+## [2026-09-16] Multimodal Material Texture Conditioning (Gemini Direct API & Craft Lambda)
+
+### 1. Motivation & Aesthetic Goals
+- **Problem:** When generating mockups from a 2D wallpaper graphic file, the resulting wall often appears flat or digitally smooth without the tactile character of real wallpaper material.
+- **Solution:** Integrated physical wallpaper macro-reference `Craft_Lambda.jpg` (270 KB optimized asset with sand grain micro-relief and non-woven fleece texture) directly into the Gemini Batch Generator (`BatchGenerator.tsx`, `useBatch.ts`, `services/geminiService.ts`).
+
+### 2. Multi-Image Conditioning Architecture (ai.google.dev specification)
+- **Direct Gemini API (@google/genai):** Uses native multi-image conditioning (`contents.parts`):
+  - `REFERENCE_IMAGE_1` (`WALLPAPER_GRAPHIC_DESIGN`): Wallpaper user artwork (transfers pattern, colors, shapes 1:1).
+  - `REFERENCE_IMAGE_2` (`MATERIAL_TEXTURE_MACRO`): Real macro photo of Craft Lambda non-woven sand paper. Explicit instruction directs Gemini 3.1 to extract *only* surface relief, sand grain texture, and ultra-matte chalky finish under natural daylight, while strictly ignoring and discarding any graphic art (e.g. gold leaves) from the texture reference.
+- **In-Memory Zero-Latency Asset:** Created `services/craftLambdaAsset.ts` and `public/textures/craft_lambda.jpg` providing instant synchronous Base64 access without runtime disk or network overhead.
+- **UI Control:** Added interactive toggle card with thumbnail preview on the Batch Generator setup screen, persisted in `localStorage`.
+
 ## [2026-09-14] Dual-Model Upscaler Architecture (Real-ESRGAN & Topaz Labs)
 
 ### 1. Motivation & Unit Economics

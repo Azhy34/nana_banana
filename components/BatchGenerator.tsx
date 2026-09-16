@@ -47,9 +47,9 @@ const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs
 
 export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, onViewModeChange, onSendToTool }) => {
   const { state, actions } = useBatch(provider, apiKey, replicateToken);
-  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal } = state;
+  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, useTextureReference } = state;
   const {
-    setBatchStep, setWallpaper, setModel, setExpandedCard,
+    setBatchStep, setWallpaper, setModel, setExpandedCard, setUseTextureReference,
     handleWallpaperUpload, updateFormat, selectCount, generateCards,
     updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
     updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadSelected
@@ -85,6 +85,44 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               <input type="file" accept="image/*" className="hidden" onChange={handleWallpaperUpload} />
             </label>
           )}
+        </div>
+
+        {/* Material Texture Reference (Craft Lambda) */}
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-5 mb-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <img
+                src="/textures/craft_lambda.jpg"
+                className="w-14 h-14 object-cover rounded-lg border border-slate-600 shadow-md shrink-0"
+                alt="Craft Lambda sand texture"
+              />
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-white font-semibold text-sm">Фактура материала: Craft Lambda</h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    Песок / Флизелин
+                  </span>
+                </div>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  Передает в Gemini 3.1 реальный песчаный рельеф, ультраматовость и тактильность полотна
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setUseTextureReference(!useTextureReference)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                useTextureReference ? 'bg-indigo-600' : 'bg-slate-700'
+              }`}
+              title="Переключить референс фактуры"
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  useTextureReference ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
         </div>
 
         {/* Count */}

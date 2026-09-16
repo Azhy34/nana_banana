@@ -4,6 +4,7 @@ import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, getKeyObjectsForAge
 import { generateBatchImage, isQwenModel } from '../services/generationRouter';
 import { downloadImage } from '../services/downloadService';
 import { compressImageFile } from '../services/imageCompressor';
+import { CRAFT_LAMBDA_TEXTURE_IMAGE } from '../services/craftLambdaAsset';
 
 export type BatchStep = 'setup' | 'cards' | 'results';
 
@@ -39,6 +40,14 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const [count, setCount] = useState(12);
   const [model, setModel] = useState<ModelType>(ModelType.Flash31);
   const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '9:16': 6, '2:3': 4, '4:3': 2 });
+  const [useTextureReference, setUseTextureReference] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('nana_banana_batch_use_texture');
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch {
+      return true;
+    }
+  });
 
   // Cards
   const [cards, setCards] = useState<BatchCard[]>(() => {
@@ -80,6 +89,14 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       console.warn('Failed to save cards to localStorage:', e);
     }
   }, [cards]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('nana_banana_batch_use_texture', JSON.stringify(useTextureReference));
+    } catch (e) {
+      console.warn('Failed to save useTextureReference to localStorage:', e);
+    }
+  }, [useTextureReference]);
 
   const formatTotal = formatDist['9:16'] + formatDist['2:3'] + formatDist['4:3'];
 
@@ -236,12 +253,24 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
     const concurrencyLimit = 2;
     const selectedCards = cards.filter(c => c.selected);
+    const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
     
     for (let i = 0; i < selectedCards.length; i += concurrencyLimit) {
       const chunk = selectedCards.slice(i, i + concurrencyLimit);
       await Promise.allSettled(chunk.map(async (card) => {
         try {
-          const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, card.model, provider);
+          const img = await generateBatchImage(
+            apiKey,
+            replicateToken,
+            wallpaper,
+            card.promptText,
+            card.tags.aspectRatio,
+            card.model,
+            provider,
+            undefined,
+            undefined,
+            texture
+          );
           setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
         } catch (err: any) {
           setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
@@ -256,9 +285,21 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     if ((!apiKey && !isQwenModel(model)) || !wallpaper || (isQwenModel(model) && !replicateToken)) return;
     const card = cards.find(c => c.id === cardId);
     if (!card) return;
+    const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
-      const img = await generateBatchImage(apiKey, replicateToken, wallpaper, card.promptText, card.tags.aspectRatio, card.model, provider);
+      const img = await generateBatchImage(
+        apiKey,
+        replicateToken,
+        wallpaper,
+        card.promptText,
+        card.tags.aspectRatio,
+        card.model,
+        provider,
+        undefined,
+        undefined,
+        texture
+      );
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img } : c));
     } catch (err: any) {
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message } : c));
@@ -270,6 +311,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     const card = cards.find(c => c.id === cardId);
     if (!card || !card.resultImage) return;
 
+    const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
       const img = await generateBatchImage(
@@ -280,7 +322,9 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         card.tags.aspectRatio,
         ModelType.Pro,
         provider,
-        card.resultImage
+        card.resultImage,
+        undefined,
+        texture
       );
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img, model: ModelType.Pro } : c));
     } catch (err: any) {
@@ -301,9 +345,9 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   };
 
   return {
-    state: { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal },
+    state: { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, useTextureReference },
     actions: {
-      setBatchStep, setWallpaper, setModel, setExpandedCard,
+      setBatchStep, setWallpaper, setModel, setExpandedCard, setUseTextureReference,
       handleWallpaperUpload, updateFormat, selectCount, generateCards,
       updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
       updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadSelected
