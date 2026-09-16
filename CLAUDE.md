@@ -32,12 +32,12 @@ Images   Browser → generationRouter.ts ─┬─ provider "gemini"     → gem
                                         └─ model Qwen Image 2    → replicateService.ts → /api/qwen (+/poll) → Replicate
 Video    Browser → VideoTool.tsx ─┬─ Omni (default) → omniService.ts → Gemini Interactions API (sync, base64 MP4)
                                   └─ Veo            → veoService.ts  → Gemini API predictLongRunning + poll
-Upscale  Browser → Vercel Blob client upload (token from /api/upload) → /api/upscale (+/poll) → Replicate topazlabs/image-upscale
+Upscale  Browser → Vercel Blob client upload (token from /api/upload) → /api/upscale (+/poll) → Replicate nightmareai/real-esrgan (default, ~$0.002) or topazlabs/image-upscale
 Logs     services, Upscaler.tsx → logGeminiEvent() → /api/log-event → stdout JSON (Cloud Trace field) + Vercel Blob sessions/<sessionId>.json
                                                                      (+ gemini_sessions.json when not running on Vercel)
 ```
 
-`/api/log-event` persists only the fields listed in its `DETAIL_FIELDS` (mirror of `GeminiLogDetails` in `types.ts`) — add new log fields in both places. Upscale events carry `upscaleFactor`, input/output pixel size, `predictionId`, `billingUnits` and `stage` (`upload`/`upscale`) on errors.
+`/api/log-event` persists only the fields listed in its `DETAIL_FIELDS` (mirror of `GeminiLogDetails` in `types.ts`) — add new log fields in both places. Upscale events carry `upscaleModel` ('real-esrgan'|'topaz'), `upscaleFactor`, input/output pixel size, `predictionId`, `billingUnits` and `stage` (`upload`/`upscale`) on errors.
 
 All AI calls except Qwen and upscaling go straight from the browser with the key from the header. `traceId` (from `utils/tracing.ts`) is sent only in the `/api/log-event` body; `formatTraceParent()` exists but no request uses it.
 
@@ -80,7 +80,7 @@ App.tsx
 ├── Cropper:
 │   └── EtsyCropper.tsx     — Canvas crops to Etsy presets (3000×2250 etc.), batch mode, wall-detection warp mode
 ├── Upscale:
-│   └── Upscaler.tsx        — Topaz via Replicate: 8K/16K/24K → 2x/4x/6x, subject detection, JPG/PNG
+│   └── Upscaler.tsx        — Real-ESRGAN (default, ~$0.002) / Topaz via Replicate: 8K/16K/24K → 2x/4x/6x, subject detection (Topaz), JPG/PNG
 └── Video:
     └── VideoTool.tsx       — Omni 1.1 Flash (default) or Veo 3.1 Fast, presets, editable prompt, Etsy ≥500 px check
 ```
@@ -103,7 +103,8 @@ App.tsx
 | `veo-3.1-fast-generate-preview` | Alternative video engine |
 | `google/gemini-2.5-flash` (OpenRouter) | ✨ Enhance on the OpenRouter provider |
 | `qwen/qwen-image-2` (Replicate) | Optional image model, unused in production |
-| `topazlabs/image-upscale` (Replicate) | Upscaling to 8K/16K/24K |
+| `nightmareai/real-esrgan` (Replicate) | Fast & ultra-cheap upscaling (~$0.002/run, default) |
+| `topazlabs/image-upscale` (Replicate) | High-fidelity upscaling with subject detection (~$0.048/billing unit) |
 
 ### State Management
 

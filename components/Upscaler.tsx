@@ -1,17 +1,33 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { upload } from '@vercel/blob/client';
 import { upscaleImage } from '../services/replicateService';
 import { logGeminiEvent } from '../services/geminiService';
 import { GeminiLogDetails, UpscaleSettings, UpscaleState } from '../types';
 import { downloadImage } from '../services/downloadService';
 import { generateTraceId } from '../utils/tracing';
-import { TOPAZ_UPSCALE_MODEL_ID, TOPAZ_USD_PER_BILLING_UNIT } from '../constants';
+import { TOPAZ_UPSCALE_MODEL_ID, TOPAZ_USD_PER_BILLING_UNIT, REAL_ESRGAN_MODEL_ID, REAL_ESRGAN_USD_PER_RUN } from '../constants';
 
 interface UpscalerProps {
     replicateToken: string;
     initialImage?: string | null;
     onBack?: () => void;
 }
+
+// Available Upscale Models
+const UPSCALE_MODEL_OPTIONS = [
+    {
+        id: 'real-esrgan' as const,
+        name: '⚡ Real-ESRGAN (Рекомендуется)',
+        badge: '~$0.002 (быстро 3 сек)',
+        description: 'Идеально для обоев, акварели и иллюстраций. Резкие векторные контуры без мыла.',
+    },
+    {
+        id: 'topaz' as const,
+        name: '💎 Topaz Labs Gigapixel',
+        badge: '~$0.82 (17 units)',
+        description: 'Премиум для сложных фото, подавления шума и портретов.',
+    },
+];
 
 // Replicate's upscale_factor enum is None | 2x | 4x | 6x — there is no 3x.
 // Offering a "12K ×3" button would send 4x and silently bill a 16K upscale.
@@ -44,6 +60,13 @@ export const Upscaler: React.FC<UpscalerProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [sourceImage, setSourceImage] = useState<string | null>(initialImage || null);
+
+    useEffect(() => {
+        if (initialImage) {
+            setSourceImage(initialImage);
+            setSourceFile(null);
+        }
+    }, [initialImage]);
     const [sourceFile, setSourceFile] = useState<File | null>(null);
     const [sourceMimeType, setSourceMimeType] = useState<string>('image/png');
     // Natural size of the source, read when the preview loads — logged so the real
@@ -51,6 +74,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
     const [sourceSize, setSourceSize] = useState<{ width: number; height: number } | null>(null);
     
     const [settings, setSettings] = useState<UpscaleSettings>({
+        model: 'real-esrgan',
         targetSize: '16K',
         format: 'jpg',
         subjectDetection: 'All',
@@ -98,10 +122,12 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         const multiplier = Number.parseInt(upscaleFactor, 10);
         const traceId = generateTraceId();
         const startedAt = Date.now();
+        const activeModelId = settings.model === 'real-esrgan' ? REAL_ESRGAN_MODEL_ID : TOPAZ_UPSCALE_MODEL_ID;
         const sourceName = sourceFile?.name ?? 'image from another tool';
         const outputSize = sourceSize && `${sourceSize.width * multiplier}×${sourceSize.height * multiplier}`;
         const description = `Upscale ${upscaleFactor}${outputSize ? ` → ${outputSize}` : ''} (${settings.format}, ${settings.subjectDetection}): ${sourceName}`;
         const logDetails: GeminiLogDetails = {
+            upscaleModel: settings.model,
             upscaleFactor,
             enhanceModel: ENHANCE_MODEL,
             outputFormat: settings.format,
@@ -113,7 +139,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         };
         let stage = 'upload';
 
-        logGeminiEvent(TOPAZ_UPSCALE_MODEL_ID, `${description} [start]`, 0, 0, 'started', null, traceId, undefined, logDetails);
+        logGeminiEvent(activeModelId, `${description} [start]`, 0, 0, 'started', null, traceId, undefined, logDetails);
 
         try {
             let finalImageUrl = sourceImage;
@@ -155,6 +181,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                 false,
                 settings.format,
                 settings.subjectDetection,
+                settings.model,
                 (status) => {
                     setState(prev => ({
                         ...prev,
@@ -163,8 +190,8 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                 }
             );
 
-            const cost = result.billingUnits !== undefined ? result.billingUnits * TOPAZ_USD_PER_BILLING_UNIT : 0;
-            logGeminiEvent(TOPAZ_UPSCALE_MODEL_ID, description, cost, (Date.now() - startedAt) / 1000, 'success', null, traceId, undefined, {
+            const cost = settings.model === 'real-esrgan' ? REAL_ESRGAN_USD_PER_RUN : (result.billingUnits !== undefined ? result.billingUnits * TOPAZ_USD_PER_BILLING_UNIT : 0);
+            logGeminiEvent(activeModelId, description, cost, (Date.now() - startedAt) / 1000, 'success', null, traceId, undefined, {
                 ...logDetails,
                 predictionId: result.predictionId,
                 predictTimeSeconds: result.predictTimeSeconds,
@@ -178,7 +205,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                 upscaledImage: result.url,
             });
         } catch (err: any) {
-            logGeminiEvent(TOPAZ_UPSCALE_MODEL_ID, description, 0, (Date.now() - startedAt) / 1000, 'error', err.message || 'Unknown error', traceId, undefined, {
+            logGeminiEvent(activeModelId, description, 0, (Date.now() - startedAt) / 1000, 'error', err.message || 'Unknown error', traceId, undefined, {
                 ...logDetails,
                 stage,
             });
@@ -260,7 +287,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-white">🔬 AI Upscaler</h2>
-                    <p className="text-sm text-slate-400">Topaz Labs · Увеличение до 24K (6x)</p>
+                    <p className="text-sm text-slate-400">Replicate · Real-ESRGAN & Topaz Labs · До 24K</p>
                 </div>
                 <div className="flex gap-2">
                     <button
@@ -301,6 +328,36 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                 <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 p-6 space-y-6">
                     <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Настройки</h3>
 
+                    {/* AI Model Selection */}
+                    <div className="space-y-3">
+                        <label className="text-sm font-medium text-white">Модель апскейла</label>
+                        <div className="grid grid-cols-1 gap-2">
+                            {UPSCALE_MODEL_OPTIONS.map((opt) => (
+                                <button
+                                    key={opt.id}
+                                    type="button"
+                                    onClick={() => setSettings(prev => ({ ...prev, model: opt.id }))}
+                                    className={`p-3 rounded-xl border-2 transition-all text-left group ${settings.model === opt.id
+                                        ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10'
+                                        : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="font-bold text-white text-sm">{opt.name}</div>
+                                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                                            opt.id === 'real-esrgan' 
+                                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                                                : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                        }`}>
+                                            {opt.badge}
+                                        </span>
+                                    </div>
+                                    <div className="text-[11px] text-slate-400 mt-1">{opt.description}</div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* Target Size */}
                     <div className="space-y-3">
                         <label className="text-sm font-medium text-white">Целевое разрешение</label>
@@ -321,13 +378,15 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                         </div>
                     </div>
 
-                    {/* Subject Detection — the only enhancement control that measurably changes output */}
+                    {/* Subject Detection — only for Topaz Labs */}
+                    {settings.model === 'topaz' && (
                     <div className="space-y-3">
-                        <label className="text-sm font-medium text-white">Область обработки</label>
+                        <label className="text-sm font-medium text-white">Область обработки (Topaz)</label>
                         <div className="grid grid-cols-1 gap-2">
                             {SUBJECT_OPTIONS.map((option) => (
                                 <button
                                     key={option.value}
+                                    type="button"
                                     onClick={() => setSettings(prev => ({ ...prev, subjectDetection: option.value }))}
                                     className={`p-3 rounded-xl border-2 transition-all text-left group ${settings.subjectDetection === option.value
                                         ? 'border-purple-500 bg-purple-500/10'
@@ -340,6 +399,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                             ))}
                         </div>
                     </div>
+                    )}
 
                     {/* Output Format */}
                     <div className="space-y-4">
@@ -407,7 +467,7 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                         />
                     </div>
                     <p className="text-xs text-slate-500 mt-2">
-                        Стоимость: ~$0.01-0.05 (оплата с вашего Replicate аккаунта)
+                        {settings.model === 'real-esrgan' ? 'Стоимость: ~$0.002 (~0.2 цента, в 400 раз дешевле Topaz)' : 'Стоимость: ~$0.82 (17 юнитов Topaz Labs)'}
                     </p>
                 </div>
             )}

@@ -20,6 +20,9 @@ import { z } from 'zod';
  * no place in an upscaler UI, so we deliberately do not expose it.
  * There is NO '3x': anything between 2x and 4x is not a valid factor.
  */
+export const UPSCALE_MODELS = ['real-esrgan', 'topaz'] as const;
+export type UpscaleModel = (typeof UPSCALE_MODELS)[number];
+
 export const UPSCALE_FACTORS = ['2x', '4x', '6x'] as const;
 export const ENHANCE_MODELS = [
   'Standard V2',
@@ -45,6 +48,7 @@ export const upscaleRequestSchema = z.object({
       (value) => /^https?:\/\//i.test(value) || value.startsWith('data:'),
       'image must be an http(s) URL or a data: URL'
     ),
+  model: z.enum(UPSCALE_MODELS).default('real-esrgan'),
   upscaleFactor: z.enum(UPSCALE_FACTORS).default('4x'),
   enhanceModel: z.enum(ENHANCE_MODELS).default('High Fidelity V2'),
   faceEnhance: z.boolean().default(false),
@@ -55,14 +59,25 @@ export const upscaleRequestSchema = z.object({
 export type UpscaleRequest = z.infer<typeof upscaleRequestSchema>;
 
 /** Maps our camelCase request onto the snake_case input Replicate expects. */
-export const toReplicateInput = (request: UpscaleRequest) => ({
-  image: request.image,
-  upscale_factor: request.upscaleFactor,
-  enhance_model: request.enhanceModel,
-  output_format: request.outputFormat,
-  face_enhancement: request.faceEnhance,
-  subject_detection: request.subjectDetection,
-});
+export const toReplicateInput = (request: UpscaleRequest) => {
+  if (request.model === 'real-esrgan') {
+    const scaleNum = Number.parseInt(request.upscaleFactor, 10) || 4;
+    return {
+      image: request.image,
+      scale: scaleNum,
+      face_enhance: request.faceEnhance,
+    };
+  }
+
+  return {
+    image: request.image,
+    upscale_factor: request.upscaleFactor,
+    enhance_model: request.enhanceModel,
+    output_format: request.outputFormat,
+    face_enhancement: request.faceEnhance,
+    subject_detection: request.subjectDetection,
+  };
+};
 
 /** Flattens zod issues into "field: message" lines for a 400 response. */
 export const formatIssues = (error: z.ZodError): string[] =>

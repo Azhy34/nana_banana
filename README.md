@@ -12,7 +12,7 @@ Gemini Image Composer (Nana Banana) — веб-приложение для по�
 *   **Batch**: из одного фото обоев — 6/9/12/15 карточек с рандомизированными промптами (`Promt/trends.json`), форматы 9:16 / 2:3 / 4:3, генерация по 2 параллельно, ✨ Refine в Pro 2K.
 *   **🎬 Video**: оживление 9:16 кадров — по умолчанию **Gemini Omni 1.1 Flash** (`gemini-omni-1.1-flash`, 720p для Etsy или дешёвый 360p-черновик), альтернатива **Veo 3.1 Fast** (`veo-3.1-fast-generate-preview`, 6 с). Пресеты камеры с фиксацией рисунка обоев, проверка минимального разрешения Etsy.
 *   **Cropper**: нарезка под пресеты листинга Etsy (3000×2250 и др.), пакетный режим, режим перспективы стены с автоопределением углов через Gemini.
-*   **Upscale**: Topaz Labs через Replicate — 8K / 16K / 24K (2x / 4x / 6x), выбор subject detection, JPG/PNG.
+*   **Upscale**: Выбор модели — сверхбыстрый и доступный **Real-ESRGAN** (`nightmareai/real-esrgan`, ~$0.002/запуск, по умолчанию) или студийный **Topaz Labs** (`topazlabs/image-upscale`, ~$0.82 за 16K, High Fidelity V2 с subject detection). Разрешения 8K / 16K / 24K (2x / 4x / 6x), JPG/PNG.
 *   **Провайдеры**: Gemini API напрямую или OpenRouter (переключатель в шапке). Qwen Image 2 через Replicate доступен как опция.
 
 ## 🔑 Ключи и безопасность

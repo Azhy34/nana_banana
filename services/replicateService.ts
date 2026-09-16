@@ -7,6 +7,7 @@ import type {
   SubjectDetection,
   TopazEnhanceModel,
   UpscaleFactor,
+  UpscaleModel,
   UpscaleOutputFormat,
 } from '../shared/upscaleContract';
 import {
@@ -19,7 +20,7 @@ const API_BASE_URL = '/api';
 const MAX_INLINE_IMAGE_BYTES = 1024 * 1024 * 4;
 
 // Re-exported so existing importers keep working against one definition.
-export type { TopazEnhanceModel, UpscaleFactor, UpscaleOutputFormat, SubjectDetection };
+export type { TopazEnhanceModel, UpscaleFactor, UpscaleModel, UpscaleOutputFormat, SubjectDetection };
 
 interface ReplicatePrediction {
   id: string;
@@ -160,7 +161,8 @@ export async function startUpscale(
   enhanceModel: TopazEnhanceModel = 'High Fidelity V2',
   faceEnhance: boolean = false,
   outputFormat: UpscaleOutputFormat = 'png',
-  subjectDetection: SubjectDetection = 'All'
+  subjectDetection: SubjectDetection = 'All',
+  model: UpscaleModel = 'real-esrgan'
 ): Promise<{ id: string }> {
   const response = await fetch(`${API_BASE_URL}/upscale`, {
     method: 'POST',
@@ -170,6 +172,7 @@ export async function startUpscale(
     },
     body: JSON.stringify({
       image: imageUrl,
+      model,
       upscaleFactor,
       enhanceModel,
       faceEnhance,
@@ -250,6 +253,7 @@ export async function upscaleImage(
   faceEnhance: boolean = false,
   outputFormat: UpscaleOutputFormat = 'png',
   subjectDetection: SubjectDetection = 'All',
+  model: UpscaleModel = 'real-esrgan',
   onProgress?: (status: string) => void
 ): Promise<UpscaleResult> {
   // Replicate accepts data URLs or plain URLs
@@ -264,7 +268,8 @@ export async function upscaleImage(
     enhanceModel,
     faceEnhance,
     outputFormat,
-    subjectDetection
+    subjectDetection,
+    model
   );
 
   if (onProgress) {

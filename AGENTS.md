@@ -2,6 +2,31 @@
 
 This file tracks significant changes, architectural decisions, and logic updates implemented by AI agents (Gemini/Claude) in the `nana_banana` project. This helps maintain context across sessions and different agents.
 
+## [2026-09-14] Dual-Model Upscaler Architecture (Real-ESRGAN & Topaz Labs)
+
+### 1. Motivation & Unit Economics
+- **Problem:** `topazlabs/image-upscale` is billed dynamically per GPU-unit (~$0.048 / unit). Upscaling wallpaper to 16K consumes ~17 units (~$0.82 / image), creating high operational cost for standard draft and preview upscale runs.
+- **Solution:** Added `nightmareai/real-esrgan` as the primary (default) upscaler model. It runs in ~2-4s on Nvidia A100 GPU and costs ~$0.002 / image (~0.2 cents) — over 400x cheaper. Topaz Labs remains accessible via an interactive toggle for final studio-grade prints.
+
+### 2. Implementation Details
+- **Contract (`shared/upscaleContract.ts`):** 
+  - Added `UPSCALE_MODELS = ['real-esrgan', 'topaz'] as const`.
+  - Added `model` enum field to `upscaleRequestSchema` (defaulting to `'real-esrgan'`).
+  - Added conditional formatting in `toReplicateInput`: for `real-esrgan` extracts numeric `{ image, scale: 2|4|6, face_enhance: false }`; for `topaz` passes Topaz-specific parameters (`enhance_model`, `subject_detection`, etc.).
+- **API Routing (`api/upscale.ts`):**
+  - Selects Replicate model endpoint dynamically: `parsed.data.model === 'real-esrgan' ? REAL_ESRGAN_API_URL : TOPAZ_API_URL`.
+- **UI (`components/Upscaler.tsx`):**
+  - Added interactive model selector cards with badges ("Экономно ~$0.002" vs "High Quality ~$0.82").
+  - Dynamically hides Topaz-exclusive `subjectDetection` controls when Real-ESRGAN is selected.
+  - Progress bar dynamically displays estimated run cost.
+- **Logging Pipeline:**
+  - `types.ts` & `api/log-event.ts`: added `upscaleModel?: string` to `GeminiLogDetails` and `DETAIL_FIELDS`.
+  - Upscale logs record `activeModelId` (`nightmareai/real-esrgan` or `topazlabs/image-upscale`) and cost ($0.002 vs actual Topaz billing units).
+- **Quality & Testing:**
+  - `e2e/ui/upscaler-cropper.spec.ts`: Added automated Playwright test for Real-ESRGAN flow ($0.002 cost check, scale factor payload, UI visibility). Updated Topaz test to explicitly select Topaz model.
+  - `e2e/api/contract.spec.ts`: Verified contract schema validation and invalid model rejection.
+  - Fixed `EtsyCropper.tsx` bug where replacing photo did not reload image canvas.
+
 ## [2026-05-19] Batch Generator Overhaul & Prompt Engineering
 
 ### 1. Aspect Ratio Optimization for Etsy

@@ -21,6 +21,7 @@ test.describe('Upscaler', () => {
     await activeTab(page).locator('input[type="file"]').first().setInputFiles(pngFile('mural.png', COLORS.blue, 320, 240));
     await expect(activeTab(page).getByAltText('Source')).toBeVisible();
 
+    await activeTab(page).getByRole('button', { name: /Topaz Labs/ }).click();
     await activeTab(page).getByRole('button', { name: /^24K/ }).click();
     await activeTab(page).getByRole('button', { name: /Передний план/ }).click();
     await activeTab(page).getByRole('button', { name: /^PNG/ }).click();
@@ -39,6 +40,7 @@ test.describe('Upscaler', () => {
     expect(apis.upscale[0].headers['authorization']).toBe(`Bearer ${FAKE_KEYS.replicate}`);
     expect(apis.upscale[0].body).toEqual({
       image: BLOB_URL,
+      model: 'topaz',
       upscaleFactor: '6x',
       enhanceModel: 'High Fidelity V2',
       faceEnhance: false,
@@ -56,6 +58,7 @@ test.describe('Upscaler', () => {
     const [started, success] = apis.logEvents;
     const expectedDetails = {
       model: 'topazlabs/image-upscale',
+      upscaleModel: 'topaz',
       upscaleFactor: '6x',
       enhanceModel: 'High Fidelity V2',
       outputFormat: 'png',
@@ -73,6 +76,49 @@ test.describe('Upscaler', () => {
     expect(success.traceId).toMatch(/^[0-9a-f]{32}$/);
     expect(started.traceId).toBe(success.traceId);
   });
+
+  test('upload → Real-ESRGAN (default, $0.002) → result, with scale factor', async ({ page, apis }) => {
+    await openApp(page);
+    await switchTab(page, 'Upscale');
+    await activeTab(page).locator('input[type="file"]').first().setInputFiles(pngFile('mural.png', COLORS.blue, 320, 240));
+    await expect(activeTab(page).getByAltText('Source')).toBeVisible();
+
+    // Verify Real-ESRGAN is default and subjectDetection is hidden
+    await expect(activeTab(page).getByRole('button', { name: /Передний план/ })).toHaveCount(0);
+    await activeTab(page).getByRole('button', { name: /^16K/ }).click();
+    await activeTab(page).getByRole('button', { name: '🚀 Увеличить до 16K' }).click();
+
+    await expect(activeTab(page).locator(`img[src="${UPSCALED_URL}"]`)).toBeVisible();
+
+    // 1. Client token & Blob upload
+    expect(apis.upload).toHaveLength(1);
+    expect(apis.blobPut).toHaveLength(1);
+
+    // 2. Upscale request with model 'real-esrgan'
+    expect(apis.upscale).toHaveLength(1);
+    expect(apis.upscale[0].body).toMatchObject({
+      image: BLOB_URL,
+      model: 'real-esrgan',
+      upscaleFactor: '4x',
+    });
+
+    // 3. Session log: started + success with 0.002 cost
+    await expect.poll(() => apis.logEvents.map((e) => e.status)).toEqual(['started', 'success']);
+    const [started, success] = apis.logEvents;
+    expect(started).toMatchObject({
+      model: 'nightmareai/real-esrgan',
+      upscaleModel: 'real-esrgan',
+      upscaleFactor: '4x',
+      cost: 0,
+    });
+    expect(success).toMatchObject({
+      model: 'nightmareai/real-esrgan',
+      upscaleModel: 'real-esrgan',
+      predictionId: 'e2epred1',
+      cost: 0.002,
+    });
+  });
+
 
   for (const [size, factor] of [['8K', '2x'], ['16K', '4x']] as const) {
     test(`${size} maps to upscale_factor ${factor}`, async ({ page, apis }) => {
@@ -99,7 +145,7 @@ test.describe('Upscaler', () => {
 
     await expect(activeTab(page).getByText(/Ошибка загрузки в облако/)).toBeVisible();
     await expect.poll(() => apis.logEvents.map((e) => e.status)).toEqual(['started', 'error']);
-    expect(apis.logEvents[1]).toMatchObject({ model: 'topazlabs/image-upscale', stage: 'upload' });
+    expect(apis.logEvents[1]).toMatchObject({ model: 'nightmareai/real-esrgan', stage: 'upload', upscaleModel: 'real-esrgan' });
     expect(apis.logEvents[1].error).toContain('Ошибка загрузки в облако');
     expect(apis.upscale).toHaveLength(0);
   });

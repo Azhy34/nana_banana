@@ -40,12 +40,12 @@ test.describe('Vercel API routes', () => {
     test('names every invalid field instead of proxying an opaque 422', async ({ request }) => {
       const res = await request.post('/api/upscale', {
         headers: { Authorization: `Bearer ${FAKE_TOKEN}` },
-        data: { image: 'ftp://nope', upscaleFactor: '3x', outputFormat: 'tiff', subjectDetection: 'Sky' },
+        data: { image: 'ftp://nope', upscaleFactor: '3x', outputFormat: 'tiff', subjectDetection: 'Sky', model: 'invalid-model' },
       });
       expect(res.status()).toBe(400);
       const body = await res.json();
       const fields = (body.issues as string[]).map((issue) => issue.split(':')[0]);
-      expect(fields).toEqual(expect.arrayContaining(['image', 'upscaleFactor', 'outputFormat', 'subjectDetection']));
+      expect(fields).toEqual(expect.arrayContaining(['image', 'upscaleFactor', 'outputFormat', 'subjectDetection', 'model']));
     });
 
     test('a valid body passes validation and reaches Replicate', async ({ request }) => {

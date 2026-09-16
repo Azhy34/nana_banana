@@ -207,9 +207,16 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const lastLoadedSrcRef = useRef<string | null>(null);
 
   const [sourceImage, setSourceImage] = useState<string | null>(initialImage || 'https://images.unsplash.com/photo-1540989100695-9b8763814c8f?q=80&w=3000&auto=format&fit=crop');
+
+  useEffect(() => {
+    if (initialImage) {
+      setSourceImage(initialImage);
+    }
+  }, [initialImage]);
   const [selectedPreset, setSelectedPreset] = useState<CropPreset>(ETSY_PRESETS[0]);
   const [zoom, setZoom] = useState(1.0);
   const [offsetX, setOffsetX] = useState(0);
@@ -274,7 +281,13 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
 
   // Загрузка изображения или смена пресета
   useEffect(() => {
-    if (sourceImage && imgRef.current) {
+    if (!sourceImage) {
+      imgRef.current = null;
+      lastLoadedSrcRef.current = null;
+      return;
+    }
+
+    if (imgRef.current && lastLoadedSrcRef.current === sourceImage) {
       const img = imgRef.current;
       const area = calculateCropArea(
         img.width,
@@ -287,11 +300,12 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
       setOffsetX(area.x);
       setOffsetY(area.y);
       setZoom(selectedPreset.defaultZoom || 1.0);
-    } else if (sourceImage) {
+    } else {
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
         imgRef.current = img;
+        lastLoadedSrcRef.current = sourceImage;
         const area = calculateCropArea(
           img.width,
           img.height,

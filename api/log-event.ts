@@ -6,8 +6,8 @@ import path from 'path';
 const DETAIL_FIELDS = [
   'negativePrompt', 'aspectRatio', 'durationSeconds', 'personGeneration', 'seed', 'resolution', 'interactionId',
   'operationName', 'raiMediaFilteredCount', 'raiMediaFilteredReasons', 'errorCode', 'errorStatus',
-  // Upscale (Replicate / Topaz)
-  'predictionId', 'upscaleFactor', 'enhanceModel', 'outputFormat', 'subjectDetection',
+  // Upscale (Replicate / Topaz / Real-ESRGAN)
+  'upscaleModel', 'predictionId', 'upscaleFactor', 'enhanceModel', 'outputFormat', 'subjectDetection',
   'inputWidth', 'inputHeight', 'outputWidth', 'outputHeight', 'billingUnits', 'predictTimeSeconds', 'stage',
 ] as const;
 

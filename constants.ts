@@ -59,6 +59,9 @@ export function getOmniCostUsd(resolution: '360p' | '720p' = '720p'): number {
 // Topaz upscale via Replicate. Billed in units that grow with output megapixels
 // (24 MP = 1 unit, 512 MP = 17 units); the prediction reports them as
 // metrics.unspecified_billing_metric. Price table: replicate.com/topazlabs/image-upscale (2026-09-14).
+// Upscale models on Replicate
+export const REAL_ESRGAN_MODEL_ID = 'nightmareai/real-esrgan';
+export const REAL_ESRGAN_USD_PER_RUN = 0.002;
 export const TOPAZ_UPSCALE_MODEL_ID = 'topazlabs/image-upscale';
 export const TOPAZ_USD_PER_BILLING_UNIT = 0.048;
 

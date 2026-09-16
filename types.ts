@@ -53,8 +53,8 @@ export type AspectRatio = '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' 
 export type ImageSize = '512' | '1K' | '2K' | '4K' | '8K' | '12K' | '16K' | '24K';
 
 // Mirrors the live Replicate schema — defined once in shared/upscaleContract.ts.
-import type { SubjectDetection, UpscaleFactor } from './shared/upscaleContract';
-export type { UpscaleFactor, SubjectDetection };
+import type { SubjectDetection, UpscaleFactor, UpscaleModel } from './shared/upscaleContract';
+export type { UpscaleFactor, SubjectDetection, UpscaleModel };
 
 export interface UploadedImage {
   id: string;
@@ -86,6 +86,7 @@ export interface GenerationState {
 }
 
 export interface UpscaleSettings {
+  model: UpscaleModel;
   // Only sizes Replicate can actually deliver: 2x, 4x and 6x. There is no 3x,
   // so a "12K" option would silently resolve to 4x/16K.
   targetSize: '8K' | '16K' | '24K';
@@ -138,7 +139,8 @@ export interface GeminiLogDetails {
   raiMediaFilteredReasons?: string[];
   errorCode?: string | number;
   errorStatus?: string;
-  // Upscale (Replicate / Topaz)
+  // Upscale (Replicate / Topaz / Real-ESRGAN)
+  upscaleModel?: string;
   predictionId?: string;
   upscaleFactor?: string;
   enhanceModel?: string;

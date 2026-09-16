@@ -7,7 +7,8 @@ import {
   parsePrediction,
 } from '../shared/upscaleContract.js';
 
-const REPLICATE_API_URL = 'https://api.replicate.com/v1/models/topazlabs/image-upscale/predictions';
+const TOPAZ_API_URL = 'https://api.replicate.com/v1/models/topazlabs/image-upscale/predictions';
+const REAL_ESRGAN_API_URL = 'https://api.replicate.com/v1/models/nightmareai/real-esrgan/predictions';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS
@@ -44,8 +45,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // Select Replicate endpoint according to model
+    const apiUrl = parsed.data.model === 'real-esrgan' ? REAL_ESRGAN_API_URL : TOPAZ_API_URL;
+
     // Start prediction on Replicate
-    const response = await fetch(REPLICATE_API_URL, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiToken}`,
