@@ -14,6 +14,7 @@ This file tracks significant changes, architectural decisions, and logic updates
   - `REFERENCE_IMAGE_2` (`MATERIAL_TEXTURE_MACRO`): Real macro photo of Craft Lambda non-woven sand paper. Explicit instruction directs Gemini 3.1 to extract *only* surface relief, sand grain texture, and ultra-matte chalky finish under natural daylight, while strictly ignoring and discarding any graphic art (e.g. gold leaves) from the texture reference.
 - **In-Memory Zero-Latency Asset:** Created `services/craftLambdaAsset.ts` and `public/textures/craft_lambda.jpg` providing instant synchronous Base64 access without runtime disk or network overhead.
 - **UI Control:** Added interactive toggle card with thumbnail preview on the Batch Generator setup screen, persisted in `localStorage`.
+- **Gemini Omni 1.1 Video Stabilization (Inanimate 2D Print Lock):** Fixed animal head duplication / morphing during macro camera moves (`omni_texture_macro`). Replaced lateral camera gliding with pure optical macro push-in (zoom straight along Z-axis) and added mandatory negative semantic constraint: *"INANIMATE 2D PRINT LOCK: The artwork is strictly flat, static ink printed on paper. Zero biological animation, zero head turns, zero duplicate heads, zero extra limbs, zero morphing."*
 
 ## [2026-09-14] Dual-Model Upscaler Architecture (Real-ESRGAN & Topaz Labs)
 
