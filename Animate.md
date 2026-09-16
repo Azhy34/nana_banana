@@ -1,45 +1,50 @@
-# Animate — оживление интерьеров через Google Veo 3.1 (image-to-video)
+# Animate — Оживление интерьеров через Gemini Omni 1.1 Flash & Veo 3.1 (image-to-video)
 
-Документ фичи: новая вкладка **Video** + кнопка **🎬 Animate** в Batch. Цель — короткие "живые" видео интерьеров с обоями для Pinterest-пинов и трафика на сайт/Etsy. Обои — продаваемый товар: узор/цвет не должны меняться при анимации.
+Документ фичи: вкладка **Video** + кнопка **🎬 Video** в Batch (карточки 9:16). Цель — короткие "живые" видео интерьеров с обоями для Pinterest-пинов и видео-листингов Etsy. Обои — продаваемый товар: узор, цвета, персонажи и фактура материала не должны искажаться при анимации.
 
 ## Ключевые решения
 
 | Вопрос | Решение |
 |---|---|
-| Модель | **Veo 3.1 Fast** (`veo-3.1-fast-generate-preview`) по умолчанию, Standard — переключатель |
-| Разрешение | **720p** (осознанно; Pinterest рекомендует 1080p — при необходимости Topaz-апскейл отдельным шагом) |
-| Длительность | **4/6/8 сек, по умолчанию 6** → ~$0.60/видео на Fast |
-| Формат | 9:16 (Batch) / 16:9 (standalone). Veo другие не поддерживает — на карточках 4:3/2:3 кнопка disabled |
-| Механика | **Фото комнаты = первый кадр (`image`), БЕЗ `referenceImages`** — SDK явно запрещает совмещать их (genai.d.ts:3381-3386). Обои в первом кадре уже точные 1:1 |
-| Защита обоев | Промпт (позитивные приказы) + `negativePrompt` (все запреты) + фиксированный `seed` |
-| Биллинг | Серверный ключ `GEMINI_VEO_API_KEY` (Vercel env). Подписка Google AI Pro к API НЕ применима — только платный биллинг. Fast: $0.10/сек (720p), $0.12 (1080p); Standard: $0.40/сек |
-| Подтверждение | Двухшаговая кнопка Generate с ценой — каждая генерация платная |
+| Основной движок | **Gemini Omni 1.1 Flash** (`gemini-omni-1.1-flash`) по умолчанию через Google Interactions API |
+| Альтернативный движок | **Veo 3.1 Fast** (`veo-3.1-fast-generate-preview`, 6 сек, predictLongRunning) |
+| Разрешение Omni | **720p** ($0.50, минимум Etsy: 720×1280) или **360p** ($0.15, черновик) |
+| Длительность | **5 секунд** (Omni 1.1) / **6 секунд** (Veo 3.1) |
+| Формат | **9:16** (вертикальное видео для мобильных устройств, Pinterest и Etsy) |
+| Механика | **Клиентский I2V (Image-to-Video)**: входное сгенерированное фото интерьера передается напрямую в `POST /v1beta/interactions` браузером, видео возвращается синхронно в Base64 MP4 |
+| Защита от дублирования | **Inanimate 2D Print Lock** + прямой оптический наезд (Z-axis push-in) без бокового панорамирования (gliding) |
+| Фактура материала | Omni считывает микрорельеф кварцевого песка **Craft Lambda** напрямую с пикселей исходного 2K-рендера |
 
-## Промпт-стратегия (защита обоев)
-
-По Veo prompt guide отрицания ("no", "don't") в основном промпте модель может игнорировать — все запреты уходят в `negativePrompt`:
-
-**Основной промпт (позитивные приказы):**
-> Static locked-off camera shot, the camera remains completely still. The wallpaper mural on the wall stays perfectly identical, crisp and unchanged throughout the entire video — exact same pattern, exact same colors, exact same position, as in the first frame. Subtle natural ambient motion only: soft daylight shifting gently, faint air movement in fabrics. Everything in the room keeps its exact appearance and position.
-
-**Negative prompt (запреты):**
-> changing wallpaper pattern, different wall color, morphing wall texture, warped walls, shifting print, repainted wall, new wall art appearing, camera movement, zoom, pan, dolly, camera shake, scene change, furniture moving, objects appearing or disappearing, text, watermark
-
-## Архитектура
+## Архитектура Gemini Omni 1.1 Flash
 
 ```
-VideoTool.tsx ──▶ veoService.ts ──▶ POST /api/animate  ──▶ Gemini API generateVideos → { operationName }
-                     │  poll loop ──▶ GET /api/animate/poll?name=... ──▶ getVideosOperation
-                     │                  └─ done: скачивает видео + put() в Vercel Blob → { videoUrl }
-                     └─ data:-фото → /api/upload (Vercel Blob client upload)
+Batch (9:16 карточка) ──▶ VideoTool.tsx ──▶ services/omniService.ts
+                                                    │
+                                                    ▼
+                             POST https://generativelanguage.googleapis.com/v1beta/interactions?key=...
+                             {
+                               model: "gemini-omni-1.1-flash",
+                               input: [ { type: "image", data: base64 }, { type: "text", text: prompt } ],
+                               response_format: { type: "video", resolution: "720p", aspect_ratio: "9:16" }
+                             }
+                                                    │
+                                                    ▼ (Sync Response ~35-40s)
+                                       steps[0].content[video/mp4 base64]
+                                                    │
+                                                    ▼
+                                    Blob Video Player (<video>) + Download
 ```
 
-- Паттерн submit+poll скопирован с `services/replicateService.ts` + `api/upscale.ts`/`api/upscale/poll.ts` (весь wait на клиенте, функции быстрые).
-- Серверный ключ — по прецеденту `api/qwen.ts` (env, не BYOK).
-- Готовое видео Google не отдаёт без ключа в URL → poll-эндпоинт перезаливает его в Vercel Blob (`BLOB_READ_WRITE_TOKEN`), клиент получает публичную ссылку.
-- Телеметрия: события start/done/error в `/api/log-event` (паттерн `geminiService.ts` + `sessionTracker.ts`).
+## Пресеты Omni Video (Nursery & Etsy Proof)
 
-## Файлы
+1. **`omni_wall_dolly` (Архитектурный наезд на стену):**
+   - Медленный steady push-in на стену с фиксацией геометрии и 2D-рисунка обоев.
+2. **`omni_texture_macro` (Макро-фактура Craft Lambda):**
+   - Макро-наезд строго по оси Z без бокового сдвига. Подчеркивает зернистость песка и матовую основу. Защищен строгой директивой `INANIMATE 2D PRINT LOCK: zero biological animation, zero head turns, zero duplicate heads`.
+3. **`omni_sunlight_loop` (Живой свет и тени):**
+   - Статичный ракурс, где движутся только скользящие лучи солнца и тени листьев (вирусный зацикленный Pinterest-луп).
+4. **`omni_montessori` (Монтессори-ракурс от кроватки):**
+   - Детский ракурс от пола, подчеркивающий масштаб и уют комнаты (Gemütlichkeit).
 
 | Файл | Что |
 |---|---|

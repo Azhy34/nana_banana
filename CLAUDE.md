@@ -88,10 +88,18 @@ App.tsx
 ### Batch Generator — Key Design Decisions
 
 - Model per batch: 3.1 Flash (default), 3 Pro, 50/50 split (first half Pro, second half Flash) or Qwen 2; images are requested at `2K`.
+- Multimodal Material Conditioning: When `useTextureReference` is active (default), passes `REFERENCE_IMAGE_1` (wallpaper artwork 1:1) and `REFERENCE_IMAGE_2` (Craft Lambda macro photo, `services/craftLambdaAsset.ts`). Explicit prompt instructs Gemini 3.1 to extract exclusively the sand grain micro-relief and matte fleece texture, discarding sample graphics.
+- Setup UI has toggle card with thumbnail preview for Craft Lambda texture reference, persisted in `localStorage`.
 - Cards generate in chunks of 2 with `Promise.allSettled`; each result updates its card through functional `setCards(prev => ...)`.
 - ✨ Refine sends the card result as a draft plus the wallpaper to 3 Pro at 2K.
 - Text overlays (USP / promo brushstrokes) are disabled: `generateCards()` clears `overlayText`, although `buildGeminiPrompt()` still supports it.
 - `batchToolImage` in `App.tsx` carries a result to Cropper/Upscaler/Video.
+
+### Video Animator — Key Design Decisions
+
+- Default engine: **Gemini Omni 1.1 Flash** (`gemini-omni-1.1-flash`) via Google Interactions API (`POST /v1beta/interactions`), sync response returning Base64 MP4.
+- 4 Specialized Etsy & Pinterest presets: `omni_wall_dolly`, `omni_texture_macro`, `omni_sunlight_loop`, `omni_montessori`.
+- **Inanimate 2D Print Lock**: strict prompt constraint preventing biological animation, morphing, and duplicate animal heads during camera movement. Camera uses pure optical macro push-in (Z-axis zoom) rather than lateral gliding.
 
 ### AI Models in Use
 
@@ -99,7 +107,7 @@ App.tsx
 |---|---|
 | `gemini-3.1-flash-image` | Fast image generation; also wall detection and ✨ Enhance on the Gemini provider |
 | `gemini-3-pro-image` | High-quality generation (up to 4K), batch ✨ Refine |
-| `gemini-omni-1.1-flash` | Default video engine (Interactions API) |
+| `gemini-omni-1.1-flash` | Default video engine (Interactions API, 720p/360p) |
 | `veo-3.1-fast-generate-preview` | Alternative video engine |
 | `google/gemini-2.5-flash` (OpenRouter) | ✨ Enhance on the OpenRouter provider |
 | `qwen/qwen-image-2` (Replicate) | Optional image model, unused in production |
