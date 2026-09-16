@@ -86,24 +86,24 @@ export const VEO_PRESETS = {
 // Specialized Nursery & Wallpaper Presets for Gemini Omni 1.1 Flash
 export const OMNI_PRESETS = {
   omni_wall_dolly: {
-    label: "Архитектурный наезд на стену (Wall Focus)",
-    description: "Плавный наезд с сохранением геометрии стены и жесткой фиксацией паттерна обоев.",
-    prompt: "A smooth, slow, steady architectural camera push-in towards the nursery feature wall. ABSOLUTE PRESERVATION REQUIREMENT: The wallpaper pattern, motifs, colors, and layout from the input image must remain 100% frozen, completely static, and strictly unaltered. Do NOT invent, redraw, or animate any new wallpaper details, animals, or illustrations. Furniture and floor remain physically locked and static. Warm natural morning sunlight grazes the wall, creating soft ambient shadow occlusion along the baseboards. Flawless 9:16 interior design showcase, continuous unbroken camera motion, no warping."
+    label: "🎥 Архитектурный наезд на стену (Wall Focus)",
+    description: "Плавный наезд с сохранением геометрии стены, матовой текстуры Craft Lambda и жесткой фиксацией обоев.",
+    prompt: "A smooth, slow, steady architectural camera push-in towards the nursery feature wall. ABSOLUTE PRESERVATION REQUIREMENT: The wallpaper pattern, motifs, colors, and layout from the input image must remain 100% frozen, completely static, and strictly unaltered. The wallpaper features a fine tactile sand-grain matte texture (Craft Lambda). Do NOT invent, redraw, or animate any new wallpaper details, animals, or illustrations. Furniture and floor remain physically locked and static. Warm natural morning sunlight grazes the wall, creating soft ambient shadow occlusion along the baseboards. Flawless 9:16 interior design showcase, continuous unbroken camera motion, no warping."
   },
   omni_texture_macro: {
-    label: "Макро-пролет по текстуре (Wallpaper Texture Macro)",
-    description: "Крупный план тактильной матовой поверхности обоев (без пластиковых бликов).",
-    prompt: "Cinematic macro gliding shot moving smoothly along the tactile surface of the wallpaper. STRICT 1:1 INTEGRITY: The printed illustration and motifs from the input reference image are strictly locked and preserved down to every brushstroke. The camera tracks on a motorized slider, revealing the organic matte paper grain. Completely eliminate plastic reflections, glare, or hallucinated elements (komplett matt, keine Reflexionen). Soft, diffused warm indoor lighting highlights the tactile depth of the material. Flawless focus tracking, steady fluid motion."
-  },
-  omni_montessori: {
-    label: "Монтессори-ракурс от кроватки (Child Eye-Level Arc)",
-    description: "Низкий детский ракурс, создающий уют и объем вокруг обоев и мебели.",
-    prompt: "Smooth low-angle camera arc shot composed from a child's eye-level perspective. The camera gently sweeps past the natural solid wood slatted crib, expanding the spatial view of the room. STRICT 1:1 WALLPAPER LOCK: The wallpaper design on the wall is an exact static match to the input image, with zero new elements added, zero morphing, and zero recoloring. Solid wood furniture remains completely stationary. The white balance is strictly adjusted to warm, cozy tones (Gemütlichkeit). Premium editorial nursery showcase, continuous unbroken camera movement."
+    label: "🔍 Макро-фактура Craft Lambda (Etsy Texture Proof)",
+    description: "Крупный план реальной текстуры: тонкий минеральный песок, матовый флизелин, без бликов.",
+    prompt: "Cinematic slow-motion macro gliding shot moving smoothly along the tactile surface of the wallpaper. REAL MATERIAL TEXTURE: The wallpaper is printed on a heavy-weight luxury non-woven substrate with a distinctive fine-grain sand texture (fine mineral plaster stippling). STRICT 1:1 INTEGRITY: The printed illustration and motifs from the input reference image are strictly locked and preserved down to every brushstroke. Completely eliminate plastic reflections, synthetic vinyl sheen, or glare (komplett matt, keine Reflexionen). Soft, diffused warm side lighting highlights the organic matte paper grain and tactile micro-relief. Flawless focus tracking, steady fluid motion, premium Etsy listing video proof."
   },
   omni_sunlight_loop: {
-    label: "Живое солнце / Ambient Loop (Etsy Endless)",
-    description: "Статичная камера с плавным ходом солнечных лучей и теней для зацикленного видео.",
-    prompt: "Static architectural camera framing of the stylish children's bedroom feature wall. ZERO MORPHING: The room architecture, furniture, and wallpaper illustration are 100% frozen and geometrically locked. Gentle, realistic passage of natural warm afternoon sunlight and subtle dappled leaf shadows drifting across the wallpaper and matte floor. No new motifs or objects appear. Hypnotic, calming ambient lighting movement designed for a seamless video loop."
+    label: "✨ Живой свет и тени (Pinterest Viral Loop)",
+    description: "Зацикленное видео: теплые лучи солнца и тени скользят по текстуре стены 9:16.",
+    prompt: "Static architectural camera framing of the stylish children's bedroom feature wall. ZERO MORPHING: The room architecture, furniture, and wallpaper illustration are 100% frozen and geometrically locked. Warm afternoon sunlight and subtle dappled leaf shadows drift smoothly across the textured matte wallpaper and floor, emphasizing the authentic fine-sand paper depth. No new motifs or objects appear. Hypnotic, calming ambient lighting movement designed for a seamless, viral Pinterest video loop."
+  },
+  omni_montessori: {
+    label: "👶 Монтессори-ракурс от кроватки (Room Scale & Coziness)",
+    description: "Низкий детский ракурс: показывает масштаб обоев в интерьере и уют детской комнаты.",
+    prompt: "Smooth low-angle camera arc shot composed from a child's eye-level perspective. The camera gently sweeps past the natural solid wood slatted crib, expanding the spatial view of the room and proving the real-life proportions of the wallpaper mural. STRICT 1:1 WALLPAPER LOCK: The wallpaper design on the wall is an exact static match to the input image, with zero new elements added, zero morphing, and zero recoloring. Solid wood furniture remains completely stationary. The white balance is strictly adjusted to warm, cozy tones (Gemütlichkeit). Premium editorial nursery showcase, continuous unbroken camera movement."
   }
 };
 
