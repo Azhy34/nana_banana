@@ -168,7 +168,7 @@ Soft, directional natural light gently grazes the wallpaper, revealing the tacti
       ? `soft ${tags.color.toLowerCase()}`
       : pick(WATERCOLOR_COLORS);
 
-    promptText += ` In the ${tags.overlayPosition} corner of the image, there is a small, subtle ${watercolorColor} watercolor brushstroke. On top of the brushstroke, the text '${tags.overlayText}' is written in a clear, highly readable, elegant handwritten cursive font, in a warm charcoal-grey color. Balanced and clean.`;
+    promptText += ` In the ${tags.overlayPosition} corner of the image, placed delicately over the floor or rug without obscuring the wallpaper, there is a small, compact, subtle ${watercolorColor} watercolor brushstroke with organic wet painterly edges and gentle natural translucency. On top of this soft watercolor patch, the text '${tags.overlayText}' is written in a graceful, fluid, highly aesthetic handwritten brush cursive script in warm dark charcoal ink with slight organic transparency and ink variation as if soaked into the watercolor wash. Balanced, airy, understated, and clean. Strictly no heavy oil paint, no thick impasto smears, no blue flags, no yellow stars, no geometric boxes, no stickers.`;
   }
 
   if (promptText.toLowerCase().includes('pc') || promptText.toLowerCase().includes('monitor') || promptText.toLowerCase().includes('screen') || promptText.toLowerCase().includes('schreibtisch')) {
@@ -178,7 +178,7 @@ Soft, directional natural light gently grazes the wallpaper, revealing the tacti
   const baseNegative = "peeling wallpaper, wallpaper peeling off wall, corner curl, page curl, paper curl, bed canopy, sheer fabric canopy, hanging baldachin, hanging curtains over bed, fabric drapes near bed, foreground lamps, foreground hanging lights, hanging objects blocking the wall view, mounted animal heads, plush animal heads, stuffed animal heads, felt animal heads, wall-mounted animal heads, fake taxidermy, animal head wall decor, Tierkopf Wanddeko, animal trophies, half-wall wallpaper, half-height wallpaper, halbhoch tapeziert, two-tone wall, split wall, horizontally divided wall, wainscoting, wall paneling, beadboard, dado rail, chair rail, lower wall unpapered, partial wall coverage, wallpaper border, plain bottom half, split paint, wicker baskets, straw baskets, warped woven baskets, asymmetric baskets, rattan furniture, bunk beds, ladders, plastic toys, cluttered surfaces";
 
   const textNegative = (tags.overlayText && tags.overlayPosition)
-    ? "digital watermark, advertising badge, corner stamp, low quality font, blurry text"
+    ? "heavy oil paint, thick impasto smear, paint paste, solid blue flag, yellow stars, cartoon stars, geometric boxes, harsh stickers, white outlines, digital watermark, advertising badge, corner stamp, low quality font, blurry text"
     : "text overlay, watermark, advertising badge, corner stamp, promotional text, watercolor patch, promo brushstroke, typography, letters, words";
 
   promptText += ` Absolutely avoid: ${baseNegative}, ${textNegative}.`;

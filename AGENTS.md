@@ -23,6 +23,13 @@ This file tracks significant changes, architectural decisions, and logic updates
   - `Certified EU Quality`
 - **Dynamic Negative Prompt:** `services/promptGenerator.ts` now dynamically excludes `text overlay, promotional text, watercolor patch` from negative constraints when `overlayText` is active on a card.
 
+### 3. Delicate Watercolor Brushstroke & Translucent Ink (Aesthetic Lock)
+- **Problem:** Heavy impasto oil smears felt too thick/clay-like in delicate nurseries, while corporate EU flags/yellow stars felt bureaucratic and clashed with botanical watercolor murals.
+- **Solution:** Locked in the delicate, airy watercolor brushstroke formula:
+  - **Brushstroke:** Small, compact, subtle watercolor wash with wet organic painterly edges and natural gradient translucency harmonizing with the room's palette.
+  - **Typography & Ink:** Graceful, fluid, aesthetic brush cursive script in warm dark charcoal ink with slight organic transparency and ink variation as if soaked into the watercolor wash.
+  - **Negative Constraints:** Strictly banned `heavy oil paint, thick impasto smear, paint paste, solid blue flag, yellow stars, cartoon stars, geometric boxes, harsh stickers, white outlines`.
+
 ## [2026-09-16] Multimodal Material Texture Conditioning (Gemini Direct API & Craft Lambda)
 
 ### 1. Motivation & Aesthetic Goals
