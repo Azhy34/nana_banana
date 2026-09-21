@@ -10,6 +10,9 @@ export type AIProvider = 'openrouter' | 'gemini';
 export type AgeGroupKey = 'baby' | 'vorschul' | 'schulkind' | 'teenager';
 export type BatchAspectRatio = '9:16' | '2:3' | '4:3';
 
+export type OverlayPosition = 'bottom left' | 'bottom right' | 'top left' | 'top right';
+export type OverlayBadgeStyle = 'watercolor' | 'pill' | 'washi';
+
 export interface BatchPromptTags {
   color: string;
   style: string;
@@ -26,7 +29,8 @@ export interface BatchPromptTags {
   compositionStrategy: 'unobstructed' | 'natural';
   cinematicDetail: string;
   overlayText?: string;
-  overlayPosition?: 'bottom left' | 'bottom right';
+  overlayPosition?: OverlayPosition;
+  overlayStyle?: OverlayBadgeStyle;
 }
 
 export type BatchCardStatus = 'idle' | 'loading' | 'done' | 'error';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ModelType, AIProvider } from '../types';
+import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ModelType, AIProvider, OverlayPosition, OverlayBadgeStyle } from '../types';
 import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, getKeyObjectsForAge } from '../services/promptGenerator';
 import { generateBatchImage, isQwenModel } from '../services/generationRouter';
 import { downloadImage } from '../services/downloadService';
@@ -176,11 +176,15 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       
       // USP overlay text only for 4:3 and 2:3 formats; 9:16 is strictly clean for video
       if (textIndices.has(idx) && ar !== '9:16') {
+        const POSITIONS: OverlayPosition[] = ['bottom left', 'bottom right', 'top left', 'top right'];
+        const STYLES: OverlayBadgeStyle[] = ['watercolor', 'pill', 'washi'];
         tags.overlayText = USP_OPTIONS[Math.floor(Math.random() * USP_OPTIONS.length)];
-        tags.overlayPosition = Math.random() < 0.5 ? 'bottom left' : 'bottom right';
+        tags.overlayPosition = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
+        tags.overlayStyle = STYLES[Math.floor(Math.random() * STYLES.length)];
       } else {
         tags.overlayText = undefined;
         tags.overlayPosition = undefined;
+        tags.overlayStyle = undefined;
       }
 
       // Разделение 50/50 для моделей при A/B-тесте
