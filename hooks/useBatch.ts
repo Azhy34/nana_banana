@@ -145,41 +145,43 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     ].sort(() => Math.random() - 0.5);
 
     const USP_OPTIONS = [
-      '5% OFF: MOONPIN5',
       'Custom Sizes Available',
-      'Washable & Easy to Clean',
-      'Easy Paste-the-Wall'
+      '100% Toxin-Free & Odorless',
+      'Washable & Easy Clean',
+      'Easy Paste-the-Wall',
+      'Premium Tactile Texture',
+      'Certified EU Quality',
     ];
 
     const ageGroupCycle: AgeGroupKey[] = ['baby', 'vorschul', 'schulkind', 'teenager'];
     
-    // Вычисляем, сколько карточек должны получить надпись
-    let textCardsCount = 3;
-    if (formats.length === 6) {
-      textCardsCount = 3;
-    } else if (formats.length === 9) {
-      textCardsCount = 3;
-    } else if (formats.length === 12) {
-      textCardsCount = 4;
-    } else if (formats.length === 15) {
-      textCardsCount = 5;
-    } else {
-      textCardsCount = Math.max(1, Math.round(formats.length * 0.33));
-    }
+    // Select non-video formats (4:3 and 2:3) for Etsy listing USP overlays.
+    // 9:16 formats are always kept 100% clean for video animation.
+    const nonVideoIndices = formats
+      .map((ar, idx) => (ar !== '9:16' ? idx : -1))
+      .filter((idx) => idx !== -1);
 
-    const textIndices = new Set<number>();
-    while (textIndices.size < textCardsCount) {
-      textIndices.add(Math.floor(Math.random() * formats.length));
-    }
+    // Give USP overlay to ~35% of listing photo cards (at least 1 if non-video cards exist)
+    const textCardsCount = Math.min(
+      nonVideoIndices.length,
+      Math.max(1, Math.round(nonVideoIndices.length * 0.35))
+    );
+
+    const shuffledNonVideo = [...nonVideoIndices].sort(() => Math.random() - 0.5);
+    const textIndices = new Set<number>(shuffledNonVideo.slice(0, textCardsCount));
 
     setCards(formats.map((ar, idx) => {
       const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
       const tags = generateRandomTags(ar, ageGroup);
       
-      // Рекламные надписи (overlayText) полностью отключены, чтобы не портить чистоту
-      // генерации интерьера и исключить появление артефактов/дымчатых полос при видео-анимации.
-      tags.overlayText = undefined;
-      tags.overlayPosition = undefined;
+      // USP overlay text only for 4:3 and 2:3 formats; 9:16 is strictly clean for video
+      if (textIndices.has(idx) && ar !== '9:16') {
+        tags.overlayText = USP_OPTIONS[Math.floor(Math.random() * USP_OPTIONS.length)];
+        tags.overlayPosition = Math.random() < 0.5 ? 'bottom left' : 'bottom right';
+      } else {
+        tags.overlayText = undefined;
+        tags.overlayPosition = undefined;
+      }
 
       // Разделение 50/50 для моделей при A/B-тесте
       const cardModel = model === ModelType.ABTest

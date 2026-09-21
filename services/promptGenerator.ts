@@ -137,7 +137,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     psychologyConstraint = "The room styling balances mature self-expression and functional study/lounge zones: featuring clean geometric lines, cozy textiles, and a structured, uncluttered layout.";
   }
 
-  let promptText = `This is a high-end product listing photograph for an interior wallpaper. The provided reference image is a single full-scale wall mural (not a repeating tileable pattern). It is strictly mandatory that this entire reference image is mapped and stretched onto the feature wall from edge to edge, as a single, continuous, seamless mural without any repeating, tiling, cuts, or visible seams. The bottom of the reference image must align perfectly with the floor/baseboard, and the top of the reference image must reach the ceiling. Do not alter the colors, scale, or design details. The wallpaper is the absolute visual hero of this image.
+  let promptText = `This is a high-end product listing photograph for an interior wallpaper. The provided reference image is a single full-scale wall mural (not a repeating tileable pattern). FULL-HEIGHT 100% WALL COVERAGE: It is strictly mandatory that this entire reference image is mapped and stretched onto the feature wall from edge to edge, as a single, continuous, seamless mural covering 100% of the wall surface from the absolute ceiling line all the way down to the floor/baseboards, continuing solidly behind the desk, bed, and all furniture without any horizontal cut, split, wainscoting, or unpapered lower section. The bottom of the reference image must align perfectly with the floor/baseboard, and the top of the reference image must reach the ceiling. Do not alter the colors, scale, or design details. The wallpaper is the absolute visual hero of this image.
 
 This is a premium, high-end editorial photograph of a children's bedroom for a luxury interior design magazine like Architectural Digest. The scene is masterfully designed in a ${styleData?.name ?? tags.style} style (${styleData?.description ?? ''}), radiating an atmosphere of Nachhaltigkeit (eco-friendliness), Gemütlichkeit (coziness), and quiet sophistication. The lighting is exceptionally natural, soft, and balanced, highlighting the tactile non-woven sand paper texture (Craft Lambda ultra-matte finish) of the wallpaper and the natural grain of the solid wood furniture. Avoid any cheap plastic surfaces, artificial lighting, or digital clutter. The room is sophisticated, warm, and inviting. ${psychologyConstraint}
 
@@ -161,8 +161,13 @@ Soft, directional natural light gently grazes the wallpaper, revealing the tacti
     promptText += " The computer screen is turned off, appearing as a clean, blank matte dark screen with no glossy reflections.";
   }
 
-  const negativeConstraints = "Absolutely avoid: peeling wallpaper, wallpaper peeling off wall, corner curl, page curl, paper curl, bed canopy, sheer fabric canopy, hanging baldachin, hanging curtains over bed, fabric drapes near bed, foreground lamps, foreground hanging lights, hanging objects blocking the wall view, wicker baskets, straw baskets, warped woven baskets, asymmetric baskets, rattan furniture, bunk beds, ladders, plastic toys, cluttered surfaces, text overlay, watermark, advertising badge, corner stamp, promotional text, watercolor patch, promo brushstroke.";
-  promptText += ` ${negativeConstraints}`;
+  const baseNegative = "peeling wallpaper, wallpaper peeling off wall, corner curl, page curl, paper curl, bed canopy, sheer fabric canopy, hanging baldachin, hanging curtains over bed, fabric drapes near bed, foreground lamps, foreground hanging lights, hanging objects blocking the wall view, half-wall wallpaper, half-height wallpaper, halbhoch tapeziert, two-tone wall, split wall, horizontally divided wall, wainscoting, wall paneling, beadboard, dado rail, chair rail, lower wall unpapered, partial wall coverage, wallpaper border, plain bottom half, split paint, wicker baskets, straw baskets, warped woven baskets, asymmetric baskets, rattan furniture, bunk beds, ladders, plastic toys, cluttered surfaces";
+
+  const textNegative = (tags.overlayText && tags.overlayPosition)
+    ? "digital watermark, advertising badge, corner stamp, low quality font, blurry text"
+    : "text overlay, watermark, advertising badge, corner stamp, promotional text, watercolor patch, promo brushstroke, typography, letters, words";
+
+  promptText += ` Absolutely avoid: ${baseNegative}, ${textNegative}.`;
 
   return promptText;
 }

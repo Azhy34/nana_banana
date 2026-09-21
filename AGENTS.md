@@ -2,6 +2,27 @@
 
 This file tracks significant changes, architectural decisions, and logic updates implemented by AI agents (Gemini/Claude) in the `nana_banana` project. This helps maintain context across sessions and different agents.
 
+## [2026-09-21] Full-Height Wallpaper Enforcement & Evergreen Listing USPs (Selective 4:3 / 2:3 Overlays)
+
+### 1. Motivation & Half-Wall Issue Fix
+- **Problem:** In batch generations (e.g. `2:3` and `4:3`), Gemini was occasionally hallucinating "two-tone" walls or "half-height wallpaper" (Halbhoch tapezieren) where wallpaper only covered the top half of the wall, leaving the bottom half plain white behind desks or beds.
+- **Solution:** 
+  - Added explicit positive constraint in `services/promptGenerator.ts`: *"FULL-HEIGHT 100% WALL COVERAGE: It is strictly mandatory that this entire reference image is mapped and stretched onto the feature wall from edge to edge, as a single, continuous, seamless mural covering 100% of the wall surface from the absolute ceiling line all the way down to the floor/baseboards, continuing solidly behind the desk, bed, and all furniture without any horizontal cut, split, wainscoting, or unpapered lower section."*
+  - Added strict negative constraints against half-walls across both `services/promptGenerator.ts` and `services/geminiService.ts` (`GEMINI_NEGATIVE_PROMPT`): `half-wall wallpaper, half-height wallpaper, halbhoch tapeziert, two-tone wall, split wall, horizontally divided wall, wainscoting, wall paneling, beadboard, dado rail, chair rail, lower wall unpapered, partial wall coverage, wallpaper border, plain bottom half, split paint`.
+
+### 2. Video vs. Listing Separation & Evergreen English USPs
+- **Separation:**
+  - `9:16` format is kept **100% clean** (`overlayText = undefined`) to ensure flawless, artifact-free video animations in Veo/Omni.
+  - `4:3` and `2:3` formats randomly receive a curated watercolor brushstroke USP badge on ~35% of listing photo cards.
+- **Evergreen English USPs:** Replaced hardcoded expiring discount coupons (e.g. `5% OFF: MOONPIN5`) with timeless, high-converting product quality and safety selling points:
+  - `Custom Sizes Available`
+  - `100% Toxin-Free & Odorless`
+  - `Washable & Easy Clean`
+  - `Easy Paste-the-Wall`
+  - `Premium Tactile Texture`
+  - `Certified EU Quality`
+- **Dynamic Negative Prompt:** `services/promptGenerator.ts` now dynamically excludes `text overlay, promotional text, watercolor patch` from negative constraints when `overlayText` is active on a card.
+
 ## [2026-09-16] Multimodal Material Texture Conditioning (Gemini Direct API & Craft Lambda)
 
 ### 1. Motivation & Aesthetic Goals
