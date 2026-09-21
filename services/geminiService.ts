@@ -47,7 +47,7 @@ const OPENROUTER_TITLE = "Nana Banana Composer";
 const GEMINI_WALL_DETECT_MODEL = "gemini-3.1-flash-image";
 const OPENROUTER_WALL_DETECT_MODEL = "google/gemini-3.1-flash-image";
 
-const GEMINI_NEGATIVE_PROMPT = "peeling wallpaper, wallpaper peeling off wall, corner curl, page curl, paper curl, bed canopy, fabric canopy, baldachin, foreground lamps, foreground hanging lights, half-wall wallpaper, half-height wallpaper, halbhoch tapeziert, two-tone wall, split wall, horizontally divided wall, wainscoting, wall paneling, beadboard, dado rail, chair rail, lower wall unpapered, partial wall coverage, wallpaper border, plain bottom half, split paint, plastic toys, distorted furniture, messy room, low quality, seams, tiling, repeating wallpaper patterns, cheap 3D render look, cartoon style, CGI, blurry textures";
+const GEMINI_NEGATIVE_PROMPT = "peeling wallpaper, wallpaper peeling off wall, corner curl, page curl, paper curl, bed canopy, fabric canopy, baldachin, foreground lamps, foreground hanging lights, mounted animal heads, plush animal heads, stuffed animal heads, felt animal heads, wall-mounted animal heads, fake taxidermy, animal head wall decor, Tierkopf Wanddeko, animal trophies, half-wall wallpaper, half-height wallpaper, halbhoch tapeziert, two-tone wall, split wall, horizontally divided wall, wainscoting, wall paneling, beadboard, dado rail, chair rail, lower wall unpapered, partial wall coverage, wallpaper border, plain bottom half, split paint, plastic toys, distorted furniture, messy room, low quality, seams, tiling, repeating wallpaper patterns, cheap 3D render look, cartoon style, CGI, blurry textures";
 
 const toDataUrl = (image: UploadedImage): string =>
   `data:${image.mimeType || "image/png"};base64,${image.data}`;
