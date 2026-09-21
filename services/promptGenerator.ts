@@ -153,30 +153,22 @@ Soft, directional natural light gently grazes the wallpaper, revealing the tacti
   promptText += ` ${cameraSetup}`;
 
   if (tags.overlayText && tags.overlayPosition) {
-    const BADGE_PALETTES = [
-      'soft warm oat',
-      'muted dusty sage',
-      'soft powder blush',
-      'warm cream parchment',
-      'subtle terracotta clay',
-      'muted desaturated lavender'
+    const WATERCOLOR_COLORS = [
+      'soft sage green',
+      'soft dusty rose',
+      'warm honey amber',
+      'muted terracotta',
+      'soft eucalyptus green',
+      'soft powder blue',
+      'warm caramel mustard',
+      'soft lavender blush',
+      'warm oat cream'
     ];
-    const badgeColor = tags.color ? `soft ${tags.color.toLowerCase()}` : pick(BADGE_PALETTES);
+    const watercolorColor = Math.random() < 0.6 && tags.color
+      ? `soft ${tags.color.toLowerCase()}`
+      : pick(WATERCOLOR_COLORS);
 
-    const fontStyle = Math.random() < 0.5
-      ? 'a clean, modern minimalist sans-serif typography with balanced tracking'
-      : 'a refined, clear handwritten cursive script';
-
-    let badgeShape = '';
-    if (tags.overlayStyle === 'pill') {
-      badgeShape = `a small, tasteful ${badgeColor} rounded pill-shaped matte sticker badge. Inside the badge, the text '${tags.overlayText}' is written in ${fontStyle}, in a warm charcoal-grey color`;
-    } else if (tags.overlayStyle === 'washi') {
-      badgeShape = `a small, understated ${badgeColor} washi tape strip with subtle tactile matte paper texture. Across the strip, the text '${tags.overlayText}' is printed in ${fontStyle}, in a warm charcoal-grey color`;
-    } else {
-      badgeShape = `a small, subtle ${badgeColor} watercolor wash brushstroke. On top of the wash, the text '${tags.overlayText}' is written in ${fontStyle}, in a warm charcoal-grey color`;
-    }
-
-    promptText += ` In the ${tags.overlayPosition} corner of the image, there is ${badgeShape}. Balanced, tasteful, and clean.`;
+    promptText += ` In the ${tags.overlayPosition} corner of the image, there is a small, subtle ${watercolorColor} watercolor brushstroke. On top of the brushstroke, the text '${tags.overlayText}' is written in a clear, highly readable, elegant handwritten cursive font, in a warm charcoal-grey color. Balanced and clean.`;
   }
 
   if (promptText.toLowerCase().includes('pc') || promptText.toLowerCase().includes('monitor') || promptText.toLowerCase().includes('screen') || promptText.toLowerCase().includes('schreibtisch')) {
