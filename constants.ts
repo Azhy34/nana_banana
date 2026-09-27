@@ -97,8 +97,8 @@ export const OMNI_PRESETS = {
   },
   omni_sunlight_loop: {
     label: "✨ Живой свет и тени (Pinterest Viral Loop)",
-    description: "Зацикленное видео: теплые лучи солнца и тени скользят по текстуре стены 9:16.",
-    prompt: "Static architectural camera framing of the stylish children's bedroom feature wall. ZERO MORPHING: The room architecture, furniture, and wallpaper illustration are 100% frozen and geometrically locked. The wallpaper is flat static 2D print: strictly no animation or duplication of characters. Warm afternoon sunlight and subtle dappled leaf shadows drift smoothly across the textured matte wallpaper and floor, emphasizing the authentic fine-sand paper depth. No new motifs or objects appear. Hypnotic, calming ambient lighting movement designed for a seamless, viral Pinterest video loop."
+    description: "Плавный микро-наезд с легким смещением: теплые лучи солнца и тени скользят по текстуре стены 9:16.",
+    prompt: "An extremely slow, subtle architectural camera push-in gently drifting slightly sideways towards the stylish children's bedroom feature wall. ZERO MORPHING: The room architecture, furniture, and wallpaper illustration are 100% frozen and geometrically locked. The wallpaper is flat static 2D print: strictly no biological animation, no duplicate heads, and no character motion. Warm afternoon sunlight and subtle dappled leaf shadows drift smoothly across the textured matte wallpaper and floor, emphasizing the authentic fine-sand paper depth. No new motifs or objects appear. Hypnotic, calming ambient lighting and ultra-smooth micro-camera motion designed for a seamless, viral Pinterest video loop."
   },
   omni_montessori: {
     label: "👶 Монтессори-ракурс от кроватки (Room Scale & Coziness)",
