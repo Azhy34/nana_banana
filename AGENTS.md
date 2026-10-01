@@ -2,6 +2,20 @@
 
 This file tracks significant changes, architectural decisions, and logic updates implemented by AI agents (Gemini/Claude) in the `nana_banana` project. This helps maintain context across sessions and different agents.
 
+## [2026-10-01] Omni Video Stabilization: Montessori Preset Fix (Elimination of Midpoint Hallucinations)
+
+### 1. Root Cause Analysis
+- **Symptom:** In `omni_montessori` ("👶 Монтессори-ракурс от кроватки"), around second 2.5–3 (midpoint of the 5s video), the generation devolved into visual chaos, morphing furniture, and distorted hallucinations.
+- **Root Cause:**
+  - **Arc Trajectory & High-Frequency Parallax:** The prompt instructed `Smooth low-angle camera arc shot ... sweeps past the natural solid wood slatted crib, expanding the spatial view of the room`.
+  - In single-image I2V (image-to-video) diffusion, an **arc shot** forces 3D rotational perspective without 3D geometry. Moving behind and past slatted bars creates rapid occlusions and reveals unseen regions (`expanding spatial view`) absent from the reference frame.
+  - At the halfway mark (frames 30–60), temporal attention loses its anchor to the reference pixels, and the diffusion model begins hallucinating unseen room space, bending crib slats, and melting the wallpaper.
+
+### 2. Solution & Architectural Lock
+- **Optical Stabilization:** Replaced the rotational arc trajectory and lateral sweep with a **steady forward push-in along the Z-axis** (`ultra-slow low-angle forward push-in camera shot composed from a child's eye-level perspective`).
+- **Geometric & Furniture Lock:** Added explicit constraints: `"GEOMETRIC & FURNITURE LOCK: The crib, slatted bars, flooring, and room architecture remain 100% frozen, solid, and geometrically locked without any bending, warping, or disappearing parts."`
+- **Directional Constraint:** Appended `"Zero camera rotation, zero arc sweep, continuous smooth forward motion."` while preserving warm Montessori lighting (`Gemütlichkeit`) and 1:1 wallpaper print fidelity (`INANIMATE 2D PRINT LOCK`).
+
 ## [2026-09-21] Full-Height Wallpaper Enforcement & Evergreen Listing USPs (Selective 4:3 / 2:3 Overlays)
 
 ### 1. Motivation & Half-Wall Issue Fix
