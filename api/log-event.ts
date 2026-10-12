@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { put, list } from '@vercel/blob';
+import { z } from 'zod';
 import fs from 'fs';
 import path from 'path';
 
@@ -10,6 +11,44 @@ const DETAIL_FIELDS = [
   'upscaleModel', 'predictionId', 'upscaleFactor', 'enhanceModel', 'outputFormat', 'subjectDetection',
   'inputWidth', 'inputHeight', 'outputWidth', 'outputHeight', 'billingUnits', 'predictTimeSeconds', 'stage',
 ] as const;
+
+export const logEventSchema = z.object({
+  sessionId: z.string().min(1, 'sessionId is required'),
+  model: z.string().min(1, 'model is required'),
+  prompt: z.string().default(''),
+  cost: z.coerce.number().default(0),
+  duration: z.coerce.number().default(0),
+  status: z.enum(['success', 'error', 'started']).default('success'),
+  error: z.string().nullable().optional(),
+  traceId: z.string().optional(),
+  negativePrompt: z.string().optional(),
+  aspectRatio: z.string().optional(),
+  durationSeconds: z.coerce.number().optional(),
+  personGeneration: z.string().optional(),
+  seed: z.coerce.number().optional(),
+  resolution: z.string().optional(),
+  interactionId: z.string().optional(),
+  operationName: z.string().optional(),
+  raiMediaFilteredCount: z.coerce.number().optional(),
+  raiMediaFilteredReasons: z.array(z.string()).optional(),
+  errorCode: z.union([z.string(), z.number()]).optional(),
+  errorStatus: z.string().optional(),
+  upscaleModel: z.string().optional(),
+  predictionId: z.string().optional(),
+  upscaleFactor: z.string().optional(),
+  enhanceModel: z.string().optional(),
+  outputFormat: z.string().optional(),
+  subjectDetection: z.string().optional(),
+  inputWidth: z.coerce.number().optional(),
+  inputHeight: z.coerce.number().optional(),
+  outputWidth: z.coerce.number().optional(),
+  outputHeight: z.coerce.number().optional(),
+  billingUnits: z.coerce.number().optional(),
+  predictTimeSeconds: z.coerce.number().optional(),
+  stage: z.string().optional(),
+});
+
+export type LogEventRequest = z.infer<typeof logEventSchema>;
 
 // Short names kept from the original stdout message format.
 const SUMMARY_LABELS: Record<string, string> = { operationName: 'operation', raiMediaFilteredCount: 'raiFiltered' };
@@ -28,12 +67,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { sessionId, model, prompt, cost, duration, status, error, traceId } = req.body;
+  const parsed = logEventSchema.safeParse(req.body);
+  if (!parsed.success) {
+    const issues = parsed.error.issues.map((issue) => {
+      const p = issue.path.join('.');
+      return p ? `${p}: ${issue.message}` : issue.message;
+    });
+    return res.status(400).json({ error: `Invalid log event — ${issues.join('; ')}`, issues });
+  }
+
+  const {
+    sessionId, model, prompt, cost, duration, status, error, traceId,
+  } = parsed.data;
   const timestamp = new Date().toISOString();
 
   // Optional fields are persisted only if listed here (mirrors GeminiLogDetails in types.ts).
   const details = Object.fromEntries(
-    DETAIL_FIELDS.filter((key) => req.body[key] !== undefined && req.body[key] !== null).map((key) => [key, req.body[key]])
+    DETAIL_FIELDS.filter((key) => parsed.data[key] !== undefined && parsed.data[key] !== null).map((key) => [key, parsed.data[key]])
   );
   const { negativePrompt } = details;
 

@@ -47,3 +47,7 @@ coverage/
 test-results/
 playwright-report/
 blob-report/
+
+# Local Dev Session Logs & Heavy test binaries
+gemini_sessions.json
+public/upscaled_*

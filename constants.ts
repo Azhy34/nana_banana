@@ -62,6 +62,7 @@ export function getOmniCostUsd(resolution: '360p' | '720p' = '720p'): number {
 // Upscale models on Replicate
 export const REAL_ESRGAN_MODEL_ID = 'nightmareai/real-esrgan';
 export const REAL_ESRGAN_USD_PER_RUN = 0.002;
+export const REAL_ESRGAN_MAX_PIXELS = 1448 * 1448; // 2,096,704 px (~2.1 MP) — hardware VRAM limit of nightmareai/real-esrgan
 export const TOPAZ_UPSCALE_MODEL_ID = 'topazlabs/image-upscale';
 export const TOPAZ_USD_PER_BILLING_UNIT = 0.048;
 

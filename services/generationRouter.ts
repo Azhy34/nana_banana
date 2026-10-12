@@ -58,7 +58,8 @@ export async function generateBatchImage(
   provider: AIProvider = 'gemini',
   draftImage?: string,
   traceId?: string,
-  textureImage?: UploadedImage | null
+  textureImage?: UploadedImage | null,
+  cardId?: string
 ): Promise<string> {
   if (isQwenModel(model)) {
     if (!replicateToken) {
@@ -74,5 +75,5 @@ export async function generateBatchImage(
     return url;
   }
 
-  return generateGeminiFamilyBatch(providerApiKey, wallpaper, prompt, aspectRatio, model, provider, draftImage, traceId, textureImage);
+  return generateGeminiFamilyBatch(providerApiKey, wallpaper, prompt, aspectRatio, model, provider, draftImage, traceId, textureImage, cardId);
 }

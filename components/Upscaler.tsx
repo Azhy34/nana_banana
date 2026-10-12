@@ -5,7 +5,7 @@ import { logGeminiEvent } from '../services/geminiService';
 import { GeminiLogDetails, UpscaleSettings, UpscaleState } from '../types';
 import { downloadImage } from '../services/downloadService';
 import { generateTraceId } from '../utils/tracing';
-import { TOPAZ_UPSCALE_MODEL_ID, TOPAZ_USD_PER_BILLING_UNIT, REAL_ESRGAN_MODEL_ID, REAL_ESRGAN_USD_PER_RUN } from '../constants';
+import { TOPAZ_UPSCALE_MODEL_ID, TOPAZ_USD_PER_BILLING_UNIT, REAL_ESRGAN_MODEL_ID, REAL_ESRGAN_USD_PER_RUN, REAL_ESRGAN_MAX_PIXELS } from '../constants';
 
 interface UpscalerProps {
     replicateToken: string;
@@ -104,6 +104,10 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         }
     };
 
+    const isExceedingRealEsrganLimit = Boolean(
+        sourceSize && (sourceSize.width * sourceSize.height > REAL_ESRGAN_MAX_PIXELS)
+    );
+
     const handleUpscale = async () => {
         if (!sourceImage) {
             setState(prev => ({ ...prev, error: 'Загрузите изображение' }));
@@ -112,6 +116,16 @@ export const Upscaler: React.FC<UpscalerProps> = ({
 
         if (!replicateToken) {
             setState(prev => ({ ...prev, error: 'Введите Replicate API Token в шапке сайта' }));
+            return;
+        }
+
+        if (settings.model === 'real-esrgan' && isExceedingRealEsrganLimit) {
+            const mp = sourceSize ? ((sourceSize.width * sourceSize.height) / 1000000).toFixed(1) : '';
+            const dims = sourceSize ? `${sourceSize.width}×${sourceSize.height}` : '';
+            setState(prev => ({
+                ...prev,
+                error: `Изображение ${dims} (${mp} Мп) превышает лимит модели Real-ESRGAN (макс. ~2.1 Мп). Пожалуйста, выберите 💎 Topaz Labs Gigapixel или используйте исходное изображение до первого апскейла.`,
+            }));
             return;
         }
 
@@ -356,6 +370,34 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                                 </button>
                             ))}
                         </div>
+
+                        {/* Real-ESRGAN Resolution Limit Warning */}
+                        {isExceedingRealEsrganLimit && (
+                            <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2 mt-2">
+                                <div className="flex items-center justify-between text-amber-300 font-bold text-xs">
+                                    <span className="flex items-center gap-1.5">
+                                        <span>⚠️</span> Высокое разрешение входного файла
+                                    </span>
+                                    {sourceSize && (
+                                        <span className="text-[11px] bg-amber-500/20 px-2 py-0.5 rounded text-amber-200 font-mono">
+                                            {sourceSize.width}×{sourceSize.height} (~{((sourceSize.width * sourceSize.height) / 1000000).toFixed(1)} Мп)
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-[11px] text-slate-300 leading-relaxed">
+                                    Модель <b>Real-ESRGAN</b> на GPU принимает максимум ~2.1 Мп (1448×1448). Для файлов большего разрешения (или повторного апскейла) переключитесь на <b>Topaz Labs Gigapixel</b>.
+                                </p>
+                                {settings.model === 'real-esrgan' && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSettings(prev => ({ ...prev, model: 'topaz' }))}
+                                        className="w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-semibold rounded-lg border border-amber-500/40 transition-all flex items-center justify-center gap-1.5"
+                                    >
+                                        💎 Переключить на Topaz Labs Gigapixel
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Target Size */}
@@ -466,8 +508,8 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                             style={{ width: `${state.progress}%` }}
                         />
                     </div>
-                    <p className="text-xs text-slate-500 mt-2">
-                        {settings.model === 'real-esrgan' ? 'Стоимость: ~$0.002 (~0.2 цента, в 400 раз дешевле Topaz)' : 'Стоимость: ~$0.82 (17 юнитов Topaz Labs)'}
+                    <p className="text-xs text-slate-400 mt-2">
+                        {settings.model === 'real-esrgan' ? 'Стоимость: ~$0.002 (~0.2 цента, быстро 3 сек)' : 'Topaz Labs: обработка сверхвысоких разрешений на GPU может занять 4–8 минут. Пожалуйста, не закрывайте вкладку.'}
                     </p>
                 </div>
             )}

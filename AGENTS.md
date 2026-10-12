@@ -2,6 +2,39 @@
 
 This file tracks significant changes, architectural decisions, and logic updates implemented by AI agents (Gemini/Claude) in the `nana_banana` project. This helps maintain context across sessions and different agents.
 
+## [2026-10-12] Batch Generator Prompt Realism Overhaul & Backend Zod Contract Shield
+
+### 1. Root Cause Analysis: Plastic AI Look & Prompt Bloat
+- **Symptom:** Wallpaper mockups in Batch Generator looked artificial, sterile, and CGI-like, failing to look like authentic children's room interiors across age groups.
+- **Root Causes Identified:**
+  - **Aspirational Buzzwords:** Phrases like `luxury interior design magazine like Architectural Digest`, `masterfully designed`, `immaculately styled`, `flawless look` triggered diffusion models' digital beauty filters, producing synthetic, overly smooth CGI renders.
+  - **Prompt Bloat & Semantic Noise:** 450+ words with 4x repeated phrases (`desaturated`, `Craft Lambda sand paper texture`, `avoiding plastic`). Raw Etsy SEO analysis strings from `trends.json` (`Strongly associated with 'woodland nursery' searches...`) were being injected into prompts as decor instructions.
+  - **Pink Elephant Effect in Positive Prompt:** 100-word negative prompt was appended to positive prompt text, causing the model to attend to banned items.
+  - **Language Mixing & Contradictions:** German terms in parentheses (`unlackiertes Massivholz`, `Kinderbett mit Gitterstäben`) degraded natural tokenization; `trends.json` contained contradictions (rattan and stuffed animal mounts in accessories while banned in negative prompt).
+
+### 2. Solutions & 5-Layer Prompt Architecture
+- **5-Layer Natural Editorial Structure (`services/promptGenerator.ts`):**
+  - **Layer 1 (Wallpaper Mural):** Full-height edge-to-edge mural, 1:1 scale/color preservation.
+  - **Layer 2 (Authentic Room & Age Psychology):** Specific lived-in settings for Baby (0-3), Preschool (3-6), School (6-10), and Teenager (10-16).
+  - **Layer 3 (Hero Furniture & Lived-in Details):** Natural solid wood (oak, birch, beech), child-appropriate lifestyle touches (e.g. wooden mobile, open illustrated storybook, notebook with pencil).
+  - **Layer 4 (Directional Window Light & Physical Paper Texture):** Grazing natural daylight revealing Craft Lambda sand micro-relief and authentic ambient shadows under furniture.
+  - **Layer 5 (Camera & Optics Variability Matrix):** Dynamic per-card randomization of 5 discrete optical variables:
+    - `cameraAngle` (frontal, 3/4 corner, side profile, diagonal, cozy nook).
+    - `cameraElevation` (child eye-level 80cm, standing adult eye-level, low-angle rug perspective, architectural tripod).
+    - `cameraBody` (Sony A7R V, Hasselblad H6D-100c, Canon EOS R5, Fujifilm GFX 100S).
+    - `lens` (28mm gentle wide, 35mm prime, 45mm medium format, 50mm normal lens).
+    - `aperture` (f/4.0, f/5.6, f/8.0 — ensuring edge-to-edge mural sharpness without artificial blur).
+    - All passed via explicit discrete fields in `BatchPromptTags` and reflected in prompt Layer 5.
+- **Data Cleanup (`Promt/trends.json`):**
+  - Removed animal mounts and rattan from accessories; normalized `keyObjects` to clean English names and developmental descriptions.
+- **Backend Zod Shield (`api/log-event.ts`):**
+  - Implemented `logEventSchema` with coercion and defaults, guaranteeing clean metrics without `NaN` or unvalidated payloads reaching Google Cloud Logging / Vercel Blob.
+- **Full Lifecycle Telemetry Coverage (`geminiService.ts` & `useBatch.ts`):**
+  - Added explicit `'started'` status events to Single Generator (`generateImageComposition`) and Batch Generator (`generateBatchImage`), matching Veo, Omni, and Upscaler standards.
+  - Attached full execution details: `aspectRatio`, `resolution`, `stage` (`'batch_generate'` vs `'batch_refine'`).
+  - Implemented structured per-card ID format: `card_{index}_{aspectRatio}_{hash}` (e.g. `card_01_9x16_a8f2`, `card_11_4x3_e4b1`).
+  - Passed unique per-card `traceId` (32-character W3C hex) and `cardId` (as `interactionId`) across all Batch runs (`handleGenerateAll`, `regenerate`, `refineInPro`), guaranteeing 1:1 trace and card isolation in Google Cloud Trace and session logging.
+
 ## [2026-10-01] Omni Video Stabilization: Montessori Preset Fix (Elimination of Midpoint Hallucinations)
 
 ### 1. Root Cause Analysis

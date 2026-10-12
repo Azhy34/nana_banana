@@ -527,6 +527,12 @@ export const generateImageComposition = async (
 
   const startTime = Date.now();
   const pricing = MODEL_PRICING[settings.model] || { inputPer1M: 0, outputPerImage: 0 };
+  const logDetails: GeminiLogDetails = {
+    aspectRatio: settings.aspectRatio,
+    resolution: settings.imageSize,
+  };
+
+  logGeminiEvent(settings.model, settings.prompt, 0, 0, "started", null, traceId, undefined, logDetails);
 
   try {
     let result: GenerationResult;
@@ -539,11 +545,11 @@ export const generateImageComposition = async (
     const duration = (Date.now() - startTime) / 1000;
     const cost = (result.usage.promptTokens / 1_000_000) * pricing.inputPer1M + pricing.outputPerImage;
 
-    logGeminiEvent(settings.model, settings.prompt, cost, duration, "success", null, traceId, undefined);
+    logGeminiEvent(settings.model, settings.prompt, cost, duration, "success", null, traceId, undefined, logDetails);
     return result;
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(settings.model, settings.prompt, 0.0, duration, "error", err.message || "Unknown error", traceId, undefined);
+    logGeminiEvent(settings.model, settings.prompt, 0.0, duration, "error", err.message || "Unknown error", traceId, undefined, logDetails);
     throw err;
   }
 };
@@ -557,7 +563,8 @@ export const generateBatchImage = async (
   provider: AIProvider = "openrouter",
   draftImage?: string,
   traceId?: string,
-  textureImage?: UploadedImage | null
+  textureImage?: UploadedImage | null,
+  cardId?: string
 ): Promise<string> => {
   if (!apiKey) {
     const label = provider === "openrouter" ? "OpenRouter" : "Gemini";
@@ -565,6 +572,14 @@ export const generateBatchImage = async (
   }
 
   const startTime = Date.now();
+  const stage = draftImage ? 'batch_refine' : 'batch_generate';
+  const logDetails: GeminiLogDetails = {
+    aspectRatio,
+    stage,
+    interactionId: cardId,
+  };
+
+  logGeminiEvent(model, prompt, 0, 0, "started", null, traceId, undefined, logDetails);
 
   try {
     let result: string;
@@ -577,11 +592,11 @@ export const generateBatchImage = async (
     const duration = (Date.now() - startTime) / 1000;
     const estimatedCost = model === ModelType.Pro ? 0.134 : 0.0672;
 
-    logGeminiEvent(model, prompt, estimatedCost, duration, "success", null, traceId);
+    logGeminiEvent(model, prompt, estimatedCost, duration, "success", null, traceId, undefined, logDetails);
     return result;
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(model, prompt, 0.0, duration, "error", err.message || "Unknown error", traceId);
+    logGeminiEvent(model, prompt, 0.0, duration, "error", err.message || "Unknown error", traceId, undefined, logDetails);
     throw err;
   }
 };

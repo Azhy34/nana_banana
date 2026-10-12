@@ -199,7 +199,7 @@ export async function pollPrediction(
   apiToken: string,
   predictionId: string,
   onProgress?: (status: string) => void,
-  maxAttempts: number = 100,
+  maxAttempts: number = 300,
   intervalMs: number = 3000
 ): Promise<ReplicatePrediction> {
   for (let i = 0; i < maxAttempts; i++) {

@@ -27,52 +27,42 @@ Per card, one value is picked at random from `trends.json` unless noted:
 | Style | `styles` | |
 | Furniture brand | `brands` | "[brand]-inspired" |
 | Age group | `ageGroups` | assigned in a cycle across cards: baby → vorschul → schulkind → teenager |
-| Key object | `keyObjects` filtered by age group | baby always gets `Kinderbett mit Gitterstäben` |
+| Key object | `keyObjects` filtered by age group | baby always gets `Classic slatted wooden baby crib` |
 | Room zone | `roomZones` | |
 | Lighting | `lighting` | |
 | Camera angle / distance | `cameraAngles` / `cameraDistances` | |
 | Depth of field | `depthOfField` | |
 | Accessories | `accessories` | 2–3 items |
-| Composition | code | 40% "unobstructed" (low furniture, wall fills the frame), 60% "natural" child-scale waist-level shot |
+| Composition | code | 40% "unobstructed" (low furniture, wall fills the frame), 60% "natural" child-scale eye-level shot |
 | Cinematic detail | `CINEMATIC_DETAILS` in code | one of 5 light effects |
 | Camera body | code | one of 4 professional camera/lens descriptions |
 | Market trends | `latestMarketInsights` | independent 50% chances to add a trending color accent, accessory and material |
 
 Combinations are random; uniqueness within a batch is **not** enforced.
 
-## RULE #3 — PROMPT STRUCTURE
+## RULE #3 — PROMPT STRUCTURE (5-LAYER ARCHITECTURE)
 
-The prompt is one narrative text in English, in this order:
+The prompt follows Google's best-practice 5-layer architecture for natural editorial interior photography:
 
-1. **Wallpaper role** — Rule #1.
-2. **Editorial scene** — premium Architectural-Digest-style photo of a children's bedroom in `[STYLE]` (with description);
-   Nachhaltigkeit, Gemütlichkeit, quiet sophistication; soft natural light on the matte paper texture and wood grain;
-   no plastic, artificial light or clutter; **age-specific psychology paragraph** (see Rule #4).
-3. **Hero furniture** — `[BRAND]`-inspired `[KEY_OBJECT]` in the age-appropriate material, on the German apartment floor
-   with its ceiling height (`germanApartmentContext`), key object description, composition text.
-4. **Styling** — natural materials, `[COLOR]` accents, `[ACCESSORIES]`, trend notes, authentic lifestyle touches;
-   desaturated low-contrast palette; warm white balance (no cold/blue cast).
-5. **Camera** — `[ANGLE]`, `[DISTANCE]`, `[DEPTH_OF_FIELD]` keeping the wall sharp, `[CINEMATIC_DETAIL]`.
-6. **Lighting** — grazing light on the wallpaper, `[LIGHTING]` description, `Aspect ratio: [ASPECT_RATIO]`, camera body.
-7. **Conditional** — if the text mentions a PC/monitor/screen/Schreibtisch, the screen is turned off (matte, no reflections).
-8. **Negative list** — `Absolutely avoid: peeling wallpaper, corner/page curl, bed canopy, baldachin, curtains over the bed,
-   foreground/hanging lights, objects blocking the wall, wicker/straw/rattan, bunk beds, ladders, plastic toys, clutter,
-   text overlay, watermark, promotional text, watercolor patch …` (full list in code).
+1. **Wallpaper Mural Role (Layer 1):** Full-height 100% continuous mural coverage from baseboard to ceiling, running cleanly behind furniture, 1:1 color/scale fidelity.
+2. **Natural Scene & Age Group Setting (Layer 2):** Authentic, lived-in Scandinavian children's bedroom tailored to the specific age group (no synthetic/luxury CGI buzzwords).
+3. **Hero Furniture & Styling (Layer 3):** Brand-inspired key piece crafted from solid natural wood, age-appropriate lifestyle touches (e.g., wooden blocks, illustrated storybook, student notebooks), and subtle accent decor.
+4. **Lighting & Physical Wallpaper Texture (Layer 4):** Directional window daylight grazing the wallpaper to highlight the tactile non-woven paper micro-relief (Craft Lambda sand grain) and casting soft physical ambient shadows.
+5. **Camera & Optics (Layer 5):** 35mm lens, f/5.6 aperture, sharp mural focus, natural depth of field, warm cozy white balance.
+6. **Conditional:** If a computer or monitor is in the scene, it is strictly turned off (matte dark screen with zero reflections).
+7. **Negative Constraints:** Concise list avoiding peeling wallpaper, half-walls, animal trophies, plastic, bunk beds, and clutter.
 
-Text overlays (USP / promo brushstroke) are supported by `buildGeminiPrompt()` but **disabled**: `generateCards()` never sets `overlayText`.
+## RULE #4 — QUALITY & REALISM REQUIREMENTS
 
-## RULE #4 — QUALITY REQUIREMENTS
-
-- **Materials:** solid wood with visible organic grain, raw matte finish (*unlackiertes Massivholz, komplett matt, keine
-  Reflexionen*), linen, cotton, organic canvas. Teenager rooms: natural wood with matte metal and clean lines.
-- **Banned:** wicker, straw and rattan (AI renders woven materials warped), plastic, bunk beds, ladders.
-- **Shapes:** soft rounded edges (*Weiche Formen*) except for teenager rooms.
-- **Color & light:** desaturated, low-contrast palette; warm cozy white balance.
-- **Age psychology:**
-  - baby (0–3): ultra-soft desaturated tones (oat, cream, faded sky blue), spacious and calming, no busy patterns;
-  - vorschul (3–6): soft warm tones, simple uncluttered layout for play and rest;
-  - schulkind (6–10): natural wood surfaces, organized layout for study and rest;
-  - teenager (10–16): geometric lines, structured study/lounge zones.
+- **Materials:** Solid natural wood with visible organic grain (oak, birch, beech), washed linen, breathable organic cotton. Teenager rooms: natural wood with matte metal accents.
+- **Banned:** Wicker, straw, and rattan (AI renders distorted woven artifacts), plastic furniture/toys, animal trophies/heads, bunk beds, ladders.
+- **Lived-in Realism (No "CGI Luxury"):** Avoid aspirational buzzwords (*flawless, masterpiece, luxury, Architectural Digest*) which trigger digital beauty filters. Use documentary interior photography descriptors.
+- **Color & Light:** Warm, desaturated, sensory-friendly palette; directional natural window daylight.
+- **Age Psychology:**
+  - **Baby (0–3):** Peaceful nursery with slatted crib or Montessori floor bed, soft oat/cream tones, wooden mobile, zero sensory clutter.
+  - **Preschool (3–6):** Playful yet calm room, child-scale play table, low toddler bed, wooden building blocks, picture books.
+  - **School (6–10):** Balanced study and resting room, wooden student desk, ergonomic chair, tidy books, reading nook.
+  - **Teenager (10–16):** Stylish youth bedroom with clean geometric lines, platform bed, modern desk with turned-off matte screen.
 
 ## RULE #5 — ASPECT RATIOS (BATCH)
 

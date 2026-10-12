@@ -5,6 +5,7 @@ import { generateBatchImage, isQwenModel } from '../services/generationRouter';
 import { downloadImage } from '../services/downloadService';
 import { compressImageFile } from '../services/imageCompressor';
 import { CRAFT_LAMBDA_TEXTURE_IMAGE } from '../services/craftLambdaAsset';
+import { generateTraceId } from '../utils/tracing';
 
 export type BatchStep = 'setup' | 'cards' | 'results';
 
@@ -188,7 +189,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         ? (idx < formats.length / 2 ? ModelType.Pro : ModelType.Flash31)
         : model;
 
-      return { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel };
+      const cardId = `card_${String(idx + 1).padStart(2, '0')}_${ar.replace(':', 'x')}_${Math.random().toString(36).substring(2, 7)}`;
+      return { id: cardId, tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel };
     }));
     setBatchStep('cards');
   };
@@ -229,7 +231,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const addCard = () => {
     const tags = generateRandomTags('9:16');
     const cardModel = model === ModelType.ABTest ? ModelType.Pro : model;
-    setCards(prev => [...prev, { id: Math.random().toString(36).substring(7), tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel }]);
+    const cardId = `card_${String(cards.length + 1).padStart(2, '0')}_9x16_${Math.random().toString(36).substring(2, 7)}`;
+    setCards(prev => [...prev, { id: cardId, tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel }]);
   };
 
   const updatePromptText = (cardId: string, text: string) => {
@@ -261,6 +264,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       const chunk = selectedCards.slice(i, i + concurrencyLimit);
       await Promise.allSettled(chunk.map(async (card) => {
         try {
+          const cardTraceId = generateTraceId();
           const img = await generateBatchImage(
             apiKey,
             replicateToken,
@@ -270,8 +274,9 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
             card.model,
             provider,
             undefined,
-            undefined,
-            texture
+            cardTraceId,
+            texture,
+            card.id
           );
           setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
         } catch (err: any) {
@@ -290,6 +295,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
+      const cardTraceId = generateTraceId();
       const img = await generateBatchImage(
         apiKey,
         replicateToken,
@@ -299,8 +305,9 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         card.model,
         provider,
         undefined,
-        undefined,
-        texture
+        cardTraceId,
+        texture,
+        card.id
       );
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img } : c));
     } catch (err: any) {
@@ -316,6 +323,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
+      const cardTraceId = generateTraceId();
       const img = await generateBatchImage(
         apiKey,
         replicateToken,
@@ -325,8 +333,9 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         ModelType.Pro,
         provider,
         card.resultImage,
-        undefined,
-        texture
+        cardTraceId,
+        texture,
+        card.id
       );
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img, model: ModelType.Pro } : c));
     } catch (err: any) {

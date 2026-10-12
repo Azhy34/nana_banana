@@ -23,6 +23,10 @@ export interface BatchPromptTags {
   cameraAngle: string;
   cameraDistance: string;
   depthOfField: string;
+  cameraElevation?: string;
+  lens?: string;
+  aperture?: string;
+  cameraBody?: string;
   accessories: string[];
   aspectRatio: BatchAspectRatio;
   compositionStrategy: 'unobstructed' | 'natural';

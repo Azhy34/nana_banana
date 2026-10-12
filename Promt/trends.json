@@ -125,24 +125,88 @@
   "ageGroups": {
     "baby": {
       "label": "Baby (0–3 years)",
+      "theme": "Biophilic Sanctuary & Soft Organic Nursery (PANTONE Cloud Dancer aesthetic)",
+      "beds": [
+        "Oliver Furniture Wood Original cot in natural light oak with slender vertical slats",
+        "Leander Classic rounded baby crib in solid beech with soft organic linen bedding",
+        "Minimalist slatted solid birch crib with natural wood grain and organic cotton mattress"
+      ],
+      "toys": [
+        "curated wooden sensory blocks catching the light",
+        "delicate wooden mobile with soft felt shapes hanging above the crib",
+        "smooth handmade beechwood rattle resting on a quilted cotton play mat"
+      ],
+      "decor": [
+        "solid light oak dresser with a soft cream changing mat",
+        "quilted organic cotton storage baskets in warm oat tone",
+        "delicate neutral linen blackout curtains pooling gently on the floor"
+      ],
       "furniture": "classic wooden baby crib with slatted sides, premium wooden changing table dresser with a soft cream changing mat (Wickelkommode), cozy fabric nursing glider chair",
       "storage": "low open wooden shelves, canvas storage bins in linen fabric, solid wood toy chest",
       "extras": "wooden mobile above the crib, organic cotton bedding, soft nightlight, desaturated linen curtains"
     },
     "vorschul": {
       "label": "Preschool (3–6 years)",
+      "theme": "Playful Montessori & Creative Nook (Faraway Forest & Open-Ended Play)",
+      "beds": [
+        "Montessori low wooden floor bed in solid oak, keeping the wallpaper wall fully visible",
+        "Oliver Furniture Seaside low toddler daybed with natural linen bedding",
+        "Minimalist house-frame wooden floor bed in smooth natural birch"
+      ],
+      "toys": [
+        "classic wooden building blocks neatly stacked on a low shelf",
+        "open-ended wooden toy train on the woven rug",
+        "curated Grimm's-style wooden stacking arches in muted earthy tones"
+      ],
+      "decor": [
+        "Nobodinoz-style low wooden play table with two small matching chairs",
+        "front-facing low wooden bookshelf with open illustrated storybooks",
+        "chunky knit floor pouffe and soft cotton storage bins"
+      ],
       "furniture": "low Montessori floor bed, small children's play table with two matching small chairs, open shelving at child's height",
       "storage": "open wooden shelves with linen/canvas toy bins at child level, solid wooden toy chest",
       "extras": "wooden building blocks, wooden toys on shelf, small children's bookshelf, soft cotton floor rug"
     },
     "schulkind": {
       "label": "School age (6–10 years)",
+      "theme": "Scandi Study & Cozy Reading Haven (Multifunctional & Ergonomic Growth)",
+      "beds": [
+        "Solid oak low single bed with integrated under-bed storage drawers",
+        "Oliver Furniture low daybed with natural linen cushions functioning as daytime reading nook",
+        "Minimalist single platform bed in light ash wood"
+      ],
+      "toys": [
+        "vintage-style wooden desk organizer with colored pencils",
+        "classic globe on a turned solid wood stand",
+        "open handwritten school notebook alongside an open illustrated atlas"
+      ],
+      "decor": [
+        "ergonomic height-adjustable wooden study desk with brass task lamp",
+        "natural cork pinboard with watercolor sketches",
+        "oversized textured linen reading floor cushion"
+      ],
       "furniture": "low single wooden bed, children's study desk with matching chair and desk lamp, study bookshelf",
       "storage": "modular wooden wall shelves, closed wooden drawers, desk organizer",
       "extras": "desk lamp, school backpack hook, cozy reading corner with a large fabric bean bag cushion"
     },
     "teenager": {
       "label": "Teenager (10–16 years)",
+      "theme": "Japandi Minimalist Workspace & Lounge (Urban Warmth & Uncluttered Lines)",
+      "beds": [
+        "Low Japandi platform bed with floating oak frame and washed dark linen bedding",
+        "Minimalist smoked oak single platform bed with low architectural headboard",
+        "Platform bed with integrated low bookshelf ledge"
+      ],
+      "toys": [
+        "wireless studio headphones on a solid walnut stand",
+        "monograph art photography books stacked neatly",
+        "vintage acoustic guitar resting on a wooden floor stand"
+      ],
+      "decor": [
+        "wide contemporary oak desk with clean turned-off matte laptop screen",
+        "potted Ficus Audrey in a handmade textured ceramic pot",
+        "minimalist dark metal task lamp with warm ambient glow"
+      ],
       "furniture": "low platform single bed, wide wooden study desk, comfortable desk chair, modular wall bookshelves",
       "storage": "modular shelving units, closed wardrobe, desk organizer",
       "extras": "small potted plants, minimal books, LED ambient light strip (turned off), headphones on stand"
@@ -150,63 +214,63 @@
   },
   "keyObjects": [
     {
-      "name": "Bodenbett",
-      "description": "Montessori floor bed at ground level — baby can get in and out independently, very low profile, wallpaper wall fully visible above",
+      "name": "Montessori wooden floor bed",
+      "description": "low Montessori wooden floor bed resting gently on the floor, allowing a complete, panoramic view of the wallpaper mural behind it",
       "ageGroup": "baby"
     },
     {
-      "name": "Kinderbett mit Gitterstäben",
-      "description": "classic wooden crib with slatted sides, placed against wallpaper wall — simple and safe for infants",
+      "name": "Classic slatted wooden baby crib",
+      "description": "natural solid wood baby crib with slender vertical slats and soft organic cotton bedding, positioned against the wallpaper feature wall",
       "ageGroup": "baby"
     },
     {
-      "name": "Kuschelecke mit Spielmatte",
-      "description": "soft play mat on the floor with a few plush toys and a low rattan shelf — open and airy, wallpaper wall as backdrop",
+      "name": "Cozy nursery play corner with padded mat",
+      "description": "soft padded cotton play mat on the floor with wooden sensory toys and a low wooden shelf, with the wallpaper mural as a tranquil backdrop",
       "ageGroup": "baby"
     },
     {
-      "name": "Spieltisch mit Stühlen",
-      "description": "small children's play table with two small chairs — creative zone in front of the wallpaper wall, building blocks and art supplies",
+      "name": "Children's wooden play table with chairs",
+      "description": "small child-sized wooden activity table with two matching small chairs, with an open picture book and wooden blocks, set against the full wallpaper mural",
       "ageGroup": "vorschul"
     },
     {
-      "name": "Einzelbett (Schlafzone)",
-      "description": "simple low single bed — cozy sleeping zone without hanging fabrics or canopies, headboard against wallpaper wall",
+      "name": "Low wooden toddler bed",
+      "description": "simple low-profile wooden toddler bed with clean natural linen bedding, headboard placed against the feature wallpaper wall",
       "ageGroup": "vorschul"
     },
     {
-      "name": "Spielecke mit Regal",
-      "description": "open play zone with low Kallax-style shelving unit displaying toys, woven baskets and books — wallpaper fills the entire back wall",
+      "name": "Low Montessori toy shelving unit",
+      "description": "low open wooden shelving unit displaying a few curated wooden toys, puzzles, and storybooks, with the wallpaper mural filling the wall behind",
       "ageGroup": "vorschul"
     },
     {
-      "name": "Leseecke mit Sitzsack",
-      "description": "cozy reading corner — large bean bag or floor cushion, bookshelf at child height, wall lamp, wallpaper wall as full backdrop",
+      "name": "Cozy reading nook with floor cushion",
+      "description": "inviting reading corner with a comfortable oversized linen floor cushion, low book ledge, and soft task light against the vibrant wallpaper backdrop",
       "ageGroup": "schulkind"
     },
     {
-      "name": "Schreibtisch-Ecke",
-      "description": "children's desk with chair, task lamp and small open shelf — homework zone with wallpaper wall visible behind",
+      "name": "Children's study desk setup",
+      "description": "clean wooden student desk with ergonomic chair, neat desk organizer, and brass task lamp, with the wallpaper mural providing an inspiring backdrop",
       "ageGroup": "schulkind"
     },
     {
-      "name": "Einzelbett mit Kopfteil-Regal",
-      "description": "low single bed with integrated headboard shelf for books and a small lamp — calm and organized, wallpaper wall above headboard",
+      "name": "Low single bed with bookshelf headboard",
+      "description": "low single bed in natural solid wood with a neat headboard shelf for bedtime books, with the wallpaper mural clearly visible above and behind",
       "ageGroup": "schulkind"
     },
     {
-      "name": "Teenager Schreibtisch mit All-in-One PC",
-      "description": "modern desk setup: wide wooden desk, All-in-One PC with screen turned off, appearing as a clean blank matte dark screen with no glossy reflections, sleek desk lamp, small plant, minimal accessories — wallpaper wall dominant as full backdrop behind the setup",
+      "name": "Modern study desk with computer",
+      "description": "modern wooden student desk setup with an All-in-One PC, clean turned-off matte screen with no reflections, sleek lamp, and minimal decor against the wallpaper wall",
       "ageGroup": "teenager"
     },
     {
-      "name": "Gaming-Ecke",
-      "description": "teenager gaming setup: ergonomic chair, wide desk, 27\" curved monitor with screen turned off, appearing as a clean blank matte dark screen with no glossy reflections, mechanical keyboard, subtle warm lighting — modern and stylish, wallpaper wall fills the background",
+      "name": "Teenager minimalist desk and study area",
+      "description": "contemporary wide wooden desk with an ergonomic chair, matte dark turned-off monitor, mechanical keyboard, and subtle warm lighting with the wallpaper wall as the full backdrop",
       "ageGroup": "teenager"
     },
     {
-      "name": "Teenager Bett mit Lese-Ecke",
-      "description": "low single bed plus a small reading nook area beside it — a poster or plant on the desk, wallpaper wall visible behind",
+      "name": "Teenager platform bed with lounge nook",
+      "description": "low platform single bed with textured neutral bedding, flanked by a minimalist side table and small potted plant against the accent wallpaper wall",
       "ageGroup": "teenager"
     }
   ],
@@ -256,8 +320,33 @@
   ],
   "cameraAngles": [
     "frontal — straight-on view of the wallpaper wall",
-    "corner view — shot from corner of room, two walls visible, wallpaper wall dominant",
-    "side view — shot from the side, wallpaper wall in the background"
+    "three-quarter corner perspective — shot from corner of room, showing spatial depth and wallpaper wall",
+    "side profile view — shot from the side with natural window daylight grazing the wallpaper",
+    "subtle diagonal perspective — gentle angle emphasizing room depth and wallpaper wall",
+    "intimate cozy nook framing — focused perspective on the hero furniture and wallpaper backdrop"
+  ],
+  "cameraElevations": [
+    "child eye-level perspective (approx. 80cm from floor)",
+    "standing adult eye-level perspective",
+    "low-angle perspective from the rug",
+    "architectural horizontal tripod framing"
+  ],
+  "lenses": [
+    "35mm prime lens",
+    "50mm normal lens",
+    "45mm medium format lens",
+    "28mm gentle wide lens"
+  ],
+  "apertures": [
+    "f/5.6 aperture",
+    "f/8.0 aperture",
+    "f/4.0 aperture"
+  ],
+  "cameraBodies": [
+    "Sony A7R V",
+    "Hasselblad H6D-100c",
+    "Canon EOS R5",
+    "Fujifilm GFX 100S"
   ],
   "cameraDistances": [
     {
@@ -292,7 +381,7 @@
   ],
   "accessories": [
     "solid light oak wooden toy chest with smooth rounded corners",
-    "small rattan shelf with books",
+    "small solid oak wall bookshelf with children's books",
     "linen curtains in neutral tone",
     "velvet blanket draped on bed or chair",
     "large format nature poster (single, not gallery wall)",
@@ -309,10 +398,10 @@
     "small wooden decorative objects on shelf"
   ],
   "materials": [
-    "solid birch (Birke Massivholz)",
-    "solid oak (Eiche Massivholz)",
-    "solid beech (Buche Massivholz)",
-    "rattan",
+    "solid birch",
+    "solid oak",
+    "solid beech",
+    "solid ash wood",
     "jute",
     "bamboo",
     "linen",
@@ -321,10 +410,10 @@
     "FSC-certified wood"
   ],
   "germanApartmentContext": {
-    "floorType": "light oak parquet (Eichenparkett)",
+    "floorType": "light matte oak parquet",
     "roomSize": "approx. 10–14 m²",
-    "ceilingHeight": "2.6–3.0 m high ceiling",
-    "windows": "large window with deep sill, typical German apartment style"
+    "ceilingHeight": "high 2.8m ceiling",
+    "windows": "large residential window with deep sill, providing soft natural daylight"
   },
   "negativePrompt": "no wicker baskets, no straw baskets, no warped woven baskets, no asymmetric baskets, no rattan baskets, no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders",
   "latestMarketInsights": {
@@ -372,7 +461,7 @@
     "accessories": [
       "Macrame hangings",
       "Solid wood furniture/decor",
-      "Stuffed animal wall mounts (especially woodland or safari animals)",
+      "Solid birch open wall shelf with delicate wooden decor",
       "Wooden shelves/storage",
       "Botanical prints/artwork",
       "Fairy lights/string lights",
