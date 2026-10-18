@@ -2,6 +2,23 @@
 
 This file tracks significant changes, architectural decisions, and logic updates implemented by AI agents (Gemini/Claude) in the `nana_banana` project. This helps maintain context across sessions and different agents.
 
+## [2026-10-18] House-Frame Bed Ban & Wallpaper Mural Obstruction Elimination
+
+### 1. Root Cause Analysis: Mural Obstruction by Overhead Bed Frames
+- **Symptom:** In preschool (3-6 years) batch generations (e.g. `card_02_4x3` / `wallpaper-2-4x3.png`), the generator placed a wooden house-frame bed (`Minimalist house-frame wooden floor bed in smooth natural birch`).
+- **Problems Identified:**
+  - The house-frame bed structure features tall vertical posts, an overhead triangular roof gable, and a thick horizontal beam right at eye level (~1.2m).
+  - This horizontal beam and accompanying hanging decor (e.g. macramé) sliced across the center of the wall mural (cutting directly through hero illustrations like map continents, animals, or florals), violating the core requirement that the wallpaper mural must remain unobstructed and be the hero of the interior.
+
+### 2. Solutions & Negative Constraint Enforcements
+- **Database Replacement (`Promt/trends.json`):**
+  - Replaced `"Minimalist house-frame wooden floor bed in smooth natural birch"` with `"Low Scandinavian toddler floor bed in smooth natural birch, keeping the entire wall mural unobstructed"`.
+  - Added strict negative constraints to `trends.json` (`negativePrompt`): `no house bed, no house-frame bed, no house-shaped bed, no roof frame over bed, no wooden gable frame, no overhead frame beams, no tall bed frame obstructing wall`.
+- **Batch Generator & Global Negative Constraint Updates:**
+  - `services/promptGenerator.ts`: Added `house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, tall bed frame obstructing wall` to `baseNegative`.
+  - `services/geminiService.ts`: Added `house bed, house-frame bed, roof frame over bed, overhead frame beams` to `GEMINI_NEGATIVE_PROMPT`.
+  - `Promt/Promt.md`: Documented house beds and roof frames in Rule #4 banned furniture list.
+
 ## [2026-10-12] Batch Generator Prompt Realism Overhaul & Backend Zod Contract Shield
 
 ### 1. Root Cause Analysis: Plastic AI Look & Prompt Bloat

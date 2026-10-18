@@ -213,7 +213,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     promptText += " Any computer monitor or screen is strictly turned off, appearing as a clean, blank matte dark display with zero reflections.";
   }
 
-  const baseNegative = "peeling wallpaper, wallpaper peeling off wall, corner curl, half-wall wallpaper, split wall, wainscoting, wall paneling, dado rail, lower wall unpapered, bed canopy, hanging baldachin, fabric curtains over bed, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look";
+  const baseNegative = "peeling wallpaper, wallpaper peeling off wall, corner curl, half-wall wallpaper, split wall, wainscoting, wall paneling, dado rail, lower wall unpapered, bed canopy, hanging baldachin, fabric curtains over bed, house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, tall bed frame obstructing wall, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look";
 
   const textNegative = (tags.overlayText && tags.overlayPosition)
     ? "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, white outlines, digital watermark, advertising badge, low quality font"

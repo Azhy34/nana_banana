@@ -151,7 +151,7 @@
       "beds": [
         "Montessori low wooden floor bed in solid oak, keeping the wallpaper wall fully visible",
         "Oliver Furniture Seaside low toddler daybed with natural linen bedding",
-        "Minimalist house-frame wooden floor bed in smooth natural birch"
+        "Low Scandinavian toddler floor bed in smooth natural birch, keeping the entire wall mural unobstructed"
       ],
       "toys": [
         "classic wooden building blocks neatly stacked on a low shelf",
@@ -415,7 +415,7 @@
     "ceilingHeight": "high 2.8m ceiling",
     "windows": "large residential window with deep sill, providing soft natural daylight"
   },
-  "negativePrompt": "no wicker baskets, no straw baskets, no warped woven baskets, no asymmetric baskets, no rattan baskets, no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders",
+  "negativePrompt": "no wicker baskets, no straw baskets, no warped woven baskets, no asymmetric baskets, no rattan baskets, no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders, no house bed, no house-frame bed, no house-shaped bed, no roof frame over bed, no wooden gable frame, no overhead frame beams, no tall bed frame obstructing wall",
   "latestMarketInsights": {
     "updatedAt": "2026-07-13",
     "colors": [

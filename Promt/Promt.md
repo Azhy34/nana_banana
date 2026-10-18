@@ -50,12 +50,12 @@ The prompt follows Google's best-practice 5-layer architecture for natural edito
 4. **Lighting & Physical Wallpaper Texture (Layer 4):** Directional window daylight grazing the wallpaper to highlight the tactile non-woven paper micro-relief (Craft Lambda sand grain) and casting soft physical ambient shadows.
 5. **Camera & Optics (Layer 5):** 35mm lens, f/5.6 aperture, sharp mural focus, natural depth of field, warm cozy white balance.
 6. **Conditional:** If a computer or monitor is in the scene, it is strictly turned off (matte dark screen with zero reflections).
-7. **Negative Constraints:** Concise list avoiding peeling wallpaper, half-walls, animal trophies, plastic, bunk beds, and clutter.
+7. **Negative Constraints:** Concise list avoiding peeling wallpaper, half-walls, house beds / roof frames, animal trophies, plastic, bunk beds, and clutter.
 
 ## RULE #4 — QUALITY & REALISM REQUIREMENTS
 
 - **Materials:** Solid natural wood with visible organic grain (oak, birch, beech), washed linen, breathable organic cotton. Teenager rooms: natural wood with matte metal accents.
-- **Banned:** Wicker, straw, and rattan (AI renders distorted woven artifacts), plastic furniture/toys, animal trophies/heads, bunk beds, ladders.
+- **Banned:** Wicker, straw, and rattan (AI renders distorted woven artifacts), plastic furniture/toys, animal trophies/heads, bunk beds, ladders, house beds / house-frame beds (overhead roof frames and horizontal beams that cut across or obstruct the wallpaper mural).
 - **Lived-in Realism (No "CGI Luxury"):** Avoid aspirational buzzwords (*flawless, masterpiece, luxury, Architectural Digest*) which trigger digital beauty filters. Use documentary interior photography descriptors.
 - **Color & Light:** Warm, desaturated, sensory-friendly palette; directional natural window daylight.
 - **Age Psychology:**
