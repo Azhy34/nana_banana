@@ -33,6 +33,7 @@ export interface BatchPromptTags {
   cinematicDetail: string;
   overlayText?: string;
   overlayPosition?: OverlayPosition;
+  wallArchitecture?: 'full-wall' | 'scallop-trim';
 }
 
 export type BatchCardStatus = 'idle' | 'loading' | 'done' | 'error';
@@ -160,5 +161,12 @@ export interface GeminiLogDetails {
   predictTimeSeconds?: number;
   /** Where a multi-step job failed, e.g. 'upload' or 'upscale'. */
   stage?: string;
+  // GMC & Multi-frame Video Interpolation
+  gmcItemGroupId?: string;
+  videoMode?: string;
+  startImageUrl?: string;
+  endImageUrl?: string;
+  referenceCount?: number;
+  promptPreset?: string;
 }
 

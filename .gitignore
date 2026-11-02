@@ -51,3 +51,9 @@ blob-report/
 # Local Dev Session Logs & Heavy test binaries
 gemini_sessions.json
 public/upscaled_*
+
+runs/
+scratch/
+
+__pycache__/
+*.pyc

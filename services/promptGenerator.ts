@@ -69,7 +69,7 @@ export const CINEMATIC_DETAILS = [
   "Dappled sunlight filters through unseen tree leaves, casting organic shadow play across the floor.",
   "Cool, crisp morning light fills the room, enhancing the fresh and airy atmosphere.",
   "A warm late-afternoon amber glow sweeps across the room, highlighting the textures of the natural wood.",
-  "A soft, diffused overcast light provides perfectly even illumination, mimicking a high-end studio softbox.",
+  "Dappled warm morning sunlight streams through tall windows, creating natural contrast and soft ambient shadows.",
   "Dust motes dance in a single, focused shaft of sunlight cutting across the room."
 ];
 
@@ -94,6 +94,7 @@ export function generateRandomTags(aspectRatio: BatchAspectRatio, ageGroup?: Age
     aspectRatio,
     compositionStrategy: Math.random() < 0.4 ? 'unobstructed' : 'natural',
     cinematicDetail: pick(CINEMATIC_DETAILS),
+    wallArchitecture: (aspectRatio !== '9:16' && Math.random() < 0.35) ? 'scallop-trim' : 'full-wall',
   };
 }
 
@@ -153,20 +154,23 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   let sceneSetting = '';
   let lifestyleTouch = '';
   if (tags.ageGroup === 'baby') {
-    sceneSetting = "An authentic, peaceful Scandinavian nursery for a baby in a warm home. The room feels gentle, spacious, and serene, styled with calming desaturated tones (soft oat, pale cream, muted sage) and breathable organic materials to support infant rest without sensory clutter.";
+    sceneSetting = "An authentic, serene Scandinavian nursery for a baby in a warm home. The room feels gentle, joyful, and spacious, styled with warm cream, pale oat, and soft botanical tones with tactile natural birch wood and breathable organic cotton.";
     lifestyleTouch = `Authentic lived-in nursery details: soft organic cotton bedding, ${trendingToy || 'a delicate wooden mobile'}, and ${trendingDecor || 'neatly placed wooden sensory blocks catching the light'}.`;
   } else if (tags.ageGroup === 'vorschul') {
-    sceneSetting = "A warm, charming Scandinavian preschool children's bedroom in an authentic home. Designed with child-scale furniture, natural light wood, and gentle earthy tones to support gentle imaginative play and restful sleep.";
-    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'}, ${trendingDecor || 'neatly stacked wooden building blocks'}, and a soft woven cotton floor rug.`;
+    sceneSetting = "A delightful, joyful children's bedroom in trending Fun Haus / Dopamine Decor / Retro Kids style. Designed with playful child-scale furniture, natural birch wood, and cheerful designer accents that foster creativity, warmth, and restful sleep.";
+    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'}, ${trendingDecor || 'a flower-shaped craft table with colorful wax crayons'}, and a plush cream dot rug.`;
   } else if (tags.ageGroup === 'schulkind') {
-    sceneSetting = "A cozy, natural children's bedroom and study zone for a school-age child. Clean natural wood surfaces and soft textiles create an organized, inviting space for both learning focus and relaxed rest.";
-    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'}, ${trendingDecor || 'tidy children\'s books'}, and a comfortable floor reading cushion.`;
+    sceneSetting = "A stylish, cozy children's bedroom and creative study sanctuary in Dopamine Decor / Retro Kids aesthetic. Warm natural wood surfaces, playful textile patterns, and curated design touches create an inspiring, uncluttered space.";
+    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'}, ${trendingDecor || 'tidy children\'s books on a curved shelf'}, and a comfortable floor reading cushion.`;
   } else {
-    sceneSetting = "A contemporary youth bedroom with clean geometric lines, natural solid wood, subtle matte metal accents, and a calm, uncluttered layout for studying and relaxing.";
+    sceneSetting = "A contemporary youth bedroom with clean geometric lines, natural solid oak and birch, tasteful retro accents, and a calm, stylish layout for studying and relaxing.";
     lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'a small potted plant in a ceramic pot'}, ${trendingDecor || 'neatly organized books'}, and clean task lighting.`;
   }
 
-  const wallpaperRule = "This is a commercial interior photograph showcasing a wall mural wallpaper. The reference image is a single full-scale mural (not a repeating tile pattern). FULL-HEIGHT 100% WALL COVERAGE: This entire reference image must be mapped and stretched across the feature wall edge-to-edge as a single, continuous, seamless mural covering 100% of the wall surface from the floor baseboard up to the ceiling line, running cleanly behind the furniture without any horizontal cuts, splits, wainscoting, or unpapered lower section. Retain the exact illustration, colors, and scale from the reference image 1:1. The wallpaper is the hero of the interior.";
+  const isScallop = tags.wallArchitecture === 'scallop-trim';
+  const wallpaperRule = isScallop
+    ? "This is a commercial interior photograph showcasing a designer wallpaper in European Dopamine Decor / Retro Kids style. WALL ARCHITECTURE (RETRO SCALLOPED WAVE TRIM): The reference wallpaper covers the lower two-thirds of the feature wall, crowned by an eye-catching decorative scalloped wave trim moulding in warm poppy red or terracotta. Above the wavy scalloped trim, the upper wall is painted in warm chalky cream with a charming gallery of art prints in scalloped and checkered frames. Retain the exact pattern, colors, and stripe/art scale from the reference image 1:1 on the wallpaper section. The wallpaper is the hero of the interior."
+    : "This is a commercial interior photograph showcasing a wall mural wallpaper. The reference image is a single full-scale mural (not a repeating tile pattern). FULL-HEIGHT 100% WALL COVERAGE: This entire reference image must be mapped and stretched across the feature wall edge-to-edge as a single, continuous, seamless mural covering 100% of the wall surface from the floor baseboard up to the ceiling line, running cleanly behind the furniture without any horizontal cuts, splits, wainscoting, or unpapered lower section. Retain the exact illustration, colors, and scale from the reference image 1:1. The wallpaper is the hero of the interior.";
 
   const furnitureSection = `The focal furniture piece is a ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material}. Layout: ${keyObjData?.description ?? ''}. Floor and architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}. Styling: ${styleData?.name ?? tags.style} (${styleData?.description ?? ''}). ${compositionText}`;
 
@@ -175,9 +179,9 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     colorAccentText += ` Subtle accents of ${trendingColorName} harmonize across the textiles.`;
   }
 
-  const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch} The palette is desaturated and warm, avoiding harsh synthetic colors, sterile glossy surfaces, or artificial lighting.`;
+  const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch} The styling is warm, cheerful, and tactile, featuring rich natural wood grain, soft matte ceramics, and crisp organic cotton without any artificial gloss or sterile CGI look.`;
 
-  const lightingSection = `Soft directional natural daylight from an adjacent window gently grazes the wallpaper, highlighting the tactile ultra-matte non-woven paper texture (Craft Lambda fine sand grain micro-relief) and creating authentic ambient shadows where furniture meets the floor and wall. Illuminated by ${lightingData?.description ?? tags.lighting}. ${tags.cinematicDetail}`;
+  const lightingSection = `Grazing natural morning daylight from an adjacent window streams across the room, illuminating the tactile ultra-matte non-woven paper texture (Craft Lambda fine sand grain micro-relief) and creating authentic grounding ambient shadows where furniture meets the floor and wall. Light setting: ${lightingData?.description ?? tags.lighting}. ${tags.cinematicDetail}`;
 
   const angle = tags.cameraAngle || 'frontal — straight-on view of the wallpaper wall';
   const elevation = tags.cameraElevation || 'child eye-level perspective (approx. 80cm from floor)';
@@ -213,7 +217,10 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     promptText += " Any computer monitor or screen is strictly turned off, appearing as a clean, blank matte dark display with zero reflections.";
   }
 
-  const baseNegative = "peeling wallpaper, wallpaper peeling off wall, corner curl, half-wall wallpaper, split wall, wainscoting, wall paneling, dado rail, lower wall unpapered, bed canopy, hanging baldachin, fabric curtains over bed, house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, tall bed frame obstructing wall, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look";
+  const wallNegative = isScallop
+    ? ""
+    : "half-wall wallpaper, split wall, wainscoting, wall paneling, dado rail, lower wall unpapered, ";
+  const baseNegative = `peeling wallpaper, wallpaper peeling off wall, corner curl, ${wallNegative}bed canopy, hanging baldachin, fabric curtains over bed, house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, tall bed frame obstructing wall, metal bed, iron spindle bed, iron bed frame, ceiling downlights, recessed spotlights, harsh office lighting, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look, blurry muddy textures, flat soap textures, oversaturated neon`;
 
   const textNegative = (tags.overlayText && tags.overlayPosition)
     ? "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, white outlines, digital watermark, advertising badge, low quality font"

@@ -2,6 +2,122 @@
 
 This file tracks significant changes, architectural decisions, and logic updates implemented by AI agents (Gemini/Claude) in the `nana_banana` project. This helps maintain context across sessions and different agents.
 
+## [2026-11-02] Batch Generator Overhaul: Fun Haus / Dopamine Decor / Retro Kids Integration
+
+### 1. Root Cause Analysis: Website Batch "Soap / Blurry Textures" & Dull Interiors
+- **Symptoms on Web App Batch:** Generations for Listing 43 on the site appeared blurry, plastic ("мыло"), sterile, and aesthetically flat compared to manual Fun Haus runs.
+- **Root Causes Identified:**
+  1. **Diffusion Contrast Killer Words:** Constant injection of `desaturated`, `muted`, `pale cream`, `Wales Grey` suppressed local micro-contrast in Gemini 3.1, washing out paper textures and organic wood grain into muddy digital soap.
+  2. **Shadowless Overcast Softbox Lighting:** Lighting options mimicking `diffused overcast studio softbox` eliminated cast shadows, making furniture look like floating 2D stickers.
+  3. **Generic Clipart Furniture:** Abstract descriptions like `Classic slatted wooden baby crib` or `simple low-profile toddler bed` prompted Gemini to render basic, uninspired generic geometry.
+  4. **Monotonous 100% Flat Wall:** All cards were identical full-height walls with zero architectural interest.
+
+### 2. Upgrades & Architectural Solutions
+- **Hero Designer Catalog (`Promt/trends.json`):**
+  - Integrated iconic Fun Haus / Dopamine Decor / Retro Kids silhouettes: flower-shaped craft tables, stackable donut/macaron poufs, bubble cluster chandeliers, mid-century cobalt mushroom lamps, bunny-ear chairs, cozy reading teepees with felt garlands, curved Montessori floor beds, fluted nightstands.
+  - Upgraded color palette to joyful, trending accents: Dopamine Poppy Red, Cobalt Blue, Sunny Mustard, Muted Sage, Warm Terracotta, Honey Amber, Strawberry Milk (eliminated dull Wales Grey & Olivbraun).
+- **Dynamic Wall Architecture (Scallop Wave Trim 30% / Full-Wall 70%):**
+  - Added `wallArchitecture: 'full-wall' | 'scallop-trim'` to `BatchPromptTags` in `types.ts`.
+  - Non-video formats (4:3, 2:3) dynamically receive the trending European Scalloped wave trim (Variant B) on ~35% of listing photos, while 9:16 remains 100% full-wall clean for video animations.
+  - Dynamically removed half-wall negative constraints when `scallop-trim` is active.
+- **Directional Grazing Morning Sunlight Enforcement:**
+  - Removed all overcast softbox options. Enforced grazing natural morning daylight revealing Craft Lambda non-woven sand paper micro-relief and crisp grounding ambient shadows.
+
+## [2026-11-02] Listing 40: Sage Green & Cream Fun Haus 4-Clip B-Roll Pack (2 Complete Reels)
+
+### 1. Root Cause Analysis: Stripe Aliasing on Ultra-High Res & Iron Bed Ban
+- **Product Truth:** Original wallpaper `streifentapete-salbeigruen-creme-muster-vliestapete-3x2.png` is an authentic two-tone sage green and cream stripe mural.
+- **Root Cause of Stripe Distortion:** Passing the 143 MP (`14644x9763`) raw file directly to Gemini caused uneven downscaling aliasing/Moiré. Fixed by creating a pre-scaled Lanczos anti-aliased reference `clean_l40_wallpaper_ref.png` (2400x1600) + strict `UNIFORM STRIPE WIDTH LOCK`.
+- **Constraint Enforcement:** Excluded all metal/iron spindle beds ("только кровать не железная"). All furniture strictly natural birch/oak wood or soft fabric.
+
+### 3. Root Cause Analysis: Object-Motion Hallucination & Pedestal Up Ban
+- **Symptom 1 (Moving Pouf in Clip 1):** In `l40_broll_01_scallop_bed_slide_5s.mp4`, the donut pouf physically slid across the floor instead of the camera creating optical parallax.
+  - **Root Cause (Diffusion Semantic Bleed):** The prompt phrasing `...parallax with the wooden flower craft table and donut poufs gliding in front of the bed` caused the attention heads to bind the verb 'gliding' directly to the noun 'donut poufs'. The model interpreted it as an instruction to physically animate the pouf across the floor.
+  - **Architectural Ban:** Never attach motion verbs ('gliding', 'sliding', 'moving') to interior objects. All interior furniture must be strictly anchored via `GEOMETRIC & FURNITURE LOCK: bolted to the floor, 100% rigid`.
+- **Symptom 2 (Unpleasant Pedestal Up in Clip 4):** In `l40_broll_04_fullwall_montessori_pedestal_5s.mp4`, moving the camera vertically upwards from floor rug to ceiling distorted the room perspective and felt disorienting.
+  - **Architectural Ban:** Permanent ban on **Pedestal Up / Crane Up / Tilt Up** across all video pipelines.
+  - **Golden Standard Lock:** Replaced both defective scenes with **Ultra-slow Steadicam forward push-in along the Z-axis**, maintaining eye-level stability, frozen furniture, and 100% static wallpaper mural.
+
+### 2. CapCut B-Roll Deliverables (4 Clips, 1080p Full HD @ 24fps)
+Saved directly to `C:\Users\Mikhail\Desktop\Обои\Листинг 40\Fun Haus  Playful Interior  Dopamine Decor  Retro Kid\`:
+- **Reel 1 (Scallop Trim Theme):**
+  - **Clip 1 (`l40_broll_01_scallop_bed_slide_5s.mp4`):** 9.04 MB, 1072x1928 @ 24fps. Lateral slider tracking shot along X-axis with foreground parallax.
+  - **Clip 2 (`l40_broll_02_scallop_table_push_5s.mp4`):** 6.73 MB, 1072x1928 @ 24fps. Ultra-slow forward Steadicam push-in along Z-axis toward flower table.
+- **Reel 2 (Full Wall 100% Theme):**
+  - **Clip 3 (`l40_broll_03_fullwall_daybed_push_5s.mp4`):** 11.22 MB, 1072x1928 @ 24fps. Slow Steadicam push-in along Z-axis toward Scandinavian birch daybed and bubble lamp.
+  - **Clip 4 (`l40_broll_04_fullwall_montessori_pedestal_5s.mp4`):** 12.62 MB, 1072x1928 @ 24fps. Smooth vertical Pedestal Up along Y-axis from pompom rug to table, bunny chairs, teepee, and ivy shelf under warm golden 3200K morning light.
+- Remaining KIE credit balance: 585 credits (~$2.92).
+
+## [2026-11-02] Listing 43: Exact Stripe Factory Lock & Clean B-Roll Pack for CapCut
+
+### 1. Root Cause Analysis: Hallucinated Black Borders & Slatted Grooves
+- **Symptom:** In previous runs, diffusion models added dark side outlines / beadboard grooves to striped wallpaper, altering the authentic product design.
+- **Factory Truth Lock:** Original wallpaper `streifentapete-altrosa-creme-muster-vliestapete-3x2.png` consists strictly of wide cream stripes and wide dusty-rose (altrosa) stripes with exactly ONE thin burgundy pinstripe down the center. Zero black lines, zero side borders.
+- **Enforcement:** Enforced strict negative constraints (`black lines, dark outlines, black borders, double lines, slatted wall, beadboard, vertical grooves`) in `scripts/generate_listing43_exact_stripes_9x16.cjs`.
+
+### 2. CapCut B-Roll Workflow Delivery
+- Shifted from complex programmatic multi-track stitching to generating clean, unstitched 5-second 1080p B-Roll video clips for manual dynamic editing in CapCut:
+  - **B-Roll 1 (`broll_01_scallop_vintage_bed_5s.mp4`):** 11.53 MB, 1072x1928 @ 24fps. Scallop wave trim with vintage cornflower blue bed and flower table. 100% factory stripe accuracy.
+  - **B-Roll 2 (`broll_02_fullwall_daybed_5s.mp4`):** 8.34 MB, 1072x1928 @ 24fps. 100% full-height wallpaper mural with Scandinavian birch daybed and donut poufs. 100% factory stripe accuracy.
+- Remaining KIE credit balance: 805 credits (~$4.02).
+
+## [2026-11-02] Listing 43: Kling 2.6 Pro Multi-Scene Video Ad Assembly & Fun Haus Batch
+
+### 1. Kling 2.6 Pro Multi-Scene Generation & Reels Assembly
+- Rendered 2 consecutive Full HD 1080p scenes (1072x1928 @ 22 Mbps, 24fps) using KIE.ai direct API at $0.275 (55 credits) per scene:
+  - **Scene 1 (`kling_scene1_scallop_flight.mp4`):** Variant B Scallop Trim with flower craft table and vintage blue bed. Zero deformation of slats or crayons.
+  - **Scene 2 (`kling_scene2_fullwall_flight.mp4`):** Variant A 100% floor-to-ceiling mural with Scandinavian birch floor bed and donut poufs.
+- Automated master ad assembly via FFmpeg (`scripts/assemble_listing43_funhaus_ad.cjs`):
+  - Normalized both scenes to 1080x1920 @ 24fps H.264 High 4.1 (`yuv420p` guaranteed for Windows Media Player).
+  - Implemented 0.5s `xfade` (transition from Scene 1 to Scene 2 at second 3.0).
+  - Overlaid continuous 6.5s master acoustic guitar audio bed with a 0.5s soft fade-out.
+  - Output saved to `C:\Users\Mikhail\Desktop\Обои\Листинг 43\Fun Haus  Playful Interior  Dopamine Decor  Retro Kid\commercial_ad_funhaus_master.mp4` (3.05 MB).
+- Remaining KIE credit balance: 915 credits (~$4.57).
+
+### 2. Style Integration & Scallop Wave Architecture
+- Created batch of 9 images for Listing 43 (streifentapete-altrosa-creme-muster-vliestapete-3x2.png) in trending *Fun Haus / Playful Interior / Dopamine Decor / Retro Kids* style.
+- Executed 50/50 architectural split:
+  - **Variant A (Full-Height 100%):** Continuous edge-to-edge striped wallpaper floor-to-ceiling.
+  - **Variant B (Retro Scallop Wave Trim):** Decorative lacquer red / terracotta wavy border dividing striped wallpaper from cream upper wall with wavy gallery art frames.
+- Generated across 3 discrete aspect ratios (3x 4:3, 3x 2:3, 3x 9:16) saved directly into C:\Users\Mikhail\Desktop\Обои\Листинг 43\Fun Haus  Playful Interior  Dopamine Decor  Retro Kid\.
+- 9:16 frames are 100% clean (zero text/watermarks) prepared for Kling 2.6 camera flight and HyperFrames video assembly.
+
+## [2026-11-01] KIE.ai Kling 2.6 Full HD Integration & Two-Layer Pydantic Shield
+
+### 1. Root Cause Analysis: Overpriced Replicate Markup vs KIE Direct API
+- **Symptom:** Replicate billed Kling at .05 - .40 for 5s (300-500% markup), while Omni Flash was capped at 720p with compression artifacts on nursery wallpaper murals.
+- **Solution:** Integrated KIE.ai (pi.kie.ai) direct wholesale API for Kling 2.6 Pro at .275 (55 credits) for 5s 1080p Full HD (1072x1928 @ 15.8 Mbps).
+
+### 2. Two-Layer Pydantic V2 Shield Architecture (pi_discovery/kie_kling/)
+- Created production contract adhering to pi-discovery skill:
+  - models.py: 100% field coverage for Kling 2.6, Kling 3.0 Omni, file upload, credit balance, task polling, and 4xx/5xx error contracts (is_rate_limited, is_insufficient_credits, is_unauthorized).
+  - 	est_models.py: 8 automated unit tests verifying serialization and validation constraints.
+  - client.py: Python client with automatic 429 rate-limit backoff, pre-flight credit check, and TwoLayerResult[T] error handling.
+
+### 3. Production Generation & Master Ad Assembly (
+uns/GMC-DS-006_creative/)
+- Successfully generated kling_2_6_scene1_flight.mp4 (5.04s, 1072x1928, 15.8 Mbps, 9.5 MB) on Kling 2.6 with zero distortion on vertical crib slats and 100% static 2D wallpaper print fidelity.
+- Assembled commercial_ad_elefanten_kling_master.mp4 (6.5s 1080x1920 Full HD) with 0.5s xfade and unbroken 6.5s master acoustic guitar audio bed. Cost: 55 credits (.275), remaining balance: 25 trial credits.
+
+## [2026-10-31] GMC Video Ad Pipeline, Omni Duration Stabilization & Creative Ad Auditor Skill
+
+### 1. Root Cause Analysis: Unanchored 10s Video Hallucination & Audio Clash
+- **Symptom 1 (Visual Glitch at 6-7s):** In unconstrained Omni 1.1 Flash runs (`test1_omni_camera_flight.mp4`), the video lasted 10 seconds. Past second 5, temporal attention to reference pixels degraded, camera drifted into furniture, and geometry warped.
+  - **Root Cause:** `response_format` lacked an explicit duration parameter and defaulted to maximum 10s.
+  - **Solution:** Enforced `duration: "4s"` in `response_format` of Google Interactions API. Generations capped at 4.0s execute smoothly without geometric drift or hallucinations.
+- **Symptom 2 (Audio Clash on Scene Cut):** Independent Omni generations create random melodies in different keys and BPMs. Using `acrossfade` between two scenes produced acoustic discordance and harsh clashing.
+  - **Solution:** Decoupled video and audio in FFmpeg (`scripts/assemble_video_ad.cjs`). Muted individual scene clips (`-an`), spliced video via 0.5s `xfade`, and overlaid a single continuous 6.5s master audio bed with a 0.5s fade-out.
+
+### 2. Creative Ad Auditor Skill Integration
+- Created local skill: [.agents/skills/creative-ad-auditor/SKILL.md](file:///.agents/skills/creative-ad-auditor/SKILL.md).
+- Sets up pre-generation prompting rules (hook in first 1.5s, 60%+ wallpaper coverage, `INANIMATE 2D INK LOCK`, `GEOMETRIC LOCK`, max 4s duration) and a 100-point post-generation quality gate (80+ threshold for ad launch).
+
+## Creative Video & Ad Prompting Rules
+
+- **Trigger:** При составлении промптов для рекламных креативов (Google Merchant Center, Reels, TikTok, Pinterest, Shorts, Meta Ads), генерации видеоконтента (I2V / T2V через Omni 1.1 или Veo 3.1), сборке роликов в FFmpeg или аудите готовых креативов — вы **обязаны** первым делом прочитать инструкции в локальном скилле:
+  [creative-ad-auditor](file:///.agents/skills/creative-ad-auditor/SKILL.md)
+  и действовать строго по описанному там регламенту.
+
 ## [2026-10-18] House-Frame Bed Ban & Wallpaper Mural Obstruction Elimination
 
 ### 1. Root Cause Analysis: Mural Obstruction by Overhead Bed Frames

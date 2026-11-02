@@ -1,66 +1,62 @@
 {
   "colors": [
     {
-      "name": "Wales Grey",
-      "description": "soft grey with blue undertone, modern and calm"
+      "name": "Dopamine Poppy Red",
+      "description": "vibrant warm poppy red, cheerful and energizing retro accent"
     },
     {
-      "name": "Barberry",
-      "description": "soft berry-red, warm and elegant accent"
+      "name": "Cobalt Blue",
+      "description": "crisp mid-century cobalt blue accent, trending dopamine pop"
     },
     {
-      "name": "Bumblebee",
-      "description": "sunny yellow, soft and mood-lifting"
+      "name": "Sunny Mustard",
+      "description": "warm golden mustard yellow, retro and cozy"
     },
     {
-      "name": "Sage",
-      "description": "muted sage green, natural and fresh"
+      "name": "Muted Sage",
+      "description": "fresh botanical sage green, grounding and natural"
+    },
+    {
+      "name": "Warm Terracotta",
+      "description": "earthy baked terracotta, warm and timeless"
+    },
+    {
+      "name": "Dusty Rose",
+      "description": "soft vintage dusty rose, gentle and comforting"
+    },
+    {
+      "name": "Honey Amber",
+      "description": "warm honey wood tone, rich and glowing"
+    },
+    {
+      "name": "Strawberry Milk",
+      "description": "soft playful pastel strawberry, cheerful and gentle"
     },
     {
       "name": "Eucalyptus",
       "description": "deep eucalyptus green, grounding and organic"
-    },
-    {
-      "name": "Cool Blue",
-      "description": "fresh cool blue, trending 2026 statement color"
-    },
-    {
-      "name": "Olivbraun",
-      "description": "olive-brown, earthy and warm"
-    },
-    {
-      "name": "Mustard",
-      "description": "warm mustard yellow, retro and cozy"
-    },
-    {
-      "name": "Cocoa",
-      "description": "warm brown, mushroom-cocoa tone, earthy base"
     }
   ],
   "styles": [
     {
+      "name": "Fun Haus / Dopamine Decor",
+      "description": "playful, creative European aesthetic — joyful dopamine color pops, scalloped wavy forms, clean Scandinavian craftsmanship, warmth and character"
+    },
+    {
+      "name": "Retro Kids 2026",
+      "description": "nostalgic playful charm — warm caramel, mustard, cobalt blue accents, natural birch wood, wavy retro frames and bolster pillows"
+    },
+    {
+      "name": "Playful Montessori",
+      "description": "child-height curved furniture, low floor bed, flower craft table, donut poufs, open toy sanctuary in natural birch"
+    },
+    {
       "name": "Japandi 2.0",
-      "description": "warm minimalism with character — light wood, soft tones, balance between warmth and freshness"
+      "description": "warm minimalism with character — light natural birch and oak, soft tones, organic textures, balance between warmth and freshness"
     },
     {
-      "name": "Minimalismus 2.0",
-      "description": "bold colors in minimal interiors, matte metal accents, clean lines"
-    },
-    {
-      "name": "Boho 2026",
-      "description": "ordered boho — structured, natural textiles, wood, plants, soft blankets — NO chaos"
-    },
-    {
-      "name": "Retro 2026",
-      "description": "warm autumn tones, mustard and caramel, wood and geometric patterns"
-    },
-    {
-      "name": "Gender-Neutral",
-      "description": "nature-inspired motifs, flexible elements, grows with the child"
-    },
-    {
-      "name": "Montessori",
-      "description": "child-level shelves, floor bed, open access to toys, natural materials throughout"
+      "name": "Biophilic Nursery",
+      "description": "gentle organic sanctuary — natural light birch wood, botanical touches, soft organic linen, serene resting mood"
     }
   ],
   "brands": [
@@ -127,9 +123,9 @@
       "label": "Baby (0–3 years)",
       "theme": "Biophilic Sanctuary & Soft Organic Nursery (PANTONE Cloud Dancer aesthetic)",
       "beds": [
-        "Oliver Furniture Wood Original cot in natural light oak with slender vertical slats",
+        "Minimalist slatted solid birch crib with natural wood grain and organic cotton mattress",
         "Leander Classic rounded baby crib in solid beech with soft organic linen bedding",
-        "Minimalist slatted solid birch crib with natural wood grain and organic cotton mattress"
+        "Curved birch Montessori floor bed in natural light oak, keeping the wall mural panoramic"
       ],
       "toys": [
         "curated wooden sensory blocks catching the light",
@@ -138,7 +134,7 @@
       ],
       "decor": [
         "solid light oak dresser with a soft cream changing mat",
-        "quilted organic cotton storage baskets in warm oat tone",
+        "scalloped wooden wall shelf with small wooden animal figures",
         "delicate neutral linen blackout curtains pooling gently on the floor"
       ],
       "furniture": "classic wooden baby crib with slatted sides, premium wooden changing table dresser with a soft cream changing mat (Wickelkommode), cozy fabric nursing glider chair",
@@ -149,19 +145,19 @@
       "label": "Preschool (3–6 years)",
       "theme": "Playful Montessori & Creative Nook (Faraway Forest & Open-Ended Play)",
       "beds": [
-        "Montessori low wooden floor bed in solid oak, keeping the wallpaper wall fully visible",
-        "Oliver Furniture Seaside low toddler daybed with natural linen bedding",
-        "Low Scandinavian toddler floor bed in smooth natural birch, keeping the entire wall mural unobstructed"
+        "Low Scandinavian birch toddler daybed with checkered and striped bolster pillows",
+        "Flower-shaped craft table in pale lacquered wood with donut poufs",
+        "Montessori low wooden floor bed in solid birch, keeping the entire wall mural unobstructed"
       ],
       "toys": [
-        "classic wooden building blocks neatly stacked on a low shelf",
         "open-ended wooden toy train on the woven rug",
-        "curated Grimm's-style wooden stacking arches in muted earthy tones"
+        "curated Grimm's-style wooden stacking arches in cheerful retro tones",
+        "wax crayons in a wooden cup with an open drawing book on the craft table"
       ],
       "decor": [
-        "Nobodinoz-style low wooden play table with two small matching chairs",
-        "front-facing low wooden bookshelf with open illustrated storybooks",
-        "chunky knit floor pouffe and soft cotton storage bins"
+        "wavy scalloped picture frames with retro graphic art prints",
+        "whimsical mid-century cobalt blue mushroom table lamp",
+        "playful reading tent/teepee with a warm felt ball garland"
       ],
       "furniture": "low Montessori floor bed, small children's play table with two matching small chairs, open shelving at child's height",
       "storage": "open wooden shelves with linen/canvas toy bins at child level, solid wooden toy chest",
@@ -214,63 +210,63 @@
   },
   "keyObjects": [
     {
-      "name": "Montessori wooden floor bed",
-      "description": "low Montessori wooden floor bed resting gently on the floor, allowing a complete, panoramic view of the wallpaper mural behind it",
+      "name": "Curved birch Montessori floor bed",
+      "description": "low minimalist birch floor bed with organic linen bolster cushions, keeping the entire wallpaper mural panoramic and unobstructed",
       "ageGroup": "baby"
     },
     {
-      "name": "Classic slatted wooden baby crib",
-      "description": "natural solid wood baby crib with slender vertical slats and soft organic cotton bedding, positioned against the wallpaper feature wall",
+      "name": "Minimalist slatted solid birch crib",
+      "description": "natural light birch crib with slender vertical slats and crisp organic cotton bedding, placed against the wallpaper wall",
       "ageGroup": "baby"
     },
     {
-      "name": "Cozy nursery play corner with padded mat",
-      "description": "soft padded cotton play mat on the floor with wooden sensory toys and a low wooden shelf, with the wallpaper mural as a tranquil backdrop",
+      "name": "Cozy nursery corner with circular quilted mat",
+      "description": "soft quilted organic cotton floor mat with curated wooden sensory blocks and a low birch book ledge",
       "ageGroup": "baby"
     },
     {
-      "name": "Children's wooden play table with chairs",
-      "description": "small child-sized wooden activity table with two matching small chairs, with an open picture book and wooden blocks, set against the full wallpaper mural",
+      "name": "Flower-shaped wooden craft table",
+      "description": "charming flower-shaped craft table in pale lacquered birch, accompanied by a stack of round donut poufs in warm ochre and poppy red",
       "ageGroup": "vorschul"
     },
     {
-      "name": "Low wooden toddler bed",
-      "description": "simple low-profile wooden toddler bed with clean natural linen bedding, headboard placed against the feature wallpaper wall",
+      "name": "Low Scandinavian birch toddler daybed",
+      "description": "low natural birch toddler daybed with checkered and striped bolster pillows, keeping the wallpaper wall fully visible",
       "ageGroup": "vorschul"
     },
     {
-      "name": "Low Montessori toy shelving unit",
-      "description": "low open wooden shelving unit displaying a few curated wooden toys, puzzles, and storybooks, with the wallpaper mural filling the wall behind",
+      "name": "Montessori play sanctuary with bunny-ear chairs",
+      "description": "low round birch wooden table with two bunny-ear wooden chairs and smooth sensory wooden building blocks catching the sun",
       "ageGroup": "vorschul"
     },
     {
-      "name": "Cozy reading nook with floor cushion",
-      "description": "inviting reading corner with a comfortable oversized linen floor cushion, low book ledge, and soft task light against the vibrant wallpaper backdrop",
+      "name": "Playful reading teepee nook",
+      "description": "fabric play tent with a warm felt ball garland, soft floor cushions, and a low curved bookcase",
+      "ageGroup": "vorschul"
+    },
+    {
+      "name": "Curved birch study desk with open book ledge",
+      "description": "clean natural oak and birch desk with tidy illustrated children's books, wooden pencil cups, and an ergonomic wooden chair",
       "ageGroup": "schulkind"
     },
     {
-      "name": "Children's study desk setup",
-      "description": "clean wooden student desk with ergonomic chair, neat desk organizer, and brass task lamp, with the wallpaper mural providing an inspiring backdrop",
+      "name": "Cozy reading nook with oversized floor cushion",
+      "description": "inviting corner with a plush corduroy floor cushion, scalloped wall shelf with children's storybooks, and warm accent lighting",
       "ageGroup": "schulkind"
     },
     {
-      "name": "Low single bed with bookshelf headboard",
-      "description": "low single bed in natural solid wood with a neat headboard shelf for bedtime books, with the wallpaper mural clearly visible above and behind",
+      "name": "Low birch modular daybed with fluted nightstand",
+      "description": "low single daybed with crisp cotton bedding, flanked by a fluted birch nightstand and a mid-century cobalt mushroom lamp",
       "ageGroup": "schulkind"
     },
     {
-      "name": "Modern study desk with computer",
-      "description": "modern wooden student desk setup with an All-in-One PC, clean turned-off matte screen with no reflections, sleek lamp, and minimal decor against the wallpaper wall",
+      "name": "Minimalist platform bed with low floating frame",
+      "description": "low smoked oak platform bed with clean geometric lines and washed linen bedding",
       "ageGroup": "teenager"
     },
     {
-      "name": "Teenager minimalist desk and study area",
-      "description": "contemporary wide wooden desk with an ergonomic chair, matte dark turned-off monitor, mechanical keyboard, and subtle warm lighting with the wallpaper wall as the full backdrop",
-      "ageGroup": "teenager"
-    },
-    {
-      "name": "Teenager platform bed with lounge nook",
-      "description": "low platform single bed with textured neutral bedding, flanked by a minimalist side table and small potted plant against the accent wallpaper wall",
+      "name": "Wide Scandinavian oak study desk",
+      "description": "contemporary wooden desk with turned-off matte dark screen, ceramic pencil holder, and minimal art books",
       "ageGroup": "teenager"
     }
   ],
@@ -294,28 +290,24 @@
   ],
   "lighting": [
     {
-      "name": "warm afternoon sunlight",
-      "description": "soft golden sunlight at 15:00 streaming through linen curtains, warm amber tones, gentle soft shadows on parquet"
-    },
-    {
       "name": "warm morning sunbeams",
-      "description": "bright golden morning sunbeams streaming through the window, creating a warm, vibrant, and cozy glow across the room"
+      "description": "bright golden morning sunbeams streaming through tall windows, grazing the wallpaper surface, illuminating Craft Lambda texture and casting soft defined shadows"
     },
     {
-      "name": "warm pendant lamp at dusk",
-      "description": "evening, main ceiling lamp glowing warm amber, cozy Gemütlichkeit atmosphere with a warm light balance"
+      "name": "crisp morning window daylight",
+      "description": "fresh directional morning daylight streaming from the side window, creating natural contrast and clear ambient depth"
     },
     {
-      "name": "warm soft morning light",
-      "description": "early morning pale soft sunlight with warm golden undertones, fresh, calm, and cozy"
+      "name": "warm golden hour sunlight",
+      "description": "low-angle golden 3200K sunlight flooding across the room, illuminating rich wood grain and the matte wallpaper micro-relief"
     },
     {
-      "name": "fairy lights evening",
-      "description": "dark outside, warm golden fairy lights glowing around the room, magical cozy mood with warm color balance"
+      "name": "soft afternoon window light",
+      "description": "warm natural window daylight gently grazing the room from the side, revealing paper texture and grounding furniture shadows"
     },
     {
-      "name": "golden hour",
-      "description": "sunset light streaming in at a low angle, rich warm gold tones and amber lighting across the room"
+      "name": "cozy dusk with warm pendant lamp",
+      "description": "evening atmosphere with a warm amber glowing wicker/bubble pendant lamp creating cozy Gemütlichkeit"
     }
   ],
   "cameraAngles": [
@@ -380,22 +372,20 @@
     }
   ],
   "accessories": [
+    "stack of colorful circular donut foam poufs",
+    "whimsical mid-century cobalt blue mushroom table lamp",
+    "playful cluster bubble chandelier with frosted glass globes",
+    "wavy scalloped picture frames with retro graphic art prints",
+    "potted trailing ivy plant on a natural wooden shelf",
+    "flower-shaped plush velvet bolster pillow",
+    "low fluted birch bedside table",
+    "plush textured cream dot floor rug",
+    "wooden pencil holder with colorful wax crayons and drawing paper",
+    "curated wooden Grimm's-style stacking rainbow arches",
+    "woven wicker pendant lamp with warm 3200K glow",
     "solid light oak wooden toy chest with smooth rounded corners",
     "small solid oak wall bookshelf with children's books",
-    "linen curtains in neutral tone",
-    "velvet blanket draped on bed or chair",
-    "large format nature poster (single, not gallery wall)",
-    "soft knit throw in muted color",
-    "macramé wall hanging (small)",
-    "tall potted Ficus Audrey in a rustic ceramic pot",
-    "woven cotton rug in warm neutral",
-    "linen lampshade with warm bulb",
-    "canvas storage bin in linen fabric",
-    "delicate olive tree sapling in a warm terracotta pot",
-    "minimalist framed art print (single)",
-    "small globe or world map on shelf",
-    "desk organizer with books and a cascading Boston fern in a handmade pot",
-    "small wooden decorative objects on shelf"
+    "delicate neutral linen blackout curtains"
   ],
   "materials": [
     "solid birch",

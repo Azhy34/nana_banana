@@ -55,7 +55,7 @@ The prompt follows Google's best-practice 5-layer architecture for natural edito
 ## RULE #4 — QUALITY & REALISM REQUIREMENTS
 
 - **Materials:** Solid natural wood with visible organic grain (oak, birch, beech), washed linen, breathable organic cotton. Teenager rooms: natural wood with matte metal accents.
-- **Banned:** Wicker, straw, and rattan (AI renders distorted woven artifacts), plastic furniture/toys, animal trophies/heads, bunk beds, ladders, house beds / house-frame beds (overhead roof frames and horizontal beams that cut across or obstruct the wallpaper mural).
+- **Banned:** Wicker, straw, and rattan (AI renders distorted woven artifacts), plastic furniture/toys, animal trophies/heads, bunk beds, ladders, metal/iron spindle beds (beds strictly natural wood or fabric), ceiling downlights/recessed spotlights (cold office look), house beds / house-frame beds (overhead roof frames and horizontal beams that cut across or obstruct the wallpaper mural).
 - **Lived-in Realism (No "CGI Luxury"):** Avoid aspirational buzzwords (*flawless, masterpiece, luxury, Architectural Digest*) which trigger digital beauty filters. Use documentary interior photography descriptors.
 - **Color & Light:** Warm, desaturated, sensory-friendly palette; directional natural window daylight.
 - **Age Psychology:**

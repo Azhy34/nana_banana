@@ -10,6 +10,8 @@ const DETAIL_FIELDS = [
   // Upscale (Replicate / Topaz / Real-ESRGAN)
   'upscaleModel', 'predictionId', 'upscaleFactor', 'enhanceModel', 'outputFormat', 'subjectDetection',
   'inputWidth', 'inputHeight', 'outputWidth', 'outputHeight', 'billingUnits', 'predictTimeSeconds', 'stage',
+  // GMC & Multi-frame Video Interpolation
+  'gmcItemGroupId', 'videoMode', 'startImageUrl', 'endImageUrl', 'referenceCount', 'promptPreset',
 ] as const;
 
 export const logEventSchema = z.object({
@@ -46,6 +48,13 @@ export const logEventSchema = z.object({
   billingUnits: z.coerce.number().optional(),
   predictTimeSeconds: z.coerce.number().optional(),
   stage: z.string().optional(),
+  // GMC & Multi-frame Video Interpolation
+  gmcItemGroupId: z.string().optional(),
+  videoMode: z.string().optional(),
+  startImageUrl: z.string().optional(),
+  endImageUrl: z.string().optional(),
+  referenceCount: z.coerce.number().optional(),
+  promptPreset: z.string().optional(),
 });
 
 export type LogEventRequest = z.infer<typeof logEventSchema>;
