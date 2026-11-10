@@ -1,0 +1,42 @@
+{
+  "listing": "Листинг 6",
+  "description": "Jungle Animals Nursery, watercolour mural 5056x3392 (giraffe, elephant, sloth, two lovebirds, monstera and palm leaves on a soft white ground; sage, tan, peach). 06.11 test: the Fun Haus design with the ideas of a competitor reference (striped corner daybed with a wavy headboard, circus art frames, ribbed cobalt side table) on a calm jungle mural; one photo, Banana 2.1, 9:16. Board entry key `spec` in specs/active_board.json points the board to this file.",
+  "aspect_ratio": "9:16",
+  "brief": {
+    "description": "Facts of THIS listing used by the short (brief) prompt.",
+    "product": "the wall mural",
+    "product_short": "the mural",
+    "hero": "the giraffe and the elephant",
+    "wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it."
+  },
+  "wallpaper": "C:/Users/Mikhail/Desktop/Обои/Листинг 6/gemini-gen-1771277133481.png",
+  "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 6",
+  "texture": "public/textures/craft_lambda.jpg",
+  "cards": [
+    {
+      "id": "l6_funhaus_01",
+      "ageGroup": "vorschul",
+      "aspectRatio": "9:16",
+      "tags": {
+        "style": "Fun Haus",
+        "color": "Honey Amber",
+        "keyObject": "Upholstered daybed with a wavy striped headboard",
+        "lighting": "warm morning sunbeams",
+        "cameraAngle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "depthOfField": "deep depth of field",
+        "cameraBody": "Sony A7R V",
+        "lens": "24mm tilt-shift lens",
+        "aperture": "f/11 aperture",
+        "compositionStrategy": "unobstructed",
+        "wallArchitecture": "full-wall",
+        "accessories": [
+          "framed vintage circus art prints (a striped tent, a rocking horse) in small wavy frames",
+          "ribbed cobalt blue side table with a few books"
+        ]
+      }
+    }
+  ],
+  "audience": "neutral"
+}

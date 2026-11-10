@@ -1,0 +1,100 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-08T14:37:07Z"
+ },
+ "class_name": "MoonbloomKieImage",
+ "display_name": "Moonbloom KIE Image (Nano Banana, paid)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "prompt": {
+   "type": "STRING",
+   "multiline": true,
+   "forceInput": true
+  },
+  "scene_id": {
+   "type": "STRING",
+   "default": "scene_01"
+  },
+  "wallpaper_path": {
+   "type": "STRING",
+   "default": ""
+  },
+  "out_dir": {
+   "type": "STRING",
+   "default": ""
+  },
+  "listing": {
+   "type": "STRING",
+   "default": ""
+  },
+  "aspect_ratio": {
+   "type": "COMBO",
+   "choices": [
+    "9:16",
+    "4:5",
+    "4:3",
+    "2:3",
+    "3:2",
+    "16:9",
+    "1:1"
+   ],
+   "default": "9:16"
+  },
+  "model": {
+   "type": "COMBO",
+   "choices": [
+    "nano-banana-2-1",
+    "nano-banana-2"
+   ],
+   "default": "nano-banana-2-1"
+  },
+  "resolution": {
+   "type": "COMBO",
+   "choices": [
+    "2K",
+    "4K"
+   ],
+   "default": "2K"
+  },
+  "use_texture": {
+   "type": "BOOLEAN",
+   "default": true
+  },
+  "reuse_existing": {
+   "type": "BOOLEAN",
+   "default": true
+  },
+  "dry_run": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "ON (default): only checks the request and shows the LIVE price, nothing is sent and no credits are spent. OFF: pays KIE credits."
+  }
+ },
+ "optional_inputs": {
+  "texture_path": {
+   "type": "STRING",
+   "default": ""
+  },
+  "reference_labels": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "ON: the long labels 'REFERENCE_IMAGE_1 / REFERENCE_IMAGE_2 ...' are put before the prompt (the app's full prompt needs them). OFF: the prompt itself says what image 1 and image 2 are (the brief prompt does)."
+  }
+ },
+ "outputs": {
+  "types": [
+   "IMAGE",
+   "STRING",
+   "STRING"
+  ],
+  "names": [
+   "image",
+   "image_path",
+   "report"
+  ]
+ },
+ "output_node": true,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

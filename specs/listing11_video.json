@@ -1,0 +1,14 @@
+{
+  "listing": "Листинг 11",
+  "description": "Kling / Grok image-to-video lock of Listing 11 (misty watercolour jungle). The clips of the reel set specs/sets/l11_reel01.json are built by reels_pipeline/prompts.clip_prompt with this `lock`. Rules: faces are never shown, no plain zoom, the mural stays flat static ink: the painted toucan, parrot, leopard cub, banana leaves, palms and trees must NOT move.",
+  "duration": "5",
+  "sound": false,
+  "min_motion_delta": 15.0,
+  "lock": {
+    "description": "Facts of THIS listing used by every clip prompt: the mural is flat printed ink and never moves; the furniture is frozen.",
+    "product": "INANIMATE 2D INK LOCK: the wallpaper design is strictly flat 2D printed watercolour ink on the wall, completely static 2D artwork, zero animation, zero morphing, zero waving edges; the painted toucan and parrot do not fly or blink, the leopard cub does not move, the banana leaves and palm fronds do not sway, the trees and the fog stay completely still.",
+    "furniture": "GEOMETRIC & FURNITURE LOCK: the {items} remain 100% frozen, solid and fixed in the room. Zero warping, zero morphing, zero shifting objects across the floor.",
+    "people": "PEOPLE LOCK: every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are, nothing turns toward the lens, and a child held on an arm stays still in the position of the first frame."
+  },
+  "frames": []
+}

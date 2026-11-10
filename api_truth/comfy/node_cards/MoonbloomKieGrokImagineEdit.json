@@ -1,0 +1,84 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-08T14:37:07Z"
+ },
+ "class_name": "MoonbloomKieGrokImagineEdit",
+ "display_name": "Moonbloom KIE Image (Grok Imagine 2.0 Edit, paid)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "prompt": {
+   "type": "STRING",
+   "multiline": true,
+   "forceInput": true,
+   "tooltip": "Positive prompt (from the Design node). KIE limit: 8000 characters. Negative prompt: none: the model has no negative field, the Avoid list stays inside the prompt text."
+  },
+  "scene_id": {
+   "type": "STRING",
+   "default": "scene_01"
+  },
+  "wallpaper_path": {
+   "type": "STRING",
+   "default": ""
+  },
+  "out_dir": {
+   "type": "STRING",
+   "default": ""
+  },
+  "listing": {
+   "type": "STRING",
+   "default": ""
+  },
+  "aspect_ratio": {
+   "type": "COMBO",
+   "choices": [
+    "9:16",
+    "2:3",
+    "3:2",
+    "16:9",
+    "1:1"
+   ],
+   "default": "9:16",
+   "tooltip": "KIE allows: 1:1, 2:3, 3:2, 16:9, 9:16, auto. Offered: the Etsy formats this model supports."
+  },
+  "use_texture": {
+   "type": "BOOLEAN",
+   "default": true
+  },
+  "reuse_existing": {
+   "type": "BOOLEAN",
+   "default": true
+  },
+  "dry_run": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "ON (default): only checks the request and shows the LIVE price, nothing is sent and no credits are spent. OFF: pays KIE credits."
+  }
+ },
+ "optional_inputs": {
+  "texture_path": {
+   "type": "STRING",
+   "default": ""
+  },
+  "reference_labels": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "ON: the long labels 'REFERENCE_IMAGE_1 / REFERENCE_IMAGE_2 ...' are put before the prompt (the app's full prompt needs them). OFF: the prompt itself says what image 1 and image 2 are (the brief prompt does)."
+  }
+ },
+ "outputs": {
+  "types": [
+   "IMAGE",
+   "STRING",
+   "STRING"
+  ],
+  "names": [
+   "image",
+   "image_path",
+   "report"
+  ]
+ },
+ "output_node": true,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

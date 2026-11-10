@@ -18,29 +18,10 @@ export const TAG_OPTIONS = {
   roomZones: trendsData.roomZones.map(r => r.name),
   lighting: trendsData.lighting.map(l => l.name),
   cameraAngles: trendsData.cameraAngles,
-  cameraElevations: (trendsData as any).cameraElevations ?? [
-    "child eye-level perspective (approx. 80cm from floor)",
-    "standing adult eye-level perspective",
-    "low-angle perspective from the rug",
-    "architectural horizontal tripod framing"
-  ],
-  lenses: (trendsData as any).lenses ?? [
-    "35mm prime lens",
-    "50mm normal lens",
-    "45mm medium format lens",
-    "28mm gentle wide lens"
-  ],
-  apertures: (trendsData as any).apertures ?? [
-    "f/5.6 aperture",
-    "f/8.0 aperture",
-    "f/4.0 aperture"
-  ],
-  cameraBodies: (trendsData as any).cameraBodies ?? [
-    "Sony A7R V",
-    "Hasselblad H6D-100c",
-    "Canon EOS R5",
-    "Fujifilm GFX 100S"
-  ],
+  cameraElevations: trendsData.cameraElevations,
+  lenses: trendsData.lenses,
+  apertures: trendsData.apertures,
+  cameraBodies: trendsData.cameraBodies,
   cameraDistances: trendsData.cameraDistances.map(d => d.name),
   depthOfField: trendsData.depthOfField.map(d => d.name),
   accessories: trendsData.accessories,
@@ -65,6 +46,16 @@ export function getKeyObjectsForAge(ageGroup: AgeGroupKey): string[] {
   return filtered.length > 0 ? filtered : trendsData.keyObjects.map(k => k.name);
 }
 
+// Key objects that are tall (a tent) or a table with chairs in the foreground are never picked at random: they hide the mural.
+const NOT_MURAL_SAFE = new Set(
+  (trendsData.keyObjects as Array<{ name: string; muralSafe?: boolean }>).filter(k => k.muralSafe === false).map(k => k.name),
+);
+function muralSafeKeyObjects(ageGroup: AgeGroupKey): string[] {
+  const all = getKeyObjectsForAge(ageGroup);
+  const safe = all.filter(name => !NOT_MURAL_SAFE.has(name));
+  return safe.length > 0 ? safe : all;
+}
+
 export const CINEMATIC_DETAILS = [
   "Dappled sunlight filters through unseen tree leaves, casting organic shadow play across the floor.",
   "Cool, crisp morning light fills the room, enhancing the fresh and airy atmosphere.",
@@ -73,14 +64,30 @@ export const CINEMATIC_DETAILS = [
   "Dust motes dance in a single, focused shaft of sunlight cutting across the room."
 ];
 
+// The child comes first, then the room that fits its age (real sizes), then its toys and accessories: all of it is data of
+// Promt/trends.json `ageGroups.<age>` (child, room, toys with their place, accessories). A baby's room never gets an adult bed.
+export function ageLine(ageGroup: string): string {
+  const age = (trendsData.ageGroups as any)?.[ageGroup] as { child?: string; room?: string } | undefined;
+  return age?.child && age?.room ? `This is the room of ${age.child}. ${age.room}` : '';
+}
+
+function accessoriesOfAge(ageGroup: string): string[] {
+  const list = (trendsData.ageGroups as any)?.[ageGroup]?.accessories as string[] | undefined;
+  return list && list.length > 0 ? list : trendsData.accessories;
+}
+
 export function generateRandomTags(aspectRatio: BatchAspectRatio, ageGroup?: AgeGroupKey): BatchPromptTags {
   const resolvedAgeGroup = ageGroup ?? pick(TAG_OPTIONS.ageGroups);
+  // The style is picked first: its card in trends.json lists the colours that suit it, so a random batch never mixes
+  // a calm style with a loud pop colour. A card that pins style and colour itself is not touched by this.
+  const style = pick(TAG_OPTIONS.styles);
+  const allowedColors = (trendsData.styles.find(s => s.name === style) as { colors?: string[] } | undefined)?.colors;
   return {
-    color: pick(TAG_OPTIONS.colors),
-    style: pick(TAG_OPTIONS.styles),
+    color: pick(allowedColors && allowedColors.length > 0 ? allowedColors : TAG_OPTIONS.colors),
+    style,
     brand: pick(TAG_OPTIONS.brands),
     ageGroup: resolvedAgeGroup,
-    keyObject: pick(getKeyObjectsForAge(resolvedAgeGroup)),
+    keyObject: pick(muralSafeKeyObjects(resolvedAgeGroup)),
     roomZone: pick(TAG_OPTIONS.roomZones),
     lighting: pick(TAG_OPTIONS.lighting),
     cameraAngle: pick(TAG_OPTIONS.cameraAngles),
@@ -90,7 +97,7 @@ export function generateRandomTags(aspectRatio: BatchAspectRatio, ageGroup?: Age
     lens: pick(TAG_OPTIONS.lenses),
     aperture: pick(TAG_OPTIONS.apertures),
     cameraBody: pick(TAG_OPTIONS.cameraBodies),
-    accessories: pickN(trendsData.accessories, 2 + Math.floor(Math.random() * 2)),
+    accessories: pickN(accessoriesOfAge(resolvedAgeGroup), 1 + Math.floor(Math.random() * trendsData.staging.maxAccessories)),
     aspectRatio,
     compositionStrategy: Math.random() < 0.4 ? 'unobstructed' : 'natural',
     cinematicDetail: pick(CINEMATIC_DETAILS),
@@ -115,9 +122,9 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     ? 'solid wood, matte metal, organic linen'
     : 'solid wood with visible grain, organic canvas, washed linen, breathable cotton';
 
-  const compositionText = tags.compositionStrategy === 'unobstructed'
-    ? "The composition is framed with low-profile furniture to guarantee an expansive, unobstructed panoramic view of the wallpaper mural across the wall."
-    : "The shot is composed from a child-scale eye-level perspective, enhancing room depth and spatial realism.";
+  // The mural is the hero in every prompt: scale of the room, open floor in front of the wall, one low hero piece, at most two small
+  // accessories (Promt/trends.json "staging"). The tag `compositionStrategy` is kept for old cards; it no longer changes this.
+  const compositionText = trendsData.staging.text;
 
   const insights = (trendsData as any).latestMarketInsights as {
     colors?: Array<{ name: string; description: string }>;
@@ -134,8 +141,9 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
       const trendingColor = pick(insights.colors);
       trendingColorName = trendingColor.name;
     }
-    if (Math.random() < 0.5 && insights.accessories && insights.accessories.length > 0) {
-      const trendingAcc = pick(insights.accessories);
+    const trendingForAge = (insights.accessories ?? []).filter(a => accessoriesOfAge(tags.ageGroup).includes(a));
+    if (Math.random() < 0.5 && trendingForAge.length > 0) {
+      const trendingAcc = pick(trendingForAge);
       if (!activeAccessories.includes(trendingAcc)) {
         activeAccessories.push(trendingAcc);
       }
@@ -146,35 +154,40 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     }
   }
 
-  // Age-specific 2026 trends for setting, hero toys & decor
+  // Age-specific toys (low things on the floor); random decor is gone: every extra object hides the mural
   const ageData = (trendsData.ageGroups as any)?.[tags.ageGroup];
   const trendingToy = ageData?.toys && ageData.toys.length > 0 ? pick(ageData.toys as string[]) : '';
-  const trendingDecor = ageData?.decor && ageData.decor.length > 0 ? pick(ageData.decor as string[]) : '';
 
+  // The chosen style (its card in trends.json) is the ONLY source of the style words: the age group gives the scale of the furniture and
+  // the toys, never a style of its own.
+  const styleName = styleData?.name ?? tags.style;
+  const styleLabel = styleName ? ` in ${styleName} style` : '';
   let sceneSetting = '';
   let lifestyleTouch = '';
   if (tags.ageGroup === 'baby') {
-    sceneSetting = "An authentic, serene Scandinavian nursery for a baby in a warm home. The room feels gentle, joyful, and spacious, styled with warm cream, pale oat, and soft botanical tones with tactile natural birch wood and breathable organic cotton.";
-    lifestyleTouch = `Authentic lived-in nursery details: soft organic cotton bedding, ${trendingToy || 'a delicate wooden mobile'}, and ${trendingDecor || 'neatly placed wooden sensory blocks catching the light'}.`;
+    sceneSetting = `An authentic, serene nursery for a baby in a warm home${styleLabel}. The room feels gentle, joyful, and spacious, with tactile natural wood and breathable organic cotton.`;
+    lifestyleTouch = `Authentic lived-in nursery details: soft organic cotton bedding and ${trendingToy || 'curated wooden sensory blocks catching the light'}.`;
   } else if (tags.ageGroup === 'vorschul') {
-    sceneSetting = "A delightful, joyful children's bedroom in trending Fun Haus / Dopamine Decor / Retro Kids style. Designed with playful child-scale furniture, natural birch wood, and cheerful designer accents that foster creativity, warmth, and restful sleep.";
-    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'}, ${trendingDecor || 'a flower-shaped craft table with colorful wax crayons'}, and a plush cream dot rug.`;
+    sceneSetting = `A delightful, joyful children's bedroom${styleLabel}. Designed with playful child-scale furniture, natural wood, and cheerful accents that foster creativity, warmth, and restful sleep.`;
+    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'} and a plush cream dot rug.`;
   } else if (tags.ageGroup === 'schulkind') {
-    sceneSetting = "A stylish, cozy children's bedroom and creative study sanctuary in Dopamine Decor / Retro Kids aesthetic. Warm natural wood surfaces, playful textile patterns, and curated design touches create an inspiring, uncluttered space.";
-    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'}, ${trendingDecor || 'tidy children\'s books on a curved shelf'}, and a comfortable floor reading cushion.`;
+    sceneSetting = `A stylish, cozy children's bedroom and creative study sanctuary${styleLabel}. Warm natural wood surfaces, curated design touches and an uncluttered layout create an inspiring space.`;
+    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'} and a comfortable floor reading cushion.`;
   } else {
-    sceneSetting = "A contemporary youth bedroom with clean geometric lines, natural solid oak and birch, tasteful retro accents, and a calm, stylish layout for studying and relaxing.";
-    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'a small potted plant in a ceramic pot'}, ${trendingDecor || 'neatly organized books'}, and clean task lighting.`;
+    sceneSetting = `A contemporary youth bedroom${styleLabel} with clean lines, natural solid oak and birch, and a calm, stylish layout for studying and relaxing.`;
+    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'a small potted plant in a ceramic pot'} and clean task lighting.`;
   }
+
+  sceneSetting = `${sceneSetting} ${ageLine(tags.ageGroup)}`.trim();
 
   const isScallop = tags.wallArchitecture === 'scallop-trim';
   const wallpaperRule = isScallop
-    ? "This is a commercial interior photograph showcasing a designer wallpaper in European Dopamine Decor / Retro Kids style. WALL ARCHITECTURE (RETRO SCALLOPED WAVE TRIM): The reference wallpaper covers the lower two-thirds of the feature wall, crowned by an eye-catching decorative scalloped wave trim moulding in warm poppy red or terracotta. Above the wavy scalloped trim, the upper wall is painted in warm chalky cream with a charming gallery of art prints in scalloped and checkered frames. Retain the exact pattern, colors, and stripe/art scale from the reference image 1:1 on the wallpaper section. The wallpaper is the hero of the interior."
+    ? "This is a commercial interior photograph showcasing a designer wallpaper in a European children's interior. WALL ARCHITECTURE (RETRO SCALLOPED WAVE TRIM): The reference wallpaper covers the lower two-thirds of the feature wall, crowned by an eye-catching decorative scalloped wave trim moulding in warm barberry red or terracotta. Above the wavy scalloped trim, the upper wall is painted in warm chalky cream with a charming gallery of art prints in scalloped and checkered frames. Retain the exact pattern, colors, and stripe/art scale from the reference image 1:1 on the wallpaper section. The wallpaper is the hero of the interior."
     : "This is a commercial interior photograph showcasing a wall mural wallpaper. The reference image is a single full-scale mural (not a repeating tile pattern). FULL-HEIGHT 100% WALL COVERAGE: This entire reference image must be mapped and stretched across the feature wall edge-to-edge as a single, continuous, seamless mural covering 100% of the wall surface from the floor baseboard up to the ceiling line, running cleanly behind the furniture without any horizontal cuts, splits, wainscoting, or unpapered lower section. Retain the exact illustration, colors, and scale from the reference image 1:1. The wallpaper is the hero of the interior.";
 
   const furnitureSection = `The focal furniture piece is a ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material}. Layout: ${keyObjData?.description ?? ''}. Floor and architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}. Styling: ${styleData?.name ?? tags.style} (${styleData?.description ?? ''}). ${compositionText}`;
 
-  let colorAccentText = `Decor accented with ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}) and accessories including ${activeAccessories.slice(0, 3).join(', ')}.`;
+  let colorAccentText = `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried by the bedding, textiles, rug and small furniture so the room reads clearly in this colour family, and accessories including ${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(', ')}.`;
   if (trendingColorName) {
     colorAccentText += ` Subtle accents of ${trendingColorName} harmonize across the textiles.`;
   }
@@ -183,14 +196,15 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
 
   const lightingSection = `Grazing natural morning daylight from an adjacent window streams across the room, illuminating the tactile ultra-matte non-woven paper texture (Craft Lambda fine sand grain micro-relief) and creating authentic grounding ambient shadows where furniture meets the floor and wall. Light setting: ${lightingData?.description ?? tags.lighting}. ${tags.cinematicDetail}`;
 
-  const angle = tags.cameraAngle || 'frontal — straight-on view of the wallpaper wall';
-  const elevation = tags.cameraElevation || 'child eye-level perspective (approx. 80cm from floor)';
-  const distance = camDistData?.name ?? tags.cameraDistance ?? 'medium shot';
+  const angle = tags.cameraAngle || TAG_OPTIONS.cameraAngles[0];
+  const elevation = tags.cameraElevation || TAG_OPTIONS.cameraElevations[0];
+  const distance = camDistData?.name ?? tags.cameraDistance ?? 'wide shot';
+  const distanceNote = camDistData?.description ? `: ${camDistData.description}` : '';
   const cameraBody = tags.cameraBody || 'Sony A7R V';
   const lens = tags.lens || '35mm prime lens';
   const aperture = tags.aperture || 'f/5.6 aperture';
 
-  const cameraSection = `Photographed from a ${angle} at a ${elevation} using a ${distance}. Shot on ${cameraBody}, ${lens}, ${aperture}, sharp mural focus across the entire wall, natural optical depth. Aspect ratio: ${tags.aspectRatio}.`;
+  const cameraSection = `Photographed ${angle}, at ${elevation}. Framing: ${distance}${distanceNote}. Shot on ${cameraBody}, ${lens}, ${aperture}, sharp mural focus across the entire wall, natural optical depth. ${trendsData.realism.photo} Aspect ratio: ${tags.aspectRatio}.`;
 
   let promptText = `${wallpaperRule}\n\n${sceneSetting}\n\n${furnitureSection}\n\n${stylingSection}\n\n${lightingSection}\n\n${cameraSection}`;
 
@@ -217,16 +231,90 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     promptText += " Any computer monitor or screen is strictly turned off, appearing as a clean, blank matte dark display with zero reflections.";
   }
 
-  const wallNegative = isScallop
-    ? ""
-    : "half-wall wallpaper, split wall, wainscoting, wall paneling, dado rail, lower wall unpapered, ";
-  const baseNegative = `peeling wallpaper, wallpaper peeling off wall, corner curl, ${wallNegative}bed canopy, hanging baldachin, fabric curtains over bed, house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, tall bed frame obstructing wall, metal bed, iron spindle bed, iron bed frame, ceiling downlights, recessed spotlights, harsh office lighting, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look, blurry muddy textures, flat soap textures, oversaturated neon`;
+  // The Avoid list is data (Promt/trends.json "negatives"), not code. The chosen style adds what does not suit it.
+  const neg = trendsData.negatives;
+  const baseNegative = [neg.head, ...(isScallop ? [] : [neg.fullWall]), neg.base].join(', ');
+  const styleAvoid = (styleData as { avoid?: string } | undefined)?.avoid;
+  const textNegative = (tags.overlayText && tags.overlayPosition) ? neg.textWithOverlay : neg.text;
 
-  const textNegative = (tags.overlayText && tags.overlayPosition)
-    ? "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, white outlines, digital watermark, advertising badge, low quality font"
-    : "text overlay, watermark, advertising badge, corner stamp, promotional text, watercolor patch, promo brushstroke, typography, letters, words";
-
-  promptText += ` Avoid: ${baseNegative}, ${textNegative}.`;
+  promptText += ` Avoid: ${baseNegative}${styleAvoid ? `, ${styleAvoid}` : ''}, ${textNegative}.`;
 
   return promptText;
+}
+
+// ------------------------------------------------------------------ the short ("brief") prompt
+// The same file builds BOTH prompts, so the web app and the ComfyUI boards (through scripts/build_batch_prompts.mjs) read one set of
+// styles and variables (Promt/trends.json) and one code. The brief is written to the official guidance of Google (Nano Banana:
+// describe what you want, not what you don't; photographic terms) and OpenAI (GPT Image: scene / subject / details / constraints,
+// roles of references by number): what the photo is, the two references by number, the scene, light and camera. It has no Avoid
+// list and no aspect ratio / size / quality: those are fields of the request. Nothing random: the same input is the same text.
+// What the code does NOT know is how the product sits on the wall: that is a fact of the LISTING and arrives as `rules`.
+export const BRIEF_TEXTS = {
+  intro: 'Create a photorealistic photograph of {subject}.',
+  texture: 'Image 2 is a macro photo of the wallpaper paper: take only its fine sand-grain, matte surface, never its graphics.',
+  uninhabited: 'The room is empty of people.',
+  people: 'People: only from behind, never a face, not even in profile.', // owner rule 04.11: faces are never shown
+  anchor: 'Reproduce image 1 unchanged on the wall: do not redraw, restyle or replace it.',
+} as const;
+export const BRIEF_PEOPLE_MODES = ['none', 'from_behind'] as const;
+export const BRIEF_RULE_KEYS = ['product', 'product_short', 'wall_rule'] as const;
+
+export interface BriefInput {
+  subject: string;
+  scene: string;
+  framing: string;
+  lighting?: string;
+  cameraBody?: string;
+  lens?: string;
+  aperture?: string;
+  withTexture?: boolean;
+  anchor?: boolean;
+  people?: string;
+  style?: string; // a style of Promt/trends.json: its signature joins the first sentence (an unknown name is an error, not a silent skip)
+  color?: string; // a colour of Promt/trends.json: the accent colour of the room
+  rules?: Partial<Record<(typeof BRIEF_RULE_KEYS)[number], string>> | null;
+}
+
+export function buildBriefPrompt(input: BriefInput): string {
+  const subject = (input.subject ?? '').trim().replace(/\.+$/, '');
+  const scene = (input.scene ?? '').trim();
+  const framing = (input.framing ?? '').trim();
+  if (!(subject && scene && framing)) {
+    throw new Error('a brief prompt needs subject, scene and framing (the three short texts of the card)');
+  }
+  const rules = input.rules ?? {};
+  const missing = BRIEF_RULE_KEYS.filter(k => !(rules[k] ?? '').trim());
+  if (missing.length > 0) {
+    throw new Error(`a brief prompt needs the product rules of the listing [${missing.map(k => `'${k}'`).join(', ')}]: put them in the spec under "brief" (how the product sits on the wall is a fact of the listing, not of the code)`);
+  }
+  const people = input.people ?? 'none';
+  if (!(BRIEF_PEOPLE_MODES as readonly string[]).includes(people)) {
+    throw new Error(`people must be one of ('none', 'from_behind'), got '${people}'`);
+  }
+  const styleCard = input.style ? trendsData.styles.find(x => x.name === input.style) : undefined;
+  if (input.style && !styleCard) {
+    throw new Error(`unknown style '${input.style}' (Promt/trends.json has: ${trendsData.styles.map(x => x.name).join(', ')})`);
+  }
+  const colorCard = input.color ? trendsData.colors.find(x => x.name === input.color) : undefined;
+  if (input.color && !colorCard) {
+    throw new Error(`unknown colour '${input.color}' (Promt/trends.json has: ${trendsData.colors.map(x => x.name).join(', ')})`);
+  }
+  const gear = [input.cameraBody, input.lens, input.aperture].filter(part => part && part.trim()).map(part => (part as string).trim()).join(', ');
+  const sharp = gear ? `${gear}, sharp across the whole wall.` : 'Sharp across the whole wall.';
+  const productShort = (rules.product_short ?? '').trim();
+  const light = input.lighting && input.lighting.trim() ? `${input.lighting.trim()}, even on ${productShort}. ` : '';
+  const references = `References: image 1 is ${(rules.product ?? '').trim()}. ${(rules.wall_rule ?? '').trim()}`
+    + (input.anchor ? ` ${BRIEF_TEXTS.anchor}` : '') + ((input.withTexture ?? true) ? ` ${BRIEF_TEXTS.texture}` : '');
+  // The style and the colour come from the variables (their words live in Promt/trends.json only); the photographic realism
+  // line is data too and is worded positively, as the guides ask.
+  const intro = BRIEF_TEXTS.intro.replace('{subject}', subject)
+    .replace(/\.$/, styleCard ? `, in ${styleCard.name} style (${styleCard.description}).` : '.');
+  const accent = colorCard ? ` Accent colour: ${colorCard.name.toLowerCase()} (${colorCard.description}).` : '';
+  return [
+    intro,
+    references,
+    // the same staging rule as the full prompt, in positive words: nothing but the named items (the model otherwise adds baskets, throws, lamps)
+    `Scene: ${scene}${accent} ${trendsData.staging.brief} ${people === 'from_behind' ? BRIEF_TEXTS.people : BRIEF_TEXTS.uninhabited}`,
+    `Light and camera: ${light}${framing} ${sharp} ${trendsData.realism.photo}`,
+  ].join('\n\n');
 }

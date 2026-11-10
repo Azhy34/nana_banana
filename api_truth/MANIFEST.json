@@ -1,0 +1,319 @@
+{
+ "updated_at": "2026-11-10T18:38:54Z",
+ "items": [
+  {
+   "name": "comfy/object_info",
+   "status": "ok",
+   "fetched_at": "2026-11-10T18:38:54Z",
+   "detail": "",
+   "node_count": 1033,
+   "moonbloom_nodes": [
+    "MoonbloomDesign",
+    "MoonbloomFramePicker",
+    "MoonbloomImageFile",
+    "MoonbloomKieGptImage2",
+    "MoonbloomKieGrokImagineEdit",
+    "MoonbloomKieImage",
+    "MoonbloomKieKling",
+    "MoonbloomKieOmniVideo",
+    "MoonbloomListingScene",
+    "MoonbloomWallpaper"
+   ],
+   "file": "comfy/object_info.json",
+   "bytes": 2878447,
+   "sha256_12": "f96368188d73"
+  },
+  {
+   "name": "comfy/system_stats",
+   "status": "ok",
+   "fetched_at": "2026-11-10T18:38:54Z",
+   "detail": "",
+   "comfyui_version": "0.43.2",
+   "file": "comfy/system_stats.json",
+   "bytes": 1772,
+   "sha256_12": "28d54b23e8e5"
+  },
+  {
+   "name": "kie/balance",
+   "status": "ok",
+   "fetched_at": "2026-11-05T14:15:53Z",
+   "detail": "credits: 849.0",
+   "balance_credits": 849.0
+  },
+  {
+   "name": "kie/kling-2.6/image-to-video",
+   "status": "ok",
+   "fetched_at": "2026-11-05T14:15:54Z",
+   "detail": "",
+   "paths": [
+    "/api/v1/jobs/createTask"
+   ],
+   "file": "kie/kling-2.6__image-to-video.schema.json",
+   "bytes": 15064,
+   "sha256_12": "c64a0d112e25"
+  },
+  {
+   "name": "kie/nano-banana-2",
+   "status": "ok",
+   "fetched_at": "2026-11-05T14:15:58Z",
+   "detail": "",
+   "paths": [
+    "/api/v1/jobs/createTask"
+   ],
+   "file": "kie/nano-banana-2.schema.json",
+   "bytes": 18437,
+   "sha256_12": "7e5ef8d3934d"
+  },
+  {
+   "name": "kie/nano-banana-2-1",
+   "status": "ok",
+   "fetched_at": "2026-11-05T14:16:02Z",
+   "detail": "",
+   "paths": [
+    "/api/v1/jobs/createTask"
+   ],
+   "file": "kie/nano-banana-2-1.schema.json",
+   "bytes": 18465,
+   "sha256_12": "6df3b5d2c11d"
+  },
+  {
+   "name": "kie/catalog",
+   "status": "error",
+   "fetched_at": "2026-11-04T08:04:02Z",
+   "detail": "RuntimeError: KIE code=429 msg=Your call frequency is too high. Please try again later."
+  },
+  {
+   "name": "kie/catalog_subset",
+   "status": "ok",
+   "fetched_at": "2026-11-05T14:16:14Z",
+   "detail": "5 models",
+   "file": "kie/catalog_subset.json",
+   "bytes": 4881,
+   "sha256_12": "bc4a13d67f34"
+  },
+  {
+   "name": "docs/comfy/llms-index",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:42:57Z",
+   "detail": "https://docs.comfy.org/llms.txt",
+   "url": "https://docs.comfy.org/llms.txt",
+   "file": "docs/comfy/llms-index.md",
+   "bytes": 36770,
+   "sha256_12": "66eb53a9782c"
+  },
+  {
+   "name": "docs/comfy/server-routes",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:42:58Z",
+   "detail": "https://docs.comfy.org/development/comfyui-server/comms_routes.md",
+   "url": "https://docs.comfy.org/development/comfyui-server/comms_routes.md",
+   "file": "docs/comfy/server-routes.md",
+   "bytes": 5473,
+   "sha256_12": "805692b09062"
+  },
+  {
+   "name": "docs/comfy/server-messages",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:42:59Z",
+   "detail": "https://docs.comfy.org/development/comfyui-server/comms_messages.md",
+   "url": "https://docs.comfy.org/development/comfyui-server/comms_messages.md",
+   "file": "docs/comfy/server-messages.md",
+   "bytes": 4914,
+   "sha256_12": "733831f4f0e3"
+  },
+  {
+   "name": "docs/comfy/custom-node-lifecycle",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:42:59Z",
+   "detail": "https://docs.comfy.org/custom-nodes/backend/lifecycle.md",
+   "url": "https://docs.comfy.org/custom-nodes/backend/lifecycle.md",
+   "file": "docs/comfy/custom-node-lifecycle.md",
+   "bytes": 2494,
+   "sha256_12": "df70d9dda2a9"
+  },
+  {
+   "name": "docs/comfy/custom-node-properties",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:00Z",
+   "detail": "https://docs.comfy.org/custom-nodes/backend/server_overview.md",
+   "url": "https://docs.comfy.org/custom-nodes/backend/server_overview.md",
+   "file": "docs/comfy/custom-node-properties.md",
+   "bytes": 9537,
+   "sha256_12": "18236898681d"
+  },
+  {
+   "name": "docs/comfy/js-extensions",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:01Z",
+   "detail": "https://docs.comfy.org/custom-nodes/js/javascript_overview.md",
+   "url": "https://docs.comfy.org/custom-nodes/js/javascript_overview.md",
+   "file": "docs/comfy/js-extensions.md",
+   "bytes": 2599,
+   "sha256_12": "de91fb0d6412"
+  },
+  {
+   "name": "docs/comfy/js-hooks",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:02Z",
+   "detail": "https://docs.comfy.org/custom-nodes/js/javascript_hooks.md",
+   "url": "https://docs.comfy.org/custom-nodes/js/javascript_hooks.md",
+   "file": "docs/comfy/js-hooks.md",
+   "bytes": 7249,
+   "sha256_12": "c518821ea227"
+  },
+  {
+   "name": "docs/comfy/js-objects",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:02Z",
+   "detail": "https://docs.comfy.org/custom-nodes/js/javascript_objects_and_hijacking.md",
+   "url": "https://docs.comfy.org/custom-nodes/js/javascript_objects_and_hijacking.md",
+   "file": "docs/comfy/js-objects.md",
+   "bytes": 13782,
+   "sha256_12": "c0e2601e945e"
+  },
+  {
+   "name": "docs/comfy/js-toast",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:03Z",
+   "detail": "https://docs.comfy.org/custom-nodes/js/javascript_toast.md",
+   "url": "https://docs.comfy.org/custom-nodes/js/javascript_toast.md",
+   "file": "docs/comfy/js-toast.md",
+   "bytes": 2507,
+   "sha256_12": "ef4950d09b9d"
+  },
+  {
+   "name": "docs/comfy/node-PreviewAny",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:04Z",
+   "detail": "https://docs.comfy.org/built-in-nodes/PreviewAny.md",
+   "url": "https://docs.comfy.org/built-in-nodes/PreviewAny.md",
+   "file": "docs/comfy/node-PreviewAny.md",
+   "bytes": 2075,
+   "sha256_12": "5f14f7a19328"
+  },
+  {
+   "name": "docs/comfy/node-PreviewImage",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:05Z",
+   "detail": "https://docs.comfy.org/built-in-nodes/PreviewImage.md",
+   "url": "https://docs.comfy.org/built-in-nodes/PreviewImage.md",
+   "file": "docs/comfy/node-PreviewImage.md",
+   "bytes": 1374,
+   "sha256_12": "e24522fd87d2"
+  },
+  {
+   "name": "docs/comfy/node-LoadImage",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:06Z",
+   "detail": "https://docs.comfy.org/built-in-nodes/LoadImage.md",
+   "url": "https://docs.comfy.org/built-in-nodes/LoadImage.md",
+   "file": "docs/comfy/node-LoadImage.md",
+   "bytes": 1765,
+   "sha256_12": "c05bae514753"
+  },
+  {
+   "name": "docs/kie/llms-index",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:07Z",
+   "detail": "https://docs.kie.ai/llms.txt",
+   "url": "https://docs.kie.ai/llms.txt",
+   "file": "docs/kie/llms-index.md",
+   "bytes": 81009,
+   "sha256_12": "7ae1f24114d8"
+  },
+  {
+   "name": "docs/kie/nano-banana-2-1",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:08Z",
+   "detail": "https://docs.kie.ai/market/google/nanobanana-2-1.md",
+   "url": "https://docs.kie.ai/market/google/nanobanana-2-1.md",
+   "file": "docs/kie/nano-banana-2-1.md",
+   "bytes": 25484,
+   "sha256_12": "743729cc49fe"
+  },
+  {
+   "name": "docs/kie/nano-banana-2",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:09Z",
+   "detail": "https://docs.kie.ai/market/google/nanobanana2.md",
+   "url": "https://docs.kie.ai/market/google/nanobanana2.md",
+   "file": "docs/kie/nano-banana-2.md",
+   "bytes": 25309,
+   "sha256_12": "01c4f34f849f"
+  },
+  {
+   "name": "docs/kie/kling-2.6-image-to-video",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:10Z",
+   "detail": "https://docs.kie.ai/market/kling/image-to-video.md",
+   "url": "https://docs.kie.ai/market/kling/image-to-video.md",
+   "file": "docs/kie/kling-2.6-image-to-video.md",
+   "bytes": 18274,
+   "sha256_12": "9bfe1ed76f68"
+  },
+  {
+   "name": "docs/kie/get-task-detail",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:11Z",
+   "detail": "https://docs.kie.ai/market/common/get-task-detail.md",
+   "url": "https://docs.kie.ai/market/common/get-task-detail.md",
+   "file": "docs/kie/get-task-detail.md",
+   "bytes": 17292,
+   "sha256_12": "58479edaca4b"
+  },
+  {
+   "name": "docs/kie/get-account-credits",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:12Z",
+   "detail": "https://docs.kie.ai/common-api/get-account-credits.md",
+   "url": "https://docs.kie.ai/common-api/get-account-credits.md",
+   "file": "docs/kie/get-account-credits.md",
+   "bytes": 6639,
+   "sha256_12": "656e671c0290"
+  },
+  {
+   "name": "docs/kie/file-upload-quickstart",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:13Z",
+   "detail": "https://docs.kie.ai/file-upload-api/quickstart.md",
+   "url": "https://docs.kie.ai/file-upload-api/quickstart.md",
+   "file": "docs/kie/file-upload-quickstart.md",
+   "bytes": 21895,
+   "sha256_12": "cf2509b21a16"
+  },
+  {
+   "name": "docs/kie/file-upload-base64",
+   "status": "ok",
+   "fetched_at": "2026-11-04T17:43:14Z",
+   "detail": "https://docs.kie.ai/file-upload-api/upload-file-base-64.md",
+   "url": "https://docs.kie.ai/file-upload-api/upload-file-base-64.md",
+   "file": "docs/kie/file-upload-base64.md",
+   "bytes": 12405,
+   "sha256_12": "00eb43b46d3a"
+  },
+  {
+   "name": "kie/gpt-image-2-image-to-image",
+   "status": "ok",
+   "fetched_at": "2026-11-05T14:16:06Z",
+   "detail": "",
+   "paths": [
+    "/api/v1/jobs/createTask"
+   ],
+   "file": "kie/gpt-image-2-image-to-image.schema.json",
+   "bytes": 16007,
+   "sha256_12": "a6eb8cb38fe0"
+  },
+  {
+   "name": "kie/grok-imagine-image-2-0/image-edit",
+   "status": "ok",
+   "fetched_at": "2026-11-05T14:16:10Z",
+   "detail": "",
+   "paths": [
+    "/api/v1/jobs/createTask"
+   ],
+   "file": "kie/grok-imagine-image-2-0__image-edit.schema.json",
+   "bytes": 16964,
+   "sha256_12": "fcef91248ff0"
+  }
+ ]
+}

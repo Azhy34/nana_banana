@@ -1,0 +1,417 @@
+{
+ "1": {
+  "class_type": "MoonbloomWallpaper",
+  "inputs": {
+   "wallpaper_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/Tropical Jungle Wallpaper Mural upscail.png",
+   "use_texture": true,
+   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11"
+  }
+ },
+ "2": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "1",
+    0
+   ]
+  }
+ },
+ "3": {
+  "class_type": "MoonbloomDesign",
+  "inputs": {
+   "scene_id": "l11_reel01_s1_gaze_brief",
+   "aspect_ratio": "9:16",
+   "age_group": "vorschul",
+   "style": "Retro Kids",
+   "color": "Sunny Mustard",
+   "key_object": "random",
+   "lighting": "warm morning sunbeams",
+   "camera_angle": "random",
+   "camera_elevation": "random",
+   "camera_distance": "random",
+   "brand": "random",
+   "composition": "unobstructed",
+   "clean_random_details": false,
+   "variation": 0,
+   "camera_body": "Canon EOS R5",
+   "lens": "28mm gentle wide lens",
+   "aperture": "f/11 aperture",
+   "prompt_mode": "brief",
+   "brief_subject": "a cheerful retro room for a child aged 3 to 5, with a striped crocheted play mat and a vintage wooden toy hot-air balloon",
+   "brief_scene": "A bright airy room with a light oak floor. A round crocheted play mat in caramel, cream and mustard stripes lies on the floor with one vintage wooden toy hot-air balloon and a few wooden blocks on it. On the RIGHT side wall, away from the mural: a low vintage solid-wood bench (35 cm high) with a mustard-yellow seat cushion and one cream wool blanket folded neatly into a tidy rectangle with aligned edges at one end, and above it one small framed retro print. Warm morning sunbeams from a window on the RIGHT lie in soft patches on the floor. A boy of about four in a soft oat knit sweater and light grey trousers stands on the floor in the middle of the room about two metres in front of the mural wall with his back to the camera, one arm raised and pointing up at the leopard cub sitting on the branch, his head tilted back to look up at it, his face turned away from the camera so no facial detail is visible, well away from the mural. Palette: mustard yellow, caramel, cream, pale oak and soft sage.",
+   "brief_framing": "Shot from the left part of the room at eye level, turned about 25 degrees toward the mural wall and pulled well back, so the RIGHT side wall is in view. The whole mural wall is in the frame in perspective, with a strip of ceiling above it and the skirting board below it; the wall fills the upper-middle of the tall frame and the floor fills the lower part.",
+   "with_texture": true,
+   "brief_people": "from_behind",
+   "brief_product": "the wall mural",
+   "brief_product_short": "the mural",
+   "brief_wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it."
+  }
+ },
+ "4": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "3",
+    0
+   ]
+  }
+ },
+ "5": {
+  "class_type": "MoonbloomKieImage",
+  "inputs": {
+   "prompt": [
+    "3",
+    0
+   ],
+   "scene_id": [
+    "3",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": true,
+   "reference_labels": false,
+   "model": "nano-banana-2-1",
+   "resolution": "2K"
+  }
+ },
+ "6": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "5",
+    0
+   ]
+  }
+ },
+ "7": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "5",
+    2
+   ]
+  }
+ },
+ "8": {
+  "class_type": "MoonbloomKieGptImage2",
+  "inputs": {
+   "prompt": [
+    "3",
+    0
+   ],
+   "scene_id": [
+    "3",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": true,
+   "reference_labels": false,
+   "resolution": "2K"
+  }
+ },
+ "9": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "8",
+    0
+   ]
+  }
+ },
+ "10": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "8",
+    2
+   ]
+  }
+ },
+ "11": {
+  "class_type": "MoonbloomKieGrokImagineEdit",
+  "inputs": {
+   "prompt": [
+    "3",
+    0
+   ],
+   "scene_id": [
+    "3",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": true,
+   "reference_labels": false
+  }
+ },
+ "12": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "11",
+    0
+   ]
+  }
+ },
+ "13": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "11",
+    2
+   ]
+  }
+ },
+ "14": {
+  "class_type": "MoonbloomDesign",
+  "inputs": {
+   "scene_id": "l11_reel01_s2_product_brief",
+   "aspect_ratio": "9:16",
+   "age_group": "schulkind",
+   "style": "Woodland Nature",
+   "color": "Cocoa Brown",
+   "key_object": "random",
+   "lighting": "warm golden hour sunlight",
+   "camera_angle": "random",
+   "camera_elevation": "random",
+   "camera_distance": "random",
+   "brand": "random",
+   "composition": "unobstructed",
+   "clean_random_details": false,
+   "variation": 0,
+   "camera_body": "Hasselblad H6D-100c",
+   "lens": "35mm prime lens",
+   "aperture": "f/11 aperture",
+   "prompt_mode": "brief",
+   "brief_subject": "a calm, natural room for a school-age kid (6 to 10 years) with a low reading bench and warm oak",
+   "brief_scene": "A bright room with a warm oak floor. A large round natural wool rug in warm oat lies on the floor with nothing on it. On the LEFT side wall, away from the mural: a low solid-oak reading bench (40 cm high) with two books stacked at one end, and above it one small framed botanical print. Warm golden hour sunlight from a window on the LEFT lies in long soft patches across the floor. A sheer cream linen curtain hangs at the extreme right edge of the frame, close to the camera and slightly out of focus, as a foreground layer. Palette: warm oak, oat, soft sage and white.",
+   "brief_framing": "Shot from the right part of the room at natural eye level, turned about 30 degrees toward the mural wall and pulled well back, so the LEFT side wall is in view. The whole mural wall is in the frame in perspective, from its near edge to the far corner, with a strip of ceiling above it and the skirting board below it; the wall fills the upper-middle of the tall frame and the floor fills the lower part. Nothing stands in front of the mural.",
+   "with_texture": true,
+   "brief_people": "none",
+   "brief_product": "the wall mural",
+   "brief_product_short": "the mural",
+   "brief_wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it."
+  }
+ },
+ "15": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "14",
+    0
+   ]
+  }
+ },
+ "16": {
+  "class_type": "MoonbloomKieImage",
+  "inputs": {
+   "prompt": [
+    "14",
+    0
+   ],
+   "scene_id": [
+    "14",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": true,
+   "reference_labels": false,
+   "model": "nano-banana-2-1",
+   "resolution": "2K"
+  }
+ },
+ "17": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "16",
+    0
+   ]
+  }
+ },
+ "18": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "16",
+    2
+   ]
+  }
+ },
+ "19": {
+  "class_type": "MoonbloomKieGptImage2",
+  "inputs": {
+   "prompt": [
+    "14",
+    0
+   ],
+   "scene_id": [
+    "14",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": true,
+   "reference_labels": false,
+   "resolution": "2K"
+  }
+ },
+ "20": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "19",
+    0
+   ]
+  }
+ },
+ "21": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "19",
+    2
+   ]
+  }
+ },
+ "22": {
+  "class_type": "MoonbloomKieGrokImagineEdit",
+  "inputs": {
+   "prompt": [
+    "14",
+    0
+   ],
+   "scene_id": [
+    "14",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": true,
+   "reference_labels": false
+  }
+ },
+ "23": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "22",
+    0
+   ]
+  }
+ },
+ "24": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "22",
+    2
+   ]
+  }
+ }
+}

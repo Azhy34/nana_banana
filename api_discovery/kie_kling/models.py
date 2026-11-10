@@ -125,7 +125,7 @@ class Kling26Input(KieBaseModel):
     )
     duration: Literal["5", "10"] = Field(
         default="5",
-        description="Video duration in seconds: '5' (55 credits / $0.28) or '10' (110 credits / $0.55)"
+        description="Video duration in seconds: '5' or '10'. The price is not stored here: it is read live from KIE (reels_pipeline/live_price.py)"
     )
 
 
@@ -182,6 +182,46 @@ class KlingTaskCreateRequest(KieBaseModel):
     )
 
 
+# ---------------------------------------------------------------------
+# 4b. Nano Banana 2 / 2.1 (Google Gemini image) request models
+# Verified against the official KIE schema snapshots in api_truth/kie/ (04.11.2026):
+#   nano-banana-2   = Gemini 3.1 Flash Image  (2K = 12 credits)
+#   nano-banana-2-1 = newer update            (2K = 6 credits)
+# Both share the same input fields. There is NO negative_prompt field: put the
+# "Avoid: ..." list inside the prompt text (the app's buildGeminiPrompt already does).
+# ---------------------------------------------------------------------
+
+NanoBananaAspect = Literal[
+    "1:1", "2:3", "3:2", "1:4", "4:1", "3:4", "4:3", "4:5", "5:4",
+    "1:8", "8:1", "9:16", "16:9", "21:9", "auto",
+]
+
+
+class NanoBanana2Input(KieBaseModel):
+    prompt: str = Field(
+        min_length=1,
+        max_length=20000,
+        description="Text description of the image (max 20000 characters)"
+    )
+    image_input: List[str] = Field(
+        default_factory=list,
+        max_length=10,
+        description="Reference image URLs (uploaded file URLs, up to 10). Order = REFERENCE_IMAGE_1, 2, ..."
+    )
+    aspect_ratio: NanoBananaAspect = Field(default="auto")
+    resolution: Literal["1K", "2K", "4K"] = Field(default="1K")
+    output_format: Literal["png", "jpg"] = Field(default="jpg")
+
+
+class NanoBananaTaskCreateRequest(KieBaseModel):
+    model: Literal["nano-banana-2", "nano-banana-2-1"] = Field(
+        default="nano-banana-2-1",
+        description="Target image model identifier"
+    )
+    input: NanoBanana2Input
+    call_back_url: Optional[str] = Field(default=None, alias="callBackUrl")
+
+
 class KlingTaskCreateData(KieBaseModel):
     task_id: str = Field(
         alias="taskId",
@@ -225,6 +265,7 @@ class KlingRecordInfoData(KieBaseModel):
     fail_code: Optional[str] = Field(default=None, alias="failCode")
     fail_msg: Optional[str] = Field(default=None, alias="failMsg")
     result_json: Optional[str] = Field(default=None, alias="resultJson")
+    param: Optional[str] = Field(default=None, description="KIE's echo of the request it really received (a JSON string)")
     response: Optional[KlingTaskResponsePayload] = Field(default=None)
 
 

@@ -4,6 +4,10 @@ Verifies 100% field parsing for valid requests, success responses, and 4xx/5xx e
 """
 
 import pytest
+
+pytestmark = pytest.mark.core  # the old KIE client tests are small and guard the request/response shapes
+
+import pytest
 from pydantic import ValidationError
 from models import (
     KieApiErrorResponse,
@@ -14,8 +18,39 @@ from models import (
     KlingRecordInfoResponse,
     KlingTaskCreateRequest,
     KlingTaskCreateResponse,
+    NanoBanana2Input,
+    NanoBananaTaskCreateRequest,
     TwoLayerResult,
 )
+
+
+def test_nano_banana_request_matches_official_schema():
+    # Fields mirror api_truth/kie/nano-banana-2.schema.json (image_input, NOT image_urls).
+    req = NanoBananaTaskCreateRequest(
+        model="nano-banana-2",
+        input=NanoBanana2Input(
+            prompt="Children's bedroom, wallpaper mural on the wall",
+            image_input=["https://tempfile.redpandaai.co/a.png", "https://tempfile.redpandaai.co/b.jpg"],
+            aspect_ratio="9:16",
+            resolution="2K",
+            output_format="png",
+        ),
+    )
+    dumped = req.model_dump(by_alias=True, exclude_none=True)
+    assert dumped["model"] == "nano-banana-2"
+    assert dumped["input"]["aspect_ratio"] == "9:16"
+    assert dumped["input"]["resolution"] == "2K"
+    assert len(dumped["input"]["image_input"]) == 2
+    assert "negative_prompt" not in dumped["input"]  # the model has no such field
+
+    with pytest.raises(ValidationError):
+        NanoBanana2Input(prompt="x", resolution="8K")  # only 1K / 2K / 4K
+    with pytest.raises(ValidationError):
+        NanoBanana2Input(prompt="x", aspect_ratio="7:5")  # not in the official enum
+    with pytest.raises(ValidationError):
+        NanoBanana2Input(prompt="x", image_input=["u"] * 11)  # max 10 references
+    with pytest.raises(ValidationError):
+        NanoBananaTaskCreateRequest(model="nano-banana-3", input=NanoBanana2Input(prompt="x"))
 
 
 def test_kling26_request_validation():

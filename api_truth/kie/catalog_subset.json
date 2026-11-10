@@ -1,0 +1,112 @@
+{
+ "fetched_at": "2026-11-05T14:16:14Z",
+ "models": {
+  "kling-2.6/image-to-video": {
+   "price": "5-second video: 63 credits ($0.315) without audio, 126 credits ($0.63) with audio. 10-second video: 126 credits ($0.63) without audio, 252 credits ($1.26) with audio. Flat rate per video, about 10% below Kling's official pricing.\n\nHigh-tier top-ups come with bonus credits that lower the effective price by about 10%.",
+   "success_rate": {
+    "buckets_total": 144,
+    "buckets_with_traffic": 144,
+    "avg_success_rate_24h": 96.9,
+    "last_bucket": {
+     "start": "2026-11-05T14:00:00Z",
+     "end": "2026-11-05T14:10:00Z",
+     "successRate": 92.0,
+     "errorRate": 8.0,
+     "isNormal": true
+    }
+   },
+   "title": "Kling 2.6 Image To Video",
+   "provider": "Kling",
+   "taskType": [
+    "Image to Video"
+   ],
+   "pricingDesc": "5-second video: 63 credits ($0.315) without audio, 126 credits ($0.63) with audio. 10-second video: 126 credits ($0.63) without audio, 252 credits ($1.26) with audio. Flat rate per video, about 10% below Kling's official pricing.\n\nHigh-tier top-ups come with bonus credits that lower the effective price by about 10%."
+  },
+  "nano-banana-2": {
+   "price": "Nano Banana 2 — now just 8 credits ($0.04) for 1 K, 12 credits ($0.06) for 2 K, and 18 credits ($0.09) for 4 K, roughly 40 % below the official price.\n High-tier top-ups (+10% bonus) bring effective pricing down to ~$0.036 for 1 K, ~$0.054 for 2 K, and ~$0.081 for 4 K.",
+   "success_rate": {
+    "buckets_total": 144,
+    "buckets_with_traffic": 144,
+    "avg_success_rate_24h": 90.8,
+    "last_bucket": {
+     "start": "2026-11-05T14:00:00Z",
+     "end": "2026-11-05T14:10:00Z",
+     "successRate": 100.0,
+     "errorRate": 0.0,
+     "isNormal": true
+    }
+   },
+   "title": "Nano Banana 2",
+   "provider": "Google",
+   "taskType": [
+    "Text to Image",
+    "Image to Image"
+   ],
+   "pricingDesc": "Nano Banana 2 — now just 8 credits ($0.04) for 1 K, 12 credits ($0.06) for 2 K, and 18 credits ($0.09) for 4 K, roughly 40 % below the official price.\n High-tier top-ups (+10% bonus) bring effective pricing down to ~$0.036 for 1 K, ~$0.054 for 2 K, and ~$0.081 for 4 K."
+  },
+  "nano-banana-2-1": {
+   "price": "4 credits ($0.02) for 1K, 6 credits ($0.03) for 2K, and 9 credits ($0.045) for 4K — 1K/2K 40% and 4K 60% below official pricing.\n\nHigh-tier top-ups come with bonus credits that lower the effective price by about 10%.",
+   "success_rate": {
+    "buckets_total": 144,
+    "buckets_with_traffic": 144,
+    "avg_success_rate_24h": 95.6,
+    "last_bucket": {
+     "start": "2026-11-05T14:00:00Z",
+     "end": "2026-11-05T14:10:00Z",
+     "successRate": 100.0,
+     "errorRate": 0.0,
+     "isNormal": true
+    }
+   },
+   "title": "Nano Banana 2.1",
+   "provider": "Google",
+   "taskType": [
+    "Text to Image",
+    "Image to Image"
+   ],
+   "pricingDesc": "4 credits ($0.02) for 1K, 6 credits ($0.03) for 2K, and 9 credits ($0.045) for 4K — 1K/2K 40% and 4K 60% below official pricing.\n\nHigh-tier top-ups come with bonus credits that lower the effective price by about 10%."
+  },
+  "gpt-image-2-image-to-image": {
+   "price": "GPT-2 Image — now just 6 credits ($0.03) for 1 K, 10 credits ($0.05) for 2 K, and 16 credits ($0.08) for 4 K.\nHigh-tier top-ups (+10% bonus) bring effective pricing down to ~10% off the above rates.",
+   "success_rate": {
+    "buckets_total": 144,
+    "buckets_with_traffic": 144,
+    "avg_success_rate_24h": 95.0,
+    "last_bucket": {
+     "start": "2026-11-05T14:00:00Z",
+     "end": "2026-11-05T14:10:00Z",
+     "successRate": 97.0,
+     "errorRate": 3.0,
+     "isNormal": true
+    }
+   },
+   "title": "Gpt Image 2 Image To Image",
+   "provider": "OpenAI",
+   "taskType": [
+    "Image to Image"
+   ],
+   "pricingDesc": "GPT-2 Image — now just 6 credits ($0.03) for 1 K, 10 credits ($0.05) for 2 K, and 16 credits ($0.08) for 4 K.\nHigh-tier top-ups (+10% bonus) bring effective pricing down to ~10% off the above rates."
+  },
+  "grok-imagine-image-2-0/image-edit": {
+   "price": "4 credits per image (= $0.02), approximately 67% cheaper than the official price ($0.06/image).\n\nHigh-tier top-ups include a +10% bonus, making effective pricing approximately 10% lower than listed.",
+   "success_rate": {
+    "buckets_total": 144,
+    "buckets_with_traffic": 144,
+    "avg_success_rate_24h": 85.0,
+    "last_bucket": {
+     "start": "2026-11-05T14:00:00Z",
+     "end": "2026-11-05T14:10:00Z",
+     "successRate": 89.0,
+     "errorRate": 11.0,
+     "isNormal": true
+    }
+   },
+   "title": "Grok Imagine Image 2.0 Image  Edit",
+   "provider": "Grok",
+   "taskType": [
+    "Image to Image"
+   ],
+   "pricingDesc": "4 credits per image (= $0.02), approximately 67% cheaper than the official price ($0.06/image).\n\nHigh-tier top-ups include a +10% bonus, making effective pricing approximately 10% lower than listed."
+  }
+ }
+}

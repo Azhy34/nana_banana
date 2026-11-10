@@ -1,0 +1,47 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-08T14:37:07Z"
+ },
+ "class_name": "MoonbloomWallpaper",
+ "display_name": "Moonbloom Wallpaper (the reference image)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "wallpaper_path": {
+   "type": "STRING",
+   "default": "",
+   "tooltip": "Full path to the wallpaper artwork file (PNG/JPG)."
+  },
+  "use_texture": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "Also send the Craft Lambda paper texture as REFERENCE_IMAGE_2, like the app."
+  }
+ },
+ "optional_inputs": {
+  "out_dir": {
+   "type": "STRING",
+   "default": "",
+   "tooltip": "Where results go. Empty = the wallpaper's folder."
+  }
+ },
+ "outputs": {
+  "types": [
+   "IMAGE",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING"
+  ],
+  "names": [
+   "wallpaper",
+   "wallpaper_path",
+   "texture_path",
+   "out_dir",
+   "listing"
+  ]
+ },
+ "output_node": false,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

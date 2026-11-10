@@ -1,0 +1,39 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-08T18:13:29Z"
+ },
+ "class_name": "MoonbloomFramePicker",
+ "display_name": "Moonbloom Frame Picker (video board: choose a finished photo)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "frame": {
+   "type": "COMBO",
+   "choices": [
+    "l7_reel01_s2_product_brief__nb21.png",
+    "l7_reel01_s1_gaze_brief__nb21.png"
+   ],
+   "tooltip": "Newest photos first; the list refreshes with the node definitions."
+  }
+ },
+ "optional_inputs": {},
+ "outputs": {
+  "types": [
+   "IMAGE",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING"
+  ],
+  "names": [
+   "image",
+   "image_path",
+   "scene_id",
+   "out_dir",
+   "listing"
+  ]
+ },
+ "output_node": false,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

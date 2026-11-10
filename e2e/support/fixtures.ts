@@ -109,6 +109,7 @@ export class MockedApis {
   readonly openrouter: Captured[] = [];
   readonly gemini: Captured[] = [];
   readonly omni: Captured[] = [];
+  readonly omniFiles: Captured[] = [];
   readonly veo: Captured[] = [];
   readonly upload: Captured[] = [];
   readonly blobPut: Captured[] = [];
@@ -185,6 +186,11 @@ export class MockedApis {
       if (await preflight(route)) return;
       const request = capture(route.request());
       this.omni.push(request);
+      // delivery "uri" (1080p / long clips): the video comes as a Files API link instead of inline base64
+      const viaUri = request.body?.response_format?.delivery === 'uri';
+      const video = viaUri
+        ? { type: 'video', mime_type: 'video/mp4', uri: 'https://generativelanguage.googleapis.com/v1beta/files/e2e-omni:download?alt=media' }
+        : { type: 'video', mime_type: 'video/mp4', data: OMNI_VIDEO_BYTES.toString('base64') };
       return json(route, 200, {
         id: 'v1_e2e',
         object: 'interaction',
@@ -192,9 +198,15 @@ export class MockedApis {
         model: request.body?.model,
         steps: [
           { type: 'user_input', content: [] },
-          { type: 'model_output', content: [{ type: 'video', mime_type: 'video/mp4', data: OMNI_VIDEO_BYTES.toString('base64') }] },
+          { type: 'model_output', content: [video] },
         ],
       });
+    });
+    // Files API status poll of a URI-delivered Omni video: ready at once
+    await page.route(/^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/files\/e2e-omni(\?|$)/, async (route) => {
+      if (await preflight(route)) return;
+      this.omniFiles.push(capture(route.request()));
+      return json(route, 200, { name: 'files/e2e-omni', state: 'ACTIVE' });
     });
 
     // ── Veo: long-running operation + file download ─────────────────────────────

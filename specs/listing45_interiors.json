@@ -1,0 +1,535 @@
+{
+  "listing": "Листинг 45",
+  "description": "Eiskunstläuferin (figure skater) watercolor mural, lilac-pink. 9:16 interiors for video; mural stays full-wall and unobstructed. Cards 1-3: first round (kept). Cards 4-5: girl's-room redo of scenes 2 and 3 (owner feedback 04.11: craft table blocked the view, design must be for a girl). Cards 6-8 (04.11, owner: zoom is not interesting, CapCut does it for free): three NEW designs with dynamic ideas for real animation: 6 a woman steps into the room, 7 sun shadows move across floor and furniture, 8 depth layers for a sideways camera slide. Cards 9-10 (05.11, owner: the final frame of the reel, audience up to 10, age group schulkind 6-10, no bed, little furniture, the skater's dress on a hook, the whole mural visible): 9 frontal (looked like a cage), 10 angled 35-40 degrees with Canon EOS R5 + 28mm + f/8 + deep depth of field. Cards 11-16 (06.11, a test of the new board logic with other formats and styles): two cards per age group (baby under 2, vorschul 2-5, schulkind 6-10), three in 4:3 and three in 2:3 (`aspectRatio` of a card overrides the spec ratio), five different app styles, rooms almost empty, no people. Round A = 11-13, round B = 14-16. The cards in work are listed in specs/active_board.json. Cards l45_rand_* (06.11, owner: new run on 3 models, 9:16, fully random style): style, colour, key object, lighting and camera angle are random (seeded by `variation`), the mural stays unobstructed, the camera gear comes from the pools of trends.json.",
+  "aspect_ratio": "9:16",
+  "brief": {
+    "description": "Facts of THIS listing used by the short (brief) prompt: what image 1 is and how it sits on the wall. A listing whose wallpaper covers only the lower two thirds under a scalloped trim needs a different wall_rule.",
+    "product": "the wall mural",
+    "product_short": "the mural",
+    "hero": "the painted figure skater",
+    "wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it."
+  },
+  "wallpaper": "C:/Users/Mikhail/Desktop/Обои/Листинг 45/Листинг 45.PNG",
+  "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 45",
+  "texture": "public/textures/craft_lambda.jpg",
+  "cards": [
+    {
+      "id": "l45_scene_01_sleep_daybed",
+      "ageGroup": "vorschul",
+      "tags": {
+        "keyObject": "Low Scandinavian birch toddler daybed",
+        "roomZone": "sleep zone",
+        "color": "Dusty Rose",
+        "style": "Playful Montessori",
+        "lighting": "warm morning sunbeams",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed"
+      }
+    },
+    {
+      "id": "l45_scene_02_play_craft_table",
+      "ageGroup": "vorschul",
+      "tags": {
+        "keyObject": "Flower-shaped wooden craft table",
+        "roomZone": "play zone",
+        "color": "Strawberry Milk",
+        "style": "Playful Curves",
+        "lighting": "crisp morning window daylight",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed"
+      }
+    },
+    {
+      "id": "l45_scene_03_reading_nook",
+      "ageGroup": "vorschul",
+      "tags": {
+        "keyObject": "Playful reading teepee nook",
+        "roomZone": "reading nook",
+        "color": "Muted Sage",
+        "style": "Retro Kids",
+        "lighting": "soft afternoon window light",
+        "cameraAngle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed"
+      }
+    },
+    {
+      "id": "l45_scene_02_girl_armchair",
+      "ageGroup": "vorschul",
+      "tags": {
+        "keyObject": "Low blush-pink bouclé armchair with light oak legs and a matching round blush pouf, standing at the far left side of the wall",
+        "roomZone": "reading nook",
+        "color": "Dusty Rose",
+        "style": "Japandi",
+        "lighting": "crisp morning window daylight",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "accessories": [
+          "flower-shaped blush velvet bolster pillow",
+          "plush textured cream dot floor rug",
+          "wavy scalloped picture frames with soft pastel abstract art prints"
+        ]
+      },
+      "extraPrompt": "GIRL'S ROOM (a little figure skater's room). Palette: blush pink, dusty rose, lilac, ivory and light oak, echoing the pink-lilac mural. This palette overrides any earlier colour, toy or lamp mention: no cobalt blue, poppy red, mustard or ochre accents, no toy trains, no craft table. Soft feminine details: flower-shaped blush velvet cushions, a ballet-pink knit throw over the armchair, a plush blush pouf, framed pastel abstract art without any letters. FRAMING: the camera faces the mural straight-on and the whole mural is visible from the skirting board up to the ceiling; the floor in front of the wall is open with a soft cream dot rug; all furniture is low (under 70 cm) and stands along the far left side of the wall, nothing stands in the centre or in the foreground; the painted figure skater is fully visible from her hair bun down to her skates and the ice reflection beneath her.",
+      "cleanRandomDetails": true
+    },
+    {
+      "id": "l45_scene_03_girl_nook",
+      "ageGroup": "vorschul",
+      "tags": {
+        "keyObject": "Low curved blush-and-ivory bookcase with children's books and a round lilac floor cushion, standing against the left side wall",
+        "roomZone": "reading nook",
+        "color": "Strawberry Milk",
+        "style": "Japandi",
+        "lighting": "soft afternoon window light",
+        "cameraAngle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "accessories": [
+          "flower-shaped blush velvet bolster pillow",
+          "plush textured cream dot floor rug",
+          "delicate neutral linen blackout curtains"
+        ]
+      },
+      "extraPrompt": "GIRL'S ROOM (a little figure skater's room). Palette: blush pink, dusty rose, lilac, ivory and light oak, echoing the pink-lilac mural. This palette overrides any earlier colour, toy or lamp mention: no cobalt blue, poppy red, mustard or ochre accents, no toy trains, no tent or teepee, no craft table. Soft feminine details: flower-shaped blush velvet cushions, a ballet-pink knit throw on the floor cushion, framed pastel abstract art without any letters. FRAMING: the mural wall fills most of the frame and is visible from the skirting board up to the ceiling; all furniture is low (under 70 cm) and stands only along the left side wall, nothing stands in front of the mural; the painted figure skater is fully visible from her hair bun down to her skates and the ice reflection beneath her.",
+      "cleanRandomDetails": true
+    },
+    {
+      "id": "l45_scene_06_entering_door",
+      "ageGroup": "vorschul",
+      "tags": {
+        "keyObject": "Low white-oak daybed with ivory linen bedding and blush cushions, standing along the left side wall",
+        "roomZone": "sleep zone",
+        "color": "Dusty Rose",
+        "style": "Japandi",
+        "lighting": "warm morning sunbeams",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "accessories": [
+          "flower-shaped blush velvet bolster pillow",
+          "plush textured cream dot floor rug",
+          "delicate neutral linen blackout curtains"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "extraPrompt": "GIRL'S ROOM (a little figure skater's room). Airy and bright. Palette: dusty rose, blush, ivory and light oak, echoing the pink-lilac mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains, no craft table. MOMENT: a young woman in a soft cream knit sweater and light linen trousers, seen from behind and slightly from the side, is just stepping through an open white door at the far right edge of the frame into the room, one foot crossing the threshold, carrying a folded blush-pink blanket; her face is turned away toward the mural so no facial detail is visible; natural human proportions and natural hands. She stays at the right edge of the frame and never overlaps the mural: the painted figure skater is fully visible from her hair bun down to her skates. FRAMING: the camera is locked off on a tripod, straight-on wide shot; the whole mural wall is visible from the skirting board up to the ceiling; all furniture is low (under 70 cm) and stands along the left side wall."
+    },
+    {
+      "id": "l45_scene_07_sun_shadows",
+      "ageGroup": "vorschul",
+      "tags": {
+        "keyObject": "Low white-washed oak reading bench with sage-green and blush cushions and a small potted trailing plant beside it, standing along the left side wall",
+        "roomZone": "reading nook",
+        "color": "Muted Sage",
+        "style": "Biophilic Nursery",
+        "lighting": "warm golden hour sunlight",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "accessories": [
+          "potted trailing ivy plant on a natural wooden shelf",
+          "plush textured cream dot floor rug",
+          "delicate neutral linen blackout curtains"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "extraPrompt": "GIRL'S ROOM (a little figure skater's room). Calm and botanical. Palette: soft sage, blush, ivory and light oak, echoing the pink-lilac mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains, no craft table. MOMENT: low golden-hour sun streams through a tall window on the left of the frame and casts long, clearly visible, soft-edged dappled shadows of leaves and of the window frame across the oak floor, the cream rug and the low bench. The shadows fall only on the floor and the low furniture; the mural wall stays evenly and softly lit so its colours are shown true, with no shadow over the painted figure skater. FRAMING: the camera is locked off on a tripod, straight-on medium-wide shot; the whole mural is visible from the skirting board up to the ceiling and the painted figure skater is fully visible from her hair bun down to her skates; all furniture is low (under 70 cm) and stands along the left side wall."
+    },
+    {
+      "id": "l45_scene_08_side_depth",
+      "ageGroup": "vorschul",
+      "tags": {
+        "keyObject": "Stack of three round pastel lilac and blush donut poufs beside a low arch-shaped blush bookshelf, standing along the left side wall",
+        "roomZone": "play zone",
+        "color": "Strawberry Milk",
+        "style": "Playful Curves",
+        "lighting": "crisp morning window daylight",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "accessories": [
+          "wavy scalloped picture frames with soft pastel abstract art prints",
+          "plush textured cream dot floor rug",
+          "flower-shaped blush velvet bolster pillow"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "extraPrompt": "GIRL'S ROOM (a little figure skater's room). Playful but soft. Palette: pastel lilac, blush pink and butter cream with light oak; every colour pop is a soft pastel, no saturated red, cobalt blue or mustard, no toy trains, no craft table. FRAMING FOR DEPTH: a wide shot from a slight angle that shows the depth of the room, with clear layers: the edge of a sheer cream linen curtain softly out of focus in the extreme foreground on the left, the stack of pastel donut poufs and the low arch-shaped blush bookshelf in the middle ground along the left side wall, and the mural wall behind them. The mural stays fully readable and unobstructed from the skirting board up to the ceiling and the painted figure skater is fully visible from her hair bun down to her skates; all furniture is under 70 cm and the middle of the floor is open."
+    },
+    {
+      "id": "l45_scene_09_full_mural_final",
+      "ageGroup": "schulkind",
+      "tags": {
+        "keyObject": "Small low round light-oak stool, 35 cm high, with a folded blush knit blanket on it, standing in the right half of the room",
+        "roomZone": "play zone",
+        "color": "Dusty Rose",
+        "style": "Japandi",
+        "lighting": "crisp morning window daylight",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "accessories": [
+          "plush textured cream dot floor rug",
+          "a pair of white figure skates with blade guards standing on the rug",
+          "a pink tulle figure-skating dress with a sparkly bodice hanging on a wooden hanger from a small hook on the left side wall"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "stripRegex": [
+        "The focal furniture piece is an? [^.]*\\. Layout: \\. ",
+        "Authentic lived-in details: [^.]*\\. "
+      ],
+      "extraPrompt": "GIRL'S ROOM of a real school-age girl (6-10 years) who is a figure skater: the painted skater on the wall is her dream and the room shows that she lives here. Almost empty and airy: NO BED, no crib, no sofa, no armchair, no desk, no bookshelf, no wardrobe and no toys on the floor. The only things in the room are a plush cream rug on the oak floor, her white figure skates standing on the rug, one small low stool, and her pink tulle figure-skating dress with a sparkly bodice, like the dress of the painted skater, hanging on a wooden hanger from a small hook in the left corner on the side wall, not on the mural. Palette: pastel lilac, blush pink, ivory and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains. FINAL REEL FRAME - THE WHOLE MURAL: the camera stands straight in front of the wall on a tripod at eye level, a wide, symmetrical shot of the whole room. The mural covers the whole wall and the WHOLE wall is inside the frame: the camera is pulled back so that the left corner of the room, the right corner, the ceiling line and the skirting board are all visible, so ALL FOUR edges of the mural are shown and the mural is not cropped by the frame edge. Because the frame is tall, the wall fills the upper part and the lower part shows the oak floor and the rug. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are all shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true. Everything in the room is small and low (under 50 cm) except the hanging dress, which is small and does not touch the mural."
+    },
+    {
+      "id": "l45_scene_10_full_mural_angle",
+      "ageGroup": "schulkind",
+      "tags": {
+        "keyObject": "Large plush cream dot floor rug",
+        "roomZone": "play zone",
+        "color": "Dusty Rose",
+        "style": "Japandi",
+        "lighting": "crisp morning window daylight",
+        "cameraAngle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "cameraBody": "Canon EOS R5",
+        "lens": "28mm gentle wide lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field",
+        "compositionStrategy": "unobstructed",
+        "accessories": [
+          "a pair of white figure skates with blade guards standing on the rug",
+          "an open book and a notebook lying on the rug",
+          "a pink tulle figure-skating dress with a sparkly bodice hanging on a wooden hanger from a small hook on the wall beside the mural"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "stripRegex": [
+        "The focal furniture piece is an? [^.]*\\. Layout: \\. ",
+        "Authentic lived-in details: [^.]*\\. "
+      ],
+      "extraPrompt": "GIRL'S ROOM of a real school-age girl (6-10 years) who is a figure skater: the painted skater on the wall is her dream and the room shows that she lives here. Almost empty, big and airy: NO BED, no crib, no sofa, no armchair, no desk, no bookshelf, no wardrobe, NO STOOL, no pouf and no toys on the floor. The only things in the room are a big plush cream rug on the oak floor, her white figure skates with blade guards on the rug, an open book and a notebook on the rug, and her pink tulle figure-skating dress with a sparkly bodice, like the dress of the painted skater, hanging on a wooden hanger from a small hook on the wall beside the mural, not on the mural. Palette: pastel lilac, blush pink, ivory and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents. ANGLED FINAL REEL FRAME: the camera is NOT frontal. It stands in the right part of the room at eye level and is turned about 35-40 degrees to the mural wall, a wide shot that shows the depth of a large, spacious, airy room: wide open floor, high ceiling, the walls far from the camera, nothing closes the room in, it is not a narrow box. The whole mural wall is inside the frame in perspective: its left edge, its far corner, the ceiling line and the skirting board are all visible, so the mural is shown fully and is not cropped by the frame edge, running diagonally into the depth. Because the frame is tall, the wall fills the upper-middle part and a large part of the lower frame is the oak floor with the rug. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true. Everything in the room is small and low (under 50 cm) except the hanging dress, which is small and does not touch the mural."
+    },
+    {
+      "id": "l45_scene_11_baby_biophilic_43",
+      "ageGroup": "baby",
+      "aspectRatio": "4:3",
+      "subject": "a calm, airy, botanical nursery for a baby under 2 years",
+      "scene": "An almost empty room with a light oak floor. A low round quilted play mat in oat and blush with a small natural-wood baby play gym lies in the right half of the room, with a folded pale sage muslin blanket and one soft cream rabbit on the mat; one small potted trailing plant stands on a low white-washed oak stool near the right side wall. Everything stays low, under 50 cm. Palette: soft lilac, blush, ivory, pale eucalyptus green, light oak.",
+      "framing": "A straight-on tripod shot at eye level, wide and symmetrical: both corners, the ceiling line and the skirting board are in the frame, the wall fills the frame width and the oak floor sits below it.",
+      "tags": {
+        "keyObject": "Low round quilted oat-and-blush play mat with a small natural-wood baby play gym, lying on the floor in the right half of the room",
+        "roomZone": "play zone",
+        "color": "Eucalyptus",
+        "style": "Biophilic Nursery",
+        "lighting": "soft afternoon window light",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "cameraBody": "Sony A7R V",
+        "lens": "35mm prime lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field",
+        "accessories": [
+          "a folded pale sage muslin blanket lying on the play mat",
+          "one soft cream rabbit sitting on the play mat",
+          "a small potted trailing plant on a low white-washed oak stool near the right side wall"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "stripRegex": [
+        "The focal furniture piece is an? [^.]*\\. Layout: \\. ",
+        "Authentic lived-in nursery details: [^.]*\\. "
+      ],
+      "extraPrompt": "NURSERY of a baby under 2 years, calm, airy and botanical. Almost empty: NO CRIB, no bed, no changing table, no wardrobe, no mobile and no toys scattered on the floor. The only things in the room are a low round quilted play mat in oat and blush with a small natural-wood baby play gym on the oak floor in the right half of the room, a folded pale sage muslin blanket and one soft cream rabbit on the mat, and one small potted trailing plant on a low white-washed oak stool near the right side wall. Palette: soft lilac, blush pink, ivory, pale eucalyptus green and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains. FRAMING FOR 4:3: the camera stands straight in front of the wall on a tripod at eye level, a wide symmetrical landscape shot of the whole room. The mural covers the whole wall edge to edge and the WHOLE wall is inside the frame: the left corner, the right corner, the ceiling line and the skirting board are all visible, so ALL FOUR edges of the mural are shown and the mural is not cropped by the frame edge. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are all shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true. Everything in the room is low (under 50 cm)."
+    },
+    {
+      "id": "l45_scene_12_girl_playroom_23",
+      "ageGroup": "vorschul",
+      "aspectRatio": "2:3",
+      "subject": "a playful but soft room for a girl aged 2 to 5",
+      "scene": "An airy room with a light oak floor. A plush cream dot rug; along the left side wall a low arch-shaped blush bookshelf with a few picture books and two round lilac floor poufs, all under 70 cm; one flower-shaped blush velvet bolster pillow on the rug; two small scalloped picture frames with soft pastel abstract art on the left side wall. Palette: pastel lilac, blush pink, butter cream, light oak.",
+      "framing": "Shot from the right part of the room at eye level, turned about 30 degrees toward the mural wall and pulled well back so the room feels wide and airy. The whole wall is in the frame in perspective, from its near edge to the far corner, with the ceiling line and the skirting board; the wall fills the upper-middle of the tall frame and the oak floor with the rug fills the lower part.",
+      "tags": {
+        "keyObject": "Low arch-shaped blush bookshelf with a few picture books and two round lilac floor poufs, standing along the left side wall",
+        "roomZone": "play zone",
+        "color": "Strawberry Milk",
+        "style": "Playful Curves",
+        "lighting": "warm morning sunbeams",
+        "cameraAngle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "cameraBody": "Canon EOS R5",
+        "lens": "28mm gentle wide lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field",
+        "accessories": [
+          "plush textured cream dot floor rug",
+          "a flower-shaped blush velvet bolster pillow lying on the rug",
+          "two small scalloped picture frames with soft pastel abstract art prints on the left side wall"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "stripRegex": [
+        "The focal furniture piece is an? [^.]*\\. Layout: \\. ",
+        "Authentic lived-in details: [^.]*\\. "
+      ],
+      "extraPrompt": "ROOM of a girl aged 2 to 5, playful but soft: rounded shapes and scalloped edges, every colour pop is a soft pastel. Airy: NO BED, no crib, no sofa, no desk, no craft table, no wardrobe and no toys scattered on the floor. The only things in the room are a plush cream dot rug on the oak floor, a low arch-shaped blush bookshelf with a few picture books and two round lilac floor poufs along the LEFT side wall (everything under 70 cm), one flower-shaped blush velvet bolster pillow on the rug, and two small scalloped picture frames with soft pastel abstract art without any letters on the left side wall. Palette: pastel lilac, blush pink, butter cream and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains. FRAMING FOR 2:3 (tall frame): the camera stands in the right part of the room at eye level, turned about 30 degrees to the mural wall and pulled well back, so the room is wide and airy and not a narrow box; the wall fills the upper-middle part of the frame and a large part of the lower frame is the oak floor with the rug. The whole mural wall is inside the frame in perspective: its near edge, its far corner, the ceiling line and the skirting board are all visible, so the mural is not cropped by the frame edge. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are all shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true."
+    },
+    {
+      "id": "l45_scene_13_girl_study_43",
+      "ageGroup": "schulkind",
+      "aspectRatio": "4:3",
+      "subject": "a calm room for a school-age girl (6 to 10 years) who is a figure skater",
+      "scene": "An almost empty room with a light oak floor. A plush cream rug; against the left side wall a slim light-oak writing desk (75 cm high) with a small ivory chair, an open notebook and a wooden pencil on the desk; her white figure skates with blade guards stand on the rug. Palette: pastel lilac, blush pink, ivory, light oak.",
+      "framing": "Shot from the right part of the room at standing eye level, turned about 25 degrees toward the mural wall: a wide landscape frame that shows the depth of a large airy room. The whole wall is in the frame in perspective, from its near edge to the far corner, with the ceiling line and the skirting board.",
+      "tags": {
+        "keyObject": "Slim light-oak writing desk with a small ivory chair, standing against the left side wall",
+        "roomZone": "study zone",
+        "color": "Dusty Rose",
+        "style": "Japandi",
+        "lighting": "crisp morning window daylight",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "cameraBody": "Hasselblad H6D-100c",
+        "lens": "45mm medium format lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field",
+        "accessories": [
+          "plush textured cream dot floor rug",
+          "an open notebook and a wooden pencil on the desk",
+          "a pair of white figure skates with blade guards standing on the rug"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "stripRegex": [
+        "The focal furniture piece is an? [^.]*\\. Layout: \\. ",
+        "Authentic lived-in details: [^.]*\\. "
+      ],
+      "extraPrompt": "ROOM of a school-age girl (6-10 years) who is a figure skater, calm Japandi: light oak, ivory linen and blush. Almost empty: NO BED, no sofa, no bookshelf, no wardrobe and no toys on the floor. The only things in the room are a plush cream rug on the oak floor, a slim light-oak writing desk (75 cm high) with a small ivory chair standing against the LEFT side wall with an open notebook and a wooden pencil on it, and her white figure skates with blade guards standing on the rug. Palette: pastel lilac, blush pink, ivory and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains. FRAMING FOR 4:3: the camera stands in the right part of the room at standing eye level and is turned about 25 degrees to the mural wall, a wide landscape shot that shows the depth of a large airy room. The whole mural wall is inside the frame in perspective: its near edge, its far corner, the ceiling line and the skirting board are all visible, so the mural is not cropped by the frame edge. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are all shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true. Everything except the desk is low (under 50 cm)."
+    },
+    {
+      "id": "l45_scene_14_baby_quiet_corner_23",
+      "ageGroup": "baby",
+      "aspectRatio": "2:3",
+      "subject": "a calm nursery for a baby under 2 years",
+      "scene": "An almost empty, airy room with a light oak floor. A round cream wool rug, a low light-oak nursing chair with an ivory bouclé seat cushion and a folded blush knit blanket near the right side wall, and one soft cream bear sitting on the rug. Everything stays low. Palette: soft lilac, blush, ivory, pale sage, light oak.",
+      "framing": "A straight-on tripod shot at eye level, pulled back so the room feels wide; both corners, the ceiling line and the skirting board are in the frame. The floor and rug fill the lower half; the ceiling is plain.",
+      "tags": {
+        "keyObject": "Low light-oak nursing chair with an ivory bouclé seat cushion and a folded blush knit blanket, standing near the right side wall",
+        "roomZone": "sleep zone",
+        "color": "Muted Sage",
+        "style": "Japandi",
+        "lighting": "soft afternoon window light",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "cameraBody": "Fujifilm GFX 100S",
+        "lens": "28mm gentle wide lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field",
+        "accessories": [
+          "a round cream wool rug",
+          "a folded blush knit blanket on the nursing chair",
+          "one soft cream bear sitting on the rug"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "stripRegex": [
+        "The focal furniture piece is an? [^.]*\\. Layout: \\. ",
+        "Authentic lived-in nursery details: [^.]*\\. "
+      ],
+      "extraPrompt": "NURSERY of a baby under 2 years, a quiet Japandi corner. Almost empty: NO CRIB, no bed, no changing table, no wardrobe, no mobile and no toys scattered on the floor. The only things in the room are a round cream wool rug on the oak floor, a low light-oak nursing chair with an ivory bouclé seat cushion and a folded blush knit blanket near the RIGHT side wall (seat 35 cm high, back under 70 cm), and one soft cream bear sitting on the rug. Palette: soft lilac, blush pink, ivory, pale sage and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains. FRAMING FOR 2:3 (tall frame): the camera stands straight in front of the wall on a tripod at eye level, a symmetrical shot pulled well back so the room is wide and airy and not a narrow box; the wall fills the upper-middle part of the frame and a large part of the lower frame is the oak floor with the rug. The mural covers the whole wall edge to edge and the WHOLE wall is inside the frame: the left corner, the right corner, the ceiling line and the skirting board are all visible, so ALL FOUR edges of the mural are shown and the mural is not cropped by the frame edge. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are all shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true. Everything in the room is low (under 70 cm)."
+    },
+    {
+      "id": "l45_scene_15_girl_montessori_43",
+      "ageGroup": "vorschul",
+      "aspectRatio": "4:3",
+      "subject": "a tidy, calm room for a girl aged 2 to 5",
+      "scene": "A light oak floor with a plush cream dot rug. Along the side wall a low open light-birch Montessori shelf (70 cm high) with wooden stacking rings and a few picture books; a small light-birch step stool and a pale lilac floor cushion on the rug. Palette: pastel lilac, blush pink, ivory, light oak.",
+      "framing": "Shot from the right part of the room at child eye level, turned about 30 degrees toward the mural wall: a wide landscape frame that shows the depth of an airy room. The whole wall is in the frame in perspective, from its near edge to the far corner, with the ceiling line and the skirting board.",
+      "tags": {
+        "keyObject": "Low open light-birch Montessori shelf with wooden stacking rings and a few picture books, standing along the left side wall",
+        "roomZone": "play zone",
+        "color": "Dusty Rose",
+        "style": "Playful Montessori",
+        "lighting": "warm golden hour sunlight",
+        "cameraAngle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "cameraBody": "Canon EOS R5",
+        "lens": "35mm prime lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field",
+        "accessories": [
+          "plush textured cream dot floor rug",
+          "a small light-birch step stool",
+          "a pale lilac floor cushion lying on the rug"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "stripRegex": [
+        "The focal furniture piece is an? [^.]*\\. Layout: \\. ",
+        "Authentic lived-in details: [^.]*\\. "
+      ],
+      "extraPrompt": "ROOM of a girl aged 2 to 5 in a Playful Montessori style: everything stands at child height, tidy and calm. NO BED, no crib, no sofa, no desk, no craft table, no wardrobe and no toys on the floor. The only things in the room are a plush cream dot rug on the oak floor, a low open light-birch Montessori shelf (70 cm high) with wooden stacking rings and a few picture books along the side wall, a small light-birch step stool and a pale lilac floor cushion on the rug. Palette: pastel lilac, blush pink, ivory and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains. FRAMING FOR 4:3: the camera stands in the right part of the room at child eye level and is turned about 30 degrees to the mural wall, a wide landscape shot that shows the depth of an airy room. The whole mural wall is inside the frame in perspective: its near edge, its far corner, the ceiling line and the skirting board are all visible, so the mural is not cropped by the frame edge. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are all shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true. Everything in the room is low (under 70 cm)."
+    },
+    {
+      "id": "l45_scene_16_girl_retro_lounge_23",
+      "ageGroup": "schulkind",
+      "aspectRatio": "2:3",
+      "subject": "a soft room for a school-age girl (6 to 10 years) who is a figure skater, with rounded retro shapes in pastel tones",
+      "scene": "An almost empty room with a light oak floor. A plush cream rug; a low retro rounded lilac-and-ivory floor lounger (30 cm high) in the right half of the room; her white figure skates with blade guards stand on the rug, and an open book lies on the rug. Palette: soft lilac, blush pink, ivory, pale eucalyptus green, light oak.",
+      "framing": "Shot from the right part of the room at standing eye level, turned about 25 degrees toward the mural wall and pulled well back so the room feels wide and airy. The whole wall is in the frame in perspective, with the ceiling line and the skirting board; the wall fills the upper-middle of the tall frame and the oak floor with the rug fills the lower part.",
+      "tags": {
+        "keyObject": "Low retro rounded lilac-and-ivory floor lounger, 30 cm high, in the right half of the room",
+        "roomZone": "play zone",
+        "color": "Eucalyptus",
+        "style": "Retro Kids",
+        "lighting": "crisp morning window daylight",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "cameraBody": "Sony A7R V",
+        "lens": "28mm gentle wide lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field",
+        "accessories": [
+          "plush textured cream dot floor rug",
+          "a pair of white figure skates with blade guards standing on the rug",
+          "an open book lying on the rug"
+        ]
+      },
+      "cleanRandomDetails": true,
+      "stripRegex": [
+        "The focal furniture piece is an? [^.]*\\. Layout: \\. ",
+        "Authentic lived-in details: [^.]*\\. "
+      ],
+      "extraPrompt": "ROOM of a school-age girl (6-10 years) who is a figure skater, soft Retro Kids: rounded retro shapes in pastel tones, no loud colours. Almost empty: NO BED, no sofa, no desk, no bookshelf, no wardrobe and no toys on the floor. The only things in the room are a plush cream rug on the oak floor, a low retro rounded lilac-and-ivory floor lounger (30 cm high) in the right half of the room, her white figure skates with blade guards standing on the rug and an open book lying on the rug. Palette: soft lilac, blush pink, ivory, pale eucalyptus green and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains. FRAMING FOR 2:3 (tall frame): the camera stands in the right part of the room at standing eye level, turned about 25 degrees to the mural wall and pulled well back, so the room is wide and airy and not a narrow box; the wall fills the upper-middle part of the frame and a large part of the lower frame is the oak floor with the rug. The whole mural wall is inside the frame in perspective: its near edge, its far corner, the ceiling line and the skirting board are all visible, so the mural is not cropped by the frame edge. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are all shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true. Everything in the room is low (under 50 cm)."
+    },
+    {
+      "id": "l45_scene_17_baby_bubble_chandelier_23",
+      "ageGroup": "baby",
+      "aspectRatio": "2:3",
+      "subject": "a playful retro nursery for a baby under 2 years, with scalloped edges, round shapes and soft sunbeams",
+      "scene": "A bright room with a light oak parquet floor. A round quilted cream play mat lies in the middle of the floor with a smooth beechwood rattle on it. On the LEFT side wall, away from the mural: a scalloped wooden wall shelf with small wooden animal figures (an elephant, a giraffe and a lion) and, beside it, two wavy scalloped picture frames with retro sunrise and flower prints. A playful cluster bubble chandelier with frosted glass globes hangs high in the top-right corner of the ceiling, well above the top edge of the mural. Warm sunbeams from a window on the left cast soft dappled shadows across the floor and the mat. Palette: soft lilac, blush, butter cream and light oak.",
+      "framing": "Shot from the right part of the room at eye level, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall with the shelf is in view. The whole mural wall is in the frame in perspective, from its near edge to the far corner, with a strip of ceiling above it and the skirting board below it; the wall fills the upper-middle of the tall frame and the oak floor with the mat fills the lower part.",
+      "tags": {
+        "style": "Retro Kids",
+        "color": "Dusty Rose",
+        "lighting": "warm morning sunbeams",
+        "cameraAngle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "cameraBody": "Canon EOS R5",
+        "lens": "28mm gentle wide lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field"
+      }
+    },
+    {
+      "id": "l45_scene_18_girl_flower_table_43",
+      "ageGroup": "vorschul",
+      "aspectRatio": "4:3",
+      "subject": "a cheerful room for a girl aged 2 to 5, with a flower-shaped craft table, round bouclé poufs and scalloped details",
+      "scene": "A bright room with a light oak herringbone parquet floor and a plush cream dot rug. In the right half of the room, a low flower-shaped wooden craft table (50 cm high) with a wooden cup of wax crayons and an open drawing book, and next to it a stack of three round bouclé poufs in blush, lilac and butter cream (under 60 cm). On the RIGHT side wall, away from the mural: a scalloped wooden shelf with a few picture books and a small potted trailing ivy, and two wavy scalloped picture frames with retro prints. Warm golden-hour light from a window on the right makes soft long shadows on the floor. Palette: pastel lilac, blush, butter cream and light oak.",
+      "framing": "Shot from the left part of the room at child eye level, turned about 30 degrees toward the mural wall, a wide landscape frame so the right side wall with the shelf is in view. The whole mural wall is in the frame in perspective, from its near edge to the far corner, with the ceiling line above it and the skirting board below it.",
+      "tags": {
+        "style": "Playful Curves",
+        "color": "Strawberry Milk",
+        "lighting": "warm golden hour sunlight",
+        "cameraAngle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "cameraBody": "Sony A7R V",
+        "lens": "35mm prime lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field"
+      }
+    },
+    {
+      "id": "l45_scene_19_girl_study_globe_23",
+      "ageGroup": "schulkind",
+      "aspectRatio": "2:3",
+      "subject": "a cosy reading corner for a school-age girl (6 to 10 years) who is a figure skater, with a globe, a cork pinboard and a big floor cushion",
+      "scene": "A bright room with a light oak floor and a round cream wool rug. On the rug an oversized textured blush linen floor cushion with an open illustrated atlas on it, a classic globe on a turned solid-wood stand (60 cm high) beside it, and her white figure skates with blade guards next to the cushion. On the LEFT side wall, away from the mural: a natural cork pinboard with watercolour sketches of ice-rink swirls and petals, and a small oak wall shelf with a brass task lamp. Soft afternoon window light from the left. Palette: pastel lilac, blush, ivory, light oak and a touch of brass.",
+      "framing": "Shot from the right part of the room at standing eye level, turned about 25 degrees toward the mural wall and pulled well back, so the left side wall is in view. The whole mural wall is in the frame in perspective, with a strip of ceiling above it and the skirting board below it; the wall fills the upper-middle of the tall frame and the oak floor with the rug fills the lower part.",
+      "tags": {
+        "style": "Japandi",
+        "color": "Dusty Rose",
+        "lighting": "soft afternoon window light",
+        "cameraAngle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+        "cameraElevation": "standing adult eye level (about 1.5 m)",
+        "cameraDistance": "wide shot",
+        "compositionStrategy": "unobstructed",
+        "cameraBody": "Fujifilm GFX 100S",
+        "lens": "45mm medium format lens",
+        "aperture": "f/8.0 aperture",
+        "depthOfField": "deep depth of field"
+      }
+    },
+    {
+      "id": "l45_rand_01_baby",
+      "ageGroup": "baby",
+      "aspectRatio": "9:16",
+      "variation": 7094,
+      "tags": {
+        "compositionStrategy": "unobstructed",
+        "wallArchitecture": "full-wall",
+        "cameraBody": "Hasselblad H6D-100c",
+        "lens": "35mm prime lens",
+        "aperture": "f/8.0 aperture"
+      }
+    },
+    {
+      "id": "l45_rand_02_vorschul",
+      "ageGroup": "vorschul",
+      "aspectRatio": "9:16",
+      "variation": 7670,
+      "tags": {
+        "compositionStrategy": "unobstructed",
+        "wallArchitecture": "full-wall",
+        "cameraBody": "Sony A7R V",
+        "lens": "28mm gentle wide lens",
+        "aperture": "f/11 aperture"
+      }
+    },
+    {
+      "id": "l45_rand_03_schulkind",
+      "ageGroup": "schulkind",
+      "aspectRatio": "9:16",
+      "variation": 4842,
+      "tags": {
+        "compositionStrategy": "unobstructed",
+        "wallArchitecture": "full-wall",
+        "cameraBody": "Fujifilm GFX 100S",
+        "lens": "28mm gentle wide lens",
+        "aperture": "f/11 aperture"
+      }
+    }
+  ],
+  "audience": "girl"
+}

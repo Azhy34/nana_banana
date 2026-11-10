@@ -1,4 +1,4 @@
-# Animate — Оживление интерьеров через Gemini Omni 1.1 Flash & Veo 3.1 (image-to-video)
+# Animate — Оживление интерьеров через Gemini Omni 1.2 Flash & Veo 3.1 (image-to-video)
 
 Документ фичи: вкладка **Video** + кнопка **🎬 Video** в Batch (карточки 9:16). Цель — короткие "живые" видео интерьеров с обоями для Pinterest-пинов и видео-листингов Etsy. Обои — продаваемый товар: узор, цвета, персонажи и фактура материала не должны искажаться при анимации.
 
@@ -6,16 +6,16 @@
 
 | Вопрос | Решение |
 |---|---|
-| Основной движок | **Gemini Omni 1.1 Flash** (`gemini-omni-1.1-flash`) по умолчанию через Google Interactions API |
+| Основной движок | **Gemini Omni 1.2 Flash** (`gemini-omni-1.2-flash`, GA 05.11.2026) по умолчанию через Google Interactions API |
 | Альтернативный движок | **Veo 3.1 Fast** (`veo-3.1-fast-generate-preview`, 6 сек, predictLongRunning) |
-| Разрешение Omni | **720p** ($0.50, минимум Etsy: 720×1280) или **360p** ($0.15, черновик) |
-| Длительность | **5 секунд** (Omni 1.1) / **6 секунд** (Veo 3.1) |
+| Разрешение Omni | **720p** (≈ $0.07/с, минимум Etsy: 720×1280), **1080p** (≈ $0.104/с, апскейл Google, рекомендация Etsy, выдаётся по ссылке Files API) или **360p** (≈ $0.023/с, черновик). Цена = токены вывода × $12 за 1M, считается по секундам |
+| Длительность | **5 секунд по умолчанию, 3–15 с на выбор** (Omni 1.2, отправляется явно: `response_format.duration = "5s"`, без неё Google делает 10 секунд) / **6 секунд** (Veo 3.1) |
 | Формат | **9:16** (вертикальное видео для мобильных устройств, Pinterest и Etsy) |
 | Механика | **Клиентский I2V (Image-to-Video)**: входное сгенерированное фото интерьера передается напрямую в `POST /v1beta/interactions` браузером, видео возвращается синхронно в Base64 MP4 |
 | Защита от дублирования | **Inanimate 2D Print Lock** + прямой оптический наезд (Z-axis push-in) без бокового панорамирования (gliding) |
 | Фактура материала | Omni считывает микрорельеф кварцевого песка **Craft Lambda** напрямую с пикселей исходного 2K-рендера |
 
-## Архитектура Gemini Omni 1.1 Flash
+## Архитектура Gemini Omni 1.2 Flash
 
 ```
 Batch (9:16 карточка) ──▶ VideoTool.tsx ──▶ services/omniService.ts
@@ -23,9 +23,9 @@ Batch (9:16 карточка) ──▶ VideoTool.tsx ──▶ services/omniSer
                                                     ▼
                              POST https://generativelanguage.googleapis.com/v1beta/interactions?key=...
                              {
-                               model: "gemini-omni-1.1-flash",
+                               model: "gemini-omni-1.2-flash",
                                input: [ { type: "image", data: base64 }, { type: "text", text: prompt } ],
-                               response_format: { type: "video", resolution: "720p", aspect_ratio: "9:16" }
+                               response_format: { type: "video", resolution: "720p", aspect_ratio: "9:16", duration: "5s" }, generation_config: { seed }, store: false, stream: false, background: false
                              }
                                                     │
                                                     ▼ (Sync Response ~35-40s)

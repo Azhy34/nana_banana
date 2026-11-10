@@ -1,0 +1,29 @@
+{
+  "description": "DRAFT reel set for Listing 11 (misty watercolour jungle, sage and cream, leopard cub / toucan / parrot, neutral audience, 10.11). s1 = a small child in a Retro Kids room with warm mustard/terracotta accents (contrasts the cool sage) looks at the mural from behind (gaze, Kling); s2 = the same wall in a Woodland Nature reading nook, no person, slow walk-in (Kling). Only 2 neutral kits are free (the others are used in the reels of Listings 6 and 7). Clean rooms: nothing draped, no basket/wicker. py -3.12 -X utf8 scripts/director.py plan l11_reel01",
+  "id": "l11_reel01",
+  "listing_spec": "listing11_interiors.json",
+  "video_spec": "listing11_video.json",
+  "aspect": "9:16",
+  "seed": 11,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 2,
+    "ages": [
+      "vorschul",
+      "schulkind"
+    ],
+    "distinct_kits": true
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "gaze",
+      "kit": "neutral_retro_gaze"
+    },
+    {
+      "slot": "s2",
+      "role": "product",
+      "kit": "neutral_woodland_walkin"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "listing": "Листинг 45",
+  "description": "Kling 2.6 image-to-video, the video board (Frame Picker -> Kling), built by scripts/build_comfy_workflows.py into workflows/moonbloom_video_api.json (the clips in work are listed in specs/active_board.json; the old giant board listing45_girl_nb21_api.json is deprecated). Owner 04.11: plain zoom is not wanted (CapCut does it free); two clips with REAL motion for one reel: A = the woman leaves the room and closes the door (scene 6), B = a first-person walk-in with a light sun-beam effect on the wall (scene 8). Each frame has `motion` (camera + one real motion) and `items` (furniture in the frame); the prompt is built by reels_pipeline/prompts.clip_prompt with the listing's `lock` and replaces DEFAULT_PROMPT (the old zoom). Rules: .agents/skills/creative-ad-auditor (faces are never shown, no pedestal/tilt/crane up, no motion verbs attached to furniture, mural stays flat static ink). scene_id must equal the card id of listing45_interiors.json. min_motion_delta is set per frame: the motion guard only has to catch a FROZEN clip (first-vs-last frame difference near 0; frozen clips measure < 5, camera clips 28-35); clip A has a locked-off camera and only a person and a door move, so its threshold is low and the clip is judged by eye.",
+  "duration": "5",
+  "sound": false,
+  "min_motion_delta": 15.0,
+  "lock": {
+    "description": "Facts of THIS listing used by every clip prompt (reels_pipeline/prompts.clip_prompt): the painting is flat printed ink and never moves; the furniture is frozen. A clip only describes the camera and ONE real motion (Kling's own guide: 'subject + movement'), plus the list of furniture in its frame.",
+    "product": "INANIMATE 2D INK LOCK: the wallpaper design is strictly flat 2D printed ink on textured wallpaper, completely static 2D artwork, zero biological animation, zero morphing, zero waving edges; the painted figure skater and the pink petals stay completely still.",
+    "furniture": "GEOMETRIC & FURNITURE LOCK: the {items} remain 100% frozen, solid and fixed in the room. Zero warping, zero morphing, zero shifting objects across the floor.",
+    "people": "PEOPLE LOCK: every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are, nothing turns toward the lens, and a child held on an arm stays still in the position of the first frame."
+  },
+  "frames": [
+    {
+      "scene_id": "l45_scene_06_entering_door",
+      "clip": "A, the woman leaves the room and closes the door; locked-off camera",
+      "motion": "The camera stays completely still on a tripod and does not move at all. The young woman at the right edge of the frame turns away from the camera and steps out through the open white doorway, then pulls the white door closed behind her with a soft natural motion until it is fully shut. Her face is never visible to the camera, not even in profile: only the back of her head with the hair bun, her cream knit sweater and her linen trousers are seen, and the pink knit blanket stays in her arm. She stays at the right edge of the frame, far from the painted figure skater, and never passes in front of the mural. The warm morning light stays constant.",
+      "items": "daybed, cushions, curtain, rug and architecture",
+      "min_motion_delta": 2.0
+    },
+    {
+      "scene_id": "l45_scene_08_side_depth",
+      "clip": "B, first-person walk-in with parallax and a light sun-beam effect on the wall",
+      "motion": "A smooth slow first-person walk-in: the camera advances steadily straight forward into the room at natural eye level, as if a person is slowly entering, with no sideways drift, no tilt and no rotation. The sheer cream curtain in the extreme foreground on the left leaves the frame as the camera advances past it, and the nearer objects shift more than the farther ones, giving a natural depth parallax. A soft, light beam of warm sunlight slowly sweeps across the mural wall with faint soft diagonal window-shadow lines, very subtle and low contrast: it never covers the painted figure skater and never changes the colours of the artwork.",
+      "items": "bed, the stack of poufs, the bookshelf, the picture frame, the toys, the skates, the rug and the architecture",
+      "min_motion_delta": 10.0
+    }
+  ]
+}

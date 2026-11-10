@@ -1,0 +1,66 @@
+{
+  "id": "l11_buildup01",
+  "description": "Build-up reel for Listing 11 (owner 10.11, reference: ds.nuvora reel): ONE room, ONE camera, layers appear one by one: b1 empty room, b2 the mural on the wall (the hook), b3 shelves with warm LED + mirror + sconce, b4 furniture, b5 rich decor. The FINAL frame b5 is generated first (two decor variants a/b); the earlier frames are made from it by removing one layer at a time (removing is more reliable than adding). The mural stays visible and nothing stands in front of it, the shelves are on the SIDE wall. Realistic, not cartoonish. py -3.12 -X utf8 scripts/buildup.py l11_buildup01",
+  "listing_spec": "listing11_interiors.json",
+  "aspect": "9:16",
+  "resolution": "2K",
+  "model": "nano-banana-2-1",
+  "order": [
+    "b1",
+    "b2",
+    "b3",
+    "b4",
+    "b5"
+  ],
+  "stages": [
+    {
+      "id": "b5a",
+      "kind": "generate",
+      "layer": "b5",
+      "refs": [
+        "wallpaper",
+        "texture"
+      ],
+      "prompt": "Create a photorealistic photograph of a warm, calm children's reading corner in a German apartment, with a low reading bench and warm oak, in Woodland Nature style (green, brown, beige and cream, solid wood and natural textiles).\n\nReferences: image 1 is the wall mural. It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it. Image 2 is a macro photo of the wallpaper paper: take only its fine sand-grain, matte surface, never its graphics.\n\nScene: A bright room with a warm oak floor and a large round natural jute rug on it. On the LEFT side wall, away from the mural: three slim floating solid-oak shelves one above the other, each with a thin warm-white LED strip (2700 K) hidden under its front edge that casts a soft, realistic warm glow down the wall, not neon. Top shelf: three picture books lying flat, a small white ceramic vase with dried pampas grass and one unlit cream pillar candle. Middle shelf: a trailing green pothos in a white ceramic pot and a small framed botanical print. Bottom shelf: two upright picture books and a small cream ceramic ring vase. A round brass-framed mirror hangs to the left of the shelves and above it a brass wall sconce with a frosted globe bulb glowing warmly. Below the shelves stands a low solid-oak reading bench (40 cm high) with one soft oat cushion. Beside it a round fluted-oak side table carries a glass vase with fresh cream ranunculus and sage-green eucalyptus. One tall green areca palm in a white pot stands in the far corner. A sheer cream linen curtain hangs at the extreme right edge of the frame, close to the camera and slightly out of focus. Palette: warm oak, oat, cream, soft sage and white with small brass accents. Only the items named in this scene are in the room: nothing is draped over any furniture, no baskets, no wicker, no toys, no lit candles, and the room is empty of people.\n\nLight and camera: warm golden hour sunlight from a window on the LEFT lies in long soft patches across the floor. Shot from the right part of the room at natural eye level, turned about 30 degrees toward the mural wall and pulled well back, so the LEFT side wall is in view. The whole mural wall is in the frame in perspective, from its near edge to the far corner, with a strip of ceiling above it and the skirting board below it; the wall fills the upper-middle of the tall frame and the floor fills the lower part. Nothing stands in front of the mural. Canon EOS R5, 28mm lens, f/11 aperture, sharp across the whole wall. A real editorial interior photograph for a German home magazine, not a render and not an illustration: natural window light with soft falloff, true-to-life materials (visible wood grain, natural linen, matte painted surfaces, small signs of daily use), slightly muted natural colour, gentle contrast, fine film-like grain, no HDR glow, no plastic smoothness, no neon."
+    },
+    {
+      "id": "b5b",
+      "kind": "generate",
+      "layer": "b5",
+      "refs": [
+        "wallpaper",
+        "texture"
+      ],
+      "prompt": "Create a photorealistic photograph of a warm, calm children's reading corner in a German apartment, with a low reading bench and warm oak, in Woodland Nature style (green, brown, beige and cream, solid wood and natural textiles).\n\nReferences: image 1 is the wall mural. It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it. Image 2 is a macro photo of the wallpaper paper: take only its fine sand-grain, matte surface, never its graphics.\n\nScene: A bright room with a warm oak floor and a large round oat wool rug on it. On the LEFT side wall, away from the mural: three slim floating solid-oak shelves one above the other, each with a thin warm-white LED strip (2700 K) hidden under its front edge that casts a soft, realistic warm glow down the wall, not neon. Top shelf: two small framed botanical prints leaning against the wall and a small brass table lamp with a linen shade, switched on and glowing warmly. Middle shelf: three small terracotta pots with ferns in a row. Bottom shelf: a row of five picture books and one small ceramic bud vase with a single dried eucalyptus branch. Below the shelves stands a low solid-oak reading bench (40 cm high) with two soft cushions, one oat and one sage green. Beside it stands a round fluted-oak side table with a short stack of books and one ceramic mug. A tall ceramic floor vase with long dried eucalyptus branches stands in the far corner. A sheer cream linen curtain hangs at the extreme right edge of the frame, close to the camera and slightly out of focus. Palette: warm oak, oat, cream, terracotta, soft sage and white. Only the items named in this scene are in the room: nothing is draped over any furniture, no baskets, no wicker, no toys, no candles, and the room is empty of people.\n\nLight and camera: warm golden hour sunlight from a window on the LEFT lies in long soft patches across the floor. Shot from the right part of the room at natural eye level, turned about 30 degrees toward the mural wall and pulled well back, so the LEFT side wall is in view. The whole mural wall is in the frame in perspective, from its near edge to the far corner, with a strip of ceiling above it and the skirting board below it; the wall fills the upper-middle of the tall frame and the floor fills the lower part. Nothing stands in front of the mural. Canon EOS R5, 28mm lens, f/11 aperture, sharp across the whole wall. A real editorial interior photograph for a German home magazine, not a render and not an illustration: natural window light with soft falloff, true-to-life materials (visible wood grain, natural linen, matte painted surfaces, small signs of daily use), slightly muted natural colour, gentle contrast, fine film-like grain, no HDR glow, no plastic smoothness, no neon."
+    },
+    {
+      "id": "b4",
+      "kind": "edit",
+      "layer": "b4",
+      "from": "b5",
+      "prompt": "Image 1 is a finished photograph of a room. Edit it: remove ONLY the small decor: every book, vase, flower, dried grass, plant in a pot on the shelves, picture print, lamp or candle standing on the shelves, cushion, mug, the curtain at the right edge and the tall corner plant or floor vase. Keep the floating shelves with their warm LED strips, the mirror, the sconce (when present), the bench, the side table and the rug exactly as they are. Keep the camera position, the lens, the perspective, the room architecture, the walls, the floor, the window light and its sun patches exactly as in image 1, and do not change, move or add anything else. Fill each removed area with what is naturally behind it. The result must stay a real photograph, same colour grade and grain as image 1."
+    },
+    {
+      "id": "b3",
+      "kind": "edit",
+      "layer": "b3",
+      "from": "b4",
+      "prompt": "Image 1 is a photograph of a room. Edit it: remove ONLY the furniture: the reading bench, the side table and the rug. Keep the three floating shelves with their warm LED strips, the mirror and the sconce on the side wall, and the mural on the feature wall exactly as they are. Keep the camera position, the lens, the perspective, the room architecture, the walls, the floor, the window light and its sun patches exactly as in image 1, and do not change, move or add anything else. Fill each removed area with what is naturally behind it. The result must stay a real photograph, same colour grade and grain as image 1."
+    },
+    {
+      "id": "b2",
+      "kind": "edit",
+      "layer": "b2",
+      "from": "b3",
+      "prompt": "Image 1 is a photograph of a room. Edit it: remove ONLY the three floating shelves with their LED strips, the mirror and the wall sconce from the side wall, leaving a clean plain wall there. Keep the mural on the feature wall, the floor and the room exactly as they are. The room is now empty except for the mural wall. Keep the camera position, the lens, the perspective, the room architecture, the walls, the floor, the window light and its sun patches exactly as in image 1, and do not change, move or add anything else. Fill each removed area with what is naturally behind it. The result must stay a real photograph, same colour grade and grain as image 1."
+    },
+    {
+      "id": "b1",
+      "kind": "edit",
+      "layer": "b1",
+      "from": "b2",
+      "prompt": "Image 1 is a photograph of an empty room whose feature wall carries a printed mural. Edit it: replace ONLY the mural on the feature wall with a plain, smooth, matte warm-white painted wall, with the same soft light and shadow falloff as the rest of the walls. Keep the floor, the side walls, the ceiling, the skirting board and the light patches exactly as they are. The room is completely empty. Keep the camera position, the lens, the perspective, the room architecture, the walls, the floor, the window light and its sun patches exactly as in image 1, and do not change, move or add anything else. Fill each removed area with what is naturally behind it. The result must stay a real photograph, same colour grade and grain as image 1."
+    }
+  ],
+  "notes": "Edit stages start from the chosen final (--final a|b). Candles are unlit on purpose (a child's room). Cost on nano-banana-2-1: about 6 credits per frame at 2K."
+}

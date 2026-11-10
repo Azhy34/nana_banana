@@ -1,0 +1,23 @@
+{
+  "description": "THE TASK of a reel set for Listing 3 (vintage balloons, a boy's / neutral blue wallpaper): s2 = a toddler boy stands at the open door and walks away out of the room (the room and the train stay) (Japandi, Soft Sand). The second scene is the owner's ready frame of the yellow nursery (listing03_video.json, no person). The owner assembles the reel. py -3.12 -X utf8 scripts/director.py plan l3_reel01",
+  "id": "l3_reel01",
+  "listing_spec": "listing03_interiors.json",
+  "video_spec": "listing03_video.json",
+  "aspect": "9:16",
+  "seed": 3,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 1,
+    "ages": [
+      "vorschul"
+    ],
+    "distinct_kits": true
+  },
+  "slots": [
+    {
+      "slot": "s2",
+      "role": "leave",
+      "kit": "boy_train"
+    }
+  ]
+}

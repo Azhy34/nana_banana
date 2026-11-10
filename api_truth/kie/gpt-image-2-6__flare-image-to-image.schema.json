@@ -1,0 +1,406 @@
+{
+ "model": "gpt-image-2-6/flare-image-to-image",
+ "openapi": {
+  "openapi": "3.1.0",
+  "info": {
+   "title": "kie.ai",
+   "description": "kie.ai API 文档",
+   "version": "1.0.0",
+   "contact": {
+    "name": "技术支持",
+    "email": "support@kie.ai"
+   }
+  },
+  "tags": [],
+  "paths": {
+   "/api/v1/jobs/createTask": {
+    "post": {
+     "summary": "GPT Image 2.6 Flare - Image to Image",
+     "deprecated": false,
+     "description": "## Create Task\n\nUse this endpoint to create a GPT Image 2.6 Flare image-to-image task.\n\n### GIF animation\n\n| Parameter | Default | Notes |\n|---|---|---|\n| `frame_count` | `9` | Integer 2–16. |\n| `frame_duration_ms` | `200` | Duration per frame in integer milliseconds. Minimum 20, rounded to 10 ms. |\n\nSend these only when `output_format` is `gif`. For `svg`, send `svg.model` instead. Do not send `mask_url` with `gif` or `svg`.\n\n<Card title=\"Get Task Details\" icon=\"lucide-search\" href=\"/market/common/get-task-detail\">\n After submission, use the unified query endpoint to check task progress and retrieve results\n</Card>\n\n::: tip[]\nFor production use, we recommend providing the `callBackUrl` parameter so your service can receive completion notifications instead of polling for task status.\n:::\n\n## Related Resources\n\n<CardGroup cols={2}>\n <Card title=\"Model Marketplace\" icon=\"lucide-store\" href=\"/market/quickstart\">\n Explore all available models and capabilities\n </Card>\n <Card title=\"Common API\" icon=\"lucide-cog\" href=\"/common-api/get-account-credits\">\n Check account credits and usage\n </Card>\n</CardGroup>\n",
+     "operationId": "gpt-image-2-6-flare-image-to-image",
+     "tags": [],
+     "parameters": [],
+     "requestBody": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": false,
+         "required": [
+          "model",
+          "input"
+         ],
+         "properties": {
+          "model": {
+           "type": "string",
+           "enum": [
+            "gpt-image-2-6/flare-image-to-image"
+           ],
+           "default": "gpt-image-2-6/flare-image-to-image",
+           "description": "The model name used for generation. This endpoint must use `gpt-image-2-6/flare-image-to-image`."
+          },
+          "callBackUrl": {
+           "type": "string",
+           "format": "uri",
+           "description": "Callback URL for task completion notifications. Optional parameter. If provided, the system will send a POST request to this URL when the task completes, whether it succeeds or fails. If omitted, no callback notification will be sent.",
+           "examples": [
+            "https://your-domain.com/api/callback"
+           ]
+          },
+          "input": {
+           "type": "object",
+           "additionalProperties": false,
+           "description": "Input parameters.",
+           "properties": {
+            "prompt": {
+             "type": "string",
+             "minLength": 1,
+             "maxLength": 32000,
+             "description": "Instruction for how to edit or combine the input images. Say what should stay the same and what should change. Put any text that should appear in the image in quotes. Required, 1 to 32,000 characters.",
+             "examples": [
+              "restyle as cinematic still"
+             ]
+            },
+            "input_urls": {
+             "type": "array",
+             "maxItems": 16,
+             "items": {
+              "type": "string",
+              "format": "uri"
+             },
+             "description": "Reference image URLs. Required, up to 16 publicly accessible URLs. Accepted types: jpeg / png / webp.",
+             "examples": [
+              [
+               "https://example.com/a.png"
+              ]
+             ]
+            },
+            "mask_url": {
+             "type": "string",
+             "format": "uri",
+             "description": "Inpaint mask URL. Optional. Cannot be used together with `markup`. Do not send when `output_format` is `gif` or `svg`.",
+             "examples": [
+              "https://example.com/mask.png"
+             ]
+            },
+            "markup": {
+             "type": "string",
+             "format": "uri",
+             "description": "Markup edit. Optional string: URL of a transparent PNG overlaid on the first reference image. Cannot be used together with `mask_url`.",
+             "examples": [
+              "https://example.com/markup.png"
+             ]
+            },
+            "aspect_ratio": {
+             "type": "string",
+             "enum": [
+              "auto",
+              "1:1",
+              "3:2",
+              "2:3",
+              "4:3",
+              "3:4",
+              "5:4",
+              "4:5",
+              "16:9",
+              "9:16",
+              "2:1",
+              "1:2",
+              "21:9",
+              "9:21",
+              "3:1",
+              "1:3"
+             ],
+             "default": "auto",
+             "description": "Aspect ratio. Optional, default `auto`.\n\nFor static images (`png` / `jpeg` / `webp`), pixel size is mapped from `aspect_ratio` + `resolution` (see the table on `resolution`).\nSupported: `auto`, `1:1`, `3:2`, `2:3`, `4:3`, `3:4`, `5:4`, `4:5`, `16:9`, `9:16`, `2:1`, `1:2`, `21:9`, `9:21`, `3:1`, `1:3`.",
+             "examples": [
+              "auto"
+             ]
+            },
+            "resolution": {
+             "type": "string",
+             "enum": [
+              "1K",
+              "2K",
+              "4K"
+             ],
+             "default": "1K",
+             "description": "Resolution tier. Optional, default `1K`.\n\nStatic-image pixel sizes (width × height):\n\n<table>\n<thead>\n<tr>\n<th align=\"left\">ratio</th>\n<th align=\"center\">1K</th>\n<th align=\"center\">2K</th>\n<th align=\"center\">4K</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td nowrap>1:1 / auto</td>\n<td align=\"center\" nowrap>1024×1024</td>\n<td align=\"center\" nowrap>2048×2048</td>\n<td align=\"center\" nowrap>2880×2880</td>\n</tr>\n<tr>\n<td nowrap>3:2</td>\n<td align=\"center\" nowrap>1536×1024</td>\n<td align=\"center\" nowrap>2048×1360</td>\n<td align=\"center\" nowrap>3520×2336</td>\n</tr>\n<tr>\n<td nowrap>2:3</td>\n<td align=\"center\" nowrap>1024×1536</td>\n<td align=\"center\" nowrap>1360×2048</td>\n<td align=\"center\" nowrap>2336×3520</td>\n</tr>\n<tr>\n<td nowrap>4:3</td>\n<td align=\"center\" nowrap>1024×768</td>\n<td align=\"center\" nowrap>2048×1536</td>\n<td align=\"center\" nowrap>3312×2480</td>\n</tr>\n<tr>\n<td nowrap>3:4</td>\n<td align=\"center\" nowrap>768×1024</td>\n<td align=\"center\" nowrap>1536×2048</td>\n<td align=\"center\" nowrap>2480×3312</td>\n</tr>\n<tr>\n<td nowrap>5:4</td>\n<td align=\"center\" nowrap>1280×1024</td>\n<td align=\"center\" nowrap>2560×2048</td>\n<td align=\"center\" nowrap>3216×2576</td>\n</tr>\n<tr>\n<td nowrap>4:5</td>\n<td align=\"center\" nowrap>1024×1280</td>\n<td align=\"center\" nowrap>2048×2560</td>\n<td align=\"center\" nowrap>2576×3216</td>\n</tr>\n<tr>\n<td nowrap>16:9</td>\n<td align=\"center\" nowrap>1536×864</td>\n<td align=\"center\" nowrap>2048×1152</td>\n<td align=\"center\" nowrap>3840×2160</td>\n</tr>\n<tr>\n<td nowrap>9:16</td>\n<td align=\"center\" nowrap>864×1536</td>\n<td align=\"center\" nowrap>1152×2048</td>\n<td align=\"center\" nowrap>2160×3840</td>\n</tr>\n<tr>\n<td nowrap>2:1</td>\n<td align=\"center\" nowrap>2048×1024</td>\n<td align=\"center\" nowrap>2688×1344</td>\n<td align=\"center\" nowrap>3840×1920</td>\n</tr>\n<tr>\n<td nowrap>1:2</td>\n<td align=\"center\" nowrap>1024×2048</td>\n<td align=\"center\" nowrap>1344×2688</td>\n<td align=\"center\" nowrap>1920×3840</td>\n</tr>\n<tr>\n<td nowrap>21:9</td>\n<td align=\"center\" nowrap>2016×864</td>\n<td align=\"center\" nowrap>2688×1152</td>\n<td align=\"center\" nowrap>3840×1648</td>\n</tr>\n<tr>\n<td nowrap>9:21</td>\n<td align=\"center\" nowrap>864×2016</td>\n<td align=\"center\" nowrap>1152×2688</td>\n<td align=\"center\" nowrap>1648×3840</td>\n</tr>\n<tr>\n<td nowrap>3:1</td>\n<td align=\"center\" nowrap>1536×512</td>\n<td align=\"center\" nowrap>3072×1024</td>\n<td align=\"center\" nowrap>3840×1280</td>\n</tr>\n<tr>\n<td nowrap>1:3</td>\n<td align=\"center\" nowrap>512×1536</td>\n<td align=\"center\" nowrap>1024×3072</td>\n<td align=\"center\" nowrap>1280×3840</td>\n</tr>\n</tbody>\n</table>",
+             "examples": [
+              "1K"
+             ]
+            },
+            "quality": {
+             "type": "string",
+             "enum": [
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max",
+              "auto"
+             ],
+             "default": "medium",
+             "description": "Quality. Optional, default `medium`.\n\nSupported: `low`, `medium`, `high`, `xhigh`, `max`, `auto`.",
+             "examples": [
+              "medium"
+             ]
+            },
+            "background": {
+             "type": "string",
+             "enum": [
+              "transparent",
+              "opaque",
+              "auto"
+             ],
+             "default": "auto",
+             "description": "Background. Optional, default `auto`. Transparent background is only supported with `png` / `webp` / `gif`.\n\n- `transparent`: transparent background, useful for product cut-outs, icons and stickers. `output_format` must be `png`, `webp` or `gif`\n- `opaque`: always a solid background\n- `auto` (default): the model decides",
+             "examples": [
+              "auto"
+             ]
+            },
+            "output_format": {
+             "type": "string",
+             "enum": [
+              "png",
+              "jpeg",
+              "webp",
+              "gif",
+              "svg"
+             ],
+             "default": "png",
+             "description": "Output format. Optional, default `png`. Passing `jpg` is treated as `jpeg`.\n\nSupported: `png`, `jpeg`, `webp`, `gif`, `svg`.\n\n- Transparent background is only supported with `png` / `webp` / `gif`\n- For `gif`, use `frame_count` / `frame_duration_ms`; do not send `svg`\n- For `svg`, send `svg.model`; do not send the GIF fields\n- Do not send `mask_url` when `output_format` is `gif` or `svg`",
+             "examples": [
+              "png"
+             ]
+            },
+            "complexity": {
+             "type": "string",
+             "enum": [
+              "low",
+              "medium",
+              "high"
+             ],
+             "default": "high",
+             "description": "Planning complexity. Optional, default `high`.\n\nSupported: `low`, `medium`, `high`.",
+             "examples": [
+              "high"
+             ]
+            },
+            "moderation": {
+             "type": "string",
+             "enum": [
+              "auto",
+              "low"
+             ],
+             "default": "low",
+             "description": "Moderation strength. Optional, default `low`.\n\nSupported: `auto`, `low`.",
+             "examples": [
+              "low"
+             ]
+            },
+            "output_compression": {
+             "type": "integer",
+             "minimum": 0,
+             "maximum": 100,
+             "description": "JPEG / WebP compression, 0–100. Optional.\n\nSend only when `output_format` is `jpeg` or `webp`. Do not include this field for other formats."
+            },
+            "frame_count": {
+             "type": "integer",
+             "minimum": 2,
+             "maximum": 16,
+             "default": 9,
+             "description": "GIF frame count. Send only when `output_format=gif`. Integer 2–16, default 9. Do not send for non-gif.",
+             "examples": [
+              9
+             ]
+            },
+            "frame_duration_ms": {
+             "type": "integer",
+             "minimum": 20,
+             "maximum": 2000,
+             "multipleOf": 10,
+             "default": 200,
+             "description": "Duration of each GIF frame. Send only when `output_format=gif`. Integer milliseconds, default 200, minimum 20, rounded to 10 ms. Do not send for non-gif.",
+             "examples": [
+              200
+             ]
+            },
+            "svg": {
+             "type": "object",
+             "additionalProperties": false,
+             "description": "Send the whole `svg` object only when `output_format=svg`. Do not include `svg` for other formats.",
+             "properties": {
+              "model": {
+               "type": "string",
+               "enum": [
+                "gpt-6-sol",
+                "gpt-5.6-luna",
+                "gpt-5.6-terra"
+               ],
+               "default": "gpt-5.6-luna",
+               "description": "Text model used to write the SVG. Optional, default `gpt-5.6-luna`.\n\nSupported: `gpt-6-sol`, `gpt-5.6-luna`, `gpt-5.6-terra`.\n\nSVG output is billed in two parts: image tokens (same as PNG) plus the selected author model's input/output tokens. See the Pricing page for rates.",
+               "examples": [
+                "gpt-5.6-luna"
+               ]
+              }
+             }
+            }
+           },
+           "required": [
+            "prompt",
+            "input_urls"
+           ]
+          }
+         }
+        },
+        "examples": {
+         "1": {
+          "value": {
+           "model": "gpt-image-2-6/flare-image-to-image",
+           "callBackUrl": "https://your-domain.com/api/callback",
+           "input": {
+            "prompt": "restyle as cinematic still",
+            "input_urls": [
+             "https://example.com/a.png"
+            ],
+            "resolution": "1K",
+            "output_format": "png"
+           }
+          },
+          "description": "Image to image"
+         },
+         "2": {
+          "value": {
+           "model": "gpt-image-2-6/flare-image-to-image",
+           "callBackUrl": "https://your-domain.com/api/callback",
+           "input": {
+            "prompt": "a waving flag",
+            "input_urls": [
+             "https://example.com/a.png"
+            ],
+            "output_format": "gif",
+            "frame_count": 9,
+            "frame_duration_ms": 200
+           }
+          },
+          "description": "GIF"
+         },
+         "3": {
+          "value": {
+           "model": "gpt-image-2-6/flare-image-to-image",
+           "callBackUrl": "https://your-domain.com/api/callback",
+           "input": {
+            "prompt": "a simple maple leaf icon",
+            "input_urls": [
+             "https://example.com/a.png"
+            ],
+            "output_format": "svg",
+            "svg": {
+             "model": "gpt-5.6-luna"
+            }
+           }
+          },
+          "description": "SVG"
+         }
+        }
+       }
+      },
+      "required": true
+     },
+     "responses": {
+      "200": {
+       "description": "Request Successful",
+       "content": {
+        "application/json": {
+         "schema": {
+          "type": "object",
+          "required": [
+           "data"
+          ],
+          "properties": {
+           "code": {
+            "type": "integer",
+            "description": "Response status code\n\n- **200**: Success - Request has been processed successfully\n- **401**: Unauthorized - Authentication credentials are missing or invalid\n- **402**: Insufficient Credits - Account does not have enough credits to perform the operation\n- **404**: Not Found - The requested resource or endpoint does not exist\n- **422**: Validation Error - The request parameters failed validation checks\n- **429**: Rate Limited - Request limit has been exceeded for this resource\n- **433**: Request Limit - Sub-key Usage Exceeds Limit\n- **455**: Service Unavailable - System is currently undergoing maintenance\n- **500**: Server Error - An unexpected error occurred while processing the request\n- **501**: Generation Failed - Content generation task failed\n- **505**: Feature Disabled - The requested feature is currently disabled",
+            "enum": [
+             200,
+             401,
+             402,
+             404,
+             422,
+             429,
+             433,
+             455,
+             500,
+             501,
+             505
+            ]
+           },
+           "msg": {
+            "type": "string",
+            "description": "Response message, error description when failed",
+            "example": "success"
+           },
+           "data": {
+            "type": "object",
+            "required": [
+             "taskId"
+            ],
+            "properties": {
+             "taskId": {
+              "type": "string",
+              "description": "Task ID, can be used with Get Task Details endpoint to query task status",
+              "example": "3f2b8c61d0e94a7b8c5d6e7f80912a3b"
+             }
+            }
+           }
+          },
+          "title": "response not with recordId"
+         },
+         "example": {
+          "code": 200,
+          "msg": "success",
+          "data": {
+           "taskId": "3f2b8c61d0e94a7b8c5d6e7f80912a3b"
+          }
+         }
+        }
+       },
+       "headers": {}
+      }
+     },
+     "security": [
+      {
+       "BearerAuth": []
+      }
+     ]
+    }
+   }
+  },
+  "webhooks": {},
+  "components": {
+   "schemas": {},
+   "responses": {},
+   "securitySchemes": {
+    "BearerAuth": {
+     "type": "http",
+     "scheme": "bearer",
+     "bearerFormat": "API Key",
+     "description": "All API requests require a Bearer Token. Add the header `Authorization: Bearer YOUR_API_KEY` to authenticate requests."
+    }
+   }
+  },
+  "servers": [
+   {
+    "url": "https://api.kie.ai",
+    "description": "正式环境"
+   }
+  ],
+  "security": [
+   {
+    "BearerAuth": []
+   }
+  ]
+ }
+}

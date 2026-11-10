@@ -57,3 +57,5 @@ scratch/
 
 __pycache__/
 *.pyc
+.test_policy_stamp
+exports/

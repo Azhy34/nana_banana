@@ -35,7 +35,7 @@ RIGID CONTINUITY & ARCHITECTURAL LOCK:
 }
 
 /**
- * Builds the motion and physics guidance prompt for Veo 3.1 / Gemini Omni 1.1
+ * Builds the motion and physics guidance prompt for Veo 3.1 / Gemini Omni 1.2
  * when interpolating between Start Frame (Frame A) and End Frame (Frame B).
  */
 export function buildVideoInterpolationPrompt(product: GmcProductDesign, motion: GmcCameraMotion = 'dolly_in'): string {

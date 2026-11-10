@@ -1,0 +1,69 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-08T16:56:14Z"
+ },
+ "class_name": "MoonbloomListingScene",
+ "display_name": "Moonbloom Listing Scene (prompt from the app)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "spec_file": {
+   "type": "COMBO",
+   "choices": [
+    "active_board.json",
+    "ad_formats.json",
+    "design_kits.json",
+    "listing02_interiors.json",
+    "listing02_video.json",
+    "listing03_interiors.json",
+    "listing03_video.json",
+    "listing06_interiors.json",
+    "listing06_video.json",
+    "listing07_interiors.json",
+    "listing07_video.json",
+    "listing45_interiors.json",
+    "listing45_video.json",
+    "retarget_messages.json",
+    "roles.json",
+    "video_models.json"
+   ]
+  },
+  "card_number": {
+   "type": "INT",
+   "default": 1,
+   "min": 1,
+   "max": 20
+  },
+  "variation": {
+   "type": "INT",
+   "default": 0,
+   "min": 0,
+   "max": 9999,
+   "tooltip": "Change to re-roll the random trend picks (accessories, toys) of the prompt."
+  }
+ },
+ "optional_inputs": {},
+ "outputs": {
+  "types": [
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING"
+  ],
+  "names": [
+   "prompt",
+   "scene_id",
+   "wallpaper_path",
+   "texture_path",
+   "out_dir",
+   "listing",
+   "aspect_ratio"
+  ]
+ },
+ "output_node": false,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

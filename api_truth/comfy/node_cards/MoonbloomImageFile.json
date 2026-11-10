@@ -1,0 +1,30 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-08T14:37:07Z"
+ },
+ "class_name": "MoonbloomImageFile",
+ "display_name": "Moonbloom Image File (show a frame, pass its path)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "image_path": {
+   "type": "STRING",
+   "default": "",
+   "tooltip": "Full path to a PNG/JPG file."
+  }
+ },
+ "optional_inputs": {},
+ "outputs": {
+  "types": [
+   "IMAGE",
+   "STRING"
+  ],
+  "names": [
+   "image",
+   "image_path"
+  ]
+ },
+ "output_node": false,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

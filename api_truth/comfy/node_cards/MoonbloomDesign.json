@@ -1,0 +1,333 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-08T14:37:07Z"
+ },
+ "class_name": "MoonbloomDesign",
+ "display_name": "Moonbloom Design (choose design, prompt from the app)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "scene_id": {
+   "type": "STRING",
+   "default": "scene_01",
+   "tooltip": "File name of the result: <scene_id>__nb21.png"
+  },
+  "aspect_ratio": {
+   "type": "COMBO",
+   "choices": [
+    "9:16",
+    "4:5",
+    "4:3",
+    "2:3",
+    "3:2",
+    "16:9",
+    "1:1"
+   ],
+   "default": "9:16",
+   "tooltip": "Set the same ratio on the KIE Image node."
+  },
+  "age_group": {
+   "type": "COMBO",
+   "choices": [
+    "baby",
+    "vorschul",
+    "schulkind",
+    "teenager"
+   ],
+   "default": "vorschul"
+  },
+  "style": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "Japandi",
+    "Scandi",
+    "Playful Montessori",
+    "Retro Kids",
+    "Biophilic Nursery",
+    "Playful Curves",
+    "Fun Haus",
+    "Boho",
+    "Woodland Nature"
+   ]
+  },
+  "color": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "Sunny Mustard",
+    "Muted Sage",
+    "Warm Terracotta",
+    "Dusty Rose",
+    "Honey Amber",
+    "Strawberry Milk",
+    "Eucalyptus",
+    "Olive",
+    "Warm Greige",
+    "Soft Sand",
+    "Lilac Mist",
+    "Barberry",
+    "Cool Blue",
+    "Cocoa Brown",
+    "Petrol",
+    "Butter Yellow",
+    "Pepper White",
+    "Brick Red",
+    "Powder Blue"
+   ]
+  },
+  "key_object": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "custom (key_object_custom)",
+    "Cozy nursery corner with circular quilted mat",
+    "Cozy reading nook with oversized floor cushion",
+    "Curved birch study desk with open book ledge",
+    "Flower-shaped craft table in pale lacquered wood with round bouclé poufs",
+    "Flower-shaped wooden craft table",
+    "Leander Classic rounded baby crib in solid beech with soft organic linen bedding",
+    "Low Japandi platform bed with floating oak frame and washed dark linen bedding",
+    "Low Scandinavian birch toddler daybed",
+    "Low Scandinavian birch toddler daybed with checkered and striped bolster pillows",
+    "Low birch modular daybed with fluted nightstand",
+    "Minimalist platform bed with low floating frame",
+    "Minimalist single platform bed in light ash wood",
+    "Minimalist slatted solid birch crib",
+    "Minimalist slatted solid birch crib with natural wood grain and organic cotton mattress",
+    "Minimalist smoked oak single platform bed with low architectural headboard",
+    "Montessori low wooden floor bed in solid birch, keeping the entire wall mural unobstructed",
+    "Montessori play sanctuary with bunny-ear chairs",
+    "Oliver Furniture low daybed with natural linen cushions functioning as daytime reading nook",
+    "Platform bed with integrated low bookshelf ledge",
+    "Playful reading teepee nook",
+    "Solid oak low single bed with integrated under-bed storage drawers",
+    "Upholstered daybed with a wavy striped headboard",
+    "Wide Scandinavian oak study desk"
+   ],
+   "tooltip": "random = picked for the age group, as in the app"
+  },
+  "lighting": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "warm morning sunbeams",
+    "crisp morning window daylight",
+    "warm golden hour sunlight",
+    "soft afternoon window light",
+    "cozy dusk with warm ambient glow",
+    "layered warm lamplight at dusk"
+   ]
+  },
+  "camera_angle": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+    "from the far right corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the right side wall is in view and the whole mural wall recedes in perspective",
+    "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective"
+   ]
+  },
+  "camera_elevation": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "standing adult eye level (about 1.5 m)",
+    "a level architectural tripod framing (about 1.4 m, straight verticals)"
+   ]
+  },
+  "camera_distance": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "wide shot"
+   ]
+  },
+  "brand": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "Oliver Furniture",
+    "Paidi",
+    "Flexa",
+    "Leander",
+    "Sirch",
+    "Geuther",
+    "IKEA"
+   ]
+  },
+  "composition": {
+   "type": "COMBO",
+   "choices": [
+    "unobstructed",
+    "natural",
+    "random"
+   ],
+   "default": "unobstructed"
+  },
+  "clean_random_details": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "Drop the app's random toys/decor that clash with a custom design."
+  },
+  "variation": {
+   "type": "INT",
+   "default": 0,
+   "min": 0,
+   "max": 9999,
+   "tooltip": "The seed of whatever is left random (brand, toys, decor): the same number always builds the same prompt, even after a reload or restart; change it to re-roll."
+  }
+ },
+ "optional_inputs": {
+  "key_object_custom": {
+   "type": "STRING",
+   "default": "",
+   "tooltip": "Used when key_object is 'custom'."
+  },
+  "accessories": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true,
+   "tooltip": "One per line; empty = random, as in the app."
+  },
+  "extra_prompt": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true,
+   "tooltip": "Free text added before the Avoid list."
+  },
+  "strip_regex": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true,
+   "tooltip": "One regular expression per line (spaces count). Whatever it matches is cut from the app's prompt, like `stripRegex` of a spec card: use it to drop the app's own focal-furniture / lived-in sentences that contradict the card."
+  },
+  "wall_architecture": {
+   "type": "COMBO",
+   "choices": [
+    "full-wall",
+    "scallop-trim",
+    "random"
+   ],
+   "default": "full-wall",
+   "tooltip": "full-wall = the mural covers the whole wall (a mural listing). The app rolls scallop-trim (wallpaper only on the lower two thirds under a scalloped moulding) in 35% of the builds for every ratio except 9:16; random = like the app."
+  },
+  "prompt_mode": {
+   "type": "COMBO",
+   "choices": [
+    "full",
+    "brief"
+   ],
+   "default": "full",
+   "tooltip": "full = the web app's long prompt (written for generating a room from nothing, about 6 000 characters). brief = a short structured prompt for a reference image (about 1 200 characters): what the photo is, the two references by number, the scene, light and camera. brief uses the style and the colour you pick here (their words come from Promt/trends.json, the same file the web app reads), brief_subject / brief_scene / brief_framing, lighting, camera_body, lens, aperture and with_texture, and ignores the rest. Aspect ratio, size and quality are fields of the request, never part of the text."
+  },
+  "brief_subject": {
+   "type": "STRING",
+   "default": "",
+   "tooltip": "brief: what the room is, e.g. 'a calm Japandi nursery for a baby under 2 years'."
+  },
+  "brief_scene": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true,
+   "tooltip": "brief: what is in the room, described positively (the only things in it, sizes, palette)."
+  },
+  "brief_framing": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true,
+   "tooltip": "brief: where the camera stands and what the frame shows (corners, ceiling line, floor)."
+  },
+  "brief_product": {
+   "type": "STRING",
+   "default": "",
+   "tooltip": "brief: what image 1 is, e.g. 'the wall mural' (from the listing's spec, key brief)."
+  },
+  "brief_product_short": {
+   "type": "STRING",
+   "default": "",
+   "tooltip": "brief: the short name of the product, e.g. 'the mural' (used in 'even on the mural')."
+  },
+  "brief_wall_rule": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true,
+   "tooltip": "brief: how the product sits on the wall, e.g. 'It covers the whole feature wall edge to edge, floor to ceiling...'. A fact of the listing: a scalloped-trim wallpaper covers only the lower two thirds."
+  },
+  "brief_people": {
+   "type": "COMBO",
+   "choices": [
+    "none",
+    "from_behind"
+   ],
+   "default": "none",
+   "tooltip": "brief: none = the room is empty of people; from_behind = a person is allowed, strictly from behind or in a half-turn from behind, never a face (owner rule)."
+  },
+  "brief_anchor": {
+   "type": "BOOLEAN",
+   "default": false,
+   "tooltip": "brief: add one sentence that tells the model to reproduce image 1 (the mural) unchanged on the wall."
+  },
+  "with_texture": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "brief: mention image 2 (the paper texture). Switch off when the KIE node does not send the texture."
+  },
+  "camera_body": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "Sony A7R V",
+    "Hasselblad H6D-100c",
+    "Canon EOS R5",
+    "Fujifilm GFX 100S"
+   ],
+   "tooltip": "random = picked by the app each build"
+  },
+  "lens": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "35mm prime lens",
+    "50mm normal lens",
+    "45mm medium format lens",
+    "28mm gentle wide lens",
+    "24mm tilt-shift lens"
+   ],
+   "tooltip": "a wide 28mm suits a spacious room; random = picked by the app each build"
+  },
+  "aperture": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "f/5.6 aperture",
+    "f/8.0 aperture",
+    "f/4.0 aperture",
+    "f/11 aperture"
+   ],
+   "tooltip": "higher f = more of the room sharp"
+  },
+  "depth_of_field": {
+   "type": "COMBO",
+   "choices": [
+    "random",
+    "medium depth of field",
+    "deep depth of field"
+   ],
+   "tooltip": "deep keeps the whole mural sharp"
+  }
+ },
+ "outputs": {
+  "types": [
+   "STRING",
+   "STRING"
+  ],
+  "names": [
+   "prompt",
+   "scene_id"
+  ]
+ },
+ "output_node": false,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "l11_buildup02",
+  "description": "Build-up reel for Listing 11, take 2 (owner 10.11 after the first frames were rejected: mural cropped, heroes hidden). Slightly angled (not straight-on) wide view, mural fully visible, design from the owner's reference (rose/burgundy, scalloped ceiling, cloud pendant, colour-block rug). b5c = angle ~15 deg from the left. py -3.12 -X utf8 scripts/buildup.py l11_buildup02 --stage b5c",
+  "listing_spec": "listing11_interiors.json",
+  "aspect": "9:16",
+  "resolution": "2K",
+  "model": "nano-banana-2-1",
+  "order": [
+    "b1",
+    "b2",
+    "b3",
+    "b4",
+    "b5"
+  ],
+  "stages": [
+    {
+      "id": "b5c",
+      "kind": "generate",
+      "layer": "b5",
+      "refs": [
+        "wallpaper",
+        "texture"
+      ],
+      "prompt": "Create a photorealistic photograph of a playful, stylish children's room in a German apartment, designed like a high-end interior-design magazine feature: dusty rose, burgundy, cream, soft sage and mustard, velvet and bouclé textiles, a scalloped painted ceiling, a sculptural pendant lamp.\n\nReferences: image 1 is the wall mural, a landscape 3:2 watercolour jungle scene (sage green leaves, a toucan and a green parrot on a branch at the upper right, a leopard cub on a thick branch at the lower right). It covers the WHOLE feature wall edge to edge, from the skirting board to the ceiling, with its drawing and colours unchanged. The entire mural is visible in the frame, including its right half with the toucan, the parrot and the leopard cub. Image 2 is a macro photo of the wallpaper paper: take only its fine sand-grain, matte surface, never its graphics.\n\nScene, design A 'rose and stripe': the ceiling carries a large scalloped painted inset, cream with thin dusty-rose stripes and a soft sage scalloped border, and from its centre hangs a white cloud-shaped scalloped glass pendant lamp, switched on and glowing warmly. The walls and the mural are framed by a cream painted crown moulding. The floor is warm herringbone oak. In the lower middle of the floor lies a large soft rectangular wool rug in cream with a loose grid of thin white lines and colour blocks and half-circles in dusty rose, sage green, mustard and terracotta. On the RIGHT side wall, at the edge of the frame and well away from the mural, stands a low rounded dusty-rose-and-burgundy velvet daybed with one patterned cushion; the front of the mural wall stays completely free. A rounded bouclé armchair in rose-and-cream stripes stands at the extreme right edge of the frame on the right side wall. Only the items named here are in the room: no curtains, no baskets, no wicker, no toys, no lit candles, nothing draped over furniture, and no people.\n\nCamera: standing slightly to the LEFT of the room's centre line at natural eye height (about 1.3 m), turned about 15 degrees to the right toward the mural wall, so the mural wall is seen in gentle perspective and the RIGHT side wall is visible as a narrow strip converging to the far right corner. The camera is pulled well back so the entire mural wall from its near edge to the far corner is inside the tall 9:16 frame: ceiling with its decor takes the top quarter of the frame, the mural wall the middle third to 40 percent, the floor with the rug the lower third. Nothing stands in front of the mural and there is no curtain anywhere; the lowest edge of the mural and the skirting board are fully visible. Warm golden-hour daylight from a window on the left side, outside the frame, plus a thin warm-white 2700 K LED strip hidden in the ceiling cove above the mural that gently washes the top of the wall, realistic and not neon. Canon EOS R5, 24mm lens, f/11, sharp across the whole wall. A real editorial interior photograph, not a render and not an illustration: true-to-life materials, soft natural light falloff, slightly muted natural colour, gentle contrast, fine film-like grain, no HDR glow, no plastic smoothness."
+    },
+    {
+      "id": "b5d",
+      "kind": "edit",
+      "layer": "b5",
+      "from": "b5c",
+      "prompt": "Image 1 is a finished photograph of a stylish children's room. Photograph the SAME room again from a different camera position: move the camera to the RIGHT part of the room, at the same natural eye height (about 1.3 m), and turn it about 25 degrees to the LEFT toward the mural wall. The mural wall is now seen in a clearly angled perspective, and the LEFT side wall, with a tall window letting in warm golden-hour daylight, is visible as a strip converging to the far left corner. Keep the camera pulled well back so the ENTIRE mural wall, from its near edge to the far corner, is inside the tall 9:16 frame with a small margin on both sides: the mural must not be cropped on either side, and its right half with the toucan, the green parrot and the leopard cub is fully visible.\n\nKeep exactly as in image 1: the drawing and colours of the mural; the scalloped painted ceiling inset in cream with thin dusty-rose stripes and the sage scalloped border; the white cloud-shaped pendant lamp; the warm LED glow in the ceiling cove above the mural; the cream crown moulding and skirting board; the warm herringbone oak floor; the large cream rug with the colour blocks and half-circles in dusty rose, sage, mustard and terracotta; the same photographic look, light and grain.\n\nThe rose-and-burgundy velvet daybed and the striped bouclé armchair are now behind the camera to the right and are NOT in the frame. Nothing stands in front of the mural, nothing hangs in front of it, and there is no curtain anywhere. The only things on the left side wall are the window and its cream frame. No people, no lit candles, no baskets, nothing draped over anything."
+    }
+  ],
+  "notes": "Take 2: only b5c for now (owner asked for one frame first). b5b (design B, camera from the right ~25 deg) and the edit chain are added after the owner picks a direction."
+}

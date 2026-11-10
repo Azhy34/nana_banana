@@ -1,0 +1,31 @@
+{
+  "description": "THE TASK of a reel set for Listing 2 (Scandi Berge, WA-001): 2 photos 9:16 with their clips, two DIFFERENT rooms (style, age, side, person). s1 = mother with a baby (Biophilic Nursery, baby, play mat), s2 = a small girl (Playful Curves, 2-5 years, poufs). The owner assembles the reel. Not a carousel pair: the rooms differ on purpose. Edit this file (or the kits / roles), then: py -3.12 -X utf8 scripts/director.py plan l2_reel01",
+  "id": "l2_reel01",
+  "listing_spec": "listing02_interiors.json",
+  "video_spec": "listing02_video.json",
+  "aspect": "9:16",
+  "seed": 2,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 2,
+    "ages": [
+      "baby",
+      "vorschul"
+    ],
+    "distinct_kits": true,
+    "shared_kits_ok": true,
+    "audience_waiver": true
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "life",
+      "kit": "baby_play_mat"
+    },
+    {
+      "slot": "s2",
+      "role": "life",
+      "kit": "arch_poufs"
+    }
+  ]
+}

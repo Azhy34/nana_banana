@@ -6,7 +6,8 @@ import {
   OMNI_PRESETS,
   VEO_NEGATIVE_PROMPT,
   VEO_FIXED_DURATION_SECONDS,
-  OMNI_FIXED_DURATION_SECONDS,
+  OMNI_DEFAULT_DURATION_SECONDS,
+  OMNI_DURATION_OPTIONS,
   ETSY_MIN_VIDEO_SIDE_PX,
   ETSY_RECOMMENDED_VIDEO_SIDE_PX,
   getVeoCostUsd,
@@ -28,6 +29,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   // Model engine selector: 'omni' by default for cheaper & more stable nursery videos
   const [engine, setEngine] = useState<VideoEngine>('omni');
   const [resolution, setResolution] = useState<OmniResolution>('720p');
+  // Omni clip length (3..15 s). Always sent to Google: without it the model makes 10 s.
+  const [durationSeconds, setDurationSeconds] = useState<number>(OMNI_DEFAULT_DURATION_SECONDS);
 
   // Settings
   const [sourceImage, setSourceImage] = useState<string | null>(initialImage || null);
@@ -67,7 +70,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   }, [initialImage]);
 
   const estimatedCost = engine === 'omni'
-    ? getOmniCostUsd(resolution)
+    ? getOmniCostUsd(resolution, durationSeconds)
     : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -197,7 +200,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       if (engine === 'omni') {
         videoUrl = await generateOmniVideoOnClient(
           sourceImage,
-          { ...settings, resolution },
+          { ...settings, resolution, durationSeconds },
           geminiApiKey,
           (progress) => setState(prev => ({ ...prev, progress })),
           traceId
@@ -250,7 +253,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
           <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
             <span>🎬 Video Animator</span>
             <span className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full font-normal">
-              Omni 1.1 Flash & Veo 3.1
+              Omni 1.2 Flash & Veo 3.1
             </span>
           </h2>
           <p className="text-slate-400 text-sm mt-1">
@@ -277,7 +280,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              ✨ Gemini Omni 1.1 Flash (Быстро & Дёшево)
+              ✨ Gemini Omni 1.2 Flash (Быстро & Дёшево)
             </button>
             <button
               onClick={() => handleEngineChange('veo')}
@@ -316,10 +319,46 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               >
                 720p Финал Etsy · 720×1280
               </button>
+              <button
+                onClick={() => setResolution('1080p')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  resolution === '1080p'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                1080p Рекомендовано Etsy · 1080×1920
+              </button>
             </div>
             <span className="text-[10px] text-slate-500 hidden sm:inline">
-              ~${getOmniCostUsd(resolution).toFixed(2)}
+              ~${getOmniCostUsd(resolution, durationSeconds).toFixed(2)}
             </span>
+          </div>
+        )}
+
+        {engine === 'omni' && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-medium">Длина:</span>
+            <div className="inline-flex bg-slate-900/60 p-1 rounded-xl border border-slate-700">
+              {OMNI_DURATION_OPTIONS.map(seconds => (
+                <button
+                  key={seconds}
+                  onClick={() => setDurationSeconds(seconds)}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    durationSeconds === seconds
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {seconds} с
+                </button>
+              ))}
+            </div>
+            {durationSeconds > OMNI_DEFAULT_DURATION_SECONDS && (
+              <span className="text-[10px] text-amber-400 hidden sm:inline">
+                дольше 5 с геометрия может плыть (проверено на 1.1)
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -403,7 +442,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             />
             <span className="text-[10px] text-slate-500 mt-1.5 block">
               {engine === 'omni' 
-                ? '✨ Omni 1.1 Flash: зашиты жесткие директивы сохранения обоев 1:1 без дорисовывания лишних деталей.' 
+                ? '✨ Omni 1.2 Flash: один непрерывный кадр, только движение (комнату не переописываем), запреты и звук прописаны в самом промпте.'
                 : 'Veo 3.1: использует автоматический негативный промпт для предотвращения сворачивания обоев.'}
             </span>
           </div>
@@ -436,13 +475,13 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Движок:</span>
               <span className="text-white font-bold font-mono">
-                {engine === 'omni' ? `Gemini Omni 1.1 (${resolution})` : 'Veo 3.1 Fast'}
+                {engine === 'omni' ? `Gemini Omni 1.2 (${resolution})` : 'Veo 3.1 Fast'}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Длительность:</span>
               <span className="text-white font-bold font-mono">
-                {engine === 'omni' ? OMNI_FIXED_DURATION_SECONDS : VEO_FIXED_DURATION_SECONDS} секунд
+                {engine === 'omni' ? durationSeconds : VEO_FIXED_DURATION_SECONDS} секунд
               </span>
             </div>
             <div className="flex justify-between text-sm pt-2 border-t border-slate-700/50">

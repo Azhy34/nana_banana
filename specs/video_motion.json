@@ -1,0 +1,106 @@
+{
+  "description": "The VOCABULARY of video motion for the director (owner 10.11.2026, after the research of the official Kling / Kie / Google / xAI guides). Camera moves, light motions and the sentences that freeze the rest. A role or a slot of a set names a move by its id (`camera`, `light`), the director puts the PHRASE into the clip prompt and checks the STATUS. Status: ok = proven or safe; test = allowed but not proven on our murals (the director warns); avoid = not for a mural wall; banned_by_owner = the owner's ban (the same words as BANNED_MOTION in reels_pipeline/director.py: a test keeps the two in step). Evidence: 'ours' = a clip of ours (specs/video_models.json), 'official' = Kling/Kie/Google/xAI page, 'community' = a third-party guide, 'inference' = my reading, not a fact. Promoting this list into Promt/trends.json (so the web app shares it) is an owner decision: that file is edited by other sessions.",
+  "updated": "2026-11-10",
+  "camera_moves": {
+    "locked_off": {
+      "phrase": "The camera does not move at all: it is a fixed, static shot.",
+      "status": "ok",
+      "risk": "low",
+      "evidence": {"kling26": "ours: the person roles (life, play, gaze, leave) say 'on a tripod' and Kling never drew one", "omni12": "MEASURED 10.11 on b5c: the older wording 'locked off on a tripod' made Omni DRAW a tripod that fades in on the rug: never write the word tripod for Omni; the mural itself did not move (0.01 px)"},
+      "source": "official: kling.ai/topics/make-a-photo-move ('camera locked off', 'background stays still'); ours"
+    },
+    "walk_in": {
+      "phrase": "The camera advances straight forward into the room at a clearly visible calm walking pace, as if a person is entering, and the nearer objects shift more than the farther ones, giving a natural depth parallax.",
+      "status": "ok",
+      "risk": "low",
+      "evidence": {"kling26": "ours: proven on Listing 45; owner 08.11: do NOT say 'very slowly', say 'clearly visible calm walking pace'", "omni12": "untested"},
+      "source": "ours (specs/video_models.json kling26.recipes)"
+    },
+    "forward_drift_right": {
+      "phrase": "The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones.",
+      "status": "ok",
+      "risk": "low",
+      "evidence": {"kling26": "ours: Listing 2 mother clip 06.11, the owner liked it (forward AND a few cm right)", "omni12": "untested"},
+      "source": "ours (kling26.recipes.proven_branch_shadows)"
+    },
+    "slow_pull_back": {
+      "phrase": "The camera slowly pulls back by about 5 percent at a constant speed and keeps the whole mural wall in the frame.",
+      "status": "test",
+      "risk": "medium",
+      "evidence": {"kling26": "untested", "omni12": "untested"},
+      "source": "community: replicate.com xAI Grok readme, film.fun Kling guide. Risk (inference): a pull-back invents the edges that are not in the first frame"
+    },
+    "gentle_arc": {
+      "phrase": "The camera arcs gently by about 15 degrees around the room at a constant speed and keeps the whole mural wall in the frame.",
+      "status": "test",
+      "risk": "high",
+      "evidence": {"kling26": "untested", "omni12": "journal of the site: arcs and side glides hallucinate on Omni 1.1; with a first and a last frame the end is fixed, so it is the one case worth testing"},
+      "source": "community: linkmodel.ai ('orbit 15 degrees total'); ours"
+    },
+    "push_in": {
+      "phrase": "A slow push-in toward the room at a constant velocity.",
+      "status": "banned_by_owner",
+      "risk": "medium",
+      "evidence": {"kling26": "Kling's own blog lists a slow push-in as a safe move; the owner banned push-in/zoom (creative-ad-auditor, director.py). An open conflict: ask the owner before using it", "omni12": "untested"},
+      "source": "official: kling.ai/blog/kling-ai-prompt-guide"
+    },
+    "zoom": {"phrase": "A subtle zoom in.", "status": "banned_by_owner", "risk": "medium", "evidence": {}, "source": "community: Replicate; owner ban"},
+    "pan": {"phrase": "A gentle pan right across the room.", "status": "banned_by_owner", "risk": "medium", "evidence": {}, "source": "official: kling.ai blog; owner ban (pan left / pan right)"},
+    "tilt_up": {"phrase": "A slight tilt up.", "status": "banned_by_owner", "risk": "medium", "evidence": {}, "source": "official: kling.ai blog; owner ban"},
+    "orbit": {"phrase": "The camera orbits around the room.", "status": "banned_by_owner", "risk": "high", "evidence": {}, "source": "community; owner ban; it opens surfaces that the first frame does not show"},
+    "lateral_glide": {"phrase": "The camera is sliding sideways along the room.", "status": "banned_by_owner", "risk": "high", "evidence": {}, "source": "community: elser.ai; owner ban (sliding, gliding)"},
+    "handheld": {"phrase": "A subtle handheld micro-movement.", "status": "avoid", "risk": "high", "evidence": {}, "source": "community: picassoia, elser.ai. A shake reads as a distortion of the mural"},
+    "rack_focus": {"phrase": "A rack focus.", "status": "avoid", "risk": "medium", "evidence": {}, "source": "community: elser.ai (Grok). A mural wall must stay sharp (f/8 or smaller in the briefs)"}
+  },
+  "light_motions": {
+    "dust_and_sun_patches": {
+      "phrase": "Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently.",
+      "status": "ok",
+      "risk": "low",
+      "evidence": {"kling26": "untested on our rooms", "omni12": "untested"},
+      "source": "official example: docs.kie.ai Kling 2.1 ('floating dust ... catch the light'); community: everypixel"
+    },
+    "lamp_glow": {
+      "phrase": "The pendant lamp hangs still and its warm glow breathes very slightly.",
+      "status": "ok",
+      "risk": "low",
+      "evidence": {"kling26": "untested", "omni12": "untested"},
+      "source": "inference"
+    },
+    "branch_shadows": {
+      "phrase": "Soft dappled shadows of leafy branches sway slowly on the wall and on the floor, as in a light breeze: only the shadows move, subtly and low in contrast, and they never change the colours or the drawing of the mural.",
+      "status": "ok",
+      "risk": "medium",
+      "evidence": {"kling26": "ours: Listing 2 mother clip 06.11, the owner liked it; failed on Listing 7 when the shadow on the wall was forbidden", "omni12": "untested"},
+      "source": "ours (kling26.recipes)"
+    },
+    "window_light_shift": {
+      "phrase": "The soft window light slowly shifts and thin cloud shadows pass over the floor.",
+      "status": "test",
+      "risk": "medium",
+      "evidence": {"kling26": "untested", "omni12": "untested"},
+      "source": "official: kling.ai blog ('soft golden sunlight, long shadows'); community: Grok Replicate. Risk (inference): it may recolour the mural"
+    },
+    "cove_led_fade_in": {
+      "phrase": "The warm LED light in the ceiling cove above the mural fades up gently.",
+      "status": "test",
+      "risk": "medium",
+      "evidence": {"kling26": "untested", "omni12": "untested"},
+      "source": "inference, for the build-up reel (the layer with the ceiling and the light)"
+    }
+  },
+  "freeze": {
+    "mural": "The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted animal remain exactly as in the first frame.",
+    "room": "The ceiling, the walls, the floor and the rug stay perfectly still.",
+    "note": "Kling's official rule (make-a-photo-move): name the ONE thing that moves, then say that everything else stays frozen, in positive words ('minimize negative instructions', Kling 4.0 guide). Measured 08.11: the older negative 'ink lock' sentence did NOT hold on Kling 2.6 (the mural balloon drifted 41 px of 960); whether this positive wording holds is still untested, so measure it (the drift check in AGENTS.md 09.11)."
+  },
+  "prompt_rules": [
+    {"rule": "Prompt = subject + movement. The picture is already known to the model: describe only what MOVES, do not re-describe the photo.", "applies_to": ["kling26", "omni12"], "source": "official: kling.ai image-to-video guide; community: Grok Replicate"},
+    {"rule": "One subject, one action, one camera move per clip.", "applies_to": ["kling26", "omni12"], "source": "community: Grok Replicate readme"},
+    {"rule": "Say what you want in positive words. Kie's Kling 2.6 has no negative_prompt and no cfg_scale; Kling 4.0's guide says negative instructions can raise the error rate.", "applies_to": ["kling26", "kling40"], "source": "official: docs.kie.ai Kling 2.6; kling.ai Kling 4.0 user guide"},
+    {"rule": "Numbers beat adjectives: 'about 5 percent', 'about 15 degrees total', 'constant velocity'. 'drift', 'settle', 'hold' give restrained motion, 'dramatic' does not.", "applies_to": ["kling26", "omni12"], "source": "community: omnely.com (not confirmed by an official page)"},
+    {"rule": "A picture that looks like a painting may be answered with a pan across the painting: the freeze sentence names the mural as part of the wall.", "applies_to": ["kling26"], "source": "official: kling.ai image-to-video guide; reels_pipeline/prompts.py"},
+    {"rule": "A single continuous shot, no scene cuts; describe the roles of the pictures in plain language, never with control tags such as <FIRST_FRAME>; no quotation marks; describe the sound.", "applies_to": ["omni12"], "source": "official: Google guide (via specs/video_models.json), Google Omni 1.2 docs"},
+    {"rule": "A description that deviates strongly from the image can cause a camera cut or a transition.", "applies_to": ["kling26"], "source": "official: kling.ai image-to-video guide"}
+  ]
+}

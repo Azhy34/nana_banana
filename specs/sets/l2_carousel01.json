@@ -1,0 +1,29 @@
+{
+  "id": "l2_carousel01",
+  "type": "carousel",
+  "description": "Listing 2 (Scandi Berge): two pairs of ONE composition in two interior colourways each. A = 2 x 9:16 (stories, reels), B = 2 x 4:5 (Instagram carousel). A pair shares the camera, the room, the hero piece, the light and `seed_key`; only the colour differs. Change this file, then: py -3.12 -X utf8 scripts/director.py plan l2_carousel01",
+  "listing_spec": "listing02_interiors.json",
+  "model": "nano-banana-2-1",
+  "pairs": [
+    {
+      "id": "a", "for": ["meta_stories_reels"], "purpose": "stories_carousel", "age": "vorschul", "style": "Japandi",
+      "key_object": "Low Scandinavian birch toddler daybed",
+      "lighting": "soft afternoon window light",
+      "angle": 0,
+      "gear": {"body": "Sony A7R V", "lens": "24mm tilt-shift lens", "aperture": "f/11 aperture"},
+      "accessories": ["dimmable table lamp with a paper shade and a warm 2700K glow", "oval floor rug with a wavy edge and a short soft pile"],
+      "colorways": ["Honey Amber", "Dusty Rose"],
+      "variation": 11, "seed_key": "l2_pair_a"
+    },
+    {
+      "id": "b", "for": ["meta_feed_ad"], "age": "baby", "style": "Scandi",
+      "key_object": "Minimalist slatted solid birch crib",
+      "lighting": "warm morning sunbeams",
+      "angle": 1,
+      "gear": {"body": "Canon EOS R5", "lens": "28mm gentle wide lens", "aperture": "f/11 aperture"},
+      "accessories": ["crocheted play mat in soft earth tones", "low open shelf with picture books facing front"],
+      "colorways": ["Cool Blue", "Butter Yellow"],
+      "variation": 23, "seed_key": "l2_pair_b"
+    }
+  ]
+}

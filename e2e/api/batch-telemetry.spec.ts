@@ -8,20 +8,23 @@ test.describe('Batch Prompt Generation & Realism Rules', () => {
 
   for (const ageGroup of AGE_GROUPS) {
     test(`generates realistic 5-layer prompt for ageGroup: ${ageGroup}`, () => {
-      const tags = generateRandomTags('4:3', ageGroup);
+      // the app rolls the scalloped-trim wall in 35% of the non-9:16 builds; this test is about the mural-on-the-whole-wall rule
+      const tags = { ...generateRandomTags('4:3', ageGroup), wallArchitecture: 'full-wall' as const };
       const prompt = buildGeminiPrompt(tags);
 
       // 1. Layer 1: Wallpaper Mural Rule
       expect(prompt).toContain('FULL-HEIGHT 100% WALL COVERAGE');
       expect(prompt).toContain('single full-scale mural');
 
-      // 2. Layer 2: Age Psychology & Setting
+      // 2. Layer 2: Age Psychology & Setting. The scene is built from the CHOSEN style (its card in Promt/trends.json),
+      //    never from a style written into the code.
+      expect(prompt).toContain(` in ${tags.style} style`);
       if (ageGroup === 'baby') {
-        expect(prompt).toContain('authentic, peaceful Scandinavian nursery for a baby');
+        expect(prompt).toContain('serene nursery for a baby');
       } else if (ageGroup === 'vorschul') {
-        expect(prompt).toContain('Scandinavian preschool children\'s bedroom');
+        expect(prompt).toContain("delightful, joyful children's bedroom");
       } else if (ageGroup === 'schulkind') {
-        expect(prompt).toContain('children\'s bedroom and study zone for a school-age child');
+        expect(prompt).toContain('creative study sanctuary');
       } else {
         expect(prompt).toContain('contemporary youth bedroom');
       }
@@ -32,12 +35,14 @@ test.describe('Batch Prompt Generation & Realism Rules', () => {
 
       // 4. Layer 4: Grazing Natural Daylight & Craft Lambda Texture
       expect(prompt).toContain('Craft Lambda fine sand grain micro-relief');
-      expect(prompt).toContain('Soft directional natural daylight from an adjacent window gently grazes the wallpaper');
+      expect(prompt).toContain('Grazing natural morning daylight from an adjacent window');
 
       // 5. Layer 5: Camera & Optics (Dynamically randomized variables)
-      expect(prompt).toMatch(/f\/(4\.0|5\.6|8\.0) aperture/);
+      expect(prompt).toMatch(/f\/(4\.0|5\.6|8\.0|11) aperture/);
       expect(prompt).toMatch(/Shot on (Sony A7R V|Hasselblad H6D-100c|Canon EOS R5|Fujifilm GFX 100S)/);
-      expect(prompt).toMatch(/(28mm gentle wide lens|35mm prime lens|45mm medium format lens|50mm normal lens)/);
+      expect(prompt).toMatch(/(24mm tilt-shift lens|28mm gentle wide lens|35mm prime lens|45mm medium format lens|50mm normal lens)/);
+      // the real-photograph line (positive wording) comes from the same data file as the styles
+      expect(prompt).toContain('A real editorial interior photograph');
       expect(prompt).toContain('Aspect ratio: 4:3');
 
       // 6. Zero Aspirational Buzzwords (no digital beauty filter triggers)
@@ -97,7 +102,7 @@ test.describe('Batch Prompt Generation & Realism Rules', () => {
   test('Listing 40 (Sage stripes) generates consistent nursery prompt', () => {
     const tags = {
       color: 'Sage',
-      style: 'Japandi 2.0',
+      style: 'Japandi',
       brand: 'Oliver Furniture',
       ageGroup: 'baby' as AgeGroupKey,
       keyObject: 'Classic slatted wooden baby crib',
@@ -114,7 +119,7 @@ test.describe('Batch Prompt Generation & Realism Rules', () => {
 
     const prompt = buildGeminiPrompt(tags);
     expect(prompt).toContain('Oliver Furniture-inspired Classic slatted wooden baby crib');
-    expect(prompt).toContain('Decor accented with Sage');
+    expect(prompt).toContain('Interior colourway: Sage');
     expect(prompt).toContain('Aspect ratio: 4:3');
     expect(prompt).toContain('Avoid: peeling wallpaper');
   });

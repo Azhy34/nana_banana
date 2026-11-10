@@ -1,0 +1,210 @@
+{
+ "MoonbloomDesign": {
+  "display_name": "Moonbloom Design (choose design, prompt from the app)",
+  "category": "Moonbloom",
+  "required": [
+   "scene_id",
+   "aspect_ratio",
+   "age_group",
+   "style",
+   "color",
+   "key_object",
+   "lighting",
+   "camera_angle",
+   "camera_elevation",
+   "camera_distance",
+   "brand",
+   "composition",
+   "clean_random_details",
+   "variation"
+  ],
+  "optional": [
+   "key_object_custom",
+   "accessories",
+   "extra_prompt",
+   "strip_regex",
+   "wall_architecture",
+   "prompt_mode",
+   "brief_subject",
+   "brief_scene",
+   "brief_framing",
+   "brief_product",
+   "brief_product_short",
+   "brief_wall_rule",
+   "brief_people",
+   "brief_anchor",
+   "with_texture",
+   "camera_body",
+   "lens",
+   "aperture",
+   "depth_of_field"
+  ],
+  "outputs": [
+   "prompt",
+   "scene_id"
+  ]
+ },
+ "MoonbloomFramePicker": {
+  "display_name": "Moonbloom Frame Picker (video board: choose a finished photo)",
+  "category": "Moonbloom",
+  "required": [
+   "frame"
+  ],
+  "optional": [],
+  "outputs": [
+   "image",
+   "image_path",
+   "scene_id",
+   "out_dir",
+   "listing"
+  ]
+ },
+ "MoonbloomImageFile": {
+  "display_name": "Moonbloom Image File (show a frame, pass its path)",
+  "category": "Moonbloom",
+  "required": [
+   "image_path"
+  ],
+  "optional": [],
+  "outputs": [
+   "image",
+   "image_path"
+  ]
+ },
+ "MoonbloomKieGptImage2": {
+  "display_name": "Moonbloom KIE Image (GPT Image 2, paid)",
+  "category": "Moonbloom",
+  "required": [
+   "prompt",
+   "scene_id",
+   "wallpaper_path",
+   "out_dir",
+   "listing",
+   "aspect_ratio",
+   "resolution",
+   "use_texture",
+   "reuse_existing",
+   "dry_run"
+  ],
+  "optional": [
+   "texture_path",
+   "reference_labels"
+  ],
+  "outputs": [
+   "image",
+   "image_path",
+   "report"
+  ]
+ },
+ "MoonbloomKieGrokImagineEdit": {
+  "display_name": "Moonbloom KIE Image (Grok Imagine 2.0 Edit, paid)",
+  "category": "Moonbloom",
+  "required": [
+   "prompt",
+   "scene_id",
+   "wallpaper_path",
+   "out_dir",
+   "listing",
+   "aspect_ratio",
+   "use_texture",
+   "reuse_existing",
+   "dry_run"
+  ],
+  "optional": [
+   "texture_path",
+   "reference_labels"
+  ],
+  "outputs": [
+   "image",
+   "image_path",
+   "report"
+  ]
+ },
+ "MoonbloomKieImage": {
+  "display_name": "Moonbloom KIE Image (Nano Banana, paid)",
+  "category": "Moonbloom",
+  "required": [
+   "prompt",
+   "scene_id",
+   "wallpaper_path",
+   "out_dir",
+   "listing",
+   "aspect_ratio",
+   "model",
+   "resolution",
+   "use_texture",
+   "reuse_existing",
+   "dry_run"
+  ],
+  "optional": [
+   "texture_path",
+   "reference_labels"
+  ],
+  "outputs": [
+   "image",
+   "image_path",
+   "report"
+  ]
+ },
+ "MoonbloomKieKling": {
+  "display_name": "Moonbloom KIE Kling 2.6 Push-in (paid)",
+  "category": "Moonbloom",
+  "required": [
+   "image_path",
+   "scene_id",
+   "out_dir",
+   "listing",
+   "duration",
+   "sound",
+   "min_motion_delta",
+   "reuse_existing",
+   "dry_run"
+  ],
+  "optional": [
+   "prompt_suffix",
+   "prompt_override"
+  ],
+  "outputs": [
+   "video_path",
+   "report",
+   "motion_ok"
+  ]
+ },
+ "MoonbloomListingScene": {
+  "display_name": "Moonbloom Listing Scene (prompt from the app)",
+  "category": "Moonbloom",
+  "required": [
+   "spec_file",
+   "card_number",
+   "variation"
+  ],
+  "optional": [],
+  "outputs": [
+   "prompt",
+   "scene_id",
+   "wallpaper_path",
+   "texture_path",
+   "out_dir",
+   "listing",
+   "aspect_ratio"
+  ]
+ },
+ "MoonbloomWallpaper": {
+  "display_name": "Moonbloom Wallpaper (the reference image)",
+  "category": "Moonbloom",
+  "required": [
+   "wallpaper_path",
+   "use_texture"
+  ],
+  "optional": [
+   "out_dir"
+  ],
+  "outputs": [
+   "wallpaper",
+   "wallpaper_path",
+   "texture_path",
+   "out_dir",
+   "listing"
+  ]
+ }
+}

@@ -1,0 +1,378 @@
+{
+ "model": "gpt-image-2-6/flare-text-to-image",
+ "openapi": {
+  "openapi": "3.1.0",
+  "info": {
+   "title": "kie.ai",
+   "description": "kie.ai API 文档",
+   "version": "1.0.0",
+   "contact": {
+    "name": "技术支持",
+    "email": "support@kie.ai"
+   }
+  },
+  "tags": [],
+  "paths": {
+   "/api/v1/jobs/createTask": {
+    "post": {
+     "summary": "GPT Image 2.6 Flare - Text to Image",
+     "deprecated": false,
+     "description": "## Create Task\n\nUse this endpoint to create a GPT Image 2.6 Flare text-to-image task.\n\n### GIF animation\n\n| Parameter | Default | Notes |\n|---|---|---|\n| `frame_count` | `9` | Integer 2–16. Current cap is 16, not the 64-frame limit in the upstream guide. |\n| `frame_duration_ms` | `200` | Duration per frame in integer milliseconds. Minimum 20, rounded to 10 ms. |\n| `size` | `auto` | Per-frame pixel size. Width and height must be multiples of 16. Omit or pass `auto` for 512×512. Do not pass ratio names such as `1:1`. |\n\nFrames are first packed into a sprite sheet: 2–8 frames use 4×2, 9 frames use 3×3, 10–12 frames use 4×3, 13–16 frames use 4×4. Rows and columns may be swapped to get a closer-to-square layout. The full sheet must have each side ≤ 3840, total pixels ≤ 8,294,400, and long/short side ratio ≤ 3:1, otherwise the request returns 400.\n\n::: warning[]\n`512x512` works for all 2–16 frames; `768x768` supports at most 12 frames. `1024x1024` exceeds the per-side sheet limit even with only 2 frames.\n:::\n\n<Card title=\"Get Task Details\" icon=\"lucide-search\" href=\"/market/common/get-task-detail\">\n  After submission, use the unified query endpoint to check task progress and retrieve results\n</Card>\n\n::: tip[]\nFor production use, we recommend providing the `callBackUrl` parameter so your service can receive completion notifications instead of polling for task status.\n:::\n\n## Related Resources\n\n<CardGroup cols={2}>\n  <Card title=\"Model Marketplace\" icon=\"lucide-store\" href=\"/market/quickstart\">\n    Explore all available models and capabilities\n  </Card>\n  <Card title=\"Common API\" icon=\"lucide-cog\" href=\"/common-api/get-account-credits\">\n    Check account credits and usage\n  </Card>\n</CardGroup>\n",
+     "operationId": "gpt-image-2-6-flare-text-to-image",
+     "tags": [],
+     "parameters": [],
+     "requestBody": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": false,
+         "required": [
+          "model",
+          "input"
+         ],
+         "properties": {
+          "model": {
+           "type": "string",
+           "enum": [
+            "gpt-image-2-6/flare-text-to-image"
+           ],
+           "default": "gpt-image-2-6/flare-text-to-image",
+           "description": "The model name used for generation. This endpoint must use `gpt-image-2-6/flare-text-to-image`."
+          },
+          "callBackUrl": {
+           "type": "string",
+           "format": "uri",
+           "description": "Callback URL for task completion notifications. Optional parameter. If provided, the system will send a POST request to this URL when the task completes, whether it succeeds or fails. If omitted, no callback notification will be sent.",
+           "examples": [
+            "https://your-domain.com/api/callback"
+           ]
+          },
+          "input": {
+           "type": "object",
+           "additionalProperties": false,
+           "description": "Input parameters.",
+           "properties": {
+            "prompt": {
+             "type": "string",
+             "minLength": 1,
+             "maxLength": 32000,
+             "description": "Text description of the image to generate. Describe the subject, setting, composition, lighting and style. Put any text that should appear in the image in quotes. Required, 1 to 32,000 characters.",
+             "examples": [
+              "A cinematic product photo of a red maple leaf on dark stone, soft side light, shallow depth of field, with a small paper tag that reads \"BATCH 07\"."
+             ]
+            },
+            "aspect_ratio": {
+             "type": "string",
+             "enum": [
+              "auto",
+              "1:1",
+              "3:2",
+              "2:3",
+              "4:3",
+              "3:4",
+              "5:4",
+              "4:5",
+              "16:9",
+              "9:16",
+              "2:1",
+              "1:2",
+              "21:9",
+              "9:21",
+              "3:1",
+              "1:3"
+             ],
+             "default": "auto",
+             "description": "Aspect ratio. Optional, default `auto`.\n\nFor static images (`png` / `jpeg` / `webp` / `svg`), pixel size is mapped from `aspect_ratio` + `resolution` (see the table on `resolution`). Do **not** use this as GIF frame size — use `size` instead.\n\nSupported: `auto`, `1:1`, `3:2`, `2:3`, `4:3`, `3:4`, `5:4`, `4:5`, `16:9`, `9:16`, `2:1`, `1:2`, `21:9`, `9:21`, `3:1`, `1:3`.",
+             "examples": [
+              "auto"
+             ]
+            },
+            "resolution": {
+             "type": "string",
+             "enum": [
+              "1K",
+              "2K",
+              "4K"
+             ],
+             "default": "1K",
+             "description": "Resolution tier. Optional, default `1K`.\n\nGIF frame pixels do **not** use this table — use `size`.\n\nStatic-image pixel sizes (width × height):\n\n| ratio | 1K | 2K | 4K |\n|---|---|---|---|\n| 1:1 / auto | 1024×1024 | 2048×2048 | 2880×2880 |\n| 3:2 | 1536×1024 | 2048×1360 | 3520×2336 |\n| 2:3 | 1024×1536 | 1360×2048 | 2336×3520 |\n| 4:3 | 1024×768 | 2048×1536 | 3312×2480 |\n| 3:4 | 768×1024 | 1536×2048 | 2480×3312 |\n| 5:4 | 1280×1024 | 2560×2048 | 3216×2576 |\n| 4:5 | 1024×1280 | 2048×2560 | 2576×3216 |\n| 16:9 | 1536×864 | 2048×1152 | 3840×2160 |\n| 9:16 | 864×1536 | 1152×2048 | 2160×3840 |\n| 2:1 | 2048×1024 | 2688×1344 | 3840×1920 |\n| 1:2 | 1024×2048 | 1344×2688 | 1920×3840 |\n| 21:9 | 2016×864 | 2688×1152 | 3840×1648 |\n| 9:21 | 864×2016 | 1152×2688 | 1648×3840 |\n| 3:1 | 1536×512 | 3072×1024 | 3840×1280 |\n| 1:3 | 512×1536 | 1024×3072 | 1280×3840 |",
+             "examples": [
+              "1K"
+             ]
+            },
+            "quality": {
+             "type": "string",
+             "enum": [
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max",
+              "auto"
+             ],
+             "default": "medium",
+             "description": "Quality. Optional, default `medium`.\n\nSupported: `low`, `medium`, `high`, `xhigh`, `max`, `auto`.",
+             "examples": [
+              "medium"
+             ]
+            },
+            "background": {
+             "type": "string",
+             "enum": [
+              "transparent",
+              "opaque",
+              "auto"
+             ],
+             "default": "auto",
+             "description": "Background. Optional, default `auto`. Transparent background is only supported with `png` / `webp` / `gif`.\n\n- `transparent`: transparent background, useful for product cut-outs, icons and stickers. `output_format` must be `png` or `webp`\n- `opaque`: always a solid background\n- `auto` (default): the model decides",
+             "examples": [
+              "auto"
+             ]
+            },
+            "output_format": {
+             "type": "string",
+             "enum": [
+              "png",
+              "jpeg",
+              "webp",
+              "gif",
+              "svg"
+             ],
+             "default": "png",
+             "description": "Output format. Optional, default `png`. Passing `jpg` is treated as `jpeg`.\n\nSupported: `png`, `jpeg`, `webp`, `gif`, `svg`.\n\n- Transparent background is only supported with `png` / `webp`\n- For `gif`, use `size` / `frame_count` / `frame_duration_ms`; do not send `svg`\n- For `svg`, send `svg.model`; do not send the GIF fields",
+             "examples": [
+              "png"
+             ]
+            },
+            "complexity": {
+             "type": "string",
+             "enum": [
+              "low",
+              "medium",
+              "high"
+             ],
+             "default": "high",
+             "description": "Planning complexity. Optional, default `high`.\n\nSupported: `low`, `medium`, `high`.",
+             "examples": [
+              "high"
+             ]
+            },
+            "moderation": {
+             "type": "string",
+             "enum": [
+              "auto",
+              "low"
+             ],
+             "default": "low",
+             "description": "Moderation strength. Optional, default `low`.\n\nSupported: `auto`, `low`.",
+             "examples": [
+              "low"
+             ]
+            },
+            "output_compression": {
+             "type": "integer",
+             "minimum": 0,
+             "maximum": 100,
+             "description": "JPEG / WebP compression, 0–100. Optional.\n\nSend only when `output_format` is `jpeg` or `webp`. Do not include this field for other formats."
+            },
+            "size": {
+             "type": "string",
+             "default": "auto",
+             "description": "GIF **per-frame** pixel size. Send only when `output_format=gif`. Width and height must both be multiples of 16. Optional, default `auto` (currently equivalent to `512x512`). Do not pass ratio names such as `1:1`. Do not send for non-gif.\n\nFrames are first packed into a sprite sheet: 2–8 frames use 4×2, 9 frames use 3×3, 10–12 frames use 4×3, 13–16 frames use 4×4. Rows and columns may be swapped to get a closer-to-square layout. The full sheet must have each side ≤ 3840, total pixels ≤ 8,294,400, and long/short side ratio ≤ 3:1, otherwise the request returns 400.\n\n- `512x512` works for all 2–16 frames\n- `768x768` supports at most 12 frames\n- `1024x1024` exceeds the per-side sheet limit even with only 2 frames",
+             "examples": [
+              "auto"
+             ]
+            },
+            "frame_count": {
+             "type": "integer",
+             "minimum": 2,
+             "maximum": 16,
+             "default": 9,
+             "description": "GIF frame count. Send only when `output_format=gif`. Integer 2–16, default 9. The current cap is 16, not the 64-frame limit in the upstream guide. Do not send for non-gif.",
+             "examples": [
+              9
+             ]
+            },
+            "frame_duration_ms": {
+             "type": "integer",
+             "minimum": 20,
+             "maximum": 2000,
+             "multipleOf": 10,
+             "default": 200,
+             "description": "Duration of each GIF frame. Send only when `output_format=gif`. Integer milliseconds, default 200, minimum 20, rounded to 10 ms. Do not send for non-gif.",
+             "examples": [
+              200
+             ]
+            },
+            "svg": {
+             "type": "object",
+             "additionalProperties": false,
+             "description": "Send the whole `svg` object only when `output_format=svg`. Do not include `svg` for other formats. If `model` is omitted, the backend fills `gpt-5.6-luna`.",
+             "properties": {
+              "model": {
+               "type": "string",
+               "enum": [
+                "gpt-6-sol",
+                "gpt-5.6-luna",
+                "gpt-5.6-terra"
+               ],
+               "default": "gpt-5.6-luna",
+               "description": "Text model used to write the SVG. Optional, default `gpt-5.6-luna`.\n\nSupported: `gpt-6-sol`, `gpt-5.6-luna`, `gpt-5.6-terra`.\n\nSVG output is billed in two parts: image tokens (same as PNG) plus the selected author model's input/output tokens. See the Pricing page for rates.",
+               "examples": [
+                "gpt-5.6-luna"
+               ]
+              }
+             }
+            }
+           },
+           "required": [
+            "prompt"
+           ]
+          }
+         }
+        },
+        "examples": {
+         "1": {
+          "value": {
+           "model": "gpt-image-2-6/flare-text-to-image",
+           "callBackUrl": "https://your-domain.com/api/callback",
+           "input": {
+            "prompt": "A cinematic product photo of a red maple leaf on dark stone, soft side light, shallow depth of field, with a small paper tag that reads \"BATCH 07\".",
+            "aspect_ratio": "16:9",
+            "resolution": "1K",
+            "quality": "medium",
+            "background": "auto",
+            "output_format": "png"
+           }
+          },
+          "description": "Text to image"
+         },
+         "2": {
+          "value": {
+           "model": "gpt-image-2-6/flare-text-to-image",
+           "callBackUrl": "https://your-domain.com/api/callback",
+           "input": {
+            "prompt": "a waving flag",
+            "output_format": "gif",
+            "size": "512x512",
+            "frame_count": 9,
+            "frame_duration_ms": 200
+           }
+          },
+          "description": "GIF"
+         },
+         "3": {
+          "value": {
+           "model": "gpt-image-2-6/flare-text-to-image",
+           "callBackUrl": "https://your-domain.com/api/callback",
+           "input": {
+            "prompt": "a simple maple leaf icon",
+            "output_format": "svg",
+            "svg": {
+             "model": "gpt-5.4-mini"
+            }
+           }
+          },
+          "description": "SVG"
+         }
+        }
+       }
+      },
+      "required": true
+     },
+     "responses": {
+      "200": {
+       "description": "Request Successful",
+       "content": {
+        "application/json": {
+         "schema": {
+          "type": "object",
+          "required": [
+           "data"
+          ],
+          "properties": {
+           "code": {
+            "type": "integer",
+            "description": "Response status code\n\n- **200**: Success - Request has been processed successfully\n- **401**: Unauthorized - Authentication credentials are missing or invalid\n- **402**: Insufficient Credits - Account does not have enough credits to perform the operation\n- **404**: Not Found - The requested resource or endpoint does not exist\n- **422**: Validation Error - The request parameters failed validation checks\n- **429**: Rate Limited - Request limit has been exceeded for this resource\n- **433**: Request Limit - Sub-key Usage Exceeds Limit\n- **455**: Service Unavailable - System is currently undergoing maintenance\n- **500**: Server Error - An unexpected error occurred while processing the request\n- **501**: Generation Failed - Content generation task failed\n- **505**: Feature Disabled - The requested feature is currently disabled",
+            "enum": [
+             200,
+             401,
+             402,
+             404,
+             422,
+             429,
+             433,
+             455,
+             500,
+             501,
+             505
+            ]
+           },
+           "msg": {
+            "type": "string",
+            "description": "Response message, error description when failed",
+            "example": "success"
+           },
+           "data": {
+            "type": "object",
+            "required": [
+             "taskId"
+            ],
+            "properties": {
+             "taskId": {
+              "type": "string",
+              "description": "Task ID, can be used with Get Task Details endpoint to query task status",
+              "example": "7a1c3e9b52d84f60a3b1c2d4e5f60718"
+             }
+            }
+           }
+          },
+          "title": "response not with recordId"
+         },
+         "example": {
+          "code": 200,
+          "msg": "success",
+          "data": {
+           "taskId": "7a1c3e9b52d84f60a3b1c2d4e5f60718"
+          }
+         }
+        }
+       },
+       "headers": {}
+      }
+     },
+     "security": [
+      {
+       "BearerAuth": []
+      }
+     ]
+    }
+   }
+  },
+  "webhooks": {},
+  "components": {
+   "schemas": {},
+   "responses": {},
+   "securitySchemes": {
+    "BearerAuth": {
+     "type": "http",
+     "scheme": "bearer",
+     "bearerFormat": "API Key",
+     "description": "All API requests require a Bearer Token. Add the header `Authorization: Bearer YOUR_API_KEY` to authenticate requests."
+    }
+   }
+  },
+  "servers": [
+   {
+    "url": "https://api.kie.ai",
+    "description": "正式环境"
+   }
+  ],
+  "security": [
+   {
+    "BearerAuth": []
+   }
+  ]
+ }
+}

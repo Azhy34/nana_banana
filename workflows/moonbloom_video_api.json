@@ -1,0 +1,51 @@
+{
+ "1": {
+  "class_type": "MoonbloomKieKling",
+  "inputs": {
+   "image_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/b5c.png",
+   "scene_id": "l11_b5c_kling_drift",
+   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/video",
+   "listing": "Листинг 11",
+   "min_motion_delta": 2.0,
+   "reuse_existing": true,
+   "dry_run": true,
+   "duration": "5",
+   "sound": false,
+   "prompt_suffix": "",
+   "prompt_override": "The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted animal remain exactly as in the first frame."
+  }
+ },
+ "2": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "1",
+    1
+   ]
+  }
+ },
+ "3": {
+  "class_type": "MoonbloomKieOmniVideo",
+  "inputs": {
+   "image_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/b5c.png",
+   "scene_id": "l11_b5c_omni_drift",
+   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/video",
+   "listing": "Листинг 11",
+   "min_motion_delta": 2.0,
+   "reuse_existing": true,
+   "dry_run": true,
+   "resolution": "720p",
+   "duration": 5,
+   "prompt_override": "The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted animal remain exactly as in the first frame. The sound is a quiet room tone."
+  }
+ },
+ "4": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "3",
+    1
+   ]
+  }
+ }
+}

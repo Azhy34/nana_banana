@@ -1,0 +1,50 @@
+{
+  "description": "What the two ComfyUI boards hold right now (owner 05.11: two small boards, one tab each). Photos: at most 3 chains; an entry is a card id or {id, model, prompt: full|brief|brief-nogear|brief-anchor}. Video: at most 3 clips (scene ids with a prompt in specs/listing45_video.json or in the generated set); each starts on its own photo and the Frame Picker can swap it for any finished one. `set` = the reel set whose generated cards and clips (specs/sets/<set>.generated.json, made by scripts/director.py) join the hand-written ones. Normally written by scripts/director.py photos|pick. After editing run: py -3.12 -X utf8 scripts/build_comfy_workflows.py",
+  "photos": {
+    "model": "nano-banana-2-1",
+    "models": "all",
+    "cards": [
+      {
+        "id": "l11_reel01_s1_gaze",
+        "model": "nano-banana-2-1",
+        "prompt": "brief"
+      },
+      {
+        "id": "l11_reel01_s2_product",
+        "model": "nano-banana-2-1",
+        "prompt": "brief"
+      }
+    ],
+    "spec": "listing11_interiors.json"
+  },
+  "video": {
+    "scenes": [],
+    "spec": "listing11_interiors.json",
+    "video_spec": "listing11_video.json",
+    "explicit_clips": [
+      {
+        "id": "l11_b5c_kling_drift",
+        "model": "kling26",
+        "image": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/b5c.png",
+        "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/video",
+        "listing": "Листинг 11",
+        "duration": 5,
+        "sound": false,
+        "min_motion_delta": 2.0,
+        "prompt": "The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted animal remain exactly as in the first frame."
+      },
+      {
+        "id": "l11_b5c_omni_drift",
+        "model": "omni12",
+        "image": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/b5c.png",
+        "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/video",
+        "listing": "Листинг 11",
+        "duration": 5,
+        "resolution": "720p",
+        "min_motion_delta": 2.0,
+        "prompt": "The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted animal remain exactly as in the first frame. The sound is a quiet room tone."
+      }
+    ]
+  },
+  "set": "l11_reel01"
+}

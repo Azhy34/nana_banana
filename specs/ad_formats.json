@@ -1,0 +1,443 @@
+{
+  "description": "WHERE A PICTURE GOES. `destinations` is the registry: one entry = one place a generated picture ends up (a platform surface), with the exact ratio and pixels it needs, WHY the picture is there and HOW it gets there. A set says `for: [destination ids]`, the director takes the ratio to generate from here (`generate_as`), scripts/export_ads.py cuts the delivery files from the finished frames, scripts/run_board.py shows which destinations a frame serves. Code: reels_pipeline/destinations.py. `platforms` below it are the checked facts of the official pages (Meta help pages and Meta MCP, Pinterest Business help, Google Ads and Merchant Center help, checked 2026-11-06) the destinations are made from. The upload itself (step B) is NOT built: `how` only names the tool that will do it.",
+  "checked": "2026-11-06",
+  "fields": {
+    "tag": "the platform: meta | pinterest | google | etsy | feed. The id of a destination starts with it, and so does the name of a frame made for it (<set>_<pair><n>_<colour>_<tag>_<ratio>), so it is clear later where a file goes",
+    "ratio": "the exact delivery ratio 'W:H' (null = the destination takes any ratio, it cannot decide what to generate)",
+    "tolerance": "how far the real ratio may be from `ratio` (0.03 = 3%; Meta 3%, Google 1%)",
+    "generate_as": "the ratio to ask the model for (an exact KIE aspect_ratio); differs from `ratio` only when the delivery is a centre crop of it (1.91:1 is cut from 16:9)",
+    "crop_max": "the most a centre crop may remove from the cut side (0 = never crop)",
+    "min_px": "[width, height] below which the platform refuses or blurs the picture (null = not stated)",
+    "rec_px": "[width, height] the platform recommends",
+    "max_mb": "largest file the platform takes",
+    "needs": "what every delivery file must have: 'ai_label' = IPTC DigitalSourceType trainedAlgorithmicMedia (Google Merchant: every AI-made image)",
+    "clip_source": "true = the frame is also the first frame of a Kling clip for a REEL: a reel needs DIFFERENT designs, so a carousel pair (one design in other colours) for it is refused unless the pair says purpose: stories_carousel",
+    "status": "live = used today; planned = we can generate it but nothing uses it yet; open = an owner decision is missing",
+    "video": "the delivery spec of a VIDEO for this destination (read by reels_pipeline/video_check.py, `scripts/check_reel.py`): `meta` = what the platform's own help says, `advice` = what practitioners recommend (the platform publishes no number); a check against `advice` is a warning, against `meta` an error"
+  },
+  "destinations": {
+    "meta_stories_reels": {
+      "tag": "meta",
+      "clip_source": true,
+      "platform": "Meta (Instagram / Facebook Reels and Stories); the same frame is the first frame of a Kling clip for Reels, YouTube Shorts and Pinterest video",
+      "ratio": "9:16",
+      "tolerance": 0.03,
+      "generate_as": "9:16",
+      "crop_max": 0,
+      "min_px": [
+        600,
+        1067
+      ],
+      "rec_px": [
+        1080,
+        1920
+      ],
+      "max_mb": 30,
+      "why": "full-screen vertical placements and the first frame of every reel clip; keep the top and bottom 14% (250 px) free of the main subject and of any text",
+      "goes_to": "Meta ad account 1591946192121461, Instagram @moonbloomwalls, YouTube, Pinterest ad account 549770501688",
+      "how": "Meta MCP ads_creative_upload_media / ads_creative_upload_local_image; Kling 2.6 takes the frame as its image (ComfyUI video board)",
+      "needs": [
+        "ai_label"
+      ],
+      "status": "live",
+      "video": {
+        "checked": "2026-11-08",
+        "sources": [
+          "https://www.facebook.com/business/help/1197310377458196 (requirements for Facebook Reels)",
+          "https://www.facebook.com/business/help/2222978001316177 (design requirements for Instagram Stories ads)",
+          "https://help.instagram.com/546362593027755 (create Instagram Reels ads)",
+          "practitioner guides: easyreels.io/blog/reel-video-quality, violetflare.ai/blog/instagram-reels-export-settings, xconvert.com/blog/best-video-format-instagram"
+        ],
+        "meta": {
+          "containers": [
+            "mp4",
+            "mov"
+          ],
+          "codecs": [
+            "h264",
+            "hevc"
+          ],
+          "pix_fmt": "yuv420p",
+          "min_px": [
+            600,
+            1067
+          ],
+          "rec_px": [
+            1080,
+            1920
+          ],
+          "fps": [
+            23,
+            60
+          ],
+          "max_gb": 4,
+          "audio": {
+            "codec": "aac",
+            "channels": 2,
+            "sample_rates": [
+              44100,
+              48000
+            ],
+            "min_kbps": 128,
+            "note": "Meta recommends music or sound for Reels ads"
+          },
+          "closed_gop_s": [
+            2,
+            5
+          ]
+        },
+        "advice": {
+          "codec": "h264",
+          "profile": "High",
+          "exact_px": [
+            1080,
+            1920
+          ],
+          "fps": "keep the native constant rate (24 from Grok / Kling); do not resample 24 to 30 (duplicated frames judder)",
+          "bitrate_mbps": [
+            10,
+            12
+          ],
+          "bitrate_mbps_ok": [
+            8,
+            15
+          ],
+          "color": "Rec.709, 8-bit (HDR and 10-bit are tone-mapped unpredictably)",
+          "faststart": true,
+          "rules": [
+            "export the final reel in ONE pass: every extra export or a 'compress for sharing' switch is another re-encode",
+            "never upload a file saved from another app or sent through a messenger",
+            "upload over Wi-Fi with high-quality uploads switched on in the Instagram app",
+            "do not export 4K: the platform downsizes it anyway; 1080x1920 is the target"
+          ]
+        }
+      }
+    },
+    "meta_feed_ad": {
+      "tag": "meta",
+      "platform": "Meta (Facebook feed, Instagram feed, carousel of catalog ads)",
+      "ratio": "4:5",
+      "tolerance": 0.03,
+      "generate_as": "4:5",
+      "crop_max": 0,
+      "min_px": [
+        600,
+        750
+      ],
+      "rec_px": [
+        1080,
+        1350
+      ],
+      "max_mb": 30,
+      "why": "the ad image of the feed: Facebook feed recommends 4:5, Instagram feed takes it, an Advantage+ catalog carousel takes 4:5 or 1:1 and fits every card to the FIRST one",
+      "goes_to": "Meta ad account 1591946192121461; catalog 1119303930493909 (MoonBloom Walls)",
+      "how": "Meta MCP ads_creative_upload_local_image + ads_create_creative (step B)",
+      "needs": [
+        "ai_label"
+      ],
+      "status": "live"
+    },
+    "meta_square": {
+      "tag": "meta",
+      "platform": "Meta (Shops, catalog carousel in 1:1), Pinterest collections secondary images",
+      "ratio": "1:1",
+      "tolerance": 0.03,
+      "generate_as": "1:1",
+      "crop_max": 0,
+      "min_px": [
+        500,
+        500
+      ],
+      "rec_px": [
+        1024,
+        1024
+      ],
+      "max_mb": 8,
+      "why": "Meta Shops show product images 1:1 and a carousel that starts with a square keeps every card square; Pinterest collections prefer 1:1 secondary images",
+      "goes_to": "Meta catalog 1119303930493909, Pinterest collections",
+      "how": "feed (feed_additional) or Meta MCP",
+      "needs": [
+        "ai_label"
+      ],
+      "status": "planned"
+    },
+    "pinterest_pin": {
+      "tag": "pinterest",
+      "platform": "Pinterest (organic pin in the feed, promoted pin = the same pin as an ad, catalog image_link)",
+      "ratio": "2:3",
+      "tolerance": 0.03,
+      "generate_as": "2:3",
+      "crop_max": 0,
+      "min_px": [
+        1000,
+        1500
+      ],
+      "rec_px": [
+        1000,
+        1500
+      ],
+      "max_mb": 20,
+      "why": "ONE file for three uses: the standard Pin is 2:3 and is published organically in the feed OR promoted as an ad (Pinterest: a standard image ad can be used in paid campaigns or to generate organic impressions; an ad is an existing pin put into promotion), and a catalog image_link must be at least 1000x1500; taller than 1:2.1 is cut off in the feed",
+      "goes_to": "Pinterest profile (organic), Pinterest ad account 549770501688 (promotion), catalog 'MoonBloom Products DE'",
+      "how": "organic: Etsy/pinterest/bulk (CSV) or by hand; ad: the Pinterest MCP create_pinterest_ad on the published pin; catalog: the feed",
+      "needs": [
+        "ai_label"
+      ],
+      "status": "live"
+    },
+    "google_search_landscape": {
+      "tag": "google",
+      "platform": "Google Ads (images of the Search campaign, PMax / Demand Gen horizontal)",
+      "ratio": "1.91:1",
+      "tolerance": 0.01,
+      "generate_as": "16:9",
+      "crop_max": 0.08,
+      "min_px": [
+        600,
+        314
+      ],
+      "rec_px": [
+        1200,
+        628
+      ],
+      "max_mb": 5,
+      "why": "image extension of the Search campaign 24386071357; the Google Ads MCP tool cuts to 1.91:1 itself, we deliver the exact ratio so nothing important is cut",
+      "goes_to": "Google Ads Search campaign 24386071357 (MoonBloom Search DE+AT - Site)",
+      "how": "Google Ads MCP create_image_asset (dry_run first; the file must be on moonbloomwalls.com, the tool downloads it from the site)",
+      "needs": [
+        "ai_label"
+      ],
+      "status": "planned"
+    },
+    "google_search_square": {
+      "tag": "google",
+      "platform": "Google Ads (images of the Search campaign, PMax / Demand Gen square)",
+      "ratio": "1:1",
+      "tolerance": 0.01,
+      "generate_as": "1:1",
+      "crop_max": 0,
+      "min_px": [
+        300,
+        300
+      ],
+      "rec_px": [
+        1200,
+        1200
+      ],
+      "max_mb": 5,
+      "why": "the square image of the Search campaign",
+      "goes_to": "Google Ads Search campaign 24386071357",
+      "how": "Google Ads MCP create_image_asset (dry_run first)",
+      "needs": [
+        "ai_label"
+      ],
+      "status": "planned"
+    },
+    "etsy_gallery": {
+      "tag": "etsy",
+      "platform": "Etsy listing gallery (the site takes its photos from the listing, in Etsy order)",
+      "ratio": "4:3",
+      "tolerance": 0.03,
+      "generate_as": "4:3",
+      "crop_max": 0,
+      "min_px": null,
+      "rec_px": [
+        2000,
+        1500
+      ],
+      "max_mb": 20,
+      "why": "Etsy recommends 4:3 for the first thumbnail; the site and the feed take the listing photos in this order, so the FIRST Etsy photo becomes the feed's main image",
+      "goes_to": "Etsy shop 64001040 listing, then site card photos (markup_photos)",
+      "how": "by hand in Etsy, then Etsy/site/scripts/sync_listing_media.py",
+      "needs": [
+        "ai_label"
+      ],
+      "status": "live"
+    },
+    "feed_main": {
+      "tag": "feed",
+      "platform": "google_shopping_feed.xml image_link (Merchant Center, Meta catalog, Pinterest catalog read ONE file)",
+      "ratio": null,
+      "tolerance": null,
+      "generate_as": null,
+      "crop_max": 0,
+      "min_px": [
+        500,
+        500
+      ],
+      "rec_px": null,
+      "max_mb": 8,
+      "why": "the main picture of every item in three catalogs at once; today it is the first photo of the Etsy listing, which is 4:3 for some items; Meta fits all carousel cards to its ratio (min 500x500), Pinterest wants it at least 1000x1500 (a horizontal one only gets a warning). Google asks for the product itself in image_link and the shop has a Misrepresentation issue since 2026-11-04",
+      "goes_to": "Merchant Center 5882676064, Meta catalog 1119303930493909, Pinterest catalog",
+      "how": "Etsy/site: card JSON -> build -> feed (a pull request there, deploy only on the owner's yes)",
+      "needs": [
+        "ai_label"
+      ],
+      "status": "open"
+    },
+    "feed_additional": {
+      "tag": "feed",
+      "platform": "google_shopping_feed.xml additional_image_link (up to 10)",
+      "ratio": null,
+      "tolerance": null,
+      "generate_as": null,
+      "crop_max": 0,
+      "min_px": [
+        500,
+        500
+      ],
+      "rec_px": null,
+      "max_mb": 8,
+      "why": "interiors and details; Meta uses a 9:16 one for Stories when 'Adapt to placement' is on; Pinterest makes a pin of each one (a horizontal one only gets a warning)",
+      "goes_to": "the same three catalogs",
+      "how": "Etsy/site: the listing photos after the first",
+      "needs": [
+        "ai_label"
+      ],
+      "status": "live"
+    }
+  },
+  "platforms": {
+    "feed": {
+      "url": "https://moonbloomwalls.com/google_shopping_feed.xml",
+      "items": 552,
+      "feeds": [
+        "Meta catalog 'MoonBloom Walls' (id 1119303930493909, its only data source, replaced every day 06:00 Berlin)",
+        "Google Merchant Center 5882676064",
+        "Pinterest catalog (once a day)"
+      ],
+      "lives_in": "the website project nocode/Etsy/site (feed/product_feed.py), not this repository",
+      "ratios_in_feed_2026_11_07": [
+        "2:3 (1696x2528, 848x1264)",
+        "9:16 (1536x2752)",
+        "4:3 (1800x1344, 1448x1086, 1200x896)"
+      ],
+      "no_ratio_in_feed": [
+        "1:1",
+        "4:5"
+      ],
+      "note": "Meta fits every card of a carousel/collection to the ratio of the FIRST image, so the first image of an item decides how the whole ad looks. Some items have a 4:3 first image."
+    },
+    "meta_catalog_carousel": {
+      "ratios": [
+        "1:1",
+        "4:5"
+      ],
+      "1:1": {
+        "min": "500x500",
+        "rec": "1024x1024"
+      },
+      "4:5": {
+        "min": "600x750",
+        "rec": "1080x1350",
+        "only": "Advantage+ catalog ads in carousel format with catalog product images"
+      },
+      "rule": "all images of an ad in ONE ratio; other ratios are fitted (zoom crop, or white space) to the first image; ratio tolerance 3%",
+      "crop_settings": [
+        "Commerce Manager > catalog settings: Fill frame (default) | Show entire image (white space) | Crop and resize",
+        "Ads Manager > ad > Image touch-ups: overrides the catalog setting"
+      ],
+      "file": "JPEG or PNG, catalog image up to 8 MB (ad image up to 30 MB); WebP is not listed in the docs",
+      "sources": [
+        "https://www.facebook.com/business/help/1114358518575630",
+        "https://www.facebook.com/business/help/856291093299815",
+        "https://www.facebook.com/business/help/686259348512056"
+      ]
+    },
+    "meta_stories_reels": {
+      "ratios": [
+        "9:16"
+      ],
+      "9:16": {
+        "min": "600x1067",
+        "rec": "1080x1920"
+      },
+      "safe_zone": "keep about 14% (250 px) at the top and the bottom free of text and logos",
+      "catalog_ads": "a 9:16 catalog image is shown full screen when 'Adapt to placement' is on and the product has a 9:16 image; one older help page says catalog ads in Stories use 1.91:1: check the preview in Ads Manager",
+      "sources": [
+        "https://www.facebook.com/business/help/2222978001316177",
+        "https://developers.facebook.com/docs/marketing-api/advantage-catalog-ads/multi-ratio-images"
+      ]
+    },
+    "meta_single_image": {
+      "facebook_feed": "4:5 recommended (1.91:1, 16:9, 1:1, 4:5 supported)",
+      "instagram_feed": "all of 1.91:1 to 4:5 supported; 1:1 and 4:5 recommended for images",
+      "shops": "product images shown 1:1, min 500x500, rec 1024x1024",
+      "sources": [
+        "https://www.facebook.com/business/help/682655495435254",
+        "https://www.facebook.com/business/help/103816146375741"
+      ]
+    },
+    "pinterest": {
+      "standard_pin": {
+        "ratio": "2:3",
+        "rec": "1000x1500",
+        "note": "taller than 1:2.1 (2:4.2) is cut off in the feed"
+      },
+      "catalog_image_link": {
+        "min": "1000x1500",
+        "additional_image_link_min": "75x75"
+      },
+      "collections": "hero 1:1 or 2:3; all secondary images ONE ratio (1:1 recommended, a non-square one is centre-cropped)",
+      "video": {
+        "rec": "9:16 1080x1920",
+        "also": [
+          "1:2",
+          "2:3",
+          "3:4",
+          "4:5",
+          "1:1"
+        ]
+      },
+      "file": "PNG or JPEG, up to 20 MB (desktop) / 32 MB (app)",
+      "sources": [
+        "https://help.pinterest.com/en/business/article/pinterest-product-specs",
+        "https://help.pinterest.com/en/business/article/before-you-get-started-with-catalogs"
+      ]
+    },
+    "google_shopping_from_feed": {
+      "uses": "image_link of the feed",
+      "observed": "an ad image from the owner's account (tpc.googlesyndication.com/pimgad/16540975458122580645) is a 1005x1005 square JPEG; whether Google crops or pads a non-square feed image was not checked",
+      "owner_campaigns": "Shopping from the Merchant Center feed; the other campaigns are Search",
+      "image_rules": "image_link shows the product itself, no promotional text, watermark or border; staging and in-use pictures are allowed in additional_image_link (https://support.google.com/merchants/answer/7052112)"
+    },
+    "google_ai_label": {
+      "rule": "every image made with generative AI must carry the IPTC DigitalSourceType trainedAlgorithmicMedia in its metadata and the tag must not be removed",
+      "uri": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "sources": [
+        "https://support.google.com/merchants/answer/14743464",
+        "https://developers.google.com/search/docs/fundamentals/using-gen-ai-content"
+      ]
+    },
+    "google_search_assets": {
+      "tool": "Google Ads MCP create_image_asset (nocode/Etsy/google-ads/tools/image_tools.py): downloads from moonbloomwalls.com, centre-cuts to 1.91:1 or 1:1 (1% tolerance), min 600x314 / 300x300, width up to 1200",
+      "used_by": "Search campaign 24386071357"
+    },
+    "google_pmax_demand_gen": {
+      "used_now": false,
+      "1.91:1": {
+        "min": "600x314",
+        "rec": "1200x628"
+      },
+      "1:1": {
+        "min": "300x300",
+        "rec": "1200x1200"
+      },
+      "4:5": {
+        "min": "480x600",
+        "rec": "960x1200",
+        "optional": true
+      },
+      "9:16": {
+        "min": "600x1067",
+        "rec": "1080x1920",
+        "optional": true
+      },
+      "rule": "content in the centre 80% of the image; up to 5 MB; JPG or PNG",
+      "sources": [
+        "https://support.google.com/google-ads/answer/17091269",
+        "https://support.google.com/google-ads/answer/17140672"
+      ]
+    }
+  }
+}

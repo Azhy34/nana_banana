@@ -1,0 +1,24 @@
+{
+  "listing": "Листинг 3",
+  "description": "Kling 2.6 image-to-video lock of Listing 3 (vintage balloons). The clips of a reel set are made from the set (specs/sets/l3_reel01.json): each clip has its `motion` and `items` from the role and the kit; the prompt is built by reels_pipeline/prompts.clip_prompt with this `lock`. Rules: faces are never shown, no plain zoom, no tilt/pedestal up, the mural stays flat static ink.",
+  "duration": "5",
+  "sound": false,
+  "min_motion_delta": 15.0,
+  "lock": {
+    "description": "Facts of THIS listing used by every clip prompt: the mural is flat printed ink and never moves; the furniture is frozen.",
+    "product": "INANIMATE 2D INK LOCK: the wallpaper design is strictly flat 2D printed ink on textured wallpaper, completely static 2D artwork, zero biological animation, zero morphing, zero waving edges; the painted hot-air balloons, swallows, stars and clouds stay completely still.",
+    "furniture": "GEOMETRIC & FURNITURE LOCK: the {items} remain 100% frozen, solid and fixed in the room. Zero warping, zero morphing, zero shifting objects across the floor.",
+    "people": "PEOPLE LOCK: every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are, nothing turns toward the lens, and a child held on an arm stays still in the position of the first frame."
+  },
+  "frames": [
+    {
+      "scene_id": "l3_reel01_s3_yellow_room",
+      "frame_file": "l3_reel01_s3_yellow_room__gemini.png",
+      "clip": "yellow nursery without a person: a slow walk-in with parallax, the curtain and the branch shadows move in a light breeze",
+      "motion": "A smooth slow first-person walk-in: the camera advances steadily forward into the room at natural eye level, as if a person is slowly entering, with no tilt and no rotation, and the nearer objects shift more than the farther ones, giving a natural depth parallax. The tall yellow linen curtain beside the window sways very gently in a light breeze, and soft dappled shadows of leafy branches move slowly across the mural and the floor: only the curtain and the shadows move, subtly, and the shadows never change the colours or the drawing of the mural.",
+      "items": "crib, shelf, wooden toys, chair, rug and architecture",
+      "min_motion_delta": 10.0,
+      "people": false
+    }
+  ]
+}

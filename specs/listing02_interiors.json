@@ -1,0 +1,18 @@
+{
+  "listing": "Листинг 2",
+  "article": "WA-001",
+  "description": "Scandi Berge, flat vector landscape mural 4800x3584: layered misty mountains (slate blue, beige, brown), pine forest in sage and olive, swallows, cream sky. THE FACTS of the wallpaper only: the photo cards live in sets (specs/sets/l2_carousel01.json, a carousel of two pairs). Board entry key `spec` in specs/active_board.json points a board to this file.",
+  "aspect_ratio": "9:16",
+  "brief": {
+    "description": "Facts of THIS listing used by the short (brief) prompt.",
+    "product": "the wall mural",
+    "product_short": "the mural",
+    "hero": "the misty mountains and the pine forest",
+    "wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it."
+  },
+  "wallpaper": "C:/Users/Mikhail/Desktop/Обои/листинг 2/Generated Image January 21, 2026 - 10_32AM.jpeg",
+  "out_dir": "C:/Users/Mikhail/Desktop/Обои/листинг 2",
+  "texture": "public/textures/craft_lambda.jpg",
+  "cards": [],
+  "audience": "neutral"
+}

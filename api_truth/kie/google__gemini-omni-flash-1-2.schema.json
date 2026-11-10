@@ -1,0 +1,487 @@
+{
+ "model": "google/gemini-omni-flash-1-2",
+ "openapi": {
+  "openapi": "3.1.0",
+  "info": {
+   "title": "kie.ai",
+   "description": "kie.ai API 文档",
+   "version": "1.0.0",
+   "contact": {
+    "name": "技术支持",
+    "email": "support@kie.ai"
+   }
+  },
+  "tags": [],
+  "paths": {
+   "/api/v1/jobs/createTask": {
+    "post": {
+     "summary": "Gemini Omni 1.2 Flash",
+     "deprecated": false,
+     "description": "## Create Task\n\nUse this endpoint to create a new multimodal video generation task. Use only one generation mode per request.\n\n<Card title=\"Get Task Details\" icon=\"lucide-search\" href=\"/market/common/get-task-detail\">\n  After submission, use the unified query endpoint to check task progress and retrieve results\n</Card>\n\n::: tip[]\nFor production use, we recommend providing the `callBackUrl` parameter so your service can receive completion notifications instead of polling for task status.\n:::\n\n## Related Resources\n\n<CardGroup cols={2}>\n  <Card title=\"Model Marketplace\" icon=\"lucide-store\" href=\"/market/quickstart\">\n    Explore all available models and capabilities\n  </Card>\n  <Card title=\"Common API\" icon=\"lucide-cog\" href=\"/common-api/get-account-credits\">\n    Check account credits and usage\n  </Card>\n</CardGroup>\n\n## Generation modes\n\nChoose one mode per request, based on whether you send a first frame or a video:\n\n| Mode | When | `duration` | Other assets allowed |\n|---|---|---|---|\n| A Text / reference images | No `first_frame_url`, no `video_list` | **Required**, integer **3–15** | `image_urls` |\n| B First frame only | `first_frame_url` set, no `last_frame_url` | **Required**, integer **3–15** | None (see exclusions) |\n| C First and last frame | Both `first_frame_url` and `last_frame_url` | **Required**, integer **3–10** | None (see exclusions) |\n| D Video edit | `video_list` set | **Do not send** | `image_urls` |\n\n**Exclusions** (when `first_frame_url` or `last_frame_url` is set):\n\n- Do not send `last_frame_url` alone\n- Do not send `image_urls` or `video_list` at the same time\n\n## Image quota (7 slots)\n\nQuota formula:\n\n```\nnumber of reference images\n+ (2 if a video is present)\n≤ 7\n```\n\nAlso: `image_urls` max **6**.\n\n**Examples:**\n\n*   6 reference images → allowed\n*   5 reference images + 1 video → 5+2=7, allowed\n*   6 reference images + 1 video → 6+2=8, over quota\n",
+     "operationId": "gemini-omni-1.2-flash",
+     "tags": [],
+     "parameters": [],
+     "requestBody": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "model",
+          "input"
+         ],
+         "properties": {
+          "model": {
+           "type": "string",
+           "enum": [
+            "google/gemini-omni-flash-1-2"
+           ],
+           "default": "google/gemini-omni-flash-1-2",
+           "description": "The model name used to generate the task. This field is required. This interface must use the `google/gemini-omni-flash-1-2` model.",
+           "examples": [
+            "google/gemini-omni-flash-1-2"
+           ]
+          },
+          "callBackUrl": {
+           "type": "string",
+           "format": "uri",
+           "description": "The callback URL for task completion notifications. This parameter is optional. If provided, the system will send a POST request to this URL when the task is completed, regardless of whether it succeeds or fails. If not provided, no callback notification will be sent.",
+           "examples": [
+            "https://your-domain.com/api/callback"
+           ]
+          },
+          "input": {
+           "type": "object",
+           "description": "Input parameters for the generation task. Use only one generation mode per request: text / reference images, first frame only, first and last frame, or video edit.",
+           "properties": {
+            "prompt": {
+             "type": "string",
+             "description": "Video prompt. Required and must be non-empty. Describe the scene, action, camera, and sound.",
+             "examples": [
+              "A cat plays piano in a jazz bar, one continuous shot, soft live jazz"
+             ],
+             "maxLength": 20000,
+             "minLength": 1
+            },
+            "duration": {
+             "type": "integer",
+             "minimum": 3,
+             "maximum": 15,
+             "description": "Duration of the generated video in seconds. Send an integer.\n\n- Text / reference images (no first frame, no video): **required**, **3–15**\n- First frame only: **required**, **3–15**\n- First and last frame: **required**, **3–10**\n- Video edit (`video_list` set): **do not send**; output duration follows the input video",
+             "examples": [
+              8
+             ]
+            },
+            "aspect_ratio": {
+             "type": "string",
+             "enum": [
+              "16:9",
+              "9:16",
+              "auto"
+             ],
+             "default": "16:9",
+             "description": "Aspect ratio of the generated video. Allowed values: `16:9`, `9:16`, `auto`. Default `16:9`. When no reference image is provided, `auto` is treated as `16:9`.",
+             "examples": [
+              "16:9"
+             ]
+            },
+            "resolution": {
+             "type": "string",
+             "enum": [
+              "360p",
+              "720p",
+              "1080p",
+              "4k"
+             ],
+             "default": "720p",
+             "description": "Resolution of the generated video. Allowed values: `360p`, `720p`, `1080p`, `4k`. Default `720p`.",
+             "examples": [
+              "720p"
+             ]
+            },
+            "seeds": {
+             "type": "integer",
+             "minimum": 10000,
+             "maximum": 99999,
+             "description": "Random seed. Range: 10000–99999. Send a single integer. If omitted, the system generates one.",
+             "examples": [
+              12345
+             ]
+            },
+            "image_urls": {
+             "type": "array",
+             "maxItems": 6,
+             "items": {
+              "type": "string",
+              "format": "uri"
+             },
+             "description": "Reference image URLs, max **6**. Used for subject, scene, style, or storyboard reference. Two reference images are not treated as first/last frames.\n\nLimits:\n- Use publicly accessible image URLs\n- Each file must be no larger than `20MB`\n- Mutually exclusive with `first_frame_url` and `last_frame_url`\n- Each image costs 1 quota slot",
+             "examples": [
+              [
+               "https://example.com/ref1.png",
+               "https://example.com/ref2.png"
+              ]
+             ]
+            },
+            "first_frame_url": {
+             "type": "string",
+             "format": "uri",
+             "description": "First-frame image URL. Sets the starting frame of the generated video. Use a publicly accessible image URL.\n\n- First frame only (no last frame): `duration` is required, integer 3–15\n- Together with `last_frame_url`: `duration` is required, integer 3–10\n- When this field is set, do not send `image_urls` or `video_list`\n- Do not send `last_frame_url` alone",
+             "examples": [
+              "https://example.com/first.png"
+             ]
+            },
+            "last_frame_url": {
+             "type": "string",
+             "format": "uri",
+             "description": "Last-frame image URL. Sets the ending frame. Must be sent together with `first_frame_url`; cannot be used alone. `duration` is then required and must be 3–10. When first and last frames are set, do not send `image_urls` or `video_list`.",
+             "examples": [
+              "https://example.com/last.png"
+             ]
+            },
+            "video_list": {
+             "type": "array",
+             "maxItems": 1,
+             "items": {
+              "type": "string",
+              "format": "uri"
+             },
+             "description": "Video URL array, max **1**. Sending this field selects video-edit mode. **Do not send `duration`**; output duration follows the input video. Can be combined with `image_urls`. Mutually exclusive with `first_frame_url` and `last_frame_url`. Use a publicly accessible video URL, MP4 recommended, no longer than **15 seconds**.",
+             "examples": [
+              [
+               "https://example.com/clip.mp4"
+              ]
+             ]
+            }
+           },
+           "required": [
+            "prompt"
+           ],
+           "dependencies": {
+            "last_frame_url": [
+             "first_frame_url"
+            ]
+           }
+          }
+         }
+        },
+        "example": {
+         "model": "google/gemini-omni-flash-1-2",
+         "callBackUrl": "https://your-domain.com/api/callback",
+         "input": {
+          "prompt": "The character walks through a rainy street at night, neon reflections",
+          "duration": 8,
+          "aspect_ratio": "9:16",
+          "resolution": "720p",
+          "image_urls": [
+           "https://example.com/ref1.png",
+           "https://example.com/ref2.png"
+          ]
+         }
+        }
+       }
+      },
+      "required": true
+     },
+     "responses": {
+      "200": {
+       "description": "Request successful",
+       "content": {
+        "application/json": {
+         "schema": {
+          "allOf": [
+           {
+            "$ref": "#/components/schemas/response%20not%20with%20recordId"
+           },
+           {
+            "type": "object",
+            "properties": {
+             "data": {
+              "type": "object",
+              "properties": {
+               "taskId": {
+                "type": "string",
+                "description": "Task ID, which can be used to query task status through the task detail endpoint.",
+                "examples": [
+                 "task_gemini_1765180586443"
+                ]
+               }
+              }
+             }
+            }
+           }
+          ]
+         },
+         "example": {
+          "code": 200,
+          "msg": "success",
+          "data": {
+           "taskId": "task_gemini_1765180586443"
+          }
+         }
+        }
+       },
+       "headers": {}
+      }
+     },
+     "security": [
+      {
+       "BearerAuth": []
+      }
+     ],
+     "callbacks": {
+      "videoTaskCompleted": {
+       "{request.body#/callBackUrl}": {
+        "post": {
+         "description": "The system sends this callback when the `google/gemini-omni-flash-1-2` task succeeds or fails.",
+         "requestBody": {
+          "required": true,
+          "content": {
+           "application/json": {
+            "schema": {
+             "type": "object",
+             "required": [
+              "code",
+              "msg",
+              "data"
+             ],
+             "properties": {
+              "code": {
+               "type": "integer",
+               "description": "Unified callback code: 200 for success, 501 for failure.",
+               "enum": [
+                200,
+                501
+               ]
+              },
+              "msg": {
+               "type": "string",
+               "description": "Unified callback message.",
+               "enum": [
+                "Playground task completed successfully.",
+                "Playground task failed."
+               ]
+              },
+              "data": {
+               "type": "object",
+               "required": [
+                "taskId",
+                "model",
+                "state",
+                "param"
+               ],
+               "properties": {
+                "taskId": {
+                 "type": "string",
+                 "description": "The unique task identifier."
+                },
+                "model": {
+                 "type": "string",
+                 "description": "The model used for the task.",
+                 "enum": [
+                  "google/gemini-omni-flash-1-2"
+                 ]
+                },
+                "state": {
+                 "type": "string",
+                 "description": "Terminal task state.",
+                 "enum": [
+                  "success",
+                  "fail"
+                 ]
+                },
+                "param": {
+                 "type": "string",
+                 "description": "JSON string containing the submitted task parameters."
+                },
+                "resultJson": {
+                 "type": "string",
+                 "nullable": true,
+                 "description": "JSON string containing resultUrls, firstFrameUrl, lastFrameUrl, or resultObject when successful. Present only when state is success."
+                },
+                "failCode": {
+                 "type": "string",
+                 "nullable": true,
+                 "description": "Failure code, a numeric string such as \"400\" or \"500\". Present only when state is fail."
+                },
+                "failMsg": {
+                 "type": "string",
+                 "nullable": true,
+                 "description": "Failure reason. Present only when state is fail."
+                },
+                "costTime": {
+                 "type": "integer",
+                 "format": "int64",
+                 "description": "Processing time in seconds. Present on both success and failure callbacks."
+                },
+                "completeTime": {
+                 "type": "integer",
+                 "format": "int64",
+                 "description": "Task completion timestamp."
+                },
+                "createTime": {
+                 "type": "integer",
+                 "format": "int64",
+                 "description": "Task creation timestamp."
+                },
+                "updateTime": {
+                 "type": "integer",
+                 "format": "int64",
+                 "description": "Use completeTime as the completion time; updateTime may equal createTime."
+                },
+                "creditsConsumed": {
+                 "type": "number",
+                 "description": "Credits consumed by the task; 0 for failed tasks."
+                }
+               }
+              }
+             }
+            },
+            "examples": {
+             "success": {
+              "summary": "Task completed successfully",
+              "value": {
+               "code": 200,
+               "msg": "Playground task completed successfully.",
+               "data": {
+                "taskId": "task_example_video_webhook_001",
+                "model": "google/gemini-omni-flash-1-2",
+                "state": "success",
+                "param": "{\"input\":\"{\\\"prompt\\\":\\\"The character walks through a rainy street at night, neon reflections\\\",\\\"duration\\\":8,\\\"aspect_ratio\\\":\\\"9:16\\\",\\\"resolution\\\":\\\"720p\\\",\\\"image_urls\\\":[\\\"https://example.com/ref1.png\\\",\\\"https://example.com/ref2.png\\\"]}\",\"callBackUrl\":\"https://example.com/callback\",\"model\":\"google/gemini-omni-flash-1-2\"}",
+                "resultJson": "{\"resultUrls\":[\"https://example.com/generated-video.mp4\"]}",
+                "costTime": 12,
+                "completeTime": 1234567890,
+                "createTime": 1234560000,
+                "updateTime": 1234567890,
+                "creditsConsumed": 1.23
+               }
+              }
+             },
+             "failure": {
+              "summary": "Task failed",
+              "value": {
+               "code": 501,
+               "msg": "Playground task failed.",
+               "data": {
+                "taskId": "task_example_video_webhook_001",
+                "model": "google/gemini-omni-flash-1-2",
+                "state": "fail",
+                "param": "{\"input\":\"{\\\"prompt\\\":\\\"The character walks through a rainy street at night, neon reflections\\\",\\\"duration\\\":8,\\\"aspect_ratio\\\":\\\"9:16\\\",\\\"resolution\\\":\\\"720p\\\",\\\"image_urls\\\":[\\\"https://example.com/ref1.png\\\",\\\"https://example.com/ref2.png\\\"]}\",\"callBackUrl\":\"https://example.com/callback\",\"model\":\"google/gemini-omni-flash-1-2\"}",
+                "failCode": "400",
+                "failMsg": "<error detail>",
+                "costTime": 12,
+                "creditsConsumed": 0
+               }
+              }
+             }
+            }
+           }
+          }
+         },
+         "responses": {
+          "200": {
+           "description": "Callback received successfully.",
+           "content": {
+            "application/json": {
+             "schema": {
+              "type": "object",
+              "properties": {
+               "code": {
+                "type": "integer",
+                "example": 200
+               },
+               "msg": {
+                "type": "string",
+                "example": "success"
+               }
+              }
+             },
+             "example": {
+              "code": 200,
+              "msg": "success"
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "webhooks": {},
+  "components": {
+   "schemas": {
+    "response not with recordId": {
+     "type": "object",
+     "required": [
+      "data"
+     ],
+     "properties": {
+      "code": {
+       "type": "integer",
+       "description": "Status code of the request. The HTTP status is 200 even when the request fails, so always check this field: 200 means success; any other value means the request failed and msg describes the reason. Common values: 401 invalid or missing API key; 402 insufficient credits; 429 rate limit exceeded; 422 or 500 the request could not be processed (read msg and check your parameters before retrying).",
+       "enum": [
+        200,
+        401,
+        402,
+        404,
+        422,
+        429,
+        433,
+        455,
+        500,
+        501,
+        505
+       ]
+      },
+      "msg": {
+       "type": "string",
+       "description": "Response message, error description upon failure",
+       "examples": [
+        "success"
+       ]
+      },
+      "data": {
+       "type": "object",
+       "required": [
+        "taskId"
+       ],
+       "properties": {
+        "taskId": {
+         "type": "string",
+         "description": "The task ID can be used with the \"Get Task Details\" endpoint to query the task status.",
+         "examples": [
+          "dc1928bfcbc77cb6c85f3359a9c718b3"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "responses": {},
+   "securitySchemes": {
+    "BearerAuth": {
+     "type": "http",
+     "scheme": "bearer",
+     "bearerFormat": "API Key",
+     "description": "All API requests require a Bearer Token. Add the header `Authorization: Bearer YOUR_API_KEY` to authenticate requests."
+    }
+   }
+  },
+  "servers": [
+   {
+    "url": "https://api.kie.ai",
+    "description": "正式环境"
+   }
+  ],
+  "security": [
+   {
+    "BearerAuth": []
+   }
+  ]
+ }
+}

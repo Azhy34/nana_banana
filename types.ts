@@ -112,7 +112,7 @@ export interface UpscaleState {
 }
 
 export type VideoEngine = 'veo' | 'omni';
-export type OmniResolution = '360p' | '720p';
+export type OmniResolution = '360p' | '720p' | '1080p';
 
 export interface VideoJobSettings {
   engine?: VideoEngine;
@@ -120,6 +120,8 @@ export interface VideoJobSettings {
   customPrompt: string;
   seed: number;
   resolution?: OmniResolution;
+  /** Omni clip length in whole seconds (3..15). Always sent: without it Google makes 10 s. */
+  durationSeconds?: number;
 }
 
 export interface VideoToolPayload {

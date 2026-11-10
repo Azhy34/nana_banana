@@ -1,0 +1,4 @@
+interface:
+  display_name: "Добавить дизайн-идею"
+  short_description: "Референс или идея → данные и доски ComfyUI"
+  default_prompt: "Use $add-design-idea to turn this reference photo into data and ComfyUI boards."

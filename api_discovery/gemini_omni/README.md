@@ -1,6 +1,6 @@
-# Gemini Omni 1.1 Flash API Integration & Discovery Package
+# Gemini Omni Flash (1.2 / 1.1) API Integration & Discovery Package
 
-Пакет интеграции модели **Gemini Omni 1.1 Flash** (Interactions API) для генерации и анимации интерьерного видео, собранный строго по стандарту [api-discovery](file:///C:/Users/Mikhail/.gemini/config/skills/api-discovery/SKILL.md).
+Пакет интеграции модели **Gemini Omni Flash** (`gemini-omni-1.2-flash`, GA с 05.11.2026; `gemini-omni-1.1-flash` с 03.12.2026 идёт на 1.2 по тарифу 1.2) (Interactions API) для генерации и анимации интерьерного видео, собранный строго по стандарту [api-discovery](file:///C:/Users/Mikhail/.gemini/config/skills/api-discovery/SKILL.md).
 
 ---
 
@@ -41,3 +41,16 @@ from api_discovery.gemini_omni.models import OmniInteractionCreateRequest, OmniI
 
 ### 3. Подключение в TypeScript фронтенд (`nana_banana`):
 Контракты из `models.py` транслируются 1-в-1 в интерфейсы для `omniService.ts` при готовности перейти к фронтенду.
+
+---
+
+## Что обновлено 08.11.2026 (сверка с документацией Google)
+- `response_format.duration` (строка `"3s"`..`"15s"`; **без неё модель делает 10 секунд**; с первым+последним кадром максимум 10 с). Сайт `omniService.ts` это поле теперь отправляет.
+- Разрешение по умолчанию 720p (раньше в схеме стоял 360p).
+- Модель по умолчанию `gemini-omni-1.2-flash`; `generation_config.video_config.task` (запасной вариант) и `seed`; `stream`, `background`.
+- Вход видео это `{"type": "video", "uri": ...}` (`VideoContentInput`).
+- Проверки запроса: ≤6 картинок, ≤3 видео, нет устаревших тегов `<FIRST_FRAME>` и др., первый+последний кадр не длиннее 10 с.
+- Ответ: полный список статусов, `usage` с токенами по модальностям, `OmniUsage.video_cost_usd()` (цена клипа = токены видео × $12 / 1M) и `expected_cost_usd(resolution, seconds)` до запуска.
+- Образец ответа 1.2 в `raw_endpoints_audit.json` составлен вручную по документации (помечен `synthetic`); заменить реальным после первого платного вызова.
+- Нет негативного промпта-параметра: запреты писать в тексте («No dialogue. No extra sound effects.»).
+- Запуск проверок: `py -3.12 -X utf8 api_discovery/gemini_omni/test_models.py` (без сети и без денег).

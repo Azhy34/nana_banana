@@ -24,8 +24,27 @@ from .models import (
     KlingRecordInfoResponse,
     KlingTaskCreateRequest,
     KlingTaskCreateResponse,
+    NanoBananaTaskCreateRequest,
     TwoLayerResult,
 )
+
+MAX_BASE64_UPLOAD_BYTES = 10 * 1024 * 1024  # KIE base64 upload limit
+
+
+def sniff_image_format(data: bytes) -> Optional[str]:
+    """Return 'jpeg' | 'png' | 'webp' from the real magic bytes, or None.
+
+    KIE answers code=400 "Image fetch failed" when the declared MIME type / file
+    extension disagrees with the bytes (04.11.2026: a .png that was really a JPEG).
+    The format is therefore always taken from the content, never from the file name.
+    """
+    if data[:3] == b"\xff\xd8\xff":
+        return "jpeg"
+    if data[:8] == b"\x89PNG\r\n\x1a\n":
+        return "png"
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "webp"
+    return None
 
 
 class KieKlingClient:
@@ -40,6 +59,8 @@ class KieKlingClient:
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
+        # Filled by poll_and_download on success: real credits billed, KIE processing time, result URL.
+        self.last_task_info: dict = {}
 
     @staticmethod
     def _load_api_key() -> Optional[str]:
@@ -96,13 +117,27 @@ class KieKlingClient:
 
         try:
             content_bytes = path.read_bytes()
-            ext = path.suffix.lstrip(".").lower() or "png"
-            base64_str = f"data:image/{ext};base64," + base64.b64encode(content_bytes).decode("ascii")
+            fmt = sniff_image_format(content_bytes)
+            if fmt is None:
+                return TwoLayerResult[KieFileUploadResponse](
+                    success=False,
+                    error=KieApiErrorResponse(code=415, msg=f"Not a JPEG/PNG/WEBP image (magic bytes): {path.name}"),
+                    raw_status_code=415
+                )
+            if len(content_bytes) > MAX_BASE64_UPLOAD_BYTES:
+                return TwoLayerResult[KieFileUploadResponse](
+                    success=False,
+                    error=KieApiErrorResponse(code=413, msg=f"File is {len(content_bytes) / 1024 / 1024:.1f} MB, base64 upload limit is 10 MB: {path.name}"),
+                    raw_status_code=413
+                )
+            # MIME and file extension come from the real bytes so they can never disagree.
+            ext = "jpg" if fmt == "jpeg" else fmt
+            base64_str = f"data:image/{fmt};base64," + base64.b64encode(content_bytes).decode("ascii")
 
             req_payload = KieBase64UploadRequest(
                 base64Data=base64_str,
                 uploadPath=upload_path,
-                fileName=path.name
+                fileName=f"{path.stem}.{ext}"
             )
 
             resp = self._safe_request(
@@ -125,10 +160,30 @@ class KieKlingClient:
                 raw_status_code=500
             )
 
-    def create_kling_task(self, request: KlingTaskCreateRequest) -> TwoLayerResult[KlingTaskCreateResponse]:
-        """Submits video generation task with local validation."""
+    def create_image_task(self, request: NanoBananaTaskCreateRequest) -> TwoLayerResult[KlingTaskCreateResponse]:
+        """Submits an image task (Nano Banana 2 / 2.1). Same createTask endpoint, validated locally first."""
+        return self.create_kling_task(request)
+
+    def create_task(self, model: str, input_body: dict) -> TwoLayerResult[KlingTaskCreateResponse]:
+        """
+        Submits a task of ANY KIE model: {"model", "input"}. There is no per-model pydantic class here; the caller validates
+        `input_body` against the model's own schema first (reels_pipeline.kie_capabilities.validate_input).
+        """
+        return self._post_task({"model": model, "input": input_body})
+
+    def create_kling_task(self, request: Union[KlingTaskCreateRequest, NanoBananaTaskCreateRequest]) -> TwoLayerResult[KlingTaskCreateResponse]:
+        """Submits a generation task (video or image) with local validation."""
         try:
-            payload = request.model_dump(by_alias=True, exclude_none=True)
+            return self._post_task(request.model_dump(by_alias=True, exclude_none=True))
+        except Exception as e:
+            return TwoLayerResult[KlingTaskCreateResponse](
+                success=False,
+                error=KieApiErrorResponse(code=500, msg=f"Task creation error: {str(e)}"),
+                raw_status_code=500
+            )
+
+    def _post_task(self, payload: dict) -> TwoLayerResult[KlingTaskCreateResponse]:
+        try:
             resp = self._safe_request(
                 "POST",
                 f"{self.BASE_API_URL}/api/v1/jobs/createTask",
@@ -231,11 +286,24 @@ class KieKlingClient:
                 size_mb = out_path.stat().st_size / (1024 * 1024)
                 print(f"[Success] Saved {out_path} ({size_mb:.2f} MB) in {elapsed}s!")
 
+                task = status_res.data.data
+                self.last_task_info = {
+                    "task_id": task_id,
+                    "model": task.model,
+                    "credits_consumed": task.credits_consumed,
+                    "cost_time_s": task.cost_time,
+                    "elapsed_s": elapsed,
+                    "result_url": video_url,
+                    "output_file": str(out_path),
+                    "param": task.param,            # KIE's echo of the request it received
+                    "result_json": task.result_json,  # whatever else the model returned (usage, if it ever does)
+                }
+
                 # Record structured telemetry to gemini_sessions.json
                 self._log_session_event(
                     task_id=task_id,
-                    model=status_res.data.data.model,
-                    credits_consumed=status_res.data.data.credits_consumed or 55.0,
+                    model=task.model,
+                    credits_consumed=task.credits_consumed if task.credits_consumed is not None else 0.0,
                     duration_sec=elapsed,
                     video_url=video_url,
                     output_file=str(out_path)
@@ -288,7 +356,8 @@ class KieKlingClient:
         }))
 
         # Persistence to gemini_sessions.json
-        sess_file = Path("gemini_sessions.json")
+        # Absolute repo-root path: the cwd differs when called from ComfyUI or the gateway.
+        sess_file = Path(__file__).resolve().parents[2] / "gemini_sessions.json"
         try:
             sess_data = json.loads(sess_file.read_text(encoding="utf-8")) if sess_file.exists() else {}
             if session_id not in sess_data:

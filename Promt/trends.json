@@ -1,14 +1,6 @@
 {
   "colors": [
     {
-      "name": "Dopamine Poppy Red",
-      "description": "vibrant warm poppy red, cheerful and energizing retro accent"
-    },
-    {
-      "name": "Cobalt Blue",
-      "description": "crisp mid-century cobalt blue accent, trending dopamine pop"
-    },
-    {
       "name": "Sunny Mustard",
       "description": "warm golden mustard yellow, retro and cozy"
     },
@@ -35,28 +27,193 @@
     {
       "name": "Eucalyptus",
       "description": "deep eucalyptus green, grounding and organic"
+    },
+    {
+      "name": "Olive",
+      "description": "calm natural olive green, grounding and earthy"
+    },
+    {
+      "name": "Warm Greige",
+      "description": "warm grey-beige, a quiet base that lets colour accents glow"
+    },
+    {
+      "name": "Soft Sand",
+      "description": "soft sandy beige, warm and neutral"
+    },
+    {
+      "name": "Lilac Mist",
+      "description": "soft dusty lilac with a hint of lavender, gentle and calm"
+    },
+    {
+      "name": "Barberry",
+      "description": "soft berry red, warm and sophisticated, for small accents only"
+    },
+    {
+      "name": "Cool Blue",
+      "description": "calm cool blue with a clear fresh feel, as a quiet accent"
+    },
+    {
+      "name": "Cocoa Brown",
+      "description": "warm cocoa and rusty brown, cosy and earthy"
+    },
+    {
+      "name": "Petrol",
+      "description": "deep muted petrol teal, calm and grown-up"
+    },
+    {
+      "name": "Butter Yellow",
+      "description": "soft creamy butter yellow, sunny and gentle"
+    },
+    {
+      "name": "Pepper White",
+      "description": "warm off-white, softer on the eyes than pure white"
+    },
+    {
+      "name": "Brick Red",
+      "description": "warm brick red, for striped cushions and small accents"
+    },
+    {
+      "name": "Powder Blue",
+      "description": "soft dusty powder blue, light and calm"
     }
   ],
   "styles": [
     {
-      "name": "Fun Haus / Dopamine Decor",
-      "description": "playful, creative European aesthetic — joyful dopamine color pops, scalloped wavy forms, clean Scandinavian craftsmanship, warmth and character"
+      "name": "Japandi",
+      "description": "warm earthy neutrals, light birch and oak, low slim-legged handcrafted furniture, linen and paper, sparse decor with generous empty wall and floor space, handmade ceramics with gentle imperfection",
+      "colors": [
+        "Warm Greige",
+        "Soft Sand",
+        "Muted Sage",
+        "Olive",
+        "Dusty Rose",
+        "Cocoa Brown",
+        "Pepper White",
+        "Honey Amber",
+        "Petrol",
+        "Lilac Mist"
+      ],
+      "avoid": "loud colours, many small objects, busy patterns"
     },
     {
-      "name": "Retro Kids 2026",
-      "description": "nostalgic playful charm — warm caramel, mustard, cobalt blue accents, natural birch wood, wavy retro frames and bolster pillows"
+      "name": "Scandi",
+      "description": "bright white walls and pale wood, soft wool and sheepskin textiles, simple functional furniture, calm, cheerful and cosy",
+      "colors": [
+        "Pepper White",
+        "Soft Sand",
+        "Muted Sage",
+        "Cool Blue",
+        "Dusty Rose",
+        "Butter Yellow",
+        "Warm Greige",
+        "Lilac Mist"
+      ],
+      "avoid": "dark heavy furniture, ornate decor"
     },
     {
       "name": "Playful Montessori",
-      "description": "child-height curved furniture, low floor bed, flower craft table, donut poufs, open toy sanctuary in natural birch"
+      "description": "everything at child height: a low floor bed about 10 to 15 cm high, an open shelf no deeper than 40 cm with few toys and picture books facing front, art hung at child eye level, natural wood, wool and cotton, calm colours",
+      "colors": [
+        "Muted Sage",
+        "Soft Sand",
+        "Warm Greige",
+        "Honey Amber",
+        "Dusty Rose",
+        "Olive",
+        "Butter Yellow",
+        "Pepper White"
+      ],
+      "avoid": "tall furniture, overfilled shelves, flashing plastic toys"
     },
     {
-      "name": "Japandi 2.0",
-      "description": "warm minimalism with character — light natural birch and oak, soft tones, organic textures, balance between warmth and freshness"
+      "name": "Retro Kids",
+      "description": "nostalgic childhood of the 70s to the 2000s: vintage wooden toys, a crocheted play mat, handmade patterns, a vintage furniture piece, warm caramel and mustard accents",
+      "colors": [
+        "Honey Amber",
+        "Sunny Mustard",
+        "Warm Terracotta",
+        "Butter Yellow",
+        "Dusty Rose",
+        "Cocoa Brown",
+        "Barberry",
+        "Muted Sage",
+        "Eucalyptus"
+      ],
+      "avoid": "glossy plastic, neon colours"
     },
     {
       "name": "Biophilic Nursery",
-      "description": "gentle organic sanctuary — natural light birch wood, botanical touches, soft organic linen, serene resting mood"
+      "description": "nature indoors: botanical touches, linen, a bouclé cushion, curved shapes such as an oval rug, a round shelf and wavy edges, soft greens and natural wood",
+      "colors": [
+        "Muted Sage",
+        "Eucalyptus",
+        "Olive",
+        "Soft Sand",
+        "Warm Greige",
+        "Dusty Rose",
+        "Pepper White"
+      ],
+      "avoid": "artificial plants, literal animal decor"
+    },
+    {
+      "name": "Playful Curves",
+      "description": "rounded arches, scalloped edges and soft curved furniture in gentle pastel colour pops on a calm cream base, clean Scandinavian craftsmanship",
+      "colors": [
+        "Dusty Rose",
+        "Strawberry Milk",
+        "Lilac Mist",
+        "Butter Yellow",
+        "Muted Sage",
+        "Eucalyptus",
+        "Soft Sand",
+        "Cool Blue",
+        "Pepper White"
+      ],
+      "avoid": "hard angles, dark colours"
+    },
+    {
+      "name": "Fun Haus",
+      "description": "circus-inspired playfulness: striped upholstery (caramel-and-cream or blue-and-cream) on the bed and cushions, sculptural arch- and pill-shaped cream furniture fronts, wavy edges, vintage circus art in small frames, one saturated blue accent; the loud pattern is balanced by a restrained blue, cream, caramel and brick palette, and stripes never appear on the wall behind the wallpaper",
+      "colors": [
+        "Brick Red",
+        "Powder Blue",
+        "Cool Blue",
+        "Butter Yellow",
+        "Honey Amber",
+        "Cocoa Brown",
+        "Barberry",
+        "Pepper White",
+        "Soft Sand"
+      ],
+      "avoid": "stripes or dots on the wallpaper wall, rugs or curtains next to the mural, hanging balloons or lamps in front of the mural"
+    },
+    {
+      "name": "Boho",
+      "description": "warm relaxed layering in beige, terracotta, warm brown and muted green, cotton and textured textiles, natural wood",
+      "colors": [
+        "Warm Terracotta",
+        "Cocoa Brown",
+        "Soft Sand",
+        "Olive",
+        "Muted Sage",
+        "Honey Amber",
+        "Warm Greige"
+      ],
+      "avoid": "chaotic layering, fringe clutter"
+    },
+    {
+      "name": "Woodland Nature",
+      "description": "calm forest feeling: green, brown, beige and cream, solid wood and natural textiles, soft botanical touches, no literal animal decor",
+      "colors": [
+        "Olive",
+        "Muted Sage",
+        "Cocoa Brown",
+        "Soft Sand",
+        "Warm Greige",
+        "Eucalyptus",
+        "Pepper White"
+      ],
+      "avoid": "taxidermy, cartoon animals"
     }
   ],
   "brands": [
@@ -121,21 +278,31 @@
   "ageGroups": {
     "baby": {
       "label": "Baby (0–3 years)",
+      "child": "a baby under 2 years old",
+      "room": "A nursery: the bed is a slatted cot of 120 by 60 cm, every piece of furniture is low, small and soft-cornered, and the play space is a quilted mat on the floor; the proportions are those of a baby's room.",
       "theme": "Biophilic Sanctuary & Soft Organic Nursery (PANTONE Cloud Dancer aesthetic)",
       "beds": [
         "Minimalist slatted solid birch crib with natural wood grain and organic cotton mattress",
-        "Leander Classic rounded baby crib in solid beech with soft organic linen bedding",
-        "Curved birch Montessori floor bed in natural light oak, keeping the wall mural panoramic"
+        "Leander Classic rounded baby crib in solid beech with soft organic linen bedding"
       ],
       "toys": [
-        "curated wooden sensory blocks catching the light",
-        "delicate wooden mobile with soft felt shapes hanging above the crib",
-        "smooth handmade beechwood rattle resting on a quilted cotton play mat"
+        "wooden stacking rings and a soft knitted rabbit comforter lying together on the quilted play mat on the floor",
+        "two cloth baby books and a wooden teething ring lying on the quilted play mat on the floor",
+        "a wooden push-along walker cart with a few wooden blocks standing on the floor beside the cot"
       ],
-      "decor": [
-        "solid light oak dresser with a soft cream changing mat",
-        "scalloped wooden wall shelf with small wooden animal figures",
-        "delicate neutral linen blackout curtains pooling gently on the floor"
+      "accessories": [
+        "playful cluster bubble chandelier with frosted glass globes",
+        "plush textured cream dot floor rug",
+        "solid light oak wooden toy chest with smooth rounded corners",
+        "delicate neutral linen blackout curtains",
+        "crocheted play mat in soft earth tones",
+        "oval floor rug with a wavy edge and a short soft pile",
+        "dimmable table lamp with a paper shade and a warm 2700K glow",
+        "wall sconce with a soft warm glow",
+        "low open shelf with picture books facing front",
+        "one large calm art print in a slim oak frame",
+        "checkerboard wooden storage box",
+        "cream waffle-knit blanket folded on the bed"
       ],
       "furniture": "classic wooden baby crib with slatted sides, premium wooden changing table dresser with a soft cream changing mat (Wickelkommode), cozy fabric nursing glider chair",
       "storage": "low open wooden shelves, canvas storage bins in linen fabric, solid wood toy chest",
@@ -143,21 +310,43 @@
     },
     "vorschul": {
       "label": "Preschool (3–6 years)",
+      "child": "a child of 2 to 5 years",
+      "room": "A children's bedroom: the bed is a child's bed of 140 by 70 cm, no higher than 40 cm, and every piece of furniture stands at the height of a small child, with the proportions of a playroom.",
+      "accessories": [
+        "whimsical mid-century cobalt blue mushroom table lamp",
+        "playful cluster bubble chandelier with frosted glass globes",
+        "wavy scalloped picture frames with retro graphic art prints",
+        "flower-shaped plush velvet bolster pillow",
+        "low fluted birch bedside table",
+        "plush textured cream dot floor rug",
+        "wooden pencil holder with colorful wax crayons and drawing paper",
+        "warm mushroom table lamp on bedside table with soft 3200K glow",
+        "solid light oak wooden toy chest with smooth rounded corners",
+        "small solid oak wall bookshelf with children's books",
+        "delicate neutral linen blackout curtains",
+        "round bouclé floor pouf in cream",
+        "crocheted play mat in soft earth tones",
+        "oval floor rug with a wavy edge and a short soft pile",
+        "dimmable table lamp with a paper shade and a warm 2700K glow",
+        "wall sconce with a soft warm glow",
+        "low open shelf with picture books facing front",
+        "one large calm art print in a slim oak frame",
+        "framed vintage circus art prints (a striped tent, a rocking horse) in small wavy frames",
+        "red-and-white striped bolster cushions",
+        "checkerboard wooden storage box",
+        "cream waffle-knit blanket folded on the bed",
+        "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)"
+      ],
       "theme": "Playful Montessori & Creative Nook (Faraway Forest & Open-Ended Play)",
       "beds": [
         "Low Scandinavian birch toddler daybed with checkered and striped bolster pillows",
-        "Flower-shaped craft table in pale lacquered wood with donut poufs",
+        "Flower-shaped craft table in pale lacquered wood with round bouclé poufs",
         "Montessori low wooden floor bed in solid birch, keeping the entire wall mural unobstructed"
       ],
       "toys": [
         "open-ended wooden toy train on the woven rug",
-        "curated Grimm's-style wooden stacking arches in cheerful retro tones",
-        "wax crayons in a wooden cup with an open drawing book on the craft table"
-      ],
-      "decor": [
-        "wavy scalloped picture frames with retro graphic art prints",
-        "whimsical mid-century cobalt blue mushroom table lamp",
-        "playful reading tent/teepee with a warm felt ball garland"
+        "a crocheted play mat on the floor with a few vintage-style wooden toys on it",
+        "wax crayons in a wooden cup with an open drawing book on the rug"
       ],
       "furniture": "low Montessori floor bed, small children's play table with two matching small chairs, open shelving at child's height",
       "storage": "open wooden shelves with linen/canvas toy bins at child level, solid wooden toy chest",
@@ -165,6 +354,33 @@
     },
     "schulkind": {
       "label": "School age (6–10 years)",
+      "child": "a schoolchild of 6 to 10 years",
+      "room": "A school child's room: the bed is a single bed of 90 by 200 cm in a low frame, furniture is slim and sized for a schoolchild, and books and learning things stand at child height.",
+      "accessories": [
+        "whimsical mid-century cobalt blue mushroom table lamp",
+        "playful cluster bubble chandelier with frosted glass globes",
+        "wavy scalloped picture frames with retro graphic art prints",
+        "potted trailing ivy plant on a natural wooden shelf",
+        "flower-shaped plush velvet bolster pillow",
+        "low fluted birch bedside table",
+        "plush textured cream dot floor rug",
+        "wooden pencil holder with colorful wax crayons and drawing paper",
+        "warm mushroom table lamp on bedside table with soft 3200K glow",
+        "small solid oak wall bookshelf with children's books",
+        "delicate neutral linen blackout curtains",
+        "round bouclé floor pouf in cream",
+        "oval floor rug with a wavy edge and a short soft pile",
+        "dimmable table lamp with a paper shade and a warm 2700K glow",
+        "wall sconce with a soft warm glow",
+        "low open shelf with picture books facing front",
+        "one large calm art print in a slim oak frame",
+        "framed vintage circus art prints (a striped tent, a rocking horse) in small wavy frames",
+        "red-and-white striped bolster cushions",
+        "ribbed cobalt blue side table with a few books",
+        "checkerboard wooden storage box",
+        "cream waffle-knit blanket folded on the bed",
+        "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)"
+      ],
       "theme": "Scandi Study & Cozy Reading Haven (Multifunctional & Ergonomic Growth)",
       "beds": [
         "Solid oak low single bed with integrated under-bed storage drawers",
@@ -172,14 +388,9 @@
         "Minimalist single platform bed in light ash wood"
       ],
       "toys": [
-        "vintage-style wooden desk organizer with colored pencils",
-        "classic globe on a turned solid wood stand",
-        "open handwritten school notebook alongside an open illustrated atlas"
-      ],
-      "decor": [
-        "ergonomic height-adjustable wooden study desk with brass task lamp",
-        "natural cork pinboard with watercolor sketches",
-        "oversized textured linen reading floor cushion"
+        "a classic globe on a turned solid wood stand on the floor beside the bed",
+        "an open illustrated atlas with a school notebook and colored pencils lying on a floor reading cushion",
+        "a few chapter books and a wooden pencil cup standing on a low shelf beside the bed"
       ],
       "furniture": "low single wooden bed, children's study desk with matching chair and desk lamp, study bookshelf",
       "storage": "modular wooden wall shelves, closed wooden drawers, desk organizer",
@@ -187,6 +398,23 @@
     },
     "teenager": {
       "label": "Teenager (10–16 years)",
+      "child": "a teenager of 10 to 16 years",
+      "room": "A youth room: the bed is a single platform bed of 90 by 200 cm, furniture is slim and calm, and the character is youthful and grown-up.",
+      "accessories": [
+        "potted trailing ivy plant on a natural wooden shelf",
+        "low fluted birch bedside table",
+        "plush textured cream dot floor rug",
+        "warm mushroom table lamp on bedside table with soft 3200K glow",
+        "delicate neutral linen blackout curtains",
+        "round bouclé floor pouf in cream",
+        "oval floor rug with a wavy edge and a short soft pile",
+        "dimmable table lamp with a paper shade and a warm 2700K glow",
+        "wall sconce with a soft warm glow",
+        "one large calm art print in a slim oak frame",
+        "ribbed cobalt blue side table with a few books",
+        "cream waffle-knit blanket folded on the bed",
+        "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)"
+      ],
       "theme": "Japandi Minimalist Workspace & Lounge (Urban Warmth & Uncluttered Lines)",
       "beds": [
         "Low Japandi platform bed with floating oak frame and washed dark linen bedding",
@@ -194,14 +422,9 @@
         "Platform bed with integrated low bookshelf ledge"
       ],
       "toys": [
-        "wireless studio headphones on a solid walnut stand",
-        "monograph art photography books stacked neatly",
-        "vintage acoustic guitar resting on a wooden floor stand"
-      ],
-      "decor": [
-        "wide contemporary oak desk with clean turned-off matte laptop screen",
-        "potted Ficus Audrey in a handmade textured ceramic pot",
-        "minimalist dark metal task lamp with warm ambient glow"
+        "wireless studio headphones hanging on a solid walnut stand on a low shelf beside the bed",
+        "monograph art photography books stacked neatly on the floor beside the bed",
+        "a vintage acoustic guitar resting on a wooden floor stand in the corner"
       ],
       "furniture": "low platform single bed, wide wooden study desk, comfortable desk chair, modular wall bookshelves",
       "storage": "modular shelving units, closed wardrobe, desk organizer",
@@ -210,13 +433,8 @@
   },
   "keyObjects": [
     {
-      "name": "Curved birch Montessori floor bed",
-      "description": "low minimalist birch floor bed with organic linen bolster cushions, keeping the entire wallpaper mural panoramic and unobstructed",
-      "ageGroup": "baby"
-    },
-    {
       "name": "Minimalist slatted solid birch crib",
-      "description": "natural light birch crib with slender vertical slats and crisp organic cotton bedding, placed against the wallpaper wall",
+      "description": "natural light birch crib (a cot of 120 by 60 cm) with slender vertical slats and crisp organic cotton bedding, placed against the wallpaper wall",
       "ageGroup": "baby"
     },
     {
@@ -226,23 +444,25 @@
     },
     {
       "name": "Flower-shaped wooden craft table",
-      "description": "charming flower-shaped craft table in pale lacquered birch, accompanied by a stack of round donut poufs in warm ochre and poppy red",
+      "description": "charming flower-shaped craft table in pale lacquered birch, accompanied by a stack of round bouclé poufs in warm ochre and barberry red",
       "ageGroup": "vorschul"
     },
     {
       "name": "Low Scandinavian birch toddler daybed",
-      "description": "low natural birch toddler daybed with checkered and striped bolster pillows, keeping the wallpaper wall fully visible",
+      "description": "low natural birch toddler daybed (a child's bed of 140 by 70 cm, under 40 cm high) with checkered and striped bolster pillows, keeping the wallpaper wall fully visible",
       "ageGroup": "vorschul"
     },
     {
       "name": "Montessori play sanctuary with bunny-ear chairs",
       "description": "low round birch wooden table with two bunny-ear wooden chairs and smooth sensory wooden building blocks catching the sun",
-      "ageGroup": "vorschul"
+      "ageGroup": "vorschul",
+      "muralSafe": false
     },
     {
       "name": "Playful reading teepee nook",
       "description": "fabric play tent with a warm felt ball garland, soft floor cushions, and a low curved bookcase",
-      "ageGroup": "vorschul"
+      "ageGroup": "vorschul",
+      "muralSafe": false
     },
     {
       "name": "Curved birch study desk with open book ledge",
@@ -268,6 +488,11 @@
       "name": "Wide Scandinavian oak study desk",
       "description": "contemporary wooden desk with turned-off matte dark screen, ceramic pencil holder, and minimal art books",
       "ageGroup": "teenager"
+    },
+    {
+      "name": "Upholstered daybed with a wavy striped headboard",
+      "ageGroup": "vorschul",
+      "description": "a low child-size upholstered daybed (140 by 70 cm) placed along a side wall with only its low end touching the mural wall, a wavy scalloped headboard in caramel-and-cream stripes at that end, red-and-white striped bolster cushions and a cream waffle-knit blanket"
     }
   ],
   "roomZones": [
@@ -306,33 +531,35 @@
       "description": "warm natural window daylight gently grazing the room from the side, revealing paper texture and grounding furniture shadows"
     },
     {
-      "name": "cozy dusk with warm pendant lamp",
-      "description": "evening atmosphere with a warm amber glowing wicker/bubble pendant lamp creating cozy Gemütlichkeit"
+      "name": "cozy dusk with warm ambient glow",
+      "description": "evening atmosphere with a warm amber ambient glow creating cozy Gemütlichkeit, with clean unobstructed upper wall"
+    },
+    {
+      "name": "layered warm lamplight at dusk",
+      "description": "soft layered evening light from dimmed warm 2700K table lamps and a wall sconce, a gentle glow across the wallpaper, no harsh overhead light"
     }
   ],
   "cameraAngles": [
-    "frontal — straight-on view of the wallpaper wall",
-    "three-quarter corner perspective — shot from corner of room, showing spatial depth and wallpaper wall",
-    "side profile view — shot from the side with natural window daylight grazing the wallpaper",
-    "subtle diagonal perspective — gentle angle emphasizing room depth and wallpaper wall",
-    "intimate cozy nook framing — focused perspective on the hero furniture and wallpaper backdrop"
+    "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+    "from the far right corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the right side wall is in view and the whole mural wall recedes in perspective",
+    "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective"
   ],
   "cameraElevations": [
-    "child eye-level perspective (approx. 80cm from floor)",
-    "standing adult eye-level perspective",
-    "low-angle perspective from the rug",
-    "architectural horizontal tripod framing"
+    "standing adult eye level (about 1.5 m)",
+    "a level architectural tripod framing (about 1.4 m, straight verticals)"
   ],
   "lenses": [
     "35mm prime lens",
     "50mm normal lens",
     "45mm medium format lens",
-    "28mm gentle wide lens"
+    "28mm gentle wide lens",
+    "24mm tilt-shift lens"
   ],
   "apertures": [
     "f/5.6 aperture",
     "f/8.0 aperture",
-    "f/4.0 aperture"
+    "f/4.0 aperture",
+    "f/11 aperture"
   ],
   "cameraBodies": [
     "Sony A7R V",
@@ -342,24 +569,11 @@
   ],
   "cameraDistances": [
     {
-      "name": "close-up",
-      "description": "shows wallpaper pattern in detail plus one furniture piece, pattern texture clearly visible"
-    },
-    {
-      "name": "medium shot",
-      "description": "main furniture piece and full wallpaper wall visible, balanced composition"
-    },
-    {
       "name": "wide shot",
-      "description": "full room view, wallpaper as backdrop, full spatial context"
+      "description": "a full room view: the whole mural wall in the frame with a strip of ceiling above it and the skirting board below it, the floor in front of the wall open"
     }
   ],
   "depthOfField": [
-    {
-      "name": "shallow depth of field",
-      "setting": "f/1.8",
-      "description": "foreground accessory sharp, wallpaper wall softly in focus — draws eye to pattern"
-    },
     {
       "name": "medium depth of field",
       "setting": "f/4.0",
@@ -372,7 +586,6 @@
     }
   ],
   "accessories": [
-    "stack of colorful circular donut foam poufs",
     "whimsical mid-century cobalt blue mushroom table lamp",
     "playful cluster bubble chandelier with frosted glass globes",
     "wavy scalloped picture frames with retro graphic art prints",
@@ -381,11 +594,23 @@
     "low fluted birch bedside table",
     "plush textured cream dot floor rug",
     "wooden pencil holder with colorful wax crayons and drawing paper",
-    "curated wooden Grimm's-style stacking rainbow arches",
-    "woven wicker pendant lamp with warm 3200K glow",
+    "warm mushroom table lamp on bedside table with soft 3200K glow",
     "solid light oak wooden toy chest with smooth rounded corners",
     "small solid oak wall bookshelf with children's books",
-    "delicate neutral linen blackout curtains"
+    "delicate neutral linen blackout curtains",
+    "round bouclé floor pouf in cream",
+    "crocheted play mat in soft earth tones",
+    "oval floor rug with a wavy edge and a short soft pile",
+    "dimmable table lamp with a paper shade and a warm 2700K glow",
+    "wall sconce with a soft warm glow",
+    "low open shelf with picture books facing front",
+    "one large calm art print in a slim oak frame",
+    "framed vintage circus art prints (a striped tent, a rocking horse) in small wavy frames",
+    "red-and-white striped bolster cushions",
+    "ribbed cobalt blue side table with a few books",
+    "checkerboard wooden storage box",
+    "cream waffle-knit blanket folded on the bed",
+    "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)"
   ],
   "materials": [
     "solid birch",
@@ -397,7 +622,11 @@
     "linen",
     "cotton",
     "cork",
-    "FSC-certified wood"
+    "FSC-certified wood",
+    "bouclé",
+    "wool felt",
+    "ceramic",
+    "paper lamp shade"
   ],
   "germanApartmentContext": {
     "floorType": "light matte oak parquet",
@@ -405,65 +634,205 @@
     "ceilingHeight": "high 2.8m ceiling",
     "windows": "large residential window with deep sill, providing soft natural daylight"
   },
-  "negativePrompt": "no wicker baskets, no straw baskets, no warped woven baskets, no asymmetric baskets, no rattan baskets, no beige monotony, no cold grey tones, no plastic toys, no sharp furniture corners, no visual noise, no chaos boho, no gallery walls, no full-length mirrors, no fluorescent lighting, no cluttered surfaces, no bunk beds, no loft beds with ladders, no Hochbett mit Leiter, no two-story beds, no elevated sleeping platforms with ladders, no house bed, no house-frame bed, no house-shaped bed, no roof frame over bed, no wooden gable frame, no overhead frame beams, no tall bed frame obstructing wall",
   "latestMarketInsights": {
-    "updatedAt": "2026-07-13",
+    "updatedAt": "2026-11-05",
+    "method": "Web research of German magazines, Pinterest DE reports and parent blogs (Tavily + Exa), every entry with its source. Replaces the entry of 13.07.2026, which was a language model answering without any search.",
+    "market": "DE",
     "colors": [
       {
-        "name": "Earthy Tones (Terracotta, Sage Green, Muted Ochre)",
-        "description": "Dominant in 'boho nursery' and 'woodland nursery' searches, indicating a preference for natural, calming palettes."
+        "name": "Warm Greige",
+        "description": "the new base for walls, replaces plain white and cold grey",
+        "source": "https://www.friedatheres.com/kinderzimmer-trends-2026 (30.11.2025)"
       },
       {
-        "name": "Soft Neutrals (Beige, Greige, Warm White)",
-        "description": "Consistently high search volume across all nursery-related keywords, serving as a versatile base for various design styles, especially for 'cloud wallpaper' and more subdued 'nursery wallpaper' options."
+        "name": "Soft Sand",
+        "description": "quiet neutral base next to sage and earth tones",
+        "source": "https://www.friedatheres.com/kinderzimmer-trends-2026 (30.11.2025)"
       },
       {
-        "name": "Deep Greens (Forest Green, Emerald)",
-        "description": "Strongly associated with 'woodland nursery' and 'forest wallpaper' searches, highlighting a desire for lush, nature-inspired environments."
+        "name": "Muted Sage",
+        "description": "top calm green of 2026 and 2027, gender-neutral",
+        "source": "https://www.friedatheres.com/kinderzimmer-trends-2026 (30.11.2025)"
       },
       {
-        "name": "Dusty Pinks and Blues",
-        "description": "Appearing in searches for 'nursery wallpaper' and 'cloud wallpaper', suggesting a continued interest in classic, gentle pastels."
+        "name": "Olive",
+        "description": "natural green, also for boys' rooms",
+        "source": "https://www.fantasyroom-studio.de/kinderzimmer-einrichten/kinderzimmer-junge (14.08.2026)"
+      },
+      {
+        "name": "Warm Terracotta",
+        "description": "warm earth accent for 2026 and 2027",
+        "source": "https://www.elle.de/decoration/jetzt-trends-sichern-diese-wohntrends-sind-2027-angesagt (21.10.2026)"
+      },
+      {
+        "name": "Honey Amber",
+        "description": "honey as a cosy warm accent",
+        "source": "https://www.friedatheres.com/kinderzimmer-trends-2026 (30.11.2025)"
+      },
+      {
+        "name": "Cocoa Brown",
+        "description": "chocolate, rusty brown and ochre for 2027",
+        "source": "https://www.elle.de/decoration/jetzt-trends-sichern-diese-wohntrends-sind-2027-angesagt (21.10.2026)"
+      },
+      {
+        "name": "Barberry",
+        "description": "soft berry red for small accents",
+        "source": "https://www.friedatheres.com/kinderzimmer-trends-2026 (30.11.2025)"
+      },
+      {
+        "name": "Lilac Mist",
+        "description": "soft lavender for a quiet pastel touch",
+        "source": "https://www.wohnen.de/magazin/wohntrends-2026-wohnen-einrichten.html (16.01.2026)"
+      },
+      {
+        "name": "Cool Blue",
+        "description": "cool blue as a quiet accent, Luminous Blue is the 2027 colour (WGSN/Coloro)",
+        "source": "https://www.gira.de/g-pulse-magazin/einrichtungsideen/trendfarben (03.09.2026)"
+      },
+      {
+        "name": "Butter Yellow",
+        "description": "soft yellow, sunny and gentle for 2027",
+        "source": "https://www.elle.de/decoration/jetzt-trends-sichern-diese-wohntrends-sind-2027-angesagt (21.10.2026)"
+      },
+      {
+        "name": "Petrol",
+        "description": "light petrol among the RAL 2027+ main colours",
+        "source": "https://www.gira.de/g-pulse-magazin/einrichtungsideen/trendfarben (03.09.2026)"
       }
     ],
     "styles": [
       {
-        "name": "Bohemian (Boho Chic)",
-        "description": "High relative search volume for 'boho nursery' and 'modern boho', characterized by natural textures, global patterns, and a relaxed, eclectic feel."
+        "name": "Japandi",
+        "description": "the big interior trend of 2026, also for children: light birch, open surfaces instead of visual noise",
+        "source": "https://www.friedatheres.com/kinderzimmer-trends-2026 (30.11.2025)"
       },
       {
-        "name": "Woodland/Forest Themed",
-        "description": "Significantly trending with 'woodland nursery', 'forest wallpaper', and 'fototapete wald', focusing on depictions of trees, animals (deer, bears, foxes), and nature scenes."
+        "name": "Biophilic Nursery",
+        "description": "Natural Play: botanical prints, forest scenes, bouclé, curved shapes",
+        "source": "https://www.friedatheres.com/kinderzimmer-trends-2026 (30.11.2025)"
       },
       {
-        "name": "Safari/Jungle Themed",
-        "description": "Consistent interest in 'safari wallpaper' and 'safari jungle', featuring exotic animals (giraffes, elephants, lions) and lush foliage, often in more muted or artistic interpretations."
+        "name": "Retro Kids",
+        "description": "Pinterest DE parenting report: parents furnish in the styles of their own 70s, 90s and 2000s childhood",
+        "source": "https://newsroom.pinterest.com/de/news/parenting-trend-report-2026/ (24.02.2026)"
       },
       {
-        "name": "Minimalist/Scandinavian-inspired",
-        "description": "Underlying trend across multiple keywords, especially with plain or subtly patterned 'nursery wallpaper' and 'cloud wallpaper', emphasizing clean lines, natural materials, and functional design."
-      },
-      {
-        "name": "Whimsical/Dreamy (e.g., Cloud motifs)",
-        "description": "Driven by 'cloud wallpaper' and 'wolken tapete' searches, aiming for serene, imaginative spaces often with soft colors and ethereal patterns."
+        "name": "Fun Haus",
+        "description": "Pinterest Predicts 2026: circus-inspired, block stripes, curves, loud pattern with a restrained palette",
+        "source": "https://newsroom.pinterest.com/de/news/pinterest-predicts-nonconformity-self-preservation-and-escapism-drive-21-trends-for-2026/ (09.12.2025)"
       }
     ],
     "accessories": [
-      "Macrame hangings",
-      "Solid wood furniture/decor",
-      "Solid birch open wall shelf with delicate wooden decor",
-      "Wooden shelves/storage",
-      "Botanical prints/artwork",
-      "Fairy lights/string lights",
-      "Mobile cribs (often with animal or cloud themes)",
-      "Textured throw blankets/rugs"
+      "round bouclé floor pouf in cream",
+      "crocheted play mat in soft earth tones",
+      "dimmable table lamp with a paper shade and a warm 2700K glow",
+      "wall sconce with a soft warm glow",
+      "low open shelf with picture books facing front"
     ],
     "materials": [
-      "Wood (natural, light-colored)",
-      "Organic Canvas",
-      "Linen/Cotton (organic where possible)",
-      "Bamboo",
-      "Wool/Felt"
+      "Bouclé",
+      "Wool felt",
+      "Solid oak",
+      "Washed linen",
+      "Ceramic"
+    ],
+    "rules": [
+      "Out in 2026: full themed rooms, loud wall colours, plastic decor, symmetric picture-frame grids; in: gender-neutral rooms, natural materials, layered warm light, furniture that grows with the child (Kindersein 26.03.2026)",
+      "One wall may be loud, the rest quiet; no pattern on other surfaces next to a patterned wall (allergutendinge 22.04.2026, wohnprofiblog 11.08.2026)",
+      "Warm oak looks cosier than white furniture and hides scratches; kids like more colour than adults expect (wohnlieberaumgefuehl 27.05.2026)",
+      "Competitor reference (kids-furniture studio, Instagram post of 26.10.2026): a striped corner daybed with a wavy headboard, sculptural cream fronts, vintage circus frames and a blue-cream-caramel-brick palette show what Fun Haus looks like in a real room; the striped wall itself only suits a listing whose wallpaper IS the stripe"
+    ],
+    "sources": [
+      {
+        "url": "https://newsroom.pinterest.com/de/news/pinterest-predicts-nonconformity-self-preservation-and-escapism-drive-21-trends-for-2026/",
+        "date": "2025-12-09"
+      },
+      {
+        "url": "https://newsroom.pinterest.com/de/news/parenting-trend-report-2026/",
+        "date": "2026-02-24"
+      },
+      {
+        "url": "https://www.friedatheres.com/kinderzimmer-trends-2026",
+        "date": "2025-11-30"
+      },
+      {
+        "url": "https://kindersein.de/blogs/magazin/kinderzimmer-deko-ideen-guide-2026",
+        "date": "2026-03-26"
+      },
+      {
+        "url": "https://www.schoener-wohnen.de/einrichten/dekorieren/aktuelle-deko-trends-36951808.html",
+        "date": "2025-12-28"
+      },
+      {
+        "url": "https://www.wohnen.de/magazin/wohntrends-2026-wohnen-einrichten.html",
+        "date": "2026-01-16"
+      },
+      {
+        "url": "https://allergutendinge.net/2026/04/22/kinderzimmer-einrichten-2026-was-gerade-wirklich-funktioniert-und-was-ich-anders-machen-wuerde",
+        "date": "2026-04-22"
+      },
+      {
+        "url": "https://wohnlieberaumgefuehl.de/kinderzimmer-fehler-planung/",
+        "date": "2026-05-27"
+      },
+      {
+        "url": "https://www.zimmergestalten.de/blog/jungenzimmer-einrichten",
+        "date": "2026-08-21"
+      },
+      {
+        "url": "https://www.fantasyroom-studio.de/kinderzimmer-einrichten/kinderzimmer-junge",
+        "date": "2026-08-14"
+      },
+      {
+        "url": "https://nur1blog.de/kinderzimmer-ideen-fuer-jungen-modern-ruhig-zeitlos/",
+        "date": "2025-12-28"
+      },
+      {
+        "url": "https://wohnprofiblog.de/uncategorized/kinderzimmer-renovieren-motivwand-grundfarbe-und-robuste-details-richtig-dosieren/",
+        "date": "2026-08-11"
+      },
+      {
+        "url": "https://www.gira.de/g-pulse-magazin/einrichtungsideen/trendfarben",
+        "date": "2026-09-03"
+      },
+      {
+        "url": "https://www.elle.de/decoration/jetzt-trends-sichern-diese-wohntrends-sind-2027-angesagt",
+        "date": "2026-10-21"
+      },
+      {
+        "url": "https://hovia.com/de/tapetentrends-fur-2027",
+        "date": "2026-11-03"
+      },
+      {
+        "url": "https://www.latimes.com/spaces/room/kids/story/kids-bedroom-ideas-toddler-to-teen",
+        "date": "2026-01-27"
+      },
+      {
+        "url": "https://simplemotherhood.de/montessori-kinderzimmer-ab-1-jahr/",
+        "date": "2026-01-24"
+      },
+      {
+        "url": "https://schardt.com/Montessori-Kinderzimmer-einrichten",
+        "date": "2026-09-17"
+      }
     ]
+  },
+  "realism": {
+    "photo": "A real editorial interior photograph for a German home magazine: natural window light with soft falloff, true-to-life materials (visible wood grain, natural linen, matte painted surfaces with small signs of daily use), natural colour and gentle contrast.",
+    "note": "Positive wording on purpose: Google's image guide says describe what you want, not what you don't; OpenAI's says ask for a real photograph and name materials and light. Camera body, lens and aperture are cues for the look, not a simulation."
+  },
+  "negatives": {
+    "head": "peeling wallpaper, wallpaper peeling off wall, corner curl",
+    "fullWall": "half-wall wallpaper, split wall, wainscoting, wall paneling, dado rail, lower wall unpapered",
+    "base": "pendant lamp, hanging lamp, hanging pendant light, low ceiling lamp, ceiling chandelier, hanging chandelier, dangling light fixture, hanging lamp blocking wallpaper, ceiling lamp in foreground, ceiling fixture blocking mural, crib mobile, baby mobile, hanging mobile, hanging mobile toy, ceiling mobile, cot mobile, felt mobile, wooden mobile, dangling hanging toys, dangling ceiling decor, bed canopy, hanging baldachin, fabric curtains over bed, house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, tall bed frame obstructing wall, metal bed, iron spindle bed, iron bed frame, ceiling downlights, recessed spotlights, harsh office lighting, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look, blurry muddy textures, flat soap textures, oversaturated neon, glossy plastic-looking surfaces, over-smoothed airbrushed textures, HDR halo, full themed room, foam poufs, stripes or dots on rugs and curtains next to the mural, wardrobe or tall furniture against the mural wall, table and chairs in the foreground, crowded room, straight-on frontal view, furniture hiding the lower part of the mural, adult double bed, queen-size bed, adult sofa",
+    "text": "text overlay, watermark, advertising badge, corner stamp, promotional text, watercolor patch, promo brushstroke, typography, letters, words",
+    "textWithOverlay": "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, white outlines, digital watermark, advertising badge, low quality font"
+  },
+  "staging": {
+    "text": "STAGING (the mural is the hero): a spacious, airy room of about 4.5 by 3.5 metres under a 2.8 m ceiling, the camera about 4 metres from the mural wall. The mural wall is completely visible with an open floor in front of it. The room is calm and almost empty: only the hero piece, lower than 90 cm and standing along a side wall, and at most two small accessories; nothing is taller than the lower third of the mural.",
+    "brief": "Only the items named in this scene are in the room: the floor is clear, the corners and the foreground edges are empty, the ceiling is bare and plain, and the walls carry only the pictures named here.",
+    "maxAccessories": 2,
+    "maxHeightCm": 90,
+    "note": "Applies to every prompt the builder makes (the product is a wall mural). Numbers and positive wording on purpose; the Avoid list is only the last guard."
   }
 }

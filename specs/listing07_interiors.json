@@ -1,0 +1,17 @@
+{
+  "listing": "Листинг 7",
+  "audience": "neutral",
+  "description": "Misty Balloons watercolour mural 5056x3392: two hot-air balloons (the big one on the right glows warm from inside), a flock of birds, a fog-covered pine forest in the lower third; pale blue sky with a lilac-peach glow, sage green and grey-lilac haze. Calm, dreamy, soft; no pink, no bright blue: neutral. The balloons and birds are in the upper part of the wall, the forest in the lower part, so a child standing in the room covers only the trees.",
+  "aspect_ratio": "9:16",
+  "brief": {
+    "description": "Facts of THIS listing used by the short (brief) prompt.",
+    "product": "the wall mural",
+    "product_short": "the mural",
+    "hero": "the two hot-air balloons",
+    "wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it."
+  },
+  "wallpaper": "C:/Users/Mikhail/Desktop/Обои/Листинг 7/gemini-gen-1771795415654.png",
+  "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 7",
+  "texture": "public/textures/craft_lambda.jpg",
+  "cards": []
+}

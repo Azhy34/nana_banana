@@ -1,0 +1,29 @@
+{
+  "description": "THE TASK of a reel set for Listing 6 (jungle watercolour, neutral audience): 2 photos 9:16 shot FOR animation (owner 08.11). s1 = a toddler girl runs in through the door toward the mural and throws her arms up (Scandi, from the right, door at the left); s2 = a schoolboy stands in front of the mural with raised arms and does one happy hop (Boho, from the left, door at the right). Two different rooms, ages, sides, persons; faces never shown, the camera is still. The owner assembles the reel. py -3.12 -X utf8 scripts/director.py plan l6_reel01",
+  "id": "l6_reel01",
+  "listing_spec": "listing06_interiors.json",
+  "video_spec": "listing06_video.json",
+  "aspect": "9:16",
+  "seed": 6,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 2,
+    "ages": [
+      "vorschul",
+      "schulkind"
+    ],
+    "distinct_kits": true
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "run_in",
+      "kit": "neutral_blocks"
+    },
+    {
+      "slot": "s2",
+      "role": "wow",
+      "kit": "neutral_reading"
+    }
+  ]
+}

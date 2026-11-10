@@ -1,0 +1,94 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-08T15:04:17Z"
+ },
+ "class_name": "MoonbloomKieGrokVideo",
+ "display_name": "Moonbloom KIE Grok Video (xAI, paid)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "image_path": {
+   "type": "STRING",
+   "default": ""
+  },
+  "scene_id": {
+   "type": "STRING",
+   "default": "scene_01"
+  },
+  "out_dir": {
+   "type": "STRING",
+   "default": ""
+  },
+  "listing": {
+   "type": "STRING",
+   "default": ""
+  },
+  "model": {
+   "type": "COMBO",
+   "choices": [
+    "grok-imagine-video-1-5-preview",
+    "grok-imagine/image-to-video"
+   ],
+   "default": "grok-imagine-video-1-5-preview"
+  },
+  "resolution": {
+   "type": "COMBO",
+   "choices": [
+    "480p",
+    "720p",
+    "1080p"
+   ],
+   "default": "720p"
+  },
+  "duration": {
+   "type": "INT",
+   "default": 5,
+   "min": 1,
+   "max": 30,
+   "tooltip": "Seconds. 1.5 Preview: 1-15. The older model: 6-30."
+  },
+  "enable_audio": {
+   "type": "BOOLEAN",
+   "default": false,
+   "tooltip": "1.5 Preview only. The older model always has a sound track."
+  },
+  "min_motion_delta": {
+   "type": "FLOAT",
+   "default": 15.0,
+   "min": 0.0,
+   "max": 100.0,
+   "step": 0.5
+  },
+  "reuse_existing": {
+   "type": "BOOLEAN",
+   "default": true
+  },
+  "dry_run": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "ON (default): only checks the request and shows the LIVE price, nothing is sent and no credits are spent. OFF: pays KIE credits."
+  }
+ },
+ "optional_inputs": {
+  "prompt_override": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true
+  }
+ },
+ "outputs": {
+  "types": [
+   "STRING",
+   "STRING",
+   "BOOLEAN"
+  ],
+  "names": [
+   "video_path",
+   "report",
+   "motion_ok"
+  ]
+ },
+ "output_node": true,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

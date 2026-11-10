@@ -1,0 +1,142 @@
+{
+  "description": "What we KNOW about the video models (owner 08.11: the director uses it to pick a model per role and to estimate the cost). Evidence = real clips of ours; `untested` = a guess from a price list, not a fact. Prices here are an offline estimate for 5 s (the live price is read from KIE at the board and is the number that is paid). Update this file after every new clip. Roles pick a model in specs/roles.json `video_model`.",
+  "updated": "2026-11-08",
+  "models": {
+    "kling26": {
+      "kie": "kling-2.6/image-to-video",
+      "node": "MoonbloomKieKling",
+      "credits_5s": 63,
+      "credits_10s": 126,
+      "prompt_max": 2500,
+      "kie_params": "KIE (10.11): prompt up to 2500, image_urls = 1 picture (no last frame), sound on/off, duration 5 or 10; there is NO negative_prompt and NO cfg_scale: say what you want in positive words. 63 credits per 5 s without sound, 126 with sound (flat price per clip, 12.6 credits a second).",
+      "status": "working model",
+      "good_for": "calm walking away through a door (Listing 3), a mother with a baby, a first-person walk-in with parallax, a person doing one action (Listings 2, 45)",
+      "bad_for": "not known yet on running or on a gesture at a mural: it never animated a Listing 6 frame",
+      "evidence": "6 finished clips on Listings 45, 2, 3; owner: its movement is better",
+      "recipes": {
+        "proven_branch_shadows": "Listing 2 mother clip (06.11), the owner liked it: 'Soft dappled shadows of leafy branches sway slowly on the wall and on the floor, as in a light breeze: only the shadows move, subtly and low in contrast, and they never change the colours or the drawing of the mural.' with a camera that moves forward AND a few centimetres to the right (a glide, parallax).",
+        "failed_leaf_shadows": "Listing 7 s2 (08.11): 'shadows of tree leaves sway ... the mural wall gets no moving shadow' + a very slow straight walk-in: the owner saw no good shadow and the camera moved too little. Do NOT forbid the shadow on the wall (the owner likes the branch shadow ON the wall) and do NOT say 'very slowly' for the camera: say 'clearly visible calm walking pace'."
+      },
+      "measured": {
+        "listing7_s1_child_pointing": "08.11: the painted BIG balloon of the mural drifted UP by 41 px of 960 (about 20% of its height) in 5 s and the small one by 16 px, while the room (picture frame) stayed fixed: the 'ink lock' sentence in the prompt did not hold. Cause guess: the child points at the balloon, the model makes it float. Measured by template tracking, not by eye."
+      }
+    },
+    "grok15": {
+      "kie": "grok-imagine-video-1-5-preview",
+      "node": "MoonbloomKieGrokVideo",
+      "credits_5s": 40,
+      "status": "REJECTED by the owner 08.11.2026: do not use, do not offer",
+      "good_for": "nothing we can rely on",
+      "bad_for": "a fast full-body run of a SMALL figure across the room: the girl running in (Listing 6) had glitches, the head turned to a profile, the body rotated",
+      "avoid_in_prompt": "naming face / profile (may prime a profile): say positively where the head looks (at the wall)",
+      "evidence": "Listing 6: boy at the wall acceptable, girl running bad; Listing 7 s1 (a boy points at the balloon, one step): 'terrible: the mural moves, the child's physics is awful'. Frame-sample checks looked fine, so a still-frame check cannot clear a Grok clip; the owner's eye did.",
+      "measured": {
+        "listing7_s1_child_pointing": "the wooden toy balloon on the rug jumped 45 px in the last second and the room drifted 2 px; the mural balloons stayed (1 px)"
+      }
+    },
+    "groki2v": {
+      "kie": "grok-imagine/image-to-video",
+      "node": "MoonbloomKieGrokVideo",
+      "credits_5s": null,
+      "status": "rejected with the Grok video family (08.11)",
+      "note": "6-30 s (the shortest clip is 6 s = 48 credits at 1080p); KIE: the sound cannot be turned off"
+    },
+    "omni12": {
+      "kie": "google/gemini-omni-flash-1-2",
+      "node": "MoonbloomKieOmniVideo",
+      "credits_per_second": {"360p": 4, "720p": 9, "1080p": 10, "4k": 22},
+      "credits_5s_720p": 45,
+      "credits_6s_720p": 54,
+      "prompt_max": 20000,
+      "kie_params": "KIE (10.11, owner's paste of the schema + live price): prompt 1-20000; duration integer 3-15 (3-10 with a first AND a last frame); resolution 360p|720p|1080p|4k (the owner never uses 360p); aspect_ratio 16:9|9:16|auto; seeds 10000-99999; ONE mode per request: A text/reference images (image_urls up to 6, reference only, two images are NOT first/last), B first_frame_url, C first_frame_url + last_frame_url, D video_list (edit, no duration). Image slots: images + 2 for a video <= 7. Native audio always on. No @image tags: describe the role of each picture in words.",
+      "price_note": "Billed per second of OUTPUT: 9 credits a second at 720p ($0.045). Google direct is $0.07 a second at 720p ($0.104 at 1080p upsampled, $0.209 at 4K), so KIE is about 36% cheaper at 720p. ComfyUI's own partner node 'Google Gemini Omni (Video)' costs $0.145 a second at 720p (Comfy credits, and the installed ComfyUI lists only Omni Flash 1.1, not 1.2).",
+      "status": "first clip made 10.11 (Listing 11 b5c, 5 s, 720p, 45 credits billed = quote, 53 s): the MURAL held (phase-correlation shift of the wall band 0.01 px, no cropping, toucan / parrot / leopard intact), the light moved as asked (sun patches sweep the rug and the wall), BUT the word 'tripod' in the prompt made it draw a tripod on the rug. Output 720x1280 H.264 24 fps 3.7 Mbps + AAC stereo sound. SECOND clip (forward_drift_right + dust, no tripod, 45 credits, 142 s): a clean smooth forward move, camera scale +6.5% over 5 s, mural intact, no tripod: the wording that works for Omni. Kling 2.6 on the same frame not run yet (63 credits).",
+      "good_for": "per Google (claims, no benchmark): keyframe interpolation, FPV flythrough, fewer unwanted jump cuts; per the site journal (Omni 1.1): a slow straight push-in, light and shadow loops",
+      "bad_for": "per the site journal (Omni 1.1): >5 s drifts, arcs and side glides hallucinate, animal heads duplicate without a 2D lock (our murals have a toucan, a parrot and a leopard), compression artefacts on murals at 720p",
+      "risk_eu": "Google: uploading or editing images with MINORS is not supported in the EEA, Switzerland and the UK. The Listing 11 build-up frames have no person, so the test is clean; a child from behind is not tested.",
+      "prompting": "specs/video_motion.json prompt_rules (applies_to omni12): one continuous shot, no scene cuts, roles of pictures in plain words, no control tags, no quotation marks, describe the sound."
+    },
+    "kling40": {
+      "kie": "kling-4.0/keyframe-to-video and kling-4.0/reference-to-video",
+      "node": null,
+      "credits_per_second": {"720p": 28.5, "1080p": 42.5},
+      "credits_5s_720p": 142.5,
+      "prompt_max": 8000,
+      "kie_params": "KIE (10.11): keyframe-to-video = a first frame, a last frame and up to 10 key frames (`@first_frame`, `@keyframe_1`, `@last_frame`), 3-30 s, 720p|1080p; reference-to-video = up to 10 reference images (`@image_1`), 5 videos, elements, voices, prompt 8000, 3-30 s (references, not frames in order). The same price per second for both. With a reference VIDEO the input seconds are billed too. A '4.0 Flash' exists (about 11.3 credits a second from, first frame only); its KIE model id is not known yet.",
+      "status": "not connected, untested (2.3 times the price of Kling 2.6 at 720p, 3.4 times at 1080p; the quality is NOT known)",
+      "prompting": "official Kling 4.0 guide: descriptive language, minimise negative instructions ('negative prompts can increase the likelihood of errors'), '@Image1 is the first frame, then describe what happens'."
+    }
+  },
+  "to_try": {
+    "runway": {
+      "credits_5s_720p": 12,
+      "credits_5s_1080p": 30,
+      "note": "cheapest; aspect ratio and prompt limits not checked"
+    },
+    "wan-2-6-flash": {
+      "credits_5s_720p": 20,
+      "credits_5s_1080p": 30,
+      "note": "cheap 1080p; wan/2-6-flash-image-to-video"
+    },
+    "veo-3-1-lite": {
+      "credits_per_clip_720p": 30,
+      "credits_per_clip_1080p": 35,
+      "note": "price per clip, 4/6/8 s; 9:16 yes; Fast 60/65, Quality 250/255"
+    },
+    "pixverse-v6": {
+      "credits_5s_720p": 36,
+      "note": "cheap, quality unknown"
+    },
+    "hailuo-2-3-standard": {
+      "credits_6s_768p": 30,
+      "credits_6s_1080p": 50,
+      "note": "6 s clips"
+    },
+    "seedance-2-mini": {
+      "credits_5s_720p": 41,
+      "note": "max 720p, sound on by default (switch it off)"
+    },
+    "kling-3-0-omni": {
+      "credits_5s_720p": 75,
+      "credits_5s_1080p": 101,
+      "note": "newer Kling"
+    },
+    "kling-2-5-turbo-pro": {
+      "credits_5s": 63,
+      "note": "same price as 2.6"
+    },
+    "not_for_us": "infinitalk, omnihuman, volcengine (talking avatars), topaz (an upscaler), wan animate (motion transfer from a video), happyhorse (from 112 credits per 5 s)",
+    "gemini-omni-flash": {
+      "superseded": "see models.omni12 (10.11): Omni 1.2 is live on KIE with per-second prices; 1.1 routes to 1.2 at Google on 2026-12-03",
+      "kie": {
+        "model": "google/gemini-omni-flash-1-1",
+        "credits": {
+          "4s": 63,
+          "6s": 84,
+          "8s": 105,
+          "10s": 126
+        },
+        "note": "price by length, the same at 360p-1080p; no 5 s clip; no field to switch the sound off found"
+      },
+      "google_direct": {
+        "model": "gemini-omni-1.2-flash",
+        "usd_per_second": {
+          "360p": 0.023,
+          "720p": 0.07,
+          "1080p": 0.104,
+          "4k": 0.209
+        },
+        "credits_5s_equiv": {
+          "720p": 70,
+          "1080p": 104
+        },
+        "note": "3-15 s, Interactions API, our site uses 1.1 (billed at 1.2 rates from 2026-12-03)"
+      },
+      "good_for": "per the site journal: slow straight push-in, light and shadow loops, no people; native audio",
+      "bad_for": "per the journal: >5 s drifts, arcs and side glides hallucinate, animal heads duplicate without a 2D lock, compression artifacts on murals at 720p",
+      "status": "untested on our people frames",
+      "risk_eu": "Google: uploading/editing images with minors is NOT supported in the EEA, Switzerland, UK; our frames show a child from behind: test one 360p call before any decision",
+      "prompting": "Google guide: single continuous shot, no scene cuts; prompt for motion only; negatives as text; describe audio; no quotation marks"
+    }
+  }
+}

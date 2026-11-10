@@ -1,0 +1,24 @@
+{
+  "listing": "Листинг 2",
+  "description": "Kling 2.6 image-to-video lock of Listing 2 (Scandi Berge, WA-001). The clips of a reel set are made from the set (specs/sets/l2_reel01.json): each clip has its `motion` and `items` from the role and the kit; the prompt is built by reels_pipeline/prompts.clip_prompt with this `lock`. Rules: faces are never shown, no plain zoom, no tilt/pedestal up, the mural stays flat static ink.",
+  "duration": "5",
+  "sound": false,
+  "min_motion_delta": 15.0,
+  "lock": {
+    "description": "Facts of THIS listing used by every clip prompt: the mural is flat printed ink and never moves; the furniture is frozen.",
+    "product": "INANIMATE 2D INK LOCK: the wallpaper design is strictly flat 2D printed ink on textured wallpaper, completely static 2D artwork, zero biological animation, zero morphing, zero waving edges; the painted misty mountains, the pine forest and the swallows stay completely still.",
+    "furniture": "GEOMETRIC & FURNITURE LOCK: the {items} remain 100% frozen, solid and fixed in the room. Zero warping, zero morphing, zero shifting objects across the floor.",
+    "people": "PEOPLE LOCK: every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are, nothing turns toward the lens, and a child held on an arm stays still in the position of the first frame."
+  },
+  "frames": [
+    {
+      "scene_id": "l2_reel01_s1_mother_baby",
+      "frame_file": "l2_reel01_s1_mother_baby__gemini.png",
+      "clip": "A mother with a baby on her arm shows the swallows on the mural; a very slow glide of the camera and swaying branch shadows",
+      "motion": "A very slow, smooth first-person glide: the camera moves gently forward and a few centimetres to the right at natural eye level, with no tilt, no rotation and no zoom, giving a soft depth parallax (the nearer objects shift a little more than the farther ones). The mother, who holds the baby on her left arm, slowly moves her raised right hand along the painted swallows from the left to the right, as if showing them to the child, then lowers her hand gently; the baby stays still on her arm looking at the wall and never turns toward the camera. Both are seen only from behind: the back of the mother's head and her long hair, the back of the baby's head; no face, not even in profile, is ever visible. Soft dappled shadows of leafy branches sway slowly on the wall and on the floor, as in a light breeze: only the shadows move, subtly and low in contrast, and they never change the colours or the drawing of the mural.",
+      "items": "low cabinet, shelf unit, wooden toy car, folded blankets, curtain, rug and architecture",
+      "min_motion_delta": 8.0,
+      "people": true
+    }
+  ]
+}

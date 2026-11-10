@@ -1,0 +1,52 @@
+{
+  "description": "THE TASK of a set: 6 photos in 9:16 planned together with their clips (2 per role); the owner picks the best 3, they are animated, the owner assembles the reel himself. To change the set edit this file (or the kits / roles), then: py -3.12 -X utf8 scripts/director.py plan l45_set01. `kit: \"auto\"` takes the next unused kit that fits (deterministic by the seed).",
+  "id": "l45_set01",
+  "listing_spec": "listing45_interiors.json",
+  "video_spec": "listing45_video.json",
+  "aspect": "9:16",
+  "seed": 1,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 4,
+    "ages": [
+      "baby",
+      "vorschul",
+      "schulkind"
+    ],
+    "distinct_kits": true,
+    "shared_kits_ok": true,
+    "audience_waiver": true
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "hook",
+      "kit": "arch_poufs"
+    },
+    {
+      "slot": "s2",
+      "role": "hook",
+      "kit": "study_desk"
+    },
+    {
+      "slot": "s3",
+      "role": "product",
+      "kit": "bubble_chandelier"
+    },
+    {
+      "slot": "s4",
+      "role": "product",
+      "kit": "flower_table"
+    },
+    {
+      "slot": "s5",
+      "role": "life",
+      "kit": "baby_play_mat"
+    },
+    {
+      "slot": "s6",
+      "role": "life",
+      "kit": "globe_pinboard"
+    }
+  ]
+}

@@ -2,6 +2,30 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Goal of the project (read first)
+
+Moonbloom sells children's-room wallpapers (moonbloomwalls.com and Etsy, Germany and Austria). **This project exists to make content that spreads and sells: viral-grade photos and video, shaped for each platform where we get traffic and buy ads (Pinterest, Meta Instagram/Facebook, Google Ads Shopping and Search, plus Etsy and the site), so that traffic turns into sales.**
+
+Everything in this repository is a tool for that goal: the SPA, the ComfyUI boards, the KIE models, prompts and `trends.json`, the director, `export_ads.py`. Judge every task by the goal, not by the tool:
+- Content is made FOR a destination (platform, placement, exact format, `specs/ad_formats.json`). A picture that serves no destination is not made.
+- What is "viral" on a platform is learned from its results (ad accounts, GA4), not assumed; wins and failures go into `Promt/trends.json` and the review checklist of the skill `add-design-idea`.
+- The measure is traffic and sales per platform, not the number of pictures, tests or features. Credits are spent only on frames that can go into a campaign.
+- After this repository the chain continues in the website project `nocode/Etsy` (feed, catalogs, ad accounts, MCP tools): `.claude/skills/add-design-idea/references/destinations-and-pipeline.md`.
+
+## Workflow of the content work (follow the steps in this order)
+
+0. **Look at the wallpaper first** (the picture, not the file name): palette, motif, mood, and WHO the room is for: `audience` = `boy` | `girl` | `neutral` in `specs/listingNN_interiors.json` (cold blue/grey/green + balloons, cars, space, animals = boy or neutral; pink, lilac, flowers = girl). Not sure: **ask the owner one question** before anything else. The director refuses kits that do not suit the audience and kits already used in the reel of another listing.
+1. **For which platform and placement** is the content (`specs/ad_formats.json`)? A picture that serves no destination is not made.
+2. **Design for that audience and age**: style and colours from `Promt/trends.json`, a kit from `specs/design_kits.json` (reels) or the pair of a carousel; real toys of the child's age; faces never shown (from behind only).
+3. **Plan, free:** `scripts/director.py plan <set>` (variety rules for a reel: different styles, both camera sides, different people; no repeats).
+4. **Show the owner the scenario and style in the chat** (room, light, camera, person, action, cost). Wait for the OK.
+5. **Pay only on the owner's "yes" with the credit number** equal to the live quote (`run_board.py ... --paid ...` prints it, `--confirm N` pays). One frame first when the design is new.
+6. **Judge the frames by eye** (clutter, faces, age, mural proportions) before any clip; record the result in `AGENTS.md`.
+7. **Clips (Kling) only for approved frames**, camera still when a person is in the frame; the owner assembles the reel.
+8. **Export** (`scripts/export_ads.py`) and, in a separate step, upload to the platforms.
+
+The website (SPA) of this repository is only one of the tools: `docs/spa-architecture.md`.
+
 ## Commands
 
 ```bash
@@ -18,122 +42,32 @@ npm run test:e2e:live   # free read-only checks with real keys from .env.local (
 
 E2E tests live in `e2e/` (`support/fixtures.ts` blocks every unmocked request to OpenRouter, Gemini, Replicate, Vercel Blob and `/api/*`). No linter is configured.
 
-## Architecture
+### ComfyUI + KIE Reels Pipeline (Python, outside the SPA)
 
-**Nana Banana** is a React + TypeScript SPA for AI image generation, video animation, Etsy cropping and upscaling, deployed on Vercel (production: https://nanabanana-one.vercel.app). Primary use case: Etsy listing photos and video pins for children's room wallpapers targeting the German market.
+ComfyUI Desktop (orchestrator only, port 8188) + KIE (one key, one `createTask`/`recordInfo` for every model): photos on Nano Banana 2/2.1, GPT Image 2, Grok Imagine 2.0 Edit; video on Kling 2.6. Two permanent boards (`Moonbloom Фото`, `Moonbloom Видео`, one tab each) opened by the agent through the bridge (`comfy_nodes/bridge_logic.py` + `web/moonbloom_ui.js`). The wallpaper is the PRODUCT and is sent only as the reference image; the prompt adds only the design.
 
-In production the owner generates images and video only with Gemini models through the **Gemini provider** (direct Gemini API key entered in the header). The OpenRouter provider and Qwen Image 2 paths still exist in code but are not used.
+**Do not hand-write steps, use the commands** (`py -3.12 -X utf8 ...`; details in `.agents/skills/kie-add-model/SKILL.md`):
+- `scripts/run_board.py photos|video [--paid all --confirm N] [--reload]`: open the board, wait, table, contact sheet. Free dry run by default.
+- `scripts/add_model.py <kie model> [--write --tag t]`: can the pipeline use this model, what is the price per size; registers it.
+- `scripts/comfy_node_info.py card <Node> | kie <model> | prices`: capabilities and live prices. `scripts/build_comfy_workflows.py --verify-live`: check the boards against the running ComfyUI.
+- `scripts/director.py plan|build|show|photos|pick <set>` and `card <spec> <card>`: the director of a set of photos. Two kinds of set: a reel (6 photos 9:16 planned with their clips from design kits + roles; the owner picks 3, they are animated, the owner assembles the reel) and a carousel (pairs of ONE composition in other interior colourways, a format per pair, e.g. 9:16 and 4:5). Data in `specs/sets/`, `specs/design_kits.json`, `specs/roles.json`. `scripts/new_listing.py <wallpaper>` starts a new listing spec (facts only).
+- **New idea, reference photo, listing or set format: use the skill `.claude/skills/add-design-idea/SKILL.md`** (what type the idea is, which file gets it, the free checks, the paid-test rule, how to judge frames).
+- **Where a picture goes** (a frame is generated FOR a destination: Meta feed 4:5, Reels/Stories 9:16, Pinterest 2:3, Google Search 1.91:1/1:1, Etsy 4:3, the feed): registry `specs/ad_formats.json` (`destinations`: ratio, pixels, why, goes_to, how), code `reels_pipeline/destinations.py`, a set says `for: [destination, ...]` (one frame per ratio, a "pack" = one design in several sizes) and a frame is named `<set>_<pair><n>_<colour>_<platform>_<ratio>`. `scripts/export_ads.py <set> [--write]` cuts the delivery files into `exports/` (exact ratio, JPEG, IPTC AI label Google Merchant requires) with a `manifest.json`; it uploads nothing (step B, not built). Chain and rules: `.claude/skills/add-design-idea/references/destinations-and-pipeline.md`. The feed `moonbloomwalls.com/google_shopping_feed.xml` lives in the website project `nocode/Etsy/site` and feeds Meta, Google and Pinterest; the FIRST image of an item sets the ratio of a Meta carousel.
+- Tests: NOT a routine step, see **Tests policy** below. `scripts/test_policy.py` says in one line what (if anything) to run for the current changes.
 
-### Data Flow
+**Tests policy** (owner 06.11: tests are for a NEW node or logic, not for every round). Default run `pytest` = the CORE only (59 money/safety tests, ~5 s, `pytest.ini`: `-m core`); the other 177 stay on disk, `pytest -m ""` runs all.
 
-```
-Images   Browser → generationRouter.ts ─┬─ provider "gemini"     → geminiService.ts → Gemini API (@google/genai, direct)
-                                        ├─ provider "openrouter" → geminiService.ts → openrouter.ai chat/completions
-                                        └─ model Qwen Image 2    → replicateService.ts → /api/qwen (+/poll) → Replicate
-Video    Browser → VideoTool.tsx ─┬─ Omni (default) → omniService.ts → Gemini Interactions API (sync, base64 MP4)
-                                  └─ Veo            → veoService.ts  → Gemini API predictLongRunning + poll
-Upscale  Browser → Vercel Blob client upload (token from /api/upload) → /api/upscale (+/poll) → Replicate nightmareai/real-esrgan (default, ~$0.002) or topazlabs/image-upscale
-Logs     services, Upscaler.tsx → logGeminiEvent() → /api/log-event → stdout JSON (Cloud Trace field) + Vercel Blob sessions/<sessionId>.json
-                                                                     (+ gemini_sessions.json when not running on Vercel)
-```
-
-`/api/log-event` persists only the fields listed in its `DETAIL_FIELDS` (mirror of `GeminiLogDetails` in `types.ts`) — add new log fields in both places. Upscale events carry `upscaleModel` ('real-esrgan'|'topaz'), `upscaleFactor`, input/output pixel size, `predictionId`, `billingUnits` and `stage` (`upload`/`upscale`) on errors.
-
-All AI calls except Qwen and upscaling go straight from the browser with the key from the header. `traceId` (from `utils/tracing.ts`) is sent only in the `/api/log-event` body; `formatTraceParent()` exists but no request uses it.
-
-### Key Files
-
-- **[App.tsx](App.tsx)** — Root component. Global state: provider, API keys, view mode, wizard step, generation state, `batchToolImage`. All five tools stay mounted and are hidden with `display: none`; `switchTab()` clears `batchToolImage` when going to Generator or Batch.
-- **[types.ts](types.ts)** — Shared types: `ViewMode` (`generator|batch|cropper|upscaler|video`), `AIProvider` (`openrouter|gemini`), `ModelType` (OpenRouter-style ids, `google/` prefix stripped for the Gemini API), `VideoEngine`, `OmniResolution`, batch types.
-- **[constants.ts](constants.ts)** — Model options and pricing, aspect ratios/sizes, Veo and Omni model ids, presets, negative prompt, Etsy video limits.
-- **[services/generationRouter.ts](services/generationRouter.ts)** — Routes image generation to Qwen (Replicate) or to `geminiService` by model.
-- **[services/geminiService.ts](services/geminiService.ts)** — Generator and Batch image generation for both providers, `detectWallCoordinates()` for the cropper's warp mode (falls back to full frame on error), `enhancePromptText()`, `logGeminiEvent()`.
-- **[services/omniService.ts](services/omniService.ts)** — Gemini Omni 1.1 Flash image-to-video via `POST v1beta/interactions` (9:16, 720p final / 360p draft), reads the video from `steps[].content[]`.
-- **[services/veoService.ts](services/veoService.ts)** — Veo 3.1 Fast image-to-video (6 s, 9:16, `allow_adult`, negative prompt; `seed` is not sent because the Gemini API rejects it).
-- **[services/promptGenerator.ts](services/promptGenerator.ts)** — `generateRandomTags()` picks values from `trends.json`; `buildGeminiPrompt()` assembles the narrative batch prompt, including its own "Absolutely avoid: …" list.
-- **[services/replicateService.ts](services/replicateService.ts)** — Qwen generation and Topaz upscale start/poll via the `/api` routes.
-- **[shared/upscaleContract.ts](shared/upscaleContract.ts)** — zod schema shared by the Upscaler and `/api/upscale*`; enums mirror the live Replicate model schema (checked by `e2e/live`). API routes must import it with a `.js` extension.
-- **[services/imageCompressor.ts](services/imageCompressor.ts)** — Re-encodes uploads to JPEG ≤2048 px before they are sent to a model.
-- **[services/imageCropService.ts](services/imageCropService.ts)** — Crop geometry and export helpers for `EtsyCropper`.
-- **[services/downloadService.ts](services/downloadService.ts)** — Blob-based download helper (avoids cross-origin download issues).
-- **[services/sessionTracker.ts](services/sessionTracker.ts)** — Per-page-load session id (`sess_*`) used to group logs.
-- **[hooks/useBatch.ts](hooks/useBatch.ts)** — All Batch state and handlers; persists step, wallpaper and cards to `localStorage`.
-- **[api/](api/)** — `upscale.ts` + `upscale/poll.ts` (Replicate proxy, client token in `Authorization`), `upload.ts` (Vercel Blob client tokens), `log-event.ts`, `list-sessions.ts` (returns all logged sessions), `qwen.ts` + `qwen/poll.ts` (use the server `REPLICATE_API_TOKEN`).
-- **[.agents/skills/log-trace-debugger/SKILL.md](.agents/skills/log-trace-debugger/SKILL.md)** — Project-scoped skill for trace-based log analysis and debugging API errors.
-- **[Promt/trends.json](Promt/trends.json)** — Data for random prompt tags (colors, styles, brands, age groups, key objects, room zones, lighting, camera, depth of field, accessories, materials, German apartment context, `latestMarketInsights`). Its `negativePrompt` key is not read by the code.
-- **[Promt/Promt.md](Promt/Promt.md)** — Prompt rules; `buildGeminiPrompt()` is the source of truth.
-
-### Component Structure
-
-```
-App.tsx
-├── Header.tsx              — Provider selector (OpenRouter/Gemini), key for the active provider, Replicate token
-├── Generator:
-│   ├── WizardSteps.tsx     — Step indicator (Prompt → Reference → Result)
-│   ├── PromptStep.tsx      — Prompt, ✨ Enhance, model, aspect ratio, resolution (512/1K/2K/4K)
-│   ├── ReferenceStep.tsx   — Up to 5 reference images (ImageUploader.tsx)
-│   └── ResultStep.tsx      — Result, cost/tokens, download, "✂️ Etsy Cropper"
-├── Batch:
-│   └── BatchGenerator.tsx  — 3-step wizard (logic in hooks/useBatch.ts): Setup → Review Prompts → Results
-│       Setup: wallpaper, count 6/9/12/15, format distribution 9:16/2:3/4:3 (default 6/4/2), model
-│       Results: per-card download, ✨ Refine (2K, Pro), ↑ Scale, ✂ Cropper, 🎬 Video (9:16 only), regenerate
-├── Cropper:
-│   └── EtsyCropper.tsx     — Canvas crops to Etsy presets (3000×2250 etc.), batch mode, wall-detection warp mode
-├── Upscale:
-│   └── Upscaler.tsx        — Real-ESRGAN (default, ~$0.002) / Topaz via Replicate: 8K/16K/24K → 2x/4x/6x, subject detection (Topaz), JPG/PNG
-└── Video:
-    └── VideoTool.tsx       — Omni 1.1 Flash (default) or Veo 3.1 Fast, presets, editable prompt, Etsy ≥500 px check
-```
-
-### Batch Generator — Key Design Decisions
-
-- Model per batch: 3.1 Flash (default), 3 Pro, 50/50 split (first half Pro, second half Flash) or Qwen 2; images are requested at `2K`.
-- Multimodal Material Conditioning: When `useTextureReference` is active (default), passes `REFERENCE_IMAGE_1` (wallpaper artwork 1:1) and `REFERENCE_IMAGE_2` (Craft Lambda macro photo, `services/craftLambdaAsset.ts`). Explicit prompt instructs Gemini 3.1 to extract exclusively the sand grain micro-relief and matte fleece texture, discarding sample graphics.
-- Setup UI has toggle card with thumbnail preview for Craft Lambda texture reference, persisted in `localStorage`.
-- Cards generate in chunks of 2 with `Promise.allSettled`; each result updates its card through functional `setCards(prev => ...)`.
-- ✨ Refine sends the card result as a draft plus the wallpaper to 3 Pro at 2K.
-- Text overlays (USP / promo brushstrokes) are disabled: `generateCards()` clears `overlayText`, although `buildGeminiPrompt()` still supports it.
-- `batchToolImage` in `App.tsx` carries a result to Cropper/Upscaler/Video.
-
-### Video Animator — Key Design Decisions
-
-- Default engine: **Gemini Omni 1.1 Flash** (`gemini-omni-1.1-flash`) via Google Interactions API (`POST /v1beta/interactions`), sync response returning Base64 MP4.
-- 4 Specialized Etsy & Pinterest presets: `omni_wall_dolly`, `omni_texture_macro`, `omni_sunlight_loop`, `omni_montessori`.
-- **Inanimate 2D Print Lock**: strict prompt constraint preventing biological animation, morphing, and duplicate animal heads during camera movement. Camera uses pure optical macro push-in (Z-axis zoom) rather than lateral gliding.
-
-### AI Models in Use
-
-| Model | Used For |
+| Situation | Tests |
 |---|---|
-| `gemini-3.1-flash-image` | Fast image generation; also wall detection and ✨ Enhance on the Gemini provider |
-| `gemini-3-pro-image` | High-quality generation (up to 4K), batch ✨ Refine |
-| `gemini-omni-1.1-flash` | Default video engine (Interactions API, 720p/360p) |
-| `veo-3.1-fast-generate-preview` | Alternative video engine |
-| `google/gemini-2.5-flash` (OpenRouter) | ✨ Enhance on the OpenRouter provider |
-| `qwen/qwen-image-2` (Replicate) | Optional image model, unused in production |
-| `nightmareai/real-esrgan` (Replicate) | Fast & ultra-cheap upscaling (~$0.002/run, default) |
-| `topazlabs/image-upscale` (Replicate) | High-fidelity upscaling with subject detection (~$0.048/billing unit) |
+| Everyday work: generation, edits of data (`trends.json`, specs, sets, listings), documents, skills, memory | **None.** The process checks itself: `director.py plan\|show\|card`, `build_comfy_workflows.py --verify-live`, `run_board.py` dry run (live price, request vs KIE schema, balance); a paid run starts only when the confirmed number equals the live quote |
+| Edit of the paid-path code (payment, quote, `--paid`, bridge, KIE request, `dry_run` default) | The CORE once after the edit: `pytest` (one line of result) |
+| NEW node, KIE model, set type or builder logic | **Acceptance once**: tests of that area + 2-4 new tests of the new thing only + `--verify-live` + dry run + one paid trial frame on the owner's "yes". Afterwards the area is not re-run. `test_policy.py --new --run` picks the area's files |
+| A mistake that cost credits | One regression test of that mistake (mark `core` if it guards money) |
 
-### State Management
+Not done: tests "just in case", tests after a prompt/data/doc edit, narrating test results. After the work: `test_policy.py --run` (quiet) moves the "accepted" baseline.
 
-React `useState` only. Provider and all keys (`openrouter_api_key`, `gemini_api_key`, `replicate_token`) are persisted in `localStorage`; Batch state is persisted by `useBatch`. When `localStorage` has no key, `App.tsx` falls back to env values that `vite.config.ts` inlines via `define`.
+**Rules:** facts about ComfyUI and KIE come from primary sources by exact address (live `/object_info`, KIE model schema `api_truth/kie`, official docs by URL), not from semantic search or memory; paid calls only with the owner's "yes" and the credit number (live quote, `dry_run` first); 2K minimum; every paid picture a usable ad creative (different designs); no third-party MCP, no ComfyUI partner nodes; keys only from `.env.local`, never printed; **faces of people are never shown in frame** (only from behind or in a half-turn, never in profile); plain zoom/push-in is not ordered from Kling. Kling prompts per `.agents/skills/creative-ad-auditor`.
 
-### Postman Integration
+Map and traps: `.agents/skills/comfy-pipeline/SKILL.md` (short), `reference.md` (full). Journal by date: [AGENTS.md](AGENTS.md).
 
-- **[Nana_Banana_API.postman_collection.json](Nana_Banana_API.postman_collection.json)** — Collection for the session logger, Qwen and Topaz upscaler endpoints.
 
-### Deployment
-
-Vercel: `npm run build` → `dist/`, functions in `/api` (`vercel.json` sets `maxDuration` 30 s for upscale, 60 s for poll) and all non-API routes rewrite to `index.html`.
-
-Server env: `BLOB_READ_WRITE_TOKEN` is required for Upscaler uploads and session logs; `REPLICATE_API_TOKEN` is used only by `/api/qwen*`. **Do not set `GEMINI_API_KEY`, `GEMINI_VEO_API_KEY`, `OPENROUTER_API_KEY` or `REPLICATE_API_TOKEN` for production builds**: `vite.config.ts` inlines them into the public JS bundle.
-
-### Known Issues (covered by failing e2e tests, 2026-09-14)
-
-Remove an entry once its test passes.
-
-- `EtsyCropper` keeps drawing and exporting the previously loaded image (the Unsplash placeholder) after a new source — `imgRef` is reused.
-- `Upscaler` and `EtsyCropper` read `initialImage` only on mount, so Generator/Batch hand-offs do not arrive.
-- Generator: `GEMINI_NEGATIVE_PROMPT` is placed in `imageConfig.negativePrompt`, which `@google/genai` drops; OpenRouter requests never include it. Batch prompts are unaffected (their negatives are in the text).
-- Batch persists 2K results to `localStorage`; after the quota is hit, a reload restores cards stuck in "Generating...".
-- Production security: provider keys in the bundle, `/api/list-sessions` is public, `/api/qwen` runs on the server token without auth, `/api/qwen/poll` passes `../` into the Replicate URL.

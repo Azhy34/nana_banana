@@ -1,0 +1,82 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-08T14:37:07Z"
+ },
+ "class_name": "MoonbloomKieKling",
+ "display_name": "Moonbloom KIE Kling 2.6 Push-in (paid)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "image_path": {
+   "type": "STRING",
+   "default": ""
+  },
+  "scene_id": {
+   "type": "STRING",
+   "default": "scene_01"
+  },
+  "out_dir": {
+   "type": "STRING",
+   "default": ""
+  },
+  "listing": {
+   "type": "STRING",
+   "default": ""
+  },
+  "duration": {
+   "type": "COMBO",
+   "choices": [
+    "5",
+    "10"
+   ],
+   "default": "5"
+  },
+  "sound": {
+   "type": "BOOLEAN",
+   "default": false
+  },
+  "min_motion_delta": {
+   "type": "FLOAT",
+   "default": 15.0,
+   "min": 0.0,
+   "max": 100.0,
+   "step": 0.5
+  },
+  "reuse_existing": {
+   "type": "BOOLEAN",
+   "default": true
+  },
+  "dry_run": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "ON (default): only checks the request and shows the LIVE price, nothing is sent and no credits are spent. OFF: pays KIE credits."
+  }
+ },
+ "optional_inputs": {
+  "prompt_suffix": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true
+  },
+  "prompt_override": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true
+  }
+ },
+ "outputs": {
+  "types": [
+   "STRING",
+   "STRING",
+   "BOOLEAN"
+  ],
+  "names": [
+   "video_path",
+   "report",
+   "motion_ok"
+  ]
+ },
+ "output_node": true,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

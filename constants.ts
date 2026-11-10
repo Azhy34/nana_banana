@@ -43,17 +43,30 @@ export function getVeoCostUsd(durationSeconds: number): number {
 export const ETSY_MIN_VIDEO_SIDE_PX = 500;          // hard reject below this
 export const ETSY_RECOMMENDED_VIDEO_SIDE_PX = 1080; // Etsy's recommended quality
 
-// Omni 1.1 Flash Constants & Pricing
-export const OMNI_MODEL_ID = 'gemini-omni-1.1-flash';
-export const OMNI_FIXED_DURATION_SECONDS = 5;
-// Official rate (ai.google.dev/gemini-api/docs/pricing): Omni video output is billed at
-// $17.50 / 1M tokens, at 5,792 tokens per second of 720p video => ~$0.10 per second.
-// 5s @ 720p ≈ $0.50. Google publishes no separate 360p rate, so the draft price stays an estimate.
-export const OMNI_PRICING_DRAFT_360P_USD = 0.15; // estimate — 360p draft, no published rate
-export const OMNI_PRICING_FINAL_720P_USD = 0.50; // 5s x $0.10/s at 720p
+// Omni 1.2 Flash Constants & Pricing (gemini-omni-1.2-flash, GA 2026-11-05; 1.1 is routed to 1.2 on 2026-12-03)
+export const OMNI_MODEL_ID = 'gemini-omni-1.2-flash';
+export const OMNI_DEFAULT_DURATION_SECONDS = 5;
+// Google: any whole second from 3 to 15; without `response_format.duration` the model makes 10 s.
+export const OMNI_DURATION_OPTIONS = [3, 5, 8, 10, 15] as const;
+export type OmniDurationSeconds = (typeof OMNI_DURATION_OPTIONS)[number];
+// Official rate (aistudio.google.com/docs/pricing, 2026-11-08): video output is billed at $12 per 1M tokens,
+// at 1,931 / 5,792 / 8,688 tokens per second of 360p / 720p / 1080p video (1080p is upscaled).
+// => 360p $0.023/s, 720p $0.07/s, 1080p $0.104/s.
+export const OMNI_USD_PER_M_VIDEO_TOKENS = 12;
+export const OMNI_TOKENS_PER_SECOND = { '360p': 1931, '720p': 5792, '1080p': 8688 } as const;
+export type OmniResolutionKey = keyof typeof OMNI_TOKENS_PER_SECOND;
 
-export function getOmniCostUsd(resolution: '360p' | '720p' = '720p'): number {
-  return resolution === '360p' ? OMNI_PRICING_DRAFT_360P_USD : OMNI_PRICING_FINAL_720P_USD;
+export function getOmniCostUsd(
+  resolution: OmniResolutionKey = '720p',
+  seconds: number = OMNI_DEFAULT_DURATION_SECONDS,
+): number {
+  return (OMNI_TOKENS_PER_SECOND[resolution] * seconds * OMNI_USD_PER_M_VIDEO_TOKENS) / 1_000_000;
+}
+
+// Google: "for videos larger than 4MB (>720p) use delivery=\"uri\" to avoid payload size limits".
+// 1080p and long clips are fetched through the Files API instead of inline base64.
+export function omniNeedsUriDelivery(resolution: OmniResolutionKey, seconds: number): boolean {
+  return resolution === '1080p' || seconds > 10;
 }
 
 // Topaz upscale via Replicate. Billed in units that grow with output megapixels
@@ -84,27 +97,38 @@ export const VEO_PRESETS = {
   }
 };
 
-// Specialized Nursery & Wallpaper Presets for Gemini Omni 1.1 Flash
+// Specialized Nursery & Wallpaper Presets for Gemini Omni 1.2 Flash.
+// Written to Google's Omni prompt guide (aistudio.google.com/docs/omni#prompt-guide):
+//  - ONE unbroken shot ("single continuous shot, no scene cuts"): by default Omni cuts several shots into a story;
+//  - image-to-video prompts describe the MOTION only, never the room again (the picture is the first frame);
+//  - there is no negative-prompt parameter: the bans are plain sentences inside the prompt;
+//  - the audio is described, otherwise the model invents a soundtrack.
+// The locks below are the ones that fixed real glitches in 2026-10 (flat 2D print, frozen furniture, no duplicated animal heads).
+export const OMNI_PROMPT_SINGLE_SHOT = 'In a single continuous shot with no scene cuts.';
+export const OMNI_PROMPT_PRINT_LOCK =
+  'The wallpaper artwork is flat printed ink and stays exactly as in the image: nothing on it moves, blinks, turns or changes, and no animal or figure on it is animated, duplicated or redrawn. Furniture, floor and architecture stay still and undistorted.';
+export const OMNI_PROMPT_AUDIO = 'No dialogue, no music, only a faint natural room ambience.';
+
 export const OMNI_PRESETS = {
   omni_wall_dolly: {
     label: "🎥 Архитектурный наезд на стену (Wall Focus)",
-    description: "Плавный наезд с сохранением геометрии стены, матовой текстуры Craft Lambda и жесткой фиксацией обоев.",
-    prompt: "A smooth, slow, steady architectural camera push-in towards the nursery feature wall. ABSOLUTE PRESERVATION REQUIREMENT: The wallpaper pattern, motifs, colors, and layout from the input image must remain 100% frozen, completely static, and strictly unaltered. The wallpaper features a fine tactile sand-grain matte texture (Craft Lambda). INANIMATE 2D INK LOCK: The artwork is flat 2D printed wallpaper; strictly no biological animation, no duplicate heads, no moving characters, and no morphing. Furniture and floor remain physically locked and static. Warm natural morning sunlight grazes the wall, creating soft ambient shadow occlusion along the baseboards. Flawless 9:16 interior design showcase, continuous unbroken camera motion, no warping."
+    description: "Плавный наезд с сохранением геометрии стены и жесткой фиксацией обоев.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera pushes in slowly and steadily along a straight line toward the feature wall, with no rotation and no sideways drift. Warm morning sunlight stays constant and soft shadows rest along the baseboards. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
   },
   omni_texture_macro: {
     label: "🔍 Макро-фактура Craft Lambda (Etsy Texture Proof)",
-    description: "Крупный план реальной текстуры: тонкий минеральный песок, матовый флизелин, без бликов и дублирования объектов.",
-    prompt: "Cinematic slow-motion macro push-in camera shot, slowly zooming straight into the tactile surface of the wallpaper with zero lateral panning. INANIMATE 2D PRINT LOCK: The wallpaper artwork, animals, and illustrations are strictly flat, 100% static, non-moving ink printed on paper. Absolutely NO biological animation, NO head movement, NO blinking, NO new limbs, NO morphing, and NO duplicate heads or body parts. The printed illustration remains completely frozen and unchanged. REAL MATERIAL TEXTURE: The wallpaper is printed on a heavy-weight luxury non-woven substrate with a distinctive fine-grain sand texture (Craft Lambda Sandstruktur). Completely eliminate plastic reflections, synthetic vinyl sheen, or glare (komplett matt, keine Reflexionen). Soft, diffused warm side lighting highlights the organic matte paper grain and tactile micro-relief. Flawless focus, steady fluid motion, premium Etsy listing video proof."
+    description: "Крупный план реальной текстуры: матовая зернистая поверхность без бликов и дублирования объектов.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera pushes in very slowly and straight toward the wallpaper surface until it is close to macro distance, with no sideways motion. Soft warm side light skims across the matte fine-grain surface and reveals its tactile relief, with no glare and no plastic sheen. The printed illustration is flat static ink: nothing on it moves, blinks, turns or duplicates, and no head, limb or object appears or disappears. ${OMNI_PROMPT_AUDIO}`
   },
   omni_sunlight_loop: {
     label: "✨ Живой свет и тени (Pinterest Viral Loop)",
-    description: "Плавный микро-наезд с легким смещением: теплые лучи солнца и тени скользят по текстуре стены 9:16.",
-    prompt: "An extremely slow, subtle architectural camera push-in gently drifting slightly sideways towards the stylish children's bedroom feature wall. ZERO MORPHING: The room architecture, furniture, and wallpaper illustration are 100% frozen and geometrically locked. The wallpaper is flat static 2D print: strictly no biological animation, no duplicate heads, and no character motion. Warm afternoon sunlight and subtle dappled leaf shadows drift smoothly across the textured matte wallpaper and floor, emphasizing the authentic fine-sand paper depth. No new motifs or objects appear. Hypnotic, calming ambient lighting and ultra-smooth micro-camera motion designed for a seamless, viral Pinterest video loop."
+    description: "Едва заметный дрейф камеры: теплые лучи солнца и тени листьев скользят по стене 9:16, клип можно зациклить.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera drifts very slowly forward and slightly sideways. Warm afternoon sunlight and soft dappled leaf shadows glide smoothly across the wall and floor, and the clip ends close to where it began so it loops. Nothing new appears in the room. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
   },
   omni_montessori: {
     label: "👶 Монтессори-ракурс от кроватки (Room Scale & Coziness)",
     description: "Низкий детский ракурс: показывает масштаб обоев в интерьере и уют детской комнаты.",
-    prompt: "Smooth, ultra-slow low-angle forward push-in camera shot composed from a child's eye-level perspective (Montessori height). The camera moves steadily along a straight forward track towards the feature wall, framing the wooden crib in the foreground while keeping the entire room layout and perspective strictly consistent. GEOMETRIC & FURNITURE LOCK: The crib, slatted bars, flooring, and room architecture remain 100% frozen, solid, and geometrically locked without any bending, warping, or disappearing parts. INANIMATE 2D PRINT LOCK: The wallpaper design on the wall is an exact 1:1 static match to the reference image, flat 2D printed ink; strictly zero biological animation, zero duplicate heads, zero animal movements, and zero morphing. Warm cozy morning sunlight with soft natural shadows. Zero camera rotation, zero arc sweep, continuous smooth forward motion."
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} Low-angle shot at a child's eye height: the camera moves steadily straight forward toward the feature wall, keeping the crib in the foreground, with no rotation, no arc and no sweep. Warm cozy morning sunlight with soft natural shadows. The crib bars stay straight and solid, with no part bending or disappearing. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
   }
 };
 

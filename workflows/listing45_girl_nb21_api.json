@@ -1,0 +1,687 @@
+{
+ "1": {
+  "class_type": "MoonbloomWallpaper",
+  "inputs": {
+   "wallpaper_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 45/Листинг 45.PNG",
+   "use_texture": true,
+   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 45"
+  }
+ },
+ "2": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "1",
+    0
+   ]
+  }
+ },
+ "3": {
+  "class_type": "MoonbloomDesign",
+  "inputs": {
+   "scene_id": "l45_scene_02_girl_armchair",
+   "aspect_ratio": "9:16",
+   "age_group": "vorschul",
+   "style": "Japandi",
+   "color": "Dusty Rose",
+   "key_object": "custom (key_object_custom)",
+   "lighting": "crisp morning window daylight",
+   "camera_angle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+   "camera_elevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+   "camera_distance": "wide shot",
+   "brand": "random",
+   "composition": "unobstructed",
+   "clean_random_details": true,
+   "variation": 0,
+   "key_object_custom": "Low blush-pink bouclé armchair with light oak legs and a matching round blush pouf, standing at the far left side of the wall",
+   "accessories": "flower-shaped blush velvet bolster pillow\nplush textured cream dot floor rug\nwavy scalloped picture frames with soft pastel abstract art prints",
+   "extra_prompt": "GIRL'S ROOM (a little figure skater's room). Palette: blush pink, dusty rose, lilac, ivory and light oak, echoing the pink-lilac mural. This palette overrides any earlier colour, toy or lamp mention: no cobalt blue, poppy red, mustard or ochre accents, no toy trains, no craft table. Soft feminine details: flower-shaped blush velvet cushions, a ballet-pink knit throw over the armchair, a plush blush pouf, framed pastel abstract art without any letters. FRAMING: the camera faces the mural straight-on and the whole mural is visible from the skirting board up to the ceiling; the floor in front of the wall is open with a soft cream dot rug; all furniture is low (under 70 cm) and stands along the far left side of the wall, nothing stands in the centre or in the foreground; the painted figure skater is fully visible from her hair bun down to her skates and the ice reflection beneath her."
+  }
+ },
+ "4": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "3",
+    0
+   ]
+  }
+ },
+ "5": {
+  "class_type": "MoonbloomKieImage",
+  "inputs": {
+   "prompt": [
+    "3",
+    0
+   ],
+   "scene_id": [
+    "3",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": false,
+   "model": "nano-banana-2-1",
+   "resolution": "2K"
+  }
+ },
+ "6": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "5",
+    0
+   ]
+  }
+ },
+ "7": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "5",
+    2
+   ]
+  }
+ },
+ "8": {
+  "class_type": "MoonbloomDesign",
+  "inputs": {
+   "scene_id": "l45_scene_03_girl_nook",
+   "aspect_ratio": "9:16",
+   "age_group": "vorschul",
+   "style": "Japandi",
+   "color": "Strawberry Milk",
+   "key_object": "custom (key_object_custom)",
+   "lighting": "soft afternoon window light",
+   "camera_angle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+   "camera_elevation": "standing adult eye level (about 1.5 m)",
+   "camera_distance": "wide shot",
+   "brand": "random",
+   "composition": "unobstructed",
+   "clean_random_details": true,
+   "variation": 0,
+   "key_object_custom": "Low curved blush-and-ivory bookcase with children's books and a round lilac floor cushion, standing against the left side wall",
+   "accessories": "flower-shaped blush velvet bolster pillow\nplush textured cream dot floor rug\ndelicate neutral linen blackout curtains",
+   "extra_prompt": "GIRL'S ROOM (a little figure skater's room). Palette: blush pink, dusty rose, lilac, ivory and light oak, echoing the pink-lilac mural. This palette overrides any earlier colour, toy or lamp mention: no cobalt blue, poppy red, mustard or ochre accents, no toy trains, no tent or teepee, no craft table. Soft feminine details: flower-shaped blush velvet cushions, a ballet-pink knit throw on the floor cushion, framed pastel abstract art without any letters. FRAMING: the mural wall fills most of the frame and is visible from the skirting board up to the ceiling; all furniture is low (under 70 cm) and stands only along the left side wall, nothing stands in front of the mural; the painted figure skater is fully visible from her hair bun down to her skates and the ice reflection beneath her."
+  }
+ },
+ "9": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "8",
+    0
+   ]
+  }
+ },
+ "10": {
+  "class_type": "MoonbloomKieImage",
+  "inputs": {
+   "prompt": [
+    "8",
+    0
+   ],
+   "scene_id": [
+    "8",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": false,
+   "model": "nano-banana-2-1",
+   "resolution": "2K"
+  }
+ },
+ "11": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "10",
+    0
+   ]
+  }
+ },
+ "12": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "10",
+    2
+   ]
+  }
+ },
+ "13": {
+  "class_type": "MoonbloomDesign",
+  "inputs": {
+   "scene_id": "l45_scene_06_entering_door",
+   "aspect_ratio": "9:16",
+   "age_group": "vorschul",
+   "style": "Japandi",
+   "color": "Dusty Rose",
+   "key_object": "custom (key_object_custom)",
+   "lighting": "warm morning sunbeams",
+   "camera_angle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+   "camera_elevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+   "camera_distance": "wide shot",
+   "brand": "random",
+   "composition": "unobstructed",
+   "clean_random_details": true,
+   "variation": 0,
+   "key_object_custom": "Low white-oak daybed with ivory linen bedding and blush cushions, standing along the left side wall",
+   "accessories": "flower-shaped blush velvet bolster pillow\nplush textured cream dot floor rug\ndelicate neutral linen blackout curtains",
+   "extra_prompt": "GIRL'S ROOM (a little figure skater's room). Airy and bright. Palette: dusty rose, blush, ivory and light oak, echoing the pink-lilac mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains, no craft table. MOMENT: a young woman in a soft cream knit sweater and light linen trousers, seen from behind and slightly from the side, is just stepping through an open white door at the far right edge of the frame into the room, one foot crossing the threshold, carrying a folded blush-pink blanket; her face is turned away toward the mural so no facial detail is visible; natural human proportions and natural hands. She stays at the right edge of the frame and never overlaps the mural: the painted figure skater is fully visible from her hair bun down to her skates. FRAMING: the camera is locked off on a tripod, straight-on wide shot; the whole mural wall is visible from the skirting board up to the ceiling; all furniture is low (under 70 cm) and stands along the left side wall."
+  }
+ },
+ "14": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "13",
+    0
+   ]
+  }
+ },
+ "15": {
+  "class_type": "MoonbloomKieImage",
+  "inputs": {
+   "prompt": [
+    "13",
+    0
+   ],
+   "scene_id": [
+    "13",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": false,
+   "model": "nano-banana-2-1",
+   "resolution": "2K"
+  }
+ },
+ "16": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "15",
+    0
+   ]
+  }
+ },
+ "17": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "15",
+    2
+   ]
+  }
+ },
+ "18": {
+  "class_type": "MoonbloomKieKling",
+  "inputs": {
+   "image_path": [
+    "15",
+    1
+   ],
+   "scene_id": [
+    "13",
+    1
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "duration": "5",
+   "sound": false,
+   "min_motion_delta": 2.0,
+   "reuse_existing": true,
+   "dry_run": true,
+   "prompt_suffix": "",
+   "prompt_override": "The camera stays completely still on a tripod and does not move at all. The young woman at the right edge of the frame turns away from the camera and steps out through the open white doorway, then pulls the white door closed behind her with a soft natural motion until it is fully shut. Her face is never visible to the camera, not even in profile: only the back of her head with the hair bun, her cream knit sweater and her linen trousers are seen, and the pink knit blanket stays in her arm. She stays at the right edge of the frame, far from the painted figure skater, and never passes in front of the mural. The warm morning light stays constant. INANIMATE 2D INK LOCK: the wallpaper design is strictly flat 2D printed ink on textured wallpaper, completely static 2D artwork, zero biological animation, zero morphing, zero waving edges; the painted figure skater and the pink petals stay completely still. GEOMETRIC & FURNITURE LOCK: the daybed, cushions, curtain, rug and architecture remain 100% frozen, solid and fixed in the room. Zero warping, zero morphing, zero shifting objects across the floor."
+  }
+ },
+ "19": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "18",
+    1
+   ]
+  }
+ },
+ "20": {
+  "class_type": "MoonbloomDesign",
+  "inputs": {
+   "scene_id": "l45_scene_07_sun_shadows",
+   "aspect_ratio": "9:16",
+   "age_group": "vorschul",
+   "style": "Biophilic Nursery",
+   "color": "Muted Sage",
+   "key_object": "custom (key_object_custom)",
+   "lighting": "warm golden hour sunlight",
+   "camera_angle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+   "camera_elevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+   "camera_distance": "wide shot",
+   "brand": "random",
+   "composition": "unobstructed",
+   "clean_random_details": true,
+   "variation": 0,
+   "key_object_custom": "Low white-washed oak reading bench with sage-green and blush cushions and a small potted trailing plant beside it, standing along the left side wall",
+   "accessories": "potted trailing ivy plant on a natural wooden shelf\nplush textured cream dot floor rug\ndelicate neutral linen blackout curtains",
+   "extra_prompt": "GIRL'S ROOM (a little figure skater's room). Calm and botanical. Palette: soft sage, blush, ivory and light oak, echoing the pink-lilac mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains, no craft table. MOMENT: low golden-hour sun streams through a tall window on the left of the frame and casts long, clearly visible, soft-edged dappled shadows of leaves and of the window frame across the oak floor, the cream rug and the low bench. The shadows fall only on the floor and the low furniture; the mural wall stays evenly and softly lit so its colours are shown true, with no shadow over the painted figure skater. FRAMING: the camera is locked off on a tripod, straight-on medium-wide shot; the whole mural is visible from the skirting board up to the ceiling and the painted figure skater is fully visible from her hair bun down to her skates; all furniture is low (under 70 cm) and stands along the left side wall."
+  }
+ },
+ "21": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "20",
+    0
+   ]
+  }
+ },
+ "22": {
+  "class_type": "MoonbloomKieImage",
+  "inputs": {
+   "prompt": [
+    "20",
+    0
+   ],
+   "scene_id": [
+    "20",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": false,
+   "model": "nano-banana-2-1",
+   "resolution": "2K"
+  }
+ },
+ "23": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "22",
+    0
+   ]
+  }
+ },
+ "24": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "22",
+    2
+   ]
+  }
+ },
+ "25": {
+  "class_type": "MoonbloomDesign",
+  "inputs": {
+   "scene_id": "l45_scene_08_side_depth",
+   "aspect_ratio": "9:16",
+   "age_group": "vorschul",
+   "style": "Playful Curves",
+   "color": "Strawberry Milk",
+   "key_object": "custom (key_object_custom)",
+   "lighting": "crisp morning window daylight",
+   "camera_angle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+   "camera_elevation": "standing adult eye level (about 1.5 m)",
+   "camera_distance": "wide shot",
+   "brand": "random",
+   "composition": "unobstructed",
+   "clean_random_details": true,
+   "variation": 0,
+   "key_object_custom": "Stack of three round pastel lilac and blush donut poufs beside a low arch-shaped blush bookshelf, standing along the left side wall",
+   "accessories": "wavy scalloped picture frames with soft pastel abstract art prints\nplush textured cream dot floor rug\nflower-shaped blush velvet bolster pillow",
+   "extra_prompt": "GIRL'S ROOM (a little figure skater's room). Playful but soft. Palette: pastel lilac, blush pink and butter cream with light oak; every colour pop is a soft pastel, no saturated red, cobalt blue or mustard, no toy trains, no craft table. FRAMING FOR DEPTH: a wide shot from a slight angle that shows the depth of the room, with clear layers: the edge of a sheer cream linen curtain softly out of focus in the extreme foreground on the left, the stack of pastel donut poufs and the low arch-shaped blush bookshelf in the middle ground along the left side wall, and the mural wall behind them. The mural stays fully readable and unobstructed from the skirting board up to the ceiling and the painted figure skater is fully visible from her hair bun down to her skates; all furniture is under 70 cm and the middle of the floor is open."
+  }
+ },
+ "26": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "25",
+    0
+   ]
+  }
+ },
+ "27": {
+  "class_type": "MoonbloomKieImage",
+  "inputs": {
+   "prompt": [
+    "25",
+    0
+   ],
+   "scene_id": [
+    "25",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": false,
+   "model": "nano-banana-2-1",
+   "resolution": "2K"
+  }
+ },
+ "28": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "27",
+    0
+   ]
+  }
+ },
+ "29": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "27",
+    2
+   ]
+  }
+ },
+ "30": {
+  "class_type": "MoonbloomKieKling",
+  "inputs": {
+   "image_path": [
+    "27",
+    1
+   ],
+   "scene_id": [
+    "25",
+    1
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "duration": "5",
+   "sound": false,
+   "min_motion_delta": 10.0,
+   "reuse_existing": true,
+   "dry_run": true,
+   "prompt_suffix": "",
+   "prompt_override": "A smooth slow first-person walk-in: the camera advances steadily straight forward into the room at natural eye level, as if a person is slowly entering, with no sideways drift, no tilt and no rotation. The sheer cream curtain in the extreme foreground on the left leaves the frame as the camera advances past it, and the nearer objects shift more than the farther ones, giving a natural depth parallax. A soft, light beam of warm sunlight slowly sweeps across the mural wall with faint soft diagonal window-shadow lines, very subtle and low contrast: it never covers the painted figure skater and never changes the colours of the artwork. INANIMATE 2D INK LOCK: the wallpaper design is strictly flat 2D printed ink on textured wallpaper, completely static 2D artwork, zero biological animation, zero morphing, zero waving edges; the painted figure skater and the pink petals stay completely still. GEOMETRIC & FURNITURE LOCK: the bed, the stack of poufs, the bookshelf, the picture frame, the toys, the skates, the rug and the architecture remain 100% frozen, solid and fixed in the room. Zero warping, zero morphing, zero shifting objects across the floor."
+  }
+ },
+ "31": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "30",
+    1
+   ]
+  }
+ },
+ "32": {
+  "class_type": "MoonbloomDesign",
+  "inputs": {
+   "scene_id": "l45_scene_09_full_mural_final",
+   "aspect_ratio": "9:16",
+   "age_group": "schulkind",
+   "style": "Japandi",
+   "color": "Dusty Rose",
+   "key_object": "custom (key_object_custom)",
+   "lighting": "crisp morning window daylight",
+   "camera_angle": "from the middle of the long side wall, turned about 20 degrees toward the mural wall and pulled well back, with the whole mural wall in the frame in perspective",
+   "camera_elevation": "a level architectural tripod framing (about 1.4 m, straight verticals)",
+   "camera_distance": "wide shot",
+   "brand": "random",
+   "composition": "unobstructed",
+   "clean_random_details": true,
+   "variation": 0,
+   "key_object_custom": "Small low round light-oak stool, 35 cm high, with a folded blush knit blanket on it, standing in the right half of the room",
+   "accessories": "plush textured cream dot floor rug\na pair of white figure skates with blade guards standing on the rug\na pink tulle figure-skating dress with a sparkly bodice hanging on a wooden hanger from a small hook on the left side wall",
+   "extra_prompt": "GIRL'S ROOM of a real school-age girl (6-10 years) who is a figure skater: the painted skater on the wall is her dream and the room shows that she lives here. Almost empty and airy: NO BED, no crib, no sofa, no armchair, no desk, no bookshelf, no wardrobe and no toys on the floor. The only things in the room are a plush cream rug on the oak floor, her white figure skates standing on the rug, one small low stool, and her pink tulle figure-skating dress with a sparkly bodice, like the dress of the painted skater, hanging on a wooden hanger from a small hook in the left corner on the side wall, not on the mural. Palette: pastel lilac, blush pink, ivory and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents, no toy trains. FINAL REEL FRAME - THE WHOLE MURAL: the camera stands straight in front of the wall on a tripod at eye level, a wide, symmetrical shot of the whole room. The mural covers the whole wall and the WHOLE wall is inside the frame: the camera is pulled back so that the left corner of the room, the right corner, the ceiling line and the skirting board are all visible, so ALL FOUR edges of the mural are shown and the mural is not cropped by the frame edge. Because the frame is tall, the wall fills the upper part and the lower part shows the oak floor and the rug. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are all shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true. Everything in the room is small and low (under 50 cm) except the hanging dress, which is small and does not touch the mural.",
+   "strip_regex": "The focal furniture piece is an? [^.]*\\. Layout: \\. \nAuthentic lived-in details: [^.]*\\. "
+  }
+ },
+ "33": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "32",
+    0
+   ]
+  }
+ },
+ "34": {
+  "class_type": "MoonbloomKieImage",
+  "inputs": {
+   "prompt": [
+    "32",
+    0
+   ],
+   "scene_id": [
+    "32",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": false,
+   "model": "nano-banana-2-1",
+   "resolution": "2K"
+  }
+ },
+ "35": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "34",
+    0
+   ]
+  }
+ },
+ "36": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "34",
+    2
+   ]
+  }
+ },
+ "37": {
+  "class_type": "MoonbloomDesign",
+  "inputs": {
+   "scene_id": "l45_scene_10_full_mural_angle",
+   "aspect_ratio": "9:16",
+   "age_group": "schulkind",
+   "style": "Japandi",
+   "color": "Dusty Rose",
+   "key_object": "custom (key_object_custom)",
+   "lighting": "crisp morning window daylight",
+   "camera_angle": "from the far left corner of the room, turned about 30 degrees toward the mural wall and pulled well back, so the left side wall is in view and the whole mural wall recedes in perspective",
+   "camera_elevation": "standing adult eye level (about 1.5 m)",
+   "camera_distance": "wide shot",
+   "brand": "random",
+   "composition": "unobstructed",
+   "clean_random_details": true,
+   "variation": 0,
+   "key_object_custom": "Large plush cream dot floor rug",
+   "camera_body": "Canon EOS R5",
+   "lens": "28mm gentle wide lens",
+   "aperture": "f/8.0 aperture",
+   "depth_of_field": "deep depth of field",
+   "accessories": "a pair of white figure skates with blade guards standing on the rug\nan open book and a notebook lying on the rug\na pink tulle figure-skating dress with a sparkly bodice hanging on a wooden hanger from a small hook on the wall beside the mural",
+   "extra_prompt": "GIRL'S ROOM of a real school-age girl (6-10 years) who is a figure skater: the painted skater on the wall is her dream and the room shows that she lives here. Almost empty, big and airy: NO BED, no crib, no sofa, no armchair, no desk, no bookshelf, no wardrobe, NO STOOL, no pouf and no toys on the floor. The only things in the room are a big plush cream rug on the oak floor, her white figure skates with blade guards on the rug, an open book and a notebook on the rug, and her pink tulle figure-skating dress with a sparkly bodice, like the dress of the painted skater, hanging on a wooden hanger from a small hook on the wall beside the mural, not on the mural. Palette: pastel lilac, blush pink, ivory and light oak, echoing the mural; no cobalt blue, poppy red, mustard or ochre accents. ANGLED FINAL REEL FRAME: the camera is NOT frontal. It stands in the right part of the room at eye level and is turned about 35-40 degrees to the mural wall, a wide shot that shows the depth of a large, spacious, airy room: wide open floor, high ceiling, the walls far from the camera, nothing closes the room in, it is not a narrow box. The whole mural wall is inside the frame in perspective: its left edge, its far corner, the ceiling line and the skirting board are all visible, so the mural is shown fully and is not cropped by the frame edge, running diagonally into the depth. Because the frame is tall, the wall fills the upper-middle part and a large part of the lower frame is the oak floor with the rug. Nothing stands in front of the mural. The painted figure skater is fully visible from her hair bun down to her skates, and the painted rink, lights and petals are shown. The mural wall is lit evenly and softly with no shadow or glare on it, so its colours are shown true. Everything in the room is small and low (under 50 cm) except the hanging dress, which is small and does not touch the mural.",
+   "strip_regex": "The focal furniture piece is an? [^.]*\\. Layout: \\. \nAuthentic lived-in details: [^.]*\\. "
+  }
+ },
+ "38": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "37",
+    0
+   ]
+  }
+ },
+ "39": {
+  "class_type": "MoonbloomKieImage",
+  "inputs": {
+   "prompt": [
+    "37",
+    0
+   ],
+   "scene_id": [
+    "37",
+    1
+   ],
+   "wallpaper_path": [
+    "1",
+    1
+   ],
+   "texture_path": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "aspect_ratio": "9:16",
+   "use_texture": true,
+   "reuse_existing": true,
+   "dry_run": false,
+   "model": "nano-banana-2-1",
+   "resolution": "2K"
+  }
+ },
+ "40": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "39",
+    0
+   ]
+  }
+ },
+ "41": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "39",
+    2
+   ]
+  }
+ }
+}

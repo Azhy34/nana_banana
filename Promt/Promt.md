@@ -23,8 +23,8 @@ Per card, one value is picked at random from `trends.json` unless noted:
 
 | Variable | Source | Notes |
 |---|---|---|
-| Color | `colors` | used as the decor accent color |
-| Style | `styles` | |
+| Color | `colors`, limited to the colours on the style's card | used as the decor accent color |
+| Style | `styles` | each style is a card: signature words, suitable colours, what to avoid |
 | Furniture brand | `brands` | "[brand]-inspired" |
 | Age group | `ageGroups` | assigned in a cycle across cards: baby → vorschul → schulkind → teenager |
 | Key object | `keyObjects` filtered by age group | baby always gets `Classic slatted wooden baby crib` |
@@ -33,10 +33,10 @@ Per card, one value is picked at random from `trends.json` unless noted:
 | Camera angle / distance | `cameraAngles` / `cameraDistances` | |
 | Depth of field | `depthOfField` | |
 | Accessories | `accessories` | 2–3 items |
-| Composition | code | 40% "unobstructed" (low furniture, wall fills the frame), 60% "natural" child-scale eye-level shot |
+| Composition | `staging` | the same for every card (Rule #7); the tag `compositionStrategy` is kept for old cards and changes nothing |
 | Cinematic detail | `CINEMATIC_DETAILS` in code | one of 5 light effects |
 | Camera body | code | one of 4 professional camera/lens descriptions |
-| Market trends | `latestMarketInsights` | independent 50% chances to add a trending color accent, accessory and material |
+| Market trends | `latestMarketInsights` (measured, every entry with its source) | independent 50% chances to add a trending color accent, accessory and material |
 
 Combinations are random; uniqueness within a batch is **not** enforced.
 
@@ -45,12 +45,12 @@ Combinations are random; uniqueness within a batch is **not** enforced.
 The prompt follows Google's best-practice 5-layer architecture for natural editorial interior photography:
 
 1. **Wallpaper Mural Role (Layer 1):** Full-height 100% continuous mural coverage from baseboard to ceiling, running cleanly behind furniture, 1:1 color/scale fidelity.
-2. **Natural Scene & Age Group Setting (Layer 2):** Authentic, lived-in Scandinavian children's bedroom tailored to the specific age group (no synthetic/luxury CGI buzzwords).
+2. **Scene in the chosen style (Layer 2):** a children's bedroom "in <style> style"; the style's signature words come from its card in `trends.json` ("Styling: name (signature)"). The age group only sets the scale of the furniture and the toys, it never names a style (no synthetic/luxury CGI buzzwords).
 3. **Hero Furniture & Styling (Layer 3):** Brand-inspired key piece crafted from solid natural wood, age-appropriate lifestyle touches (e.g., wooden blocks, illustrated storybook, student notebooks), and subtle accent decor.
 4. **Lighting & Physical Wallpaper Texture (Layer 4):** Directional window daylight grazing the wallpaper to highlight the tactile non-woven paper micro-relief (Craft Lambda sand grain) and casting soft physical ambient shadows.
-5. **Camera & Optics (Layer 5):** 35mm lens, f/5.6 aperture, sharp mural focus, natural depth of field, warm cozy white balance.
+5. **Camera & Optics (Layer 5):** camera body, lens and aperture from the pools of `trends.json`, sharp mural focus, then the real-photograph line (`realism.photo`, positive wording).
 6. **Conditional:** If a computer or monitor is in the scene, it is strictly turned off (matte dark screen with zero reflections).
-7. **Negative Constraints:** Concise list avoiding peeling wallpaper, half-walls, house beds / roof frames, animal trophies, plastic, bunk beds, and clutter.
+7. **Negative Constraints:** the Avoid list is data (`negatives` in `trends.json`) plus what the chosen style's card says does not suit it.
 
 ## RULE #4 — QUALITY & REALISM REQUIREMENTS
 
@@ -73,3 +73,22 @@ The prompt follows Google's best-practice 5-layer architecture for natural edito
 | 9:16 | Pinterest pins; the only format that can be sent to the Video tool |
 
 Default distribution for 12 photos: 6× 9:16, 4× 2:3, 2× 4:3; other counts (6/9/15) are rescaled proportionally, and card order is shuffled.
+
+## RULE #6 — ONE SOURCE OF TRUTH FOR STYLES (owner rule 06.11)
+
+The web app and the ComfyUI boards read **the same data** (`Promt/trends.json`: styles as cards, colours, accessories, materials, lighting,
+camera pools, `realism`, `negatives`, the measured `latestMarketInsights` with sources) and build the prompt with **the same code**
+(`services/promptGenerator.ts`: `buildGeminiPrompt` for the long prompt, `buildBriefPrompt` for the short one; ComfyUI calls both through
+`scripts/build_batch_prompts.mjs`). No style, colour or camera is written into any other file of the prompt path; a test
+(`comfy_nodes/test_trends_single_source.py`, run when the builder changes, not after data edits) fails if one is. To change a style, edit its card in `trends.json`. To refresh the trends,
+research with Tavily/Exa, edit `trends.json` and put the source and date of every entry into `latestMarketInsights`.
+
+## RULE #7 — THE MURAL IS THE HERO (owner rule 06.11, after the Listing 6 test)
+
+A big mural in a crowded, frontal photo looks bad: the wall must be visible, the room spacious, the view slightly angled. In the prompt:
+- **Camera as geometry, not mood:** `cameraAngles` are three concrete positions (far left corner / far right corner at about 30 degrees, middle of the long wall at about 20 degrees, pulled well back, the whole mural wall in perspective); distance only "wide shot" (ceiling strip above, skirting below, open floor in front); eye level only adult or tripod; no frontal, close-up, low-angle or child-eye-level views.
+- **`staging` block:** room about 4.5 by 3.5 m under 2.8 m, camera about 4 m from the wall, one hero piece below 90 cm along a side wall, at most two small accessories, nothing taller than the lower third of the mural. Positive wording and numbers.
+- **No random clutter:** the builder reads one low toy per age group, no random decor; key objects with `muralSafe: false` (tent nook, table with chairs) are never picked at random; accessories 1-2.
+- **Negatives are the last guard** (`negatives.base`: wardrobe or tall furniture against the mural wall, table and chairs in the foreground, crowded room, straight-on frontal view, furniture hiding the lower part of the mural). The KIE models have no negative field and Google advises positive wording, so the real work is done by removing the causes (what we ask for) and by the staging words above.
+- The director rejects a kit whose scene has a wardrobe, a tent or a table with chairs.
+

@@ -1,0 +1,121 @@
+{
+  "description": "RETARGET MESSAGES (owner 06.11): a retargeting pin is a picture the person has already seen plus ONE message that removes one objection or closes the action. The picture is never generated: the text is laid over a ready picture by scripts/make_pin.py (exact letters, brand fonts, no model, no credits). Every claim on a picture must be true on the page it leads to (lesson of the Merchant Center 'Falschdarstellung' of 04.11): `facts` are checked against the website project before a pin is made. Posting the pin and the ad is done in the hub nocode/Etsy (pinterest-bulk-csv-uploader, pinterest-ads-manager, dry_run first).",
+  "hub": "../Etsy",
+  "template": {
+    "canvas_px": [
+      1000,
+      1500
+    ],
+    "headline_font": "lora-latin-wght-v2",
+    "headline_weight": 600,
+    "headline_size_ratio": 0.07,
+    "headline_max_width_ratio": 0.88,
+    "headline_line_gap_ratio": 0.6,
+    "strip_font": "dm-sans-latin-wght-v2",
+    "strip_weight": 600,
+    "strip_size_ratio": 0.035,
+    "top_band_ratio": 0.183,
+    "bottom_strip_ratio": 0.067,
+    "colors": {
+      "surface": "#F7F3EC",
+      "on_surface": "#302C27",
+      "strip": "#596B50",
+      "on_strip": "#FFFFFF",
+      "accent": "#9C543A"
+    },
+    "note": "colours and fonts are the tokens of the website (Etsy/site/design/tokens/colors.css, fonts.css)"
+  },
+  "messages": {
+    "rechner": {
+      "objection": "does a size fit MY wall / what does it cost for my wall",
+      "headline": [
+        "Wandmaße eingeben",
+        "Preis sofort sehen"
+      ],
+      "strip": "Versand DE & AT kostenlos",
+      "facts": [
+        {
+          "claim": "a size calculator exists on the site",
+          "file": "site/rechner/rechner.py",
+          "contains": "def quote"
+        },
+        {
+          "claim": "shipping of wall pictures to DE and AT is free",
+          "file": "site/feed/product_feed.py",
+          "contains": "Kostenloser Versand"
+        },
+        {
+          "claim": "the feed ships to DE and AT",
+          "file": "site/feed/product_feed.py",
+          "contains": "(\"DE\", \"AT\")"
+        }
+      ],
+      "pin": {
+        "title": "Auto Wandbild nach Maß: Wandmaße eingeben, Preis sofort sehen | MoonBloom",
+        "description": "Noch unsicher, welche Größe passt? Geben Sie Breite und Höhe Ihrer Wand in den Rechner ein und sehen Sie sofort, was gedruckt wird und was es kostet. Oldtimer an der Küstenstraße in Beige und Salbeigrün, Vliestapete, abwischbar, nach Ihren Wandmaßen gedruckt. Der Versand von Wandbildern nach Deutschland und Österreich ist kostenlos.",
+        "link": "https://moonbloomwalls.com/motive/fototapete-berge/kuestenstrasse-mit-oldtimern",
+        "utm_organic": "utm_source=pinterest&utm_medium=organic&utm_content=s2-rechner-oldtimer",
+        "utm_ads": "utm_source=pinterest&utm_medium=paidsocial&utm_campaign=MoonBloom_SITE_DE_Retargeting&utm_content=s2-rechner-oldtimer"
+      }
+    },
+    "rechner_v2": {
+      "extends": "rechner",
+      "template": {
+        "headline_size_ratio": 0.085,
+        "top_band_ratio": 0.165,
+        "strip_size_ratio": 0.05,
+        "bottom_strip_ratio": 0.075
+      },
+      "card": {
+        "quote": {
+          "width": 300,
+          "height": 250
+        },
+        "line1": "Ihre Wand: {w} × {h} cm",
+        "line2": "= {price}",
+        "cta": "Jetzt berechnen",
+        "box": [
+          0.545,
+          0.745,
+          0.43
+        ]
+      },
+      "facts": [
+        {
+          "claim": "a size calculator exists on the site",
+          "file": "site/rechner/rechner.py",
+          "contains": "def quote"
+        },
+        {
+          "claim": "shipping of wall pictures to DE and AT is free",
+          "file": "site/feed/product_feed.py",
+          "contains": "Kostenloser Versand"
+        },
+        {
+          "claim": "the feed ships to DE and AT",
+          "file": "site/feed/product_feed.py",
+          "contains": "(\"DE\", \"AT\")"
+        },
+        {
+          "claim": "the calculator of the site answers a price for the example wall of the card",
+          "quote": {
+            "width": 300,
+            "height": 250
+          }
+        }
+      ]
+    },
+    "rechner_frage": {
+      "extends": "rechner_v2",
+      "headline": [
+        "Passt das Motiv",
+        "an Ihre Wand?"
+      ],
+      "pin": {
+        "title": "Passt das Motiv an Ihre Wand? Wandmaße eingeben, Preis sofort sehen | MoonBloom",
+        "utm_organic": "utm_source=pinterest&utm_medium=organic&utm_content=s2-rechner-oldtimer-frage",
+        "utm_ads": "utm_source=pinterest&utm_medium=paidsocial&utm_campaign=MoonBloom_SITE_DE_Retargeting&utm_content=s2-rechner-oldtimer-frage"
+      }
+    }
+  }
+}
