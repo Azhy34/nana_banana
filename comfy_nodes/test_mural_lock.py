@@ -118,3 +118,17 @@ def test_the_self_check_proves_the_lock_runs_in_this_process_before_anything_is_
     monkeypatch.setitem(__import__("sys").modules, "av", None)                  # a process without PyAV would say so instead of failing after the download
     with pytest.raises(ImportError):
         mural_lock.self_check()
+
+
+def test_the_light_drift_moves_only_the_light_inside_its_zone_and_leaves_the_rest_of_the_frame_as_the_photo(tmp_path):
+    from PIL import Image
+
+    from reels_pipeline import light_drift
+
+    yy, xx = np.mgrid[0:960, 0:540]
+    photo = (90 + 80 * np.exp(-((xx - 270) ** 2 + (yy - 760) ** 2) / (2 * 90.0 ** 2))).astype(np.uint8)      # a patch of 'sunlight' on a floor in the lower part
+    Image.fromarray(np.stack([photo] * 3, axis=-1)).save(tmp_path / "room.png")
+    zone = [[0.05, 0.60], [0.95, 0.60], [0.95, 0.98], [0.05, 0.98]]
+    report = light_drift.make_clip(tmp_path / "room.png", tmp_path / "room.mp4", zone, seconds=1.0, drift_px=60, dust=12, size=(540, 960))
+    assert report["frames"] == 24 and report["outside_zone_max_change"] < 1.0       # the wall of the room never moves: the file outside the zone is the photo
+    assert report["inside_zone_max_change"] > 1.0                                   # the light inside moves
