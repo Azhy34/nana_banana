@@ -132,3 +132,21 @@ def test_the_light_drift_moves_only_the_light_inside_its_zone_and_leaves_the_res
     report = light_drift.make_clip(tmp_path / "room.png", tmp_path / "room.mp4", zone, seconds=1.0, drift_px=60, dust=12, size=(540, 960))
     assert report["frames"] == 24 and report["outside_zone_max_change"] < 1.0       # the wall of the room never moves: the file outside the zone is the photo
     assert report["inside_zone_max_change"] > 1.0                                   # the light inside moves
+
+
+def test_the_camera_flight_scales_the_finished_photo_and_keeps_the_size_of_the_clip(tmp_path):
+    import av
+    from PIL import Image
+
+    from reels_pipeline import light_drift
+
+    yy, xx = np.mgrid[0:960, 0:540]
+    Image.fromarray(np.stack([((xx // 30 + yy // 30) % 2 * 120 + 60).astype(np.uint8)] * 3, axis=-1)).save(tmp_path / "room.png")     # a chessboard: any scaling shows
+    report = light_drift.make_clip(tmp_path / "room.png", tmp_path / "fly.mp4", [[0.05, 0.60], [0.95, 0.60], [0.95, 0.98], [0.05, 0.98]], seconds=1.0, dust=4,
+                                   size=(540, 960), push=1.25, focus=(0.9, 0.5))
+    assert report["frames"] == 24 and report["camera_flight_scale"] == 1.25
+    with av.open(str(tmp_path / "fly.mp4")) as container:
+        frames = [f.to_ndarray(format="gray").astype(np.int16) for f in container.decode(video=0)]
+    assert frames[0].shape == (960, 540) and np.abs(frames[-1] - frames[0]).mean() > 10       # the picture really moves toward the room
+    with pytest.raises(ValueError, match="push"):
+        light_drift.make_clip(tmp_path / "room.png", tmp_path / "bad.mp4", [[0.05, 0.6], [0.95, 0.6], [0.95, 0.98]], push=3.0, size=(540, 960))
