@@ -80,7 +80,7 @@
   "styles": [
     {
       "name": "Japandi",
-      "description": "warm earthy neutrals, light birch and oak, low slim-legged handcrafted furniture, linen and paper, sparse decor with generous empty wall and floor space, handmade ceramics with gentle imperfection",
+      "description": "warm earthy neutrals, light birch and oak, low slim-legged handcrafted furniture, linen and paper, a few well-chosen pieces and calm surfaces, handmade ceramics with gentle imperfection",
       "colors": [
         "Warm Greige",
         "Soft Sand",
@@ -829,10 +829,12 @@
     "textWithOverlay": "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, white outlines, digital watermark, advertising badge, low quality font"
   },
   "staging": {
-    "text": "STAGING (the mural is the hero): a spacious, airy room of about 4.5 by 3.5 metres under a 2.8 m ceiling, the camera about 4 metres from the mural wall. The mural wall is completely visible with an open floor in front of it. The room is calm and almost empty: only the hero piece, lower than 90 cm and standing along a side wall, and at most two small accessories; nothing is taller than the lower third of the mural.",
-    "brief": "Only the items named in this scene are in the room: the floor is clear, the corners and the foreground edges are empty, the ceiling is bare and plain, and the walls carry only the pictures named here.",
+    "text": "STAGING (the mural is the hero): a furnished, lived-in children's room of about 4.5 by 3.5 metres under a 2.8 m ceiling. The hero piece stands along a side wall with at most two small accessories beside it, and the child's own toys lie on a rug. Everything near the mural wall is lower than 90 cm, so the drawing of the mural stays open and clear.",
+    "brief": "Only the items named in this scene are in the room, and the walls carry only the pictures named here.",
+    "framingTall": "a floor-to-ceiling section of the mural wall around the main motif of the mural, with the ceiling line at the top of the frame and the skirting board and a strip of floor at the bottom; the mural continues beyond the frame edges at its true scale",
+    "tallRatios": ["9:16", "2:3", "4:5", "3:4"],
     "maxAccessories": 2,
     "maxHeightCm": 90,
-    "note": "Applies to every prompt the builder makes (the product is a wall mural). Numbers and positive wording on purpose; the Avoid list is only the last guard."
+    "note": "Applies to every prompt the builder makes (the product is a wall mural). Owner 10.11: a furnished room; it replaces the 'almost empty room' rule of 06.11, which made every frame the same empty box. What stays from the owner's complaints: too many things hide the mural, a blanket lying about and a basket are junk. A tall frame (tallRatios) shows a SECTION of the wall floor to ceiling (framingTall), because a wide mural shown whole in a tall frame is squeezed and half the frame is floor and ceiling; a wide frame shows the whole wall (cameraDistances). Numbers and positive wording on purpose; the Avoid list is only the last guard."
   }
 }

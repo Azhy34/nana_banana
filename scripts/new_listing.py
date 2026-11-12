@@ -21,8 +21,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SPECS = ROOT / "specs"
 TEXTURE = "public/textures/craft_lambda.jpg"  # the paper texture every listing sends as the second reference
-WALL_RULE = ("It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; "
-             "the whole wall stays visible and nothing stands in front of it.")
+WALL_RULE = ("It covers the whole feature wall edge to edge, floor to ceiling, at its true scale, drawing and colours unchanged; "
+             "nothing stands in front of it.")  # how much of the wall a FRAME shows is the role's framing, not a fact of the listing
 TODO = "TODO"
 AUDIENCES = ("boy", "girl", "neutral")  # who the room is for: decided by LOOKING at the wallpaper (step 0 of the workflow)
 KNOWN_RATIOS = {"1:1": 1.0, "4:3": 4 / 3, "3:2": 3 / 2, "16:9": 16 / 9, "5:4": 5 / 4, "3:4": 3 / 4, "2:3": 2 / 3, "9:16": 9 / 16}

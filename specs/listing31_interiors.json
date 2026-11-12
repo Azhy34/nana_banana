@@ -1,0 +1,18 @@
+{
+  "listing": "Листинг 31",
+  "audience": "boy",
+  "description": "Misty Mountains with Biplanes watercolour mural 1484x1060 (about 4:3): three vintage biplanes and three striped hot-air balloons (blue-grey and cream stripes, bunting on the big one) fly over snow-capped misty mountains, a few birds, pine forest in the lower third. Palette: dusty blue-grey, milk beige, soft peach glow in the clouds, sage and grey-green trees. Calm, airy, vintage aviation; no pink, no bright colours: a room for a boy. The planes and balloons sit in the upper two thirds of the wall, mountains and forest in the lower third, so a child standing in the room covers only mountains and trees.",
+  "aspect_ratio": "9:16",
+  "brief": {
+    "description": "Facts of THIS listing used by the short (brief) prompt.",
+    "product": "the wall mural",
+    "product_short": "the mural",
+    "hero": "the biplanes and the striped hot-air balloons",
+    "gaze_target": "the big biplane",
+    "wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, at its true scale, drawing and colours unchanged; nothing stands in front of it."
+  },
+  "wallpaper": "C:/Users/Mikhail/Desktop/Обои/Листинг 31/fototapete-kinderzimmer-heissluftballon-flugzeug-berge.png",
+  "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 31",
+  "texture": "public/textures/craft_lambda.jpg",
+  "cards": []
+}

@@ -216,16 +216,17 @@ def test_the_three_creatives_of_round_3_are_different_designs_each_with_a_clean_
 
 # ------------------------------------------------------------------ the wall rule is a fact of the listing, not of the code
 
-OLD_L45_WALL_SENTENCE = ("References: image 1 is the wall mural. It covers the whole feature wall edge to edge, floor to ceiling, drawing and "
-                         "colours unchanged; the whole wall stays visible and nothing stands in front of it.")
+# Owner 10.11: the rule states how the product sits on the wall; how much of the wall a FRAME shows is the framing (a tall frame shows a section).
+L45_WALL_SENTENCE = ("References: image 1 is the wall mural. It covers the whole feature wall edge to edge, floor to ceiling, at its true scale, "
+                     "drawing and colours unchanged; nothing stands in front of it.")
 SCALLOP = {"product": "the wallpaper", "product_short": "the wallpaper",
            "wall_rule": "It covers only the lower two thirds of the feature wall, up to a scalloped wave trim; above the trim the wall is painted warm cream."}
 
 
-def test_listing_45_gets_exactly_the_sentence_it_always_got():
+def test_listing_45_gets_the_wall_sentence_of_its_own_spec():
     card = next(c for c in SPEC["cards"] if c["id"] == "l45_scene_14_baby_quiet_corner_23")
     text = _brief_of(card)
-    assert OLD_L45_WALL_SENTENCE in text and "even on the mural." in text                                            # the words of the old code constant, unchanged
+    assert L45_WALL_SENTENCE in text and "even on the mural." in text and "the whole wall stays visible" not in text
 
 
 def test_another_listing_gets_its_own_wall_rule_and_never_the_full_wall_one():

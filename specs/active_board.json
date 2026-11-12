@@ -5,17 +5,17 @@
     "models": "all",
     "cards": [
       {
-        "id": "l11_reel01_s1_gaze",
+        "id": "l31_reel01_s1_play",
         "model": "nano-banana-2-1",
         "prompt": "brief"
       },
       {
-        "id": "l11_reel01_s2_product",
+        "id": "l31_reel01_s2_product",
         "model": "nano-banana-2-1",
         "prompt": "brief"
       }
     ],
-    "spec": "listing11_interiors.json"
+    "spec": "listing31_interiors.json"
   },
   "video": {
     "scenes": [],
@@ -46,5 +46,5 @@
       }
     ]
   },
-  "set": "l11_reel01"
+  "set": "l31_reel01"
 }

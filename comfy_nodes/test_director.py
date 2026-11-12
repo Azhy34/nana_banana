@@ -523,3 +523,116 @@ def test_a_banned_or_unknown_move_and_a_move_for_a_role_without_the_placeholder_
 def test_the_clip_prompt_limit_comes_from_the_model_not_from_one_constant():
     assert director.clip_prompt_limit("kling26") == 2500 and director.clip_prompt_limit(None) == 2500
     assert director.clip_prompt_limit("omni12") == 20000 and director.clip_prompt_limit("kling40") == 8000
+
+
+# ------------------------------------------------------------------ `director.py design`: the dealer (code) + the scene writer (a model) + the checks (the director)
+# Acceptance of the new logic (once): the model is replaced by a stub, nothing here calls Claude, KIE or spends anything.
+
+def _design_specs(specs):
+    """The scratch specs plus the files `design` reads: the listing, its video spec, the writer's rules."""
+    for name in ("listing07_interiors.json", "listing07_video.json", "scene_writer_brief.md"):
+        shutil.copy(ROOT / "specs" / name, specs / name)
+    return json.loads((specs / "listing07_interiors.json").read_text(encoding="utf-8"))
+
+
+def _scenes_for(hands, **overrides):
+    """A valid scene per hand, as the writer would answer: every field set, nothing banned, the pose of a `life` frame without the face sentence."""
+    out = []
+    for h in hands:
+        scene = {"slot": h["slot"], "name": f"Room {h['slot']}", "color": h["color"], "room_type": "play zone", "subject": f"a calm {h['style']} room for a child",
+                 "room": "A bright room with a light oak floor.", "floor": "A round cream rug lies on the floor with a few wooden blocks on it.",
+                 "side_wall": "a low solid-oak bench (35 cm high) with two picture books, and above it one small framed print",
+                 "light": "Warm morning sunbeams from a window on the {side} lie in soft patches on the floor.", "palette": "cream, pale oak, sage and white",
+                 "items": "round rug, wooden blocks, oak bench, picture books, picture frame and architecture",
+                 "life_pose": "{person} kneels on the rug with {her} back to the camera" if h["role"] == "life" else "",
+                 "life_action": "slowly turns a page" if h["role"] == "life" else ""}
+        scene.update(overrides.get(h["slot"], {}))
+        out.append(scene)
+    return out
+
+
+def test_the_dealer_is_repeatable_and_deals_different_styles_both_sides_and_roles_that_fit_the_audience(specs):
+    from reels_pipeline import dealer
+
+    listing = _design_specs(specs)
+    first = dealer.deal(listing, "t_set", 73)
+    assert first == dealer.deal(listing, "t_set", 73) and first != dealer.deal(listing, "t_set", 74)
+    assert len({h["style"] for h in first}) == 3 and {h["side"] for h in first} == {"left", "right"}
+    assert [h["person"] for h in first] == [True, False, True]
+    assert not any("dusk" in h["lighting"] for h in first) and all(h["color"] in [c["name"] for c in h["allowed_colors"]] for h in first)
+    girl = dict(listing, audience="girl")
+    assert all(h["role"] not in ("gaze", "wow") for seed in range(12) for h in dealer.deal(girl, "g_set", seed))      # a boy's role never in a girl's wallpaper
+    with pytest.raises(ValueError, match="audience"):
+        dealer.deal({k: v for k, v in listing.items() if k != "audience"}, "t_set", 1)
+
+
+def test_a_set_with_its_scenes_inside_plans_without_touching_the_shared_kits(specs):
+    from reels_pipeline import dealer, scene_writer
+
+    listing = _design_specs(specs)
+    hands = dealer.deal(listing, "d_set", 5)
+    calls = []
+
+    def stub(task, wallpaper, model):
+        calls.append(task)
+        return {"scenes": _scenes_for(hands), "usage": {"model": model, "tokens": 10, "list_price_usd": 0.0}}
+
+    kits_before = (specs / "design_kits.json").read_bytes()
+    result = scene_writer.design_set("d_set", "listing07_interiors.json", seed=5, runner=stub)
+    assert result["status"] == "ok" and len(calls) == 1 and (specs / "sets" / "d_set.json").is_file()
+    assert (specs / "design_kits.json").read_bytes() == kits_before                                      # the shared file stays as it was
+    plan = director.plan_set("d_set")
+    assert plan["problems"] == [] and [s["kit"] for s in plan["slots"]] == ["d_set_s1", "d_set_s2", "d_set_s3"]
+    life = next(c for c, s in zip(plan["cards"], plan["slots"]) if s["role"] == "life")
+    assert "face turned away from the camera" in life["scene"]                                              # the face sentence is code's, not the model's
+    with pytest.raises(ValueError, match="already exists"):
+        scene_writer.design_set("d_set", "listing07_interiors.json", seed=5, runner=stub)
+
+
+def test_a_banned_scene_is_asked_for_again_once_and_then_nothing_is_saved(specs):
+    from reels_pipeline import dealer, scene_writer
+
+    listing = _design_specs(specs)
+    hands = dealer.deal(listing, "b_set", 5)
+    bad = {"s2": {"side_wall": "a low bed with a wicker basket beside it"}}
+    answers = [_scenes_for(hands, **bad), _scenes_for(hands)]
+    asked = []
+
+    def fixes_it(task, wallpaper, model):
+        asked.append(task)
+        return {"scenes": answers[len(asked) - 1], "usage": {"model": model, "tokens": 1, "list_price_usd": 0.0}}
+
+    ok = scene_writer.design_set("b_set", "listing07_interiors.json", seed=5, runner=fixes_it)
+    assert ok["status"] == "ok" and len(asked) == 2 and "wicker" in asked[1] and "Your previous answer broke these rules" in asked[1]
+
+    never = lambda task, wallpaper, model: {"scenes": _scenes_for(hands, **bad), "usage": {"model": model, "tokens": 1, "list_price_usd": 0.0}}  # noqa: E731
+    stuck = scene_writer.design_set("b2_set", "listing07_interiors.json", seed=5, runner=never)
+    assert stuck["status"] == "problems" and any("wicker" in p for p in stuck["problems"]) and not (specs / "sets" / "b2_set.json").exists()
+
+
+def test_the_chat_writer_leaves_a_task_file_and_a_scenes_file_finishes_the_set(specs, tmp_path, monkeypatch):
+    import types
+
+    from reels_pipeline import dealer, scene_writer
+
+    listing = _design_specs(specs)
+    monkeypatch.setattr(scene_writer, "PipelineConfig", types.SimpleNamespace(ROOT_DIR=tmp_path))
+    waiting = scene_writer.design_set("c_set", "listing07_interiors.json", seed=5, writer="chat")
+    assert waiting["status"] == "task_written" and waiting["path"].is_file() and not (specs / "sets" / "c_set.json").exists()
+    text = waiting["path"].read_text(encoding="utf-8")
+    assert "Never write a face" in text and "allowed_colors" in text and "s3" in text
+    answer = tmp_path / "scenes.json"
+    answer.write_text(json.dumps({"slots": _scenes_for(dealer.deal(listing, "c_set", 5))}), encoding="utf-8")
+    done = scene_writer.design_set("c_set", "listing07_interiors.json", seed=5, scenes_file=str(answer))
+    assert done["status"] == "ok" and (specs / "sets" / "c_set.json").is_file()
+
+
+def test_a_scene_that_names_a_thing_by_denying_it_is_rejected(specs):
+    from reels_pipeline import dealer, scene_writer
+
+    listing = _design_specs(specs)
+    hands = dealer.deal(listing, "n_set", 5)
+    denying = lambda task, wallpaper, model: {"scenes": _scenes_for(hands, s1={"floor": "A cream cotton pouf, macramé-free, stands on the rug."}),  # noqa: E731
+                                              "usage": {"model": model, "tokens": 1, "list_price_usd": 0.0}}
+    result = scene_writer.design_set("n_set", "listing07_interiors.json", seed=5, runner=denying)
+    assert result["status"] == "problems" and any("macramé-free" in p or "-free" in p for p in result["problems"]) and not (specs / "sets" / "n_set.json").exists()

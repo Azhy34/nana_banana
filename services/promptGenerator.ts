@@ -122,8 +122,9 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     ? 'solid wood, matte metal, organic linen'
     : 'solid wood with visible grain, organic canvas, washed linen, breathable cotton';
 
-  // The mural is the hero in every prompt: scale of the room, open floor in front of the wall, one low hero piece, at most two small
-  // accessories (Promt/trends.json "staging"). The tag `compositionStrategy` is kept for old cards; it no longer changes this.
+  // The mural is the hero in every prompt: a furnished room of a real size, the hero piece along a side wall with at most two small
+  // accessories, everything near the mural wall low (Promt/trends.json "staging"). The tag `compositionStrategy` is kept for old cards;
+  // it no longer changes this.
   const compositionText = trendsData.staging.text;
 
   const insights = (trendsData as any).latestMarketInsights as {
@@ -204,7 +205,15 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const lens = tags.lens || '35mm prime lens';
   const aperture = tags.aperture || 'f/5.6 aperture';
 
-  const cameraSection = `Photographed ${angle}, at ${elevation}. Framing: ${distance}${distanceNote}. Shot on ${cameraBody}, ${lens}, ${aperture}, sharp mural focus across the entire wall, natural optical depth. ${trendsData.realism.photo} Aspect ratio: ${tags.aspectRatio}.`;
+  // A tall frame cannot hold a wide mural whole without squeezing it (and half the frame becomes floor and ceiling): it shows a
+  // floor-to-ceiling SECTION of the wall. Which ratios are tall and the words of that framing are data (trends.json "staging").
+  const staging = trendsData.staging as { framingTall?: string; tallRatios?: string[] };
+  const isTall = !!staging.framingTall && (staging.tallRatios ?? []).includes(tags.aspectRatio as string);
+  const view = isTall
+    ? `${angle.replace(/ and pulled well back.*$/, '')}, at ${elevation}. Framing: ${staging.framingTall}`
+    : `${angle}, at ${elevation}. Framing: ${distance}${distanceNote}`;
+
+  const cameraSection = `Photographed ${view}. Shot on ${cameraBody}, ${lens}, ${aperture}, sharp mural focus across the entire wall, natural optical depth. ${trendsData.realism.photo} Aspect ratio: ${tags.aspectRatio}.`;
 
   let promptText = `${wallpaperRule}\n\n${sceneSetting}\n\n${furnitureSection}\n\n${stylingSection}\n\n${lightingSection}\n\n${cameraSection}`;
 

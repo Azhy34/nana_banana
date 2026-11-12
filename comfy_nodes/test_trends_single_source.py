@@ -147,23 +147,30 @@ def test_every_camera_angle_is_concrete_angled_and_shows_the_whole_mural_wall():
     assert not any((d["name"] if isinstance(d, dict) else d).startswith("shallow") for d in TRENDS["depthOfField"])
 
 
-def test_the_staging_block_states_the_room_the_open_floor_and_the_limits_in_numbers():
+def test_the_staging_block_states_a_furnished_room_and_the_limits_in_numbers():
     staging = TRENDS["staging"]
-    for cue in ("4.5 by 3.5 metres", "2.8 m ceiling", "completely visible", "open floor", "lower than 90 cm", "at most two small accessories"):
+    for cue in ("furnished", "4.5 by 3.5 metres", "2.8 m ceiling", "lower than 90 cm", "at most two small accessories"):
         assert cue in staging["text"], cue
+    for emptiness in ("almost empty", "floor is clear", "corners", "bare"):  # owner 10.11: the rooms came out as empty boxes because the text asked for it
+        assert emptiness not in staging["text"] and emptiness not in staging["brief"], emptiness
+    assert "9:16" in staging["tallRatios"] and "4:3" not in staging["tallRatios"] and "floor-to-ceiling section" in staging["framingTall"]
     assert staging["maxAccessories"] == 2 and staging["maxHeightCm"] == 90
-    assert not re.search(r"(no|not|without|avoid|never)", staging["text"], re.IGNORECASE), "positive wording: the guides say describe what you want"
+    assert not re.search(r"\b(no|not|without|avoid|never)\b", staging["text"], re.IGNORECASE), "positive wording: the guides say describe what you want"
 
 
 def test_a_prompt_has_the_staging_the_angle_and_at_most_two_accessories_in_every_random_build():
     cards = [{"id": f"m{i}", "seed": i, "ageGroup": AGES[i % 4]} for i in range(300)]
     for out in build_batch_prompts(cards, aspect_ratio="9:16"):
         prompt, tags = out["prompt"], out["tags"]
-        assert TRENDS["staging"]["text"] in prompt and "Photographed from the " in prompt and "Framing: wide shot" in prompt, out["id"]
+        # a tall frame shows a floor-to-ceiling SECTION of the wall (a wide mural shown whole in 9:16 is squeezed), never "the whole mural wall"
+        assert TRENDS["staging"]["text"] in prompt and "Photographed from the " in prompt, out["id"]
+        assert f"Framing: {TRENDS['staging']['framingTall']}" in prompt and "whole mural wall" not in prompt and "pulled well back" not in prompt, out["id"]
         accessories = prompt.split("and accessories including ")[1].split(". ")[0] if "and accessories including " in prompt else ""
         shown = [a for a in TRENDS["accessories"] if a in accessories]
         assert len(shown) <= TRENDS["staging"]["maxAccessories"], (out["id"], shown)
         assert tags["cameraAngle"] in TRENDS["cameraAngles"] and tags["cameraDistance"] == "wide shot"
+    for out in build_batch_prompts(cards[:8], aspect_ratio="4:3"):  # a wide frame still shows the whole wall
+        assert "Framing: wide shot" in out["prompt"] and "pulled well back" in out["prompt"] and TRENDS["staging"]["framingTall"] not in out["prompt"], out["id"]
 
 
 def test_a_random_key_object_is_never_a_tall_or_foreground_set_but_a_card_may_still_pin_one():

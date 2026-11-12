@@ -1,0 +1,291 @@
+{
+  "description": "Designed by scripts/director.py design (seed 73): the roles, ages, styles and colours were dealt by code, the rooms written from the picture of the wallpaper by a model; each slot carries its own kit. Re-shoot under a NEW set name.",
+  "id": "l7_reel03",
+  "listing_spec": "listing07_interiors.json",
+  "video_spec": "listing07_video.json",
+  "aspect": "9:16",
+  "seed": 73,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 3,
+    "distinct_kits": true,
+    "ages": []
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "gaze",
+      "kit": {
+        "id": "l7_reel03_s1",
+        "name": "Birch flower table and bouclé poufs",
+        "audience": "neutral",
+        "room_type": "play zone",
+        "child": {
+          "gender": "neutral",
+          "age_band": "vorschul"
+        },
+        "age": "vorschul",
+        "side": "right",
+        "style": "Biophilic Nursery",
+        "color": "Muted Sage",
+        "lighting": "warm golden hour sunlight",
+        "subject": "a calm biophilic bedroom for a child aged 2 to 5, with a flower-shaped birch craft table and a stack of bouclé poufs",
+        "room": "A bright airy room with a wide-plank walnut floor.",
+        "floor": "On an oval oat bouclé rug lie wax crayons in a wooden cup and an open drawing book, beside a small wooden watering can.",
+        "side_wall": "a low flower-shaped pale lacquered birch craft table 45 cm high with a stack of round bouclé poufs in ochre and barberry red, a round birch shelf with two sage ceramic pots of small ferns, and a framed leaf print above",
+        "ceiling": "",
+        "light": "Warm golden hour sunlight from a window on the {side} lies in long soft patches on the floor.",
+        "palette": "muted sage, pale birch, oat, ochre, barberry red and warm white",
+        "items": "flower-shaped craft table, bouclé poufs, oval rug, wax crayons, drawing book, round shelf, picture frame and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "wax crayons in a wooden cup with an open drawing book on the rug"
+      }
+    },
+    {
+      "slot": "s2",
+      "role": "product",
+      "kit": {
+        "id": "l7_reel03_s2",
+        "name": "Oak storage bed, retro butter yellow",
+        "audience": "neutral",
+        "room_type": "sleep zone",
+        "child": {
+          "gender": "neutral",
+          "age_band": "schulkind"
+        },
+        "age": "schulkind",
+        "side": "left",
+        "style": "Retro Kids",
+        "color": "Butter Yellow",
+        "lighting": "crisp morning window daylight",
+        "subject": "a sunny retro room for a schoolchild aged 6 to 10, with a low solid oak single bed with storage drawers and a low book shelf",
+        "room": "A bright room with a cream and caramel checked linoleum floor.",
+        "floor": "A rectangular crocheted play mat in mustard, cream and brown stripes lies by the bed with a wooden spinning top, a vintage tin car and a stack of board games.",
+        "side_wall": "a low solid oak single bed 90 by 200 cm with under-bed drawers and butter yellow linen, beside it a 70 cm oak shelf with a few chapter books and a wooden pencil cup, and a small framed vintage map above",
+        "ceiling": "",
+        "light": "Crisp morning daylight from a window on the {side} falls in clear bands across the floor.",
+        "palette": "butter yellow, honey oak, caramel, cream, mustard, sage and white",
+        "items": "oak bed, storage drawers, low shelf, chapter books, pencil cup, crocheted mat, wooden toys, picture frame and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "a few chapter books and a wooden pencil cup standing on a low shelf beside the bed"
+      }
+    },
+    {
+      "slot": "s3",
+      "role": "leave",
+      "kit": {
+        "id": "l7_reel03_s3",
+        "name": "Birch floor bed, circus stripes",
+        "audience": "neutral",
+        "room_type": "sleep zone",
+        "child": {
+          "gender": "neutral",
+          "age_band": "vorschul"
+        },
+        "age": "vorschul",
+        "side": "right",
+        "style": "Fun Haus",
+        "color": "Cocoa Brown",
+        "lighting": "warm golden hour sunlight",
+        "subject": "a playful fun-haus bedroom for a child aged 2 to 5, with a low birch Montessori floor bed and an arched cream cabinet",
+        "room": "A light room with a pale ash herringbone floor.",
+        "floor": "On a pill-shaped cream rug with wavy edges lie wax crayons in a wooden cup and an open drawing book.",
+        "side_wall": "a low solid birch Montessori floor bed with caramel-and-cream striped bedding and one blue cushion, an arch-fronted cream cabinet 55 cm high beside it, and a small framed vintage circus print",
+        "ceiling": "",
+        "light": "Warm golden hour sunlight from a window on the {side} lies in soft patches on the floor.",
+        "palette": "cocoa brown, caramel, cream, brick, saturated blue and pale ash",
+        "items": "birch floor bed, striped bedding, arched cabinet, pill-shaped rug, wax crayons, drawing book, picture frame and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "wax crayons in a wooden cup with an open drawing book on the rug"
+      }
+    }
+  ],
+  "design": {
+    "seed": 73,
+    "frames": 3,
+    "hands": [
+      {
+        "slot": "s1",
+        "role": "gaze",
+        "age": "vorschul",
+        "side": "right",
+        "lighting": "warm golden hour sunlight",
+        "role_label": "Gaze: a child already points up at the big balloon, takes one small step toward the mural, the camera is still",
+        "person": true,
+        "audience": "neutral",
+        "child": "a child of 2 to 5 years",
+        "room_of_that_age": "A children's bedroom: the bed is a child's bed of 140 by 70 cm, no higher than 40 cm, and every piece of furniture stands at the height of a small child, with the proportions of a playroom.",
+        "style": "Biophilic Nursery",
+        "style_card": "nature indoors: botanical touches, linen, a bouclé cushion, curved shapes such as an oval rug, a round shelf and wavy edges, soft greens and natural wood",
+        "color": "Muted Sage",
+        "color_description": "fresh botanical sage green, grounding and natural",
+        "allowed_colors": [
+          {
+            "name": "Muted Sage",
+            "description": "fresh botanical sage green, grounding and natural"
+          },
+          {
+            "name": "Eucalyptus",
+            "description": "deep eucalyptus green, grounding and organic"
+          },
+          {
+            "name": "Olive",
+            "description": "calm natural olive green, grounding and earthy"
+          },
+          {
+            "name": "Soft Sand",
+            "description": "soft sandy beige, warm and neutral"
+          },
+          {
+            "name": "Warm Greige",
+            "description": "warm grey-beige, a quiet base that lets colour accents glow"
+          },
+          {
+            "name": "Dusty Rose",
+            "description": "soft vintage dusty rose, gentle and comforting"
+          },
+          {
+            "name": "Pepper White",
+            "description": "warm off-white, softer on the eyes than pure white"
+          }
+        ],
+        "hero_piece": {
+          "name": "Flower-shaped wooden craft table",
+          "description": "charming flower-shaped craft table in pale lacquered birch, accompanied by a stack of round bouclé poufs in warm ochre and barberry red"
+        },
+        "toy": "wax crayons in a wooden cup with an open drawing book on the rug"
+      },
+      {
+        "slot": "s2",
+        "role": "product",
+        "age": "schulkind",
+        "side": "left",
+        "lighting": "crisp morning window daylight",
+        "role_label": "Product: the whole mural, a walk-in with parallax",
+        "person": false,
+        "audience": "neutral",
+        "child": "a schoolchild of 6 to 10 years",
+        "room_of_that_age": "A school child's room: the bed is a single bed of 90 by 200 cm in a low frame, furniture is slim and sized for a schoolchild, and books and learning things stand at child height.",
+        "style": "Retro Kids",
+        "style_card": "nostalgic childhood of the 70s to the 2000s: vintage wooden toys, a crocheted play mat, handmade patterns, a vintage furniture piece, warm caramel and mustard accents",
+        "color": "Butter Yellow",
+        "color_description": "soft creamy butter yellow, sunny and gentle",
+        "allowed_colors": [
+          {
+            "name": "Honey Amber",
+            "description": "warm honey wood tone, rich and glowing"
+          },
+          {
+            "name": "Sunny Mustard",
+            "description": "warm golden mustard yellow, retro and cozy"
+          },
+          {
+            "name": "Warm Terracotta",
+            "description": "earthy baked terracotta, warm and timeless"
+          },
+          {
+            "name": "Butter Yellow",
+            "description": "soft creamy butter yellow, sunny and gentle"
+          },
+          {
+            "name": "Dusty Rose",
+            "description": "soft vintage dusty rose, gentle and comforting"
+          },
+          {
+            "name": "Cocoa Brown",
+            "description": "warm cocoa and rusty brown, cosy and earthy"
+          },
+          {
+            "name": "Barberry",
+            "description": "soft berry red, warm and sophisticated, for small accents only"
+          },
+          {
+            "name": "Muted Sage",
+            "description": "fresh botanical sage green, grounding and natural"
+          },
+          {
+            "name": "Eucalyptus",
+            "description": "deep eucalyptus green, grounding and organic"
+          }
+        ],
+        "hero_piece": {
+          "name": "Solid oak low single bed with integrated under-bed storage drawers",
+          "description": ""
+        },
+        "toy": "a few chapter books and a wooden pencil cup standing on a low shelf beside the bed"
+      },
+      {
+        "slot": "s3",
+        "role": "leave",
+        "age": "vorschul",
+        "side": "right",
+        "lighting": "warm golden hour sunlight",
+        "role_label": "Leave: a child walks away from the camera out of the room, the camera and the door are still",
+        "person": true,
+        "audience": "neutral",
+        "child": "a child of 2 to 5 years",
+        "room_of_that_age": "A children's bedroom: the bed is a child's bed of 140 by 70 cm, no higher than 40 cm, and every piece of furniture stands at the height of a small child, with the proportions of a playroom.",
+        "style": "Fun Haus",
+        "style_card": "circus-inspired playfulness: striped upholstery (caramel-and-cream or blue-and-cream) on the bed and cushions, sculptural arch- and pill-shaped cream furniture fronts, wavy edges, vintage circus art in small frames, one saturated blue accent; the loud pattern is balanced by a restrained blue, cream, caramel and brick palette, and stripes never appear on the wall behind the wallpaper",
+        "color": "Cocoa Brown",
+        "color_description": "warm cocoa and rusty brown, cosy and earthy",
+        "allowed_colors": [
+          {
+            "name": "Brick Red",
+            "description": "warm brick red, for striped cushions and small accents"
+          },
+          {
+            "name": "Powder Blue",
+            "description": "soft dusty powder blue, light and calm"
+          },
+          {
+            "name": "Cool Blue",
+            "description": "calm cool blue with a clear fresh feel, as a quiet accent"
+          },
+          {
+            "name": "Butter Yellow",
+            "description": "soft creamy butter yellow, sunny and gentle"
+          },
+          {
+            "name": "Honey Amber",
+            "description": "warm honey wood tone, rich and glowing"
+          },
+          {
+            "name": "Cocoa Brown",
+            "description": "warm cocoa and rusty brown, cosy and earthy"
+          },
+          {
+            "name": "Barberry",
+            "description": "soft berry red, warm and sophisticated, for small accents only"
+          },
+          {
+            "name": "Pepper White",
+            "description": "warm off-white, softer on the eyes than pure white"
+          },
+          {
+            "name": "Soft Sand",
+            "description": "soft sandy beige, warm and neutral"
+          }
+        ],
+        "hero_piece": {
+          "name": "Montessori low wooden floor bed in solid birch, keeping the entire wall mural unobstructed",
+          "description": ""
+        },
+        "toy": "wax crayons in a wooden cup with an open drawing book on the rug"
+      }
+    ],
+    "writer": {
+      "how": "claude -p (subscription)",
+      "calls": [
+        {
+          "model": "sonnet",
+          "tokens": 18494,
+          "list_price_usd": 0.0604
+        }
+      ]
+    }
+  }
+}

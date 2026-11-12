@@ -1,0 +1,34 @@
+{
+  "description": "Check set of the new frame rules (owner 10.11) for Listing 7 (misty balloons, neutral): FURNISHED rooms and a 9:16 frame that shows a floor-to-ceiling SECTION of the mural around the balloons, not the whole wall. s1 = a boy of about four in a Japandi bedroom with honey-amber bedding points up at the big balloon; s2 = a Fun Haus bedroom with a striped bed and brick red, no person; s3 = a schoolchild in an olive Woodland study corner kneels over an atlas, back to the camera. Photos only (video is paused). py -3.12 -X utf8 scripts/run_set.py l7_reel02 --until photos --round 1",
+  "id": "l7_reel02",
+  "listing_spec": "listing07_interiors.json",
+  "video_spec": "listing07_video.json",
+  "aspect": "9:16",
+  "seed": 72,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 3,
+    "ages": [
+      "vorschul",
+      "schulkind"
+    ],
+    "distinct_kits": true
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "gaze",
+      "kit": "neutral_japandi_gaze"
+    },
+    {
+      "slot": "s2",
+      "role": "product",
+      "kit": "neutral_funhaus_walkin"
+    },
+    {
+      "slot": "s3",
+      "role": "life",
+      "kit": "neutral_woodland_desk"
+    }
+  ]
+}

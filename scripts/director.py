@@ -15,6 +15,8 @@ Two kinds of set, told apart by "type" in specs/sets/<set>.json:
   py -3.12 -X utf8 scripts/director.py photos l2_carousel01 2    # carousel: round N = pair N (its cards) on the PHOTO board
   py -3.12 -X utf8 scripts/director.py pick l45_set01 s2 s3 s6   # reel only: the chosen photos on the VIDEO board (up to 3)
   py -3.12 -X utf8 scripts/director.py validate my_set.json     # a set task as a file (or `-` for stdin): problems and warnings, writes nothing, exit 1 on problems
+  py -3.12 -X utf8 scripts/director.py design l7_reel03 --listing listing07_interiors.json [--seed 73] [--writer claude|chat] [--scenes file]
+                                                                  # a NEW set in one command: code deals style/colour/piece/role/age/side, a model writes the rooms from the wallpaper
   py -3.12 -X utf8 scripts/director.py moves                      # the vocabulary of video motion (specs/video_motion.json): camera moves, light, what freezes
   py -3.12 -X utf8 scripts/director.py card listing06_interiors.json l6_funhaus_01   # the sections of the prompt of any hand-written card
 then: scripts/build_comfy_workflows.py --verify-live, scripts/run_board.py photos|video (free dry run first).
@@ -74,7 +76,7 @@ def cmd_plan(set_id: str) -> int:
                       + ("; ".join(destinations.describe(i) for i in frame["serves"]) or "no destination of specs/ad_formats.json asks for this ratio"))
         return _print_problems(plan)
     rules = _listing(plan).get("brief", {})
-    kits = director.load_kits()
+    kits = plan.get("kits") or director.load_kits()  # a set made by `design` carries its kits inside
     roles, models = director.load_roles(), director.load_video_models()
     total_rec = total_kling = 0
     print(f"set {set_id}: {len(plan['slots'])} slots, aspect {plan['cards'][0]['aspectRatio']}, model {plan['model']}")
@@ -264,6 +266,40 @@ def cmd_pick(set_id: str, slots: list) -> int:
     return 0
 
 
+def cmd_design(args: argparse.Namespace) -> int:
+    """Deal the hands (code), write the rooms from the wallpaper (a model on the subscription), check (the director), save specs/sets/<set>.json."""
+    from reels_pipeline import scene_writer
+
+    try:
+        result = scene_writer.design_set(args.set, args.listing, seed=args.seed, frames=args.frames, aspect=args.aspect, writer=args.writer, model=args.model,
+                                         scenes_file=args.scenes)
+    except (ValueError, RuntimeError) as exc:
+        print(exc)
+        return 1
+    if result["status"] == "task_written":
+        print(f"the task for the writer is in {result['path']}: answer it (a JSON file by the schema inside), then run again with --scenes <that file>")
+        return 3
+    if result["status"] == "problems":
+        print("the scenes still break the director's checks, nothing was saved:")
+        for line in result["problems"]:
+            print("  -", line)
+        return 1
+    spec, kits = result["spec"], {s["kit"]["id"]: s["kit"] for s in result["spec"]["slots"]}
+    print(f"set {spec['id']} designed: {len(spec['slots'])} frames, seed {args.seed}, saved to {result['path'].name}")
+    for hand, slot in zip(result["hands"], spec["slots"]):
+        kit = kits[slot["kit"]["id"]]
+        who = "a person from behind" if hand["person"] else "no person"
+        print(f"  {slot['slot']} {slot['role']:8} {kit['age']:9} {kit['style']:18} {kit['color']:14} camera from the {director._opposite(kit['side'])}, decor on the {kit['side']}, {who}")
+        print(f"       {kit['name']}: {kit['side_wall']}; on the floor: {kit['floor']}")
+    for line in result["warnings"]:
+        print("  WARNING:", line)
+    used = result["usage"]
+    if used:
+        print(f"writer: {used[0]['model']}, {len(used)} call(s), {sum(u['tokens'] for u in used)} tokens, list price ${sum(u['list_price_usd'] for u in used):.3f} (on the subscription, no credits)")
+    print(f"next: py -3.12 -X utf8 scripts/run_set.py {spec['id']} --until photos --round 1   (free: plan, board, dry run, live quote)")
+    return 0
+
+
 def cmd_moves() -> int:
     """The vocabulary of video motion (specs/video_motion.json) as a table: id, status, risk, the phrase a clip prompt gets. Read-only."""
     vocab = director.load_video_motion()
@@ -292,6 +328,15 @@ def main() -> int:
     pick.add_argument("slots", nargs="+")
     sub.add_parser("validate").add_argument("source", help="a set task JSON file, or - for stdin")
     sub.add_parser("moves")
+    design = sub.add_parser("design", help="deal the frames of a NEW set and write its rooms from the wallpaper")
+    design.add_argument("set", help="a NEW set name (an existing file is never overwritten)")
+    design.add_argument("--listing", required=True, help="the listing spec in specs/, e.g. listing07_interiors.json")
+    design.add_argument("--frames", type=int, default=3)
+    design.add_argument("--seed", type=int, default=1, help="another seed deals other styles, colours and pieces")
+    design.add_argument("--aspect", default="9:16")
+    design.add_argument("--writer", choices=("claude", "chat"), default="claude", help="claude = a scripted `claude -p` on the subscription; chat = write the task to a file")
+    design.add_argument("--model", default="sonnet", help="the model of the writer (default sonnet; design is not a job for haiku)")
+    design.add_argument("--scenes", help="a JSON file with the scenes written elsewhere (the answer to --writer chat)")
     card = sub.add_parser("card")
     card.add_argument("spec", help="a listing spec file in specs/ or a path")
     card.add_argument("card")
@@ -308,6 +353,8 @@ def main() -> int:
         return cmd_validate(args.source)
     if args.command == "moves":
         return cmd_moves()
+    if args.command == "design":
+        return cmd_design(args)
     if args.command == "card":
         return cmd_card(args.spec, args.card)
     return cmd_pick(args.set, args.slots)

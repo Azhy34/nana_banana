@@ -1,0 +1,14 @@
+{
+  "listing": "Листинг 31",
+  "description": "Image-to-video lock of Listing 31 (misty mountains with biplanes and balloons). Video is PAUSED (owner 10.11): this file exists because a set needs the video spec of its listing; it is used when video resumes. Rules: faces are never shown, no plain zoom, the mural stays flat static ink: the painted planes, balloons and birds must NOT move.",
+  "duration": "5",
+  "sound": false,
+  "min_motion_delta": 15.0,
+  "lock": {
+    "description": "Facts of THIS listing used by every clip prompt: the mural is flat printed ink and never moves; the furniture is frozen.",
+    "product": "The mural on the wall stays perfectly still and unchanged: the painted biplanes, hot-air balloons, birds, clouds, mountains and pine trees remain exactly as in the first frame, flat printed artwork.",
+    "furniture": "The {items} stay perfectly still, solid and fixed in the room.",
+    "people": "Every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are and nothing turns toward the lens."
+  },
+  "frames": []
+}

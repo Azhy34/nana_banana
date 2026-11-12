@@ -263,7 +263,11 @@ def plan_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
     used: List[str] = []
     cards, clips, slots, persons = [], [], [], []
     for entry in spec["slots"]:
-        kit_id = entry["kit"] if entry["kit"] != "auto" else _pick_auto(kits, used, spec["seed"], entry["slot"])
+        if isinstance(entry["kit"], dict):  # the scene is written INTO the set (scripts/director.py design): a kit of this set only, not of the shared file
+            kits[entry["kit"]["id"]] = entry["kit"]
+            kit_id = entry["kit"]["id"]
+        else:
+            kit_id = entry["kit"] if entry["kit"] != "auto" else _pick_auto(kits, used, spec["seed"], entry["slot"])
         if kit_id not in kits:
             raise ValueError(f"slot {entry['slot']}: no kit {kit_id!r} in specs/design_kits.json (have {sorted(kits)})")
         if entry["role"] not in roles["roles"]:
@@ -276,7 +280,8 @@ def plan_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
         clips.append(out["clip"])
         persons.append(out["person"])
         slots.append({"slot": entry["slot"], "role": entry["role"], "kit": kit_id, "card": out["card"]["id"]})
-    plan = {"set": spec["id"], "model": spec.get("model", "nano-banana-2-1"), "cards": cards, "clips": clips, "slots": slots, "persons": persons}  # `persons` is not written to the generated file
+    plan = {"set": spec["id"], "model": spec.get("model", "nano-banana-2-1"), "cards": cards, "clips": clips, "slots": slots, "persons": persons,
+            "kits": kits}  # `persons` and `kits` (the shared kits plus the ones written into the set) are not written to the generated file
     plan["problems"] = check_plan(plan, spec, kits, brief_rules, video_spec) + audience_problems(spec, listing_spec, kits)
     plan["warnings"] = plan_warnings(plan, spec, kits)
     return plan
@@ -494,6 +499,11 @@ def check_plan(plan: Dict[str, Any], spec: Dict[str, Any], kits: Dict[str, Dict[
     return problems
 
 
+def kit_id_of(slot: Dict[str, Any]) -> str:
+    """The id of a slot's kit: the name from the shared file, `auto`, or the id of the kit written into the slot."""
+    return slot["kit"]["id"] if isinstance(slot["kit"], dict) else slot["kit"]
+
+
 def audience_problems(spec: Dict[str, Any], listing_spec: Dict[str, Any], kits: Dict[str, Dict[str, Any]]) -> List[str]:
     """Step 0 of the workflow made a rule: every kit of a reel suits the audience of the WALLPAPER (boy takes boy and neutral kits, girl takes girl and
     neutral, neutral only neutral), and a kit is not reused in the reel of ANOTHER listing (one design in two wallpapers is a repeat, owner 06.11)."""
@@ -502,7 +512,7 @@ def audience_problems(spec: Dict[str, Any], listing_spec: Dict[str, Any], kits: 
     if audience not in AUDIENCES:
         return [f"the listing spec {spec['listing_spec']} has no `audience` (boy | girl | neutral): LOOK at the wallpaper and set it (ask the owner when unsure)"]
     allowed = AUDIENCE_KITS[audience]
-    used = [s["kit"] for s in spec.get("slots", [])]
+    used = [kit_id_of(s) for s in spec.get("slots", [])]
     for kit_id in used if not spec.get("constraints", {}).get("audience_waiver") else []:  # a waiver only for reels shot before this rule
         kit = kits.get(kit_id)
         if kit and kit.get("audience") not in allowed:
@@ -514,7 +524,7 @@ def audience_problems(spec: Dict[str, Any], listing_spec: Dict[str, Any], kits: 
             other = _load(other_file)
             if other.get("type") == "carousel" or other.get("listing_spec") in (None, spec["listing_spec"]):
                 continue
-            again = sorted(set(used) & {x["kit"] for x in other.get("slots", [])})
+            again = sorted(set(used) & {kit_id_of(x) for x in other.get("slots", [])})
             if again:
                 problems.append(f"kit(s) {again} already made the reel {other['id']} of another listing: a design is not repeated in other wallpapers (new kit, or constraints.shared_kits_ok)")
     return problems

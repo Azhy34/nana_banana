@@ -2,9 +2,9 @@
  "1": {
   "class_type": "MoonbloomWallpaper",
   "inputs": {
-   "wallpaper_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/Tropical Jungle Wallpaper Mural upscail.png",
+   "wallpaper_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 31/fototapete-kinderzimmer-heissluftballon-flugzeug-berge.png",
    "use_texture": true,
-   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11"
+   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 31"
   }
  },
  "2": {
@@ -19,13 +19,13 @@
  "3": {
   "class_type": "MoonbloomDesign",
   "inputs": {
-   "scene_id": "l11_reel01_s1_gaze_brief",
+   "scene_id": "l31_reel01_s1_play_brief",
    "aspect_ratio": "9:16",
    "age_group": "vorschul",
-   "style": "Retro Kids",
-   "color": "Sunny Mustard",
+   "style": "Biophilic Nursery",
+   "color": "Warm Greige",
    "key_object": "random",
-   "lighting": "warm morning sunbeams",
+   "lighting": "crisp morning window daylight",
    "camera_angle": "random",
    "camera_elevation": "random",
    "camera_distance": "random",
@@ -33,18 +33,18 @@
    "composition": "unobstructed",
    "clean_random_details": false,
    "variation": 0,
-   "camera_body": "Canon EOS R5",
-   "lens": "28mm gentle wide lens",
+   "camera_body": "Fujifilm GFX 100S",
+   "lens": "35mm prime lens",
    "aperture": "f/11 aperture",
    "prompt_mode": "brief",
-   "brief_subject": "a cheerful retro room for a child aged 3 to 5, with a striped crocheted play mat and a vintage wooden toy hot-air balloon",
-   "brief_scene": "A bright airy room with a light oak floor. A round crocheted play mat in caramel, cream and mustard stripes lies on the floor with one vintage wooden toy hot-air balloon and a few wooden blocks on it. On the RIGHT side wall, away from the mural: a low vintage solid-wood bench (35 cm high) with a mustard-yellow seat cushion and one cream wool blanket folded neatly into a tidy rectangle with aligned edges at one end, and above it one small framed retro print. Warm morning sunbeams from a window on the RIGHT lie in soft patches on the floor. A boy of about four in a soft oat knit sweater and light grey trousers stands on the floor in the middle of the room about two metres in front of the mural wall with his back to the camera, one arm raised and pointing up at the leopard cub sitting on the branch, his head tilted back to look up at it, his face turned away from the camera so no facial detail is visible, well away from the mural. Palette: mustard yellow, caramel, cream, pale oak and soft sage.",
-   "brief_framing": "Shot from the left part of the room at eye level, turned about 25 degrees toward the mural wall and pulled well back, so the RIGHT side wall is in view. The whole mural wall is in the frame in perspective, with a strip of ceiling above it and the skirting board below it; the wall fills the upper-middle of the tall frame and the floor fills the lower part.",
+   "brief_subject": "a calm biophilic bedroom for a child aged 2 to 5, with a low birch toddler daybed and a round oak wall shelf",
+   "brief_scene": "A bright room with a pale ash floor and warm greige walls. An oval wool rug with wavy edges holds wax crayons in a wooden cup, an open drawing book and a small wooden car. On the LEFT side wall, away from the mural: a low natural birch toddler daybed, 140 by 70 cm, with checkered and striped bolster pillows, a small potted fern on the floor beside it and a round oak shelf with two picture books. Crisp morning daylight from a window on the LEFT falls in clear patches on the floor. A toddler boy of about two and a half in a navy knit sweater and light grey trousers sits on the rug in the middle of the floor with his back to the camera, holding wax crayons in a wooden cup with an open drawing book on the rug, his face turned away from the camera so no facial detail is visible, well away from the mural. Palette: pale birch, soft sage, oat, bouclé cream and white.",
+   "brief_framing": "Shot from the right part of the room at eye level, turned about 25 degrees toward the mural wall, so the LEFT side wall is in view. The frame shows a floor-to-ceiling section of the mural wall around the biplanes and the striped hot-air balloons: the ceiling line at the top of the frame, the skirting board and a strip of floor at the bottom; the mural continues beyond the frame edges at its true scale.",
    "with_texture": true,
    "brief_people": "from_behind",
    "brief_product": "the wall mural",
    "brief_product_short": "the mural",
-   "brief_wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it."
+   "brief_wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, at its true scale, drawing and colours unchanged; nothing stands in front of it."
   }
  },
  "4": {
@@ -218,13 +218,13 @@
  "14": {
   "class_type": "MoonbloomDesign",
   "inputs": {
-   "scene_id": "l11_reel01_s2_product_brief",
+   "scene_id": "l31_reel01_s2_product_brief",
    "aspect_ratio": "9:16",
-   "age_group": "schulkind",
-   "style": "Woodland Nature",
-   "color": "Cocoa Brown",
+   "age_group": "baby",
+   "style": "Boho",
+   "color": "Soft Sand",
    "key_object": "random",
-   "lighting": "warm golden hour sunlight",
+   "lighting": "soft afternoon window light",
    "camera_angle": "random",
    "camera_elevation": "random",
    "camera_distance": "random",
@@ -232,18 +232,18 @@
    "composition": "unobstructed",
    "clean_random_details": false,
    "variation": 0,
-   "camera_body": "Hasselblad H6D-100c",
-   "lens": "35mm prime lens",
+   "camera_body": "Sony A7R V",
+   "lens": "28mm gentle wide lens",
    "aperture": "f/11 aperture",
    "prompt_mode": "brief",
-   "brief_subject": "a calm, natural room for a school-age kid (6 to 10 years) with a low reading bench and warm oak",
-   "brief_scene": "A bright room with a warm oak floor. A large round natural wool rug in warm oat lies on the floor with nothing on it. On the LEFT side wall, away from the mural: a low solid-oak reading bench (40 cm high) with two books stacked at one end, and above it one small framed botanical print. Warm golden hour sunlight from a window on the LEFT lies in long soft patches across the floor. A sheer cream linen curtain hangs at the extreme right edge of the frame, close to the camera and slightly out of focus, as a foreground layer. Palette: warm oak, oat, soft sage and white.",
-   "brief_framing": "Shot from the right part of the room at natural eye level, turned about 30 degrees toward the mural wall and pulled well back, so the LEFT side wall is in view. The whole mural wall is in the frame in perspective, from its near edge to the far corner, with a strip of ceiling above it and the skirting board below it; the wall fills the upper-middle of the tall frame and the floor fills the lower part. Nothing stands in front of the mural.",
+   "brief_subject": "a warm boho nursery for a baby under 2, with a circular quilted play mat and a low birch book ledge",
+   "brief_scene": "A soft nursery with a terracotta tile floor and sand-coloured walls. A rust-striped cotton dhurrie lies on the tiles, with two cloth baby books and a wooden teething ring on the quilted mat. On the RIGHT side wall, away from the mural: a circular quilted organic cotton mat with wooden sensory blocks, a low birch book ledge 35 cm high with cloth books, and a small round ceramic vase with dried grasses. Soft afternoon light from a window on the RIGHT lies in warm patches on the tiles. A sheer cream linen curtain hangs at the extreme left edge of the frame, close to the camera and slightly out of focus, as a foreground layer. Palette: terracotta, warm brown, muted green, cream and birch.",
+   "brief_framing": "Shot from the left part of the room at natural eye level, turned about 30 degrees toward the mural wall, so the RIGHT side wall is in view. The frame shows a floor-to-ceiling section of the mural wall around the biplanes and the striped hot-air balloons: the ceiling line at the top of the frame, the skirting board and a strip of floor at the bottom; the mural continues beyond the frame edges at its true scale. Nothing stands in front of the mural.",
    "with_texture": true,
    "brief_people": "none",
    "brief_product": "the wall mural",
    "brief_product_short": "the mural",
-   "brief_wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, drawing and colours unchanged; the whole wall stays visible and nothing stands in front of it."
+   "brief_wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, at its true scale, drawing and colours unchanged; nothing stands in front of it."
   }
  },
  "15": {
