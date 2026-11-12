@@ -419,6 +419,7 @@ class MoonbloomKieKling:
             "optional": {
                 "prompt_suffix": ("STRING", {"multiline": True, "default": ""}),
                 "prompt_override": ("STRING", {"multiline": True, "default": ""}),
+                "motion_zone": ("STRING", {"default": "", "tooltip": "MURAL LOCK (locked camera only): a polygon [[x, y], ...] or 'x0,y0,x1,y1' in fractions of the frame. Outside it every frame of the file is the first frame, so the wall cannot move. Empty = no lock."}),
             },
         }
 
@@ -435,7 +436,7 @@ class MoonbloomKieKling:
         return float("nan") if dry_run else CODE_STAMP
 
     def animate(self, image_path, scene_id, out_dir, listing, duration, sound, min_motion_delta,
-                reuse_existing, dry_run, prompt_suffix="", prompt_override=""):
+                reuse_existing, dry_run, prompt_suffix="", prompt_override="", motion_zone=""):
         if not image_path or not Path(image_path).exists():
             raise FileNotFoundError(f"image_path does not exist: {image_path!r} (pick the approved frame first)")
         out_path = Path(out_dir) / f"{scene_id}__kling26_pushin_9x16.mp4"
@@ -446,7 +447,7 @@ class MoonbloomKieKling:
         bridge.animate_interior_scene(
             image_path=Path(image_path), output_mp4_path=out_path, listing_name=listing, scene_name=scene_id,
             custom_prompt_suffix=prompt_suffix.strip(), prompt=prompt_override.strip() or DEFAULT_PROMPT,
-            duration=duration, sound=sound, min_motion_delta=min_motion_delta, dry_run=dry_run,
+            duration=duration, sound=sound, min_motion_delta=min_motion_delta, dry_run=dry_run, motion_zone=motion_zone.strip() or None,
         )  # raises RuntimeError / MotionGuardError: ComfyUI shows it on the node
         result = bridge.last_result
         motion_ok = bool((result.get("motion") or {}).get("ok", dry_run))

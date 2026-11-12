@@ -16,6 +16,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from . import mural_lock
 from .config import PipelineConfig
 from .prompts import build_brief_prompt, clip_prompt
 
@@ -189,7 +190,7 @@ def _palette_without(palette: str, accent: str) -> str:
 
 def compose(kit: Dict[str, Any], role_name: str, roles: Dict[str, Any], listing: Dict[str, Any], set_id: str, slot: str, seed: int,
             aspect: str = "9:16", audience: Optional[str] = None, motion_extra: str = "", motion_override: str = "", child_gender: Optional[str] = None,
-            camera: str = "", light: str = "") -> Dict[str, Any]:
+            camera: str = "", light: str = "", motion_zone: Any = None, min_motion_delta: Optional[float] = None) -> Dict[str, Any]:
     """One slot: the photo card (the format the board builder reads) and the clip of that photo (+ `person`, who stands in it). `motion_extra` (a slot's own sentence about the light or the weather) is added to the role's motion.
     `camera` / `light` (ids of specs/video_motion.json; the role's own `camera_move` / `light_motion` are the defaults) fill {camera_move} / {light_motion} in a motion text that has them."""
     role = roles["roles"][role_name]
@@ -231,6 +232,10 @@ def compose(kit: Dict[str, Any], role_name: str, roles: Dict[str, Any], listing:
     clip = {"scene_id": card_id, "frame_scene_id": f"{card_id}_brief", "clip": f"{card_id}__kling26.mp4",
             "motion": (_fill(motion_override or role["motion"], **names) + (" " + _fill(motion_extra, **names).strip() if motion_extra.strip() else "")), "items": kit["items"], "min_motion_delta": role["min_motion_delta"],
             "people": role["people"] != "none", "video_model": role.get("video_model") or "kling26"}
+    if min_motion_delta is not None:  # a slot may set its own (a clip whose motion is measured inside a zone is a smaller number than the whole frame)
+        clip["min_motion_delta"] = min_motion_delta
+    if motion_zone:  # the MURAL LOCK (reels_pipeline/mural_lock.py): the zone where the clip may move; everything else is the first frame
+        clip["motion_zone"] = motion_zone
     if uses_vocab:
         clip["camera_move"], clip["light_motion"] = cam_id, light_id  # the ids stay on the clip: the checks read their status from the vocabulary
     return {"card": card, "clip": clip, "person": who}
@@ -275,7 +280,7 @@ def plan_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
         used.append(kit_id)
         out = compose(kits[kit_id], entry["role"], roles, brief_rules, spec["id"], entry["slot"], spec["seed"], spec["aspect"], audience=listing_spec.get("audience"),
                        motion_extra=entry.get("motion_extra", ""), motion_override=entry.get("motion_override", ""), child_gender=asked,
-                       camera=entry.get("camera", ""), light=entry.get("light", ""))
+                       camera=entry.get("camera", ""), light=entry.get("light", ""), motion_zone=entry.get("motion_zone"), min_motion_delta=entry.get("min_motion_delta"))
         cards.append(out["card"])
         clips.append(out["clip"])
         persons.append(out["person"])
@@ -475,6 +480,13 @@ def check_plan(plan: Dict[str, Any], spec: Dict[str, Any], kits: Dict[str, Dict[
             if word in lowered:
                 problems.append(f"{cid}: banned camera move or motion word {word!r} in the clip prompt")
         problems.extend(f"{cid}: {text}" for text in _vocabulary_problems(clip, ("banned_by_owner", "avoid")))
+        if clip.get("motion_zone"):
+            try:
+                mural_lock.parse_zone(clip["motion_zone"])
+            except ValueError as exc:
+                problems.append(f"{cid}: motion_zone: {exc}")
+            if "camera does not move at all" not in clip["motion"] and clip.get("camera_move") != "locked_off":
+                problems.append(f"{cid}: a motion zone (the mural lock keeps the first frame outside it) needs a locked camera: a moving camera changes the whole picture")
     cons = spec.get("constraints", {})
     used = [s["kit"] for s in plan["slots"]]
     if cons.get("distinct_kits", True) and len(set(used)) != len(used):

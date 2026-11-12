@@ -19,7 +19,7 @@ Everything in this repository is a tool for that goal: the SPA, the ComfyUI boar
 - **Pipeline** (Python + KIE) = the agent's tool: planned sets for ads (reel, carousel), people from behind, several models with one key, export per destination, the money guard.
 - **ComfyUI** is only the window that shows a run. It is frozen: nothing new is built into the boards, the bridge or the nodes.
 - One function lives in one place: crop and upscale on the site; sets, export and clips with people in the pipeline.
-- **Video is paused** until the first photo set made by this workflow is approved and published.
+- **Video resumed 12.11 (owner) for Listing 31**, one clip at a time. The mural never moves: see rule 17.
 
 ## Workflow of a photo set (follow in this order; 2-3 owner replies)
 
@@ -61,8 +61,9 @@ The director (`scripts/director.py`, `reels_pipeline/director.py`, `dealer.py`, 
 14. Stop rule against bloat: a new code check, data file or test is added only after the same mistake happened twice. Before that it is one line in this list. A problem of a set is fixed in data, not in code.
 15. Commit and push only on the owner's word. The site is deployed from `main`.
 
-**Video (paused)**
-16. When it resumes: 720p minimum, Kling 2.6 (Grok is out), no plain zoom or push-in, clips only from approved frames, the owner assembles the reel. The open questions are listed in `AGENTS.md`.
+**Video**
+16. 720p minimum, Kling 2.6 (Grok is out), no plain zoom or push-in, clips only from approved frames, the owner assembles the reel. The open questions are listed in `AGENTS.md`.
+17. **The mural never moves (owner 12.11, strictly forbidden).** The model cannot be forbidden anything (no negative prompt, no mask), so the NODE decides what is in the file: a clip is shot with a LOCKED camera and its slot carries a `motion_zone` (a polygon around what acts: the child, the toy, the light on the floor, never the wall); after the paid download `reels_pipeline/mural_lock.py` makes every pixel outside the zone equal to the first frame (the model's own file stays as `__raw.mp4`). A moving-camera clip (a walk-in) cannot be locked and is not ordered for a mural. Offline check: `scripts/lock_clip.py`.
 
 ## Commands
 

@@ -1,0 +1,93 @@
+{
+ "_meta": {
+  "source": "live GET /object_info",
+  "fetched_at": "2026-11-12T17:30:30Z"
+ },
+ "class_name": "MoonbloomKieOmniVideo",
+ "display_name": "Moonbloom KIE Gemini Omni 1.2 Video (paid)",
+ "category": "Moonbloom",
+ "required_inputs": {
+  "image_path": {
+   "type": "STRING",
+   "default": ""
+  },
+  "scene_id": {
+   "type": "STRING",
+   "default": "scene_01"
+  },
+  "out_dir": {
+   "type": "STRING",
+   "default": ""
+  },
+  "listing": {
+   "type": "STRING",
+   "default": ""
+  },
+  "resolution": {
+   "type": "COMBO",
+   "choices": [
+    "720p",
+    "1080p",
+    "4k"
+   ],
+   "default": "720p"
+  },
+  "duration": {
+   "type": "INT",
+   "default": 5,
+   "min": 3,
+   "max": 15,
+   "tooltip": "Seconds. First frame only: 3-15. With a last frame: 3-10."
+  },
+  "min_motion_delta": {
+   "type": "FLOAT",
+   "default": 15.0,
+   "min": 0.0,
+   "max": 100.0,
+   "step": 0.5
+  },
+  "reuse_existing": {
+   "type": "BOOLEAN",
+   "default": true
+  },
+  "dry_run": {
+   "type": "BOOLEAN",
+   "default": true,
+   "tooltip": "ON (default): only checks the request and shows the LIVE price, nothing is sent and no credits are spent. OFF: pays KIE credits."
+  }
+ },
+ "optional_inputs": {
+  "last_image_path": {
+   "type": "STRING",
+   "default": "",
+   "tooltip": "A file path: the clip ends on this frame (the model interpolates). Empty = first frame only."
+  },
+  "prompt_override": {
+   "type": "STRING",
+   "default": "",
+   "multiline": true
+  },
+  "seed": {
+   "type": "INT",
+   "default": 0,
+   "min": 0,
+   "max": 99999,
+   "tooltip": "0 = random; otherwise 10000-99999 (KIE's range)."
+  }
+ },
+ "outputs": {
+  "types": [
+   "STRING",
+   "STRING",
+   "BOOLEAN"
+  ],
+  "names": [
+   "video_path",
+   "report",
+   "motion_ok"
+  ]
+ },
+ "output_node": true,
+ "hidden_inputs": [],
+ "python_module": "nodes"
+}

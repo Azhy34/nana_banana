@@ -71,17 +71,43 @@
       "scene_id": "l31_reel01_s1_play",
       "frame_scene_id": "l31_reel01_s1_play_brief",
       "clip": "l31_reel01_s1_play__kling26.mp4",
-      "motion": "The camera stays completely still on a tripod and does not move at all. A toddler boy of about two and a half in a navy knit sweater and light grey trousers sits on the rug with his back to the camera and slowly plays with wax crayons in a wooden cup with an open drawing book on the rug, moving it along the rug and then picking up the next toy. His face is never visible to the camera, not even in profile: only the back of his head, his hair and his clothes are seen. He stays on the rug, far from the biplanes and the striped hot-air balloons, and never passes in front of the mural. The warm light stays constant.",
+      "motion": "The camera does not move at all: it is a fixed, static shot. A toddler boy of about two and a half in a navy knit sweater and light grey trousers sits on the rug with his back to the camera, his head bowed toward the open drawing book on the rug in front of him. Calmly and at a natural pace he draws on the page with a crayon in his right hand, making small unhurried strokes, while his left hand rests on the page. Only his right hand and forearm move; he stays seated and his head stays bowed. Only the back of his head, his hair and his clothes are seen.",
       "items": "daybed, bolster pillows, round shelf, potted fern, oval rug, crayon cup, drawing book, wooden car, picture frame and architecture",
-      "min_motion_delta": 3.0,
+      "min_motion_delta": 1.0,
       "people": true,
-      "video_model": "kling26"
+      "video_model": "kling26",
+      "motion_zone": [
+        [
+          0.27,
+          0.605
+        ],
+        [
+          0.47,
+          0.605
+        ],
+        [
+          0.5,
+          0.725
+        ],
+        [
+          0.84,
+          0.752
+        ],
+        [
+          0.84,
+          0.86
+        ],
+        [
+          0.27,
+          0.86
+        ]
+      ]
     },
     {
       "scene_id": "l31_reel01_s2_product",
       "frame_scene_id": "l31_reel01_s2_product_brief",
       "clip": "l31_reel01_s2_product__kling26.mp4",
-      "motion": "A smooth slow first-person walk-in: the camera advances steadily straight forward into the room at natural eye level, as if a person is slowly entering, with no sideways drift, no tilt and no rotation. The sheer cream curtain in the extreme foreground on the left leaves the frame as the camera advances past it, and the nearer objects shift more than the farther ones, giving a natural depth parallax.",
+      "motion": "The camera advances straight forward into the room at a clearly visible calm walking pace, about one metre in five seconds, as if a person is entering, with no sideways drift, no tilt and no rotation. The sheer cream curtain at the extreme left edge of the frame leaves the frame as the camera advances past it, and the nearer objects shift more than the farther ones, giving a natural depth parallax. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently.",
       "items": "quilted mat, sensory blocks, book ledge, dhurrie rug, cloth books, teething ring, ceramic vase, picture frame and architecture",
       "min_motion_delta": 10.0,
       "people": false,

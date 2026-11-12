@@ -40,7 +40,35 @@
         "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
         "life_action": "stays still",
         "toy": "wax crayons in a wooden cup with an open drawing book on the rug"
-      }
+      },
+      "motion_override": "The camera does not move at all: it is a fixed, static shot. {person} sits on the rug with {her} back to the camera, {her} head bowed toward the open drawing book on the rug in front of {him}. Calmly and at a natural pace {she} draws on the page with a crayon in {her} right hand, making small unhurried strokes, while {her} left hand rests on the page. Only {her} right hand and forearm move; {she} stays seated and {her} head stays bowed. Only the back of {her} head, {her} hair and {her} clothes are seen.",
+      "motion_zone": [
+        [
+          0.27,
+          0.605
+        ],
+        [
+          0.47,
+          0.605
+        ],
+        [
+          0.5,
+          0.725
+        ],
+        [
+          0.84,
+          0.752
+        ],
+        [
+          0.84,
+          0.86
+        ],
+        [
+          0.27,
+          0.86
+        ]
+      ],
+      "min_motion_delta": 1.0
     },
     {
       "slot": "s2",
@@ -70,7 +98,8 @@
         "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
         "life_action": "stays still",
         "toy": "two cloth baby books and a wooden teething ring lying on the quilted play mat on the floor"
-      }
+      },
+      "motion_override": "The camera advances straight forward into the room at a clearly visible calm walking pace, about one metre in five seconds, as if a person is entering, with no sideways drift, no tilt and no rotation. The sheer cream curtain at the extreme {door_side} edge of the frame leaves the frame as the camera advances past it, and the nearer objects shift more than the farther ones, giving a natural depth parallax. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently."
     }
   ],
   "design": {

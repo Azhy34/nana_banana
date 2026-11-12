@@ -170,6 +170,31 @@
    "motion_ok"
   ]
  },
+ "MoonbloomKieOmniVideo": {
+  "display_name": "Moonbloom KIE Gemini Omni 1.2 Video (paid)",
+  "category": "Moonbloom",
+  "required": [
+   "image_path",
+   "scene_id",
+   "out_dir",
+   "listing",
+   "resolution",
+   "duration",
+   "min_motion_delta",
+   "reuse_existing",
+   "dry_run"
+  ],
+  "optional": [
+   "last_image_path",
+   "prompt_override",
+   "seed"
+  ],
+  "outputs": [
+   "video_path",
+   "report",
+   "motion_ok"
+  ]
+ },
  "MoonbloomListingScene": {
   "display_name": "Moonbloom Listing Scene (prompt from the app)",
   "category": "Moonbloom",

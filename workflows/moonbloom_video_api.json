@@ -1,42 +1,46 @@
 {
  "1": {
-  "class_type": "MoonbloomKieKling",
+  "class_type": "MoonbloomFramePicker",
   "inputs": {
-   "image_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/b5c.png",
-   "scene_id": "l11_b5c_kling_drift",
-   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/video",
-   "listing": "Листинг 11",
-   "min_motion_delta": 2.0,
-   "reuse_existing": true,
-   "dry_run": true,
-   "duration": "5",
-   "sound": false,
-   "prompt_suffix": "",
-   "prompt_override": "The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted animal remain exactly as in the first frame."
+   "frame": "l31_reel01_s1_play_brief__nb21.png"
   }
  },
  "2": {
-  "class_type": "PreviewAny",
+  "class_type": "PreviewImage",
   "inputs": {
-   "source": [
+   "images": [
     "1",
-    1
+    0
    ]
   }
  },
  "3": {
-  "class_type": "MoonbloomKieOmniVideo",
+  "class_type": "MoonbloomKieKling",
   "inputs": {
-   "image_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/b5c.png",
-   "scene_id": "l11_b5c_omni_drift",
-   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/video",
-   "listing": "Листинг 11",
-   "min_motion_delta": 2.0,
+   "image_path": [
+    "1",
+    1
+   ],
+   "scene_id": [
+    "1",
+    2
+   ],
+   "out_dir": [
+    "1",
+    3
+   ],
+   "listing": [
+    "1",
+    4
+   ],
+   "duration": "5",
+   "sound": false,
+   "min_motion_delta": 1.0,
    "reuse_existing": true,
    "dry_run": true,
-   "resolution": "720p",
-   "duration": 5,
-   "prompt_override": "The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted animal remain exactly as in the first frame. The sound is a quiet room tone."
+   "prompt_suffix": "",
+   "prompt_override": "The camera does not move at all: it is a fixed, static shot. A toddler boy of about two and a half in a navy knit sweater and light grey trousers sits on the rug with his back to the camera, his head bowed toward the open drawing book on the rug in front of him. Calmly and at a natural pace he draws on the page with a crayon in his right hand, making small unhurried strokes, while his left hand rests on the page. Only his right hand and forearm move; he stays seated and his head stays bowed. Only the back of his head, his hair and his clothes are seen. The mural on the wall stays perfectly still and unchanged: the painted biplanes, hot-air balloons, birds, clouds, mountains and pine trees remain exactly as in the first frame, flat printed artwork. The daybed, bolster pillows, round shelf, potted fern, oval rug, crayon cup, drawing book, wooden car, picture frame and architecture stay perfectly still, solid and fixed in the room. Every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are and nothing turns toward the lens.",
+   "motion_zone": "[[0.27, 0.605], [0.47, 0.605], [0.5, 0.725], [0.84, 0.752], [0.84, 0.86], [0.27, 0.86]]"
   }
  },
  "4": {
@@ -44,6 +48,59 @@
   "inputs": {
    "source": [
     "3",
+    1
+   ]
+  }
+ },
+ "5": {
+  "class_type": "MoonbloomFramePicker",
+  "inputs": {
+   "frame": "l31_reel01_s2_product_brief__nb21.png"
+  }
+ },
+ "6": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "5",
+    0
+   ]
+  }
+ },
+ "7": {
+  "class_type": "MoonbloomKieKling",
+  "inputs": {
+   "image_path": [
+    "5",
+    1
+   ],
+   "scene_id": [
+    "5",
+    2
+   ],
+   "out_dir": [
+    "5",
+    3
+   ],
+   "listing": [
+    "5",
+    4
+   ],
+   "duration": "5",
+   "sound": false,
+   "min_motion_delta": 10.0,
+   "reuse_existing": true,
+   "dry_run": true,
+   "prompt_suffix": "",
+   "prompt_override": "The camera advances straight forward into the room at a clearly visible calm walking pace, about one metre in five seconds, as if a person is entering, with no sideways drift, no tilt and no rotation. The sheer cream curtain at the extreme left edge of the frame leaves the frame as the camera advances past it, and the nearer objects shift more than the farther ones, giving a natural depth parallax. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: the painted biplanes, hot-air balloons, birds, clouds, mountains and pine trees remain exactly as in the first frame, flat printed artwork. The quilted mat, sensory blocks, book ledge, dhurrie rug, cloth books, teething ring, ceramic vase, picture frame and architecture stay perfectly still, solid and fixed in the room.",
+   "motion_zone": ""
+  }
+ },
+ "8": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "7",
     1
    ]
   }

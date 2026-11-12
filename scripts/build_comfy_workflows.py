@@ -220,9 +220,14 @@ def designs(dry_run: bool, model: str, card_ids: tuple, video: bool = False, vid
                 "duration": vspec["duration"], "sound": vspec["sound"],
                 "min_motion_delta": clip.get("min_motion_delta", vspec["min_motion_delta"]),
                 "reuse_existing": True, "dry_run": video_dry_run,
-                "prompt_suffix": clip.get("prompt_suffix", ""), "prompt_override": clip_prompt(clip, vspec)}}
+                "prompt_suffix": clip.get("prompt_suffix", ""), "prompt_override": clip_prompt(clip, vspec), "motion_zone": zone_text(clip)}}
             graph[report] = {"class_type": "PreviewAny", "inputs": {"source": [kling, 1]}}  # report: prompt, price, motion
     return graph
+
+
+def zone_text(clip: dict) -> str:
+    """The mural-lock zone of a clip for the Kling node (a JSON polygon), "" when the clip has none (a moving camera cannot be locked)."""
+    return json.dumps(clip["motion_zone"]) if clip.get("motion_zone") else ""
 
 
 def load_active() -> dict:
@@ -277,7 +282,7 @@ def video_board(active: dict = None) -> dict:
             "duration": vspec["duration"], "sound": vspec["sound"],
             "min_motion_delta": clip.get("min_motion_delta", vspec["min_motion_delta"]),
             "reuse_existing": True, "dry_run": True,
-            "prompt_suffix": clip.get("prompt_suffix", ""), "prompt_override": clip_prompt(clip, vspec)}}
+            "prompt_suffix": clip.get("prompt_suffix", ""), "prompt_override": clip_prompt(clip, vspec), "motion_zone": zone_text(clip)}}
         graph[report] = {"class_type": "PreviewAny", "inputs": {"source": [kling, 1]}}  # report: prompt, price, motion
         grok = video.get("grok")  # optional: a Grok video node on the SAME frame next to Kling (a comparison; Kling stays the working model)
         if grok and scene in set(grok.get("scenes") or scenes):

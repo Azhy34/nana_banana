@@ -1,7 +1,7 @@
 {
  "_meta": {
   "source": "live GET /object_info",
-  "fetched_at": "2026-11-08T16:56:14Z"
+  "fetched_at": "2026-11-12T17:30:30Z"
  },
  "class_name": "MoonbloomListingScene",
  "display_name": "Moonbloom Listing Scene (prompt from the app)",
@@ -21,11 +21,16 @@
     "listing06_video.json",
     "listing07_interiors.json",
     "listing07_video.json",
+    "listing11_interiors.json",
+    "listing11_video.json",
+    "listing31_interiors.json",
+    "listing31_video.json",
     "listing45_interiors.json",
     "listing45_video.json",
     "retarget_messages.json",
     "roles.json",
-    "video_models.json"
+    "video_models.json",
+    "video_motion.json"
    ]
   },
   "card_number": {

@@ -18,33 +18,12 @@
     "spec": "listing31_interiors.json"
   },
   "video": {
-    "scenes": [],
-    "spec": "listing11_interiors.json",
-    "video_spec": "listing11_video.json",
-    "explicit_clips": [
-      {
-        "id": "l11_b5c_kling_drift",
-        "model": "kling26",
-        "image": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/b5c.png",
-        "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/video",
-        "listing": "Листинг 11",
-        "duration": 5,
-        "sound": false,
-        "min_motion_delta": 2.0,
-        "prompt": "The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted animal remain exactly as in the first frame."
-      },
-      {
-        "id": "l11_b5c_omni_drift",
-        "model": "omni12",
-        "image": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/b5c.png",
-        "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 11/build-up/video",
-        "listing": "Листинг 11",
-        "duration": 5,
-        "resolution": "720p",
-        "min_motion_delta": 2.0,
-        "prompt": "The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted animal remain exactly as in the first frame. The sound is a quiet room tone."
-      }
-    ]
+    "scenes": [
+      "l31_reel01_s1_play",
+      "l31_reel01_s2_product"
+    ],
+    "spec": "listing31_interiors.json",
+    "video_spec": "listing31_video.json"
   },
   "set": "l31_reel01"
 }

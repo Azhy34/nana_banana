@@ -24,6 +24,7 @@ from api_discovery.kie_kling.models import Kling26Input, KlingTaskCreateRequest
 
 from . import live_price
 from .config import PipelineConfig
+from . import mural_lock
 from .motion_guard import MIN_FIRST_LAST_DELTA, check_motion
 from .preflight import PreflightShield
 from .telemetry import TelemetryLogger
@@ -82,10 +83,13 @@ class KlingBridge:
         sound: bool = False,
         min_motion_delta: float = MIN_FIRST_LAST_DELTA,
         dry_run: bool = False,
+        motion_zone: Optional[str] = None,
     ) -> Path:
         """
         Animate one approved 9:16 interior. Returns the MP4 path; details are in self.last_result.
         Raises RuntimeError on API problems and MotionGuardError when the clip is frozen.
+        motion_zone (a polygon in fractions of the frame, see mural_lock.py): the clip is shot with a LOCKED camera and after the download every pixel outside the
+        zone is made equal to the first frame, so the mural cannot move; the model's own file is kept as <name>__raw.mp4. min_motion_delta is then measured in the zone.
         dry_run=True validates everything locally (prompt, request shape, balance, cost) and sends nothing.
         """
         trace_id = trace_id or TelemetryLogger.generate_trace_id()
@@ -103,6 +107,8 @@ class KlingBridge:
         status, error = "failed", None
         try:
             self.build_request("https://example.invalid/placeholder.jpg", positive, duration, sound)  # schema check
+            zone = mural_lock.parse_zone(motion_zone)  # a bad zone is refused BEFORE anything is paid
+            result["motion_zone"] = zone or None
             result["price_source"] = price_source
             if price_source != "live":
                 result["price_warning"] = f"KIE price could not be read; showing the fallback table value {cost}"
@@ -141,7 +147,10 @@ class KlingBridge:
             result["credits_source"] = bill["billed_source"]  # kie_task = KIE's own creditsConsumed of this task
             result["billing_warning"] = bill["billing_warning"]  # set when KIE billed another number than the quote
 
-            result["motion"] = check_motion(output_mp4_path, min_motion_delta)
+            if zone:
+                result["lock"], result["motion"] = mural_lock.lock_in_place(output_mp4_path, zone, min_motion_delta)
+            else:
+                result["motion"] = check_motion(output_mp4_path, min_motion_delta)
             if not result["motion"]["ok"]:
                 status = "failed_motion"
                 raise MotionGuardError(
