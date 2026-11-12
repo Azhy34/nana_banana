@@ -10,7 +10,7 @@ whole room, every frame of the file is the first frame. Whatever the model did t
 Not possible with a MOVING camera (a walk-in): there the whole picture legitimately changes. Such a clip has no zone and no lock.
 
 The work is done in the YUV 4:2:0 planes of the source (no colour conversion, so outside the zone the picture is the source's own) and the result is encoded once
-with H.264 (the file is saved twice: `<name>__raw.mp4` as the model made it, `<name>.mp4` locked). The report says how much the model moved the wall (what was
+with H.264 (the file is saved twice: `_raw/<name>__raw.mp4` as the model made it, `<name>.mp4` locked). The report says how much the model moved the wall (what was
 removed), how still the locked file really is (read back from the file), and whether motion reaches the edge of the zone (the lock would cut a moving hand).
 """
 
@@ -58,22 +58,39 @@ def zone_area(points: List[Point]) -> float:
 
 
 def _polygon(points: List[Point], width: int, height: int) -> np.ndarray:
-    import cv2
+    """uint8 0/1 mask of the polygon. PIL and numpy only: the node runs inside ComfyUI, which has no OpenCV."""
+    from PIL import Image, ImageDraw
 
-    mask = np.zeros((height, width), np.uint8)
-    pts = np.array([[round(x * (width - 1)), round(y * (height - 1))] for x, y in points], np.int32)
-    cv2.fillPoly(mask, [pts], 1)
-    return mask
+    image = Image.new("L", (width, height), 0)
+    ImageDraw.Draw(image).polygon([(round(x * (width - 1)), round(y * (height - 1))) for x, y in points], fill=1)
+    return np.asarray(image, dtype=np.uint8)
+
+
+def _grow(mask: np.ndarray, pixels: int, shrink: bool = False) -> np.ndarray:
+    """Dilate (or erode) a 0/1 mask by `pixels` with repeated 3x3 rank filters."""
+    from PIL import Image, ImageFilter
+
+    image = Image.fromarray(mask * 255)
+    for _ in range(pixels):
+        image = image.filter(ImageFilter.MinFilter(3) if shrink else ImageFilter.MaxFilter(3))
+    return (np.asarray(image) > 127).astype(np.uint8)
+
+
+def _resize(array: np.ndarray, size: Tuple[int, int]) -> np.ndarray:
+    """Area-average resize of a 2-D float32 / uint8 array to (width, height)."""
+    from PIL import Image
+
+    return np.asarray(Image.fromarray(array.astype(np.float32)).resize(size, Image.BOX), dtype=np.float32)
 
 
 def soft_mask(points: List[Point], width: int, height: int, feather: int = FEATHER_PX) -> np.ndarray:
     """float32 0..1: 1 deep inside the zone, a soft edge inside it, exactly 0 outside the polygon."""
-    import cv2
+    from PIL import Image, ImageFilter
 
     inside = _polygon(points, width, height)
-    core = cv2.erode(inside, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * feather + 1, 2 * feather + 1)))
-    soft = cv2.GaussianBlur(core.astype(np.float32), (0, 0), sigmaX=feather / 3.0)
-    return soft * inside
+    core = _grow(inside, feather, shrink=True)
+    blurred = Image.fromarray(core * 255).filter(ImageFilter.GaussianBlur(radius=feather / 3.0))
+    return (np.asarray(blurred, dtype=np.float32) / 255.0) * inside
 
 
 def _planes(arr: np.ndarray, width: int, height: int):
@@ -85,18 +102,13 @@ def _planes(arr: np.ndarray, width: int, height: int):
 
 
 def _grey_small(y: np.ndarray) -> np.ndarray:
-    import cv2
-
-    return cv2.resize(y, SMALL, interpolation=cv2.INTER_AREA).astype(np.float32)
+    return _resize(y, SMALL)
 
 
 def _regions(points: List[Point]):
     """Boolean masks at the measuring size: inside the zone, the ring just outside it, and the far field (everything else: the mural and the room)."""
-    import cv2
-
     inside = _polygon(points, SMALL[0], SMALL[1]).astype(bool)
-    k = max(3, int(round(RING_PX * SMALL[0] / 1080.0)) * 2 + 1)
-    grown = cv2.dilate(inside.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))).astype(bool)
+    grown = _grow(inside.astype(np.uint8), max(1, int(round(RING_PX * SMALL[0] / 1080.0)))).astype(bool)
     return inside, grown & ~inside, ~grown
 
 
@@ -108,7 +120,6 @@ def lock_clip(raw_path: Path, out_path: Path, zone: Union[str, Sequence, None], 
     """Write `out_path`: every frame = the first frame of `raw_path` outside the zone, the clip's own frame inside it (soft edge). Returns the report; raises
     ValueError for a bad zone or a clip with sound (a clip with a locked wall is silent: the sound models are not used for it)."""
     import av
-    import cv2
 
     points = parse_zone(zone)
     if not points:
@@ -129,7 +140,7 @@ def lock_clip(raw_path: Path, out_path: Path, zone: Union[str, Sequence, None], 
             raise ValueError(f"odd frame size {width}x{height}")
         fps = stream.average_rate or 24
         mask_y = soft_mask(points, width, height)
-        mask_c = np.clip(cv2.resize(mask_y, (width // 2, height // 2), interpolation=cv2.INTER_AREA), 0.0, 1.0)
+        mask_c = np.clip(_resize(mask_y, (width // 2, height // 2)), 0.0, 1.0)
         with av.open(str(out_path), "w") as dst:
             out_stream = dst.add_stream("libx264", rate=fps)
             out_stream.width, out_stream.height, out_stream.pix_fmt = width, height, "yuv420p"
@@ -176,7 +187,8 @@ def lock_in_place(clip_path: Path, zone: Union[str, Sequence, None], min_zone_de
     (lock report, motion report). The motion report has the shape of motion_guard.check_motion, but it measures the ZONE (the wall is still by construction):
     ok is False when nothing moves in the zone (a frozen clip)."""
     clip_path = Path(clip_path)
-    raw = clip_path.with_name(f"{clip_path.stem}__raw{clip_path.suffix}")
+    raw = clip_path.parent / "_raw" / f"{clip_path.stem}__raw{clip_path.suffix}"  # a subfolder: the file next to the folder's clips is always the LOCKED one
+    raw.parent.mkdir(parents=True, exist_ok=True)
     clip_path.replace(raw)
     try:
         report = lock_clip(raw, clip_path, zone)

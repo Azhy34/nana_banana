@@ -78,7 +78,7 @@ def test_a_clip_whose_zone_does_not_move_is_reported_frozen_and_the_models_file_
     clip = _synthetic_clip(tmp_path / "scene__kling26_pushin_9x16.mp4", wall_drift=1.0, mover=False)    # only the wall moved, nothing in the zone
     report, motion = mural_lock.lock_in_place(clip, ZONE, min_zone_delta=2.0)
     assert motion["ok"] is False and motion["first_last_delta"] < 2.0         # a locked clip with nothing moving in the zone is frozen: the node refuses it
-    assert (tmp_path / "scene__kling26_pushin_9x16__raw.mp4").is_file() and clip.is_file()               # the model's own file stays, next to the locked one
+    assert (tmp_path / "_raw" / "scene__kling26_pushin_9x16__raw.mp4").is_file() and clip.is_file()               # the model's own file stays, next to the locked one
     assert report["raw"]["model_moved_the_wall"] > 1.0
 
 
@@ -102,3 +102,11 @@ def test_the_zone_reaches_the_kling_node_and_the_board(tmp_path):
     builder = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(builder)
     assert builder.zone_text({"motion_zone": ZONE}) == json.dumps(ZONE) and builder.zone_text({}) == ""
+
+
+def test_the_lock_needs_no_opencv_because_the_node_runs_in_comfyui_which_has_none(tmp_path, monkeypatch):
+    # 12.11: the first paid clip (63 credits) was downloaded and then the lock failed with "No module named 'cv2'" inside ComfyUI
+    raw = _synthetic_clip(tmp_path / "c__raw.mp4", wall_drift=1.0)   # made first: the helper itself uses OpenCV
+    monkeypatch.setitem(__import__("sys").modules, "cv2", None)
+    report = mural_lock.lock_clip(raw, tmp_path / "c.mp4", ZONE)
+    assert report["locked"]["far_max"] < mural_lock.LOCKED_STILL_MAX and report["locked"]["inside_first_last"] > 3.0
