@@ -109,6 +109,8 @@ class KlingBridge:
             self.build_request("https://example.invalid/placeholder.jpg", positive, duration, sound)  # schema check
             zone = mural_lock.parse_zone(motion_zone)  # a bad zone is refused BEFORE anything is paid
             result["motion_zone"] = zone or None
+            if zone:  # the lock must be able to run IN THIS PROCESS (ComfyUI's Python) before a single credit is spent
+                result["lock_selfcheck"] = {k: mural_lock.self_check()[k] for k in ("ok", "frames")}
             result["price_source"] = price_source
             if price_source != "live":
                 result["price_warning"] = f"KIE price could not be read; showing the fallback table value {cost}"
@@ -185,6 +187,6 @@ class KlingBridge:
                     "expected_credits": cost, "price_source": result.get("price_source"),
                     "credits_source": result.get("credits_source"), "billing_warning": result.get("billing_warning"),
                     "balance_before": result["balance_before"],
-                    "balance_after": result["balance_after"], "motion": result["motion"], "dry_run": dry_run,
+                    "balance_after": result["balance_after"], "motion": result["motion"], "dry_run": dry_run, "lock_selfcheck": result.get("lock_selfcheck"),
                 },
             )

@@ -215,3 +215,28 @@ def _read_back(path: Path, points: List[Point]) -> Dict[str, float]:
             far_max = max(far_max, _mean(diff, far_s))
             inside_last = _mean(diff, inside_s)
     return {"far_max": round(far_max, 3), "inside_first_last": round(inside_last, 2)}
+
+
+def self_check() -> Dict[str, Any]:
+    """Run the lock on a tiny synthetic clip IN THE CURRENT PROCESS and return its report. The Kling node calls this before it spends anything: the first paid clip
+    (12.11, 63 credits) was downloaded and then the lock failed because ComfyUI's Python had no OpenCV, which a dry run could not show. Raises when the lock cannot run here."""
+    import tempfile
+
+    import av
+
+    size_w, size_h, frames = 128, 128, 6
+    rng = np.random.default_rng(3)
+    base = rng.integers(60, 200, (size_h, size_w), dtype=np.uint8)
+    with tempfile.TemporaryDirectory(prefix="mural_lock_check_") as folder:
+        raw, out = Path(folder) / "raw.mp4", Path(folder) / "out.mp4"
+        with av.open(str(raw), "w") as container:
+            stream = container.add_stream("libx264", rate=24)
+            stream.width, stream.height, stream.pix_fmt = size_w, size_h, "yuv420p"
+            for t in range(frames):
+                gray = np.roll(base, t, axis=1).copy()
+                gray[80:110, 20 + 6 * t:40 + 6 * t] = 255
+                for packet in stream.encode(av.VideoFrame.from_ndarray(np.stack([gray] * 3, axis=-1), format="rgb24")):
+                    container.mux(packet)
+            for packet in stream.encode():
+                container.mux(packet)
+        return lock_clip(raw, out, [[0.1, 0.55], [0.9, 0.55], [0.9, 0.95], [0.1, 0.95]])

@@ -110,3 +110,11 @@ def test_the_lock_needs_no_opencv_because_the_node_runs_in_comfyui_which_has_non
     monkeypatch.setitem(__import__("sys").modules, "cv2", None)
     report = mural_lock.lock_clip(raw, tmp_path / "c.mp4", ZONE)
     assert report["locked"]["far_max"] < mural_lock.LOCKED_STILL_MAX and report["locked"]["inside_first_last"] > 3.0
+
+
+def test_the_self_check_proves_the_lock_runs_in_this_process_before_anything_is_paid(monkeypatch):
+    report = mural_lock.self_check()
+    assert report["frames"] == 6 and report["locked"]["far_max"] < mural_lock.LOCKED_STILL_MAX
+    monkeypatch.setitem(__import__("sys").modules, "av", None)                  # a process without PyAV would say so instead of failing after the download
+    with pytest.raises(ImportError):
+        mural_lock.self_check()
