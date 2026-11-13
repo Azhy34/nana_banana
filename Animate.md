@@ -1,4 +1,4 @@
-# Animate — Оживление интерьеров через Gemini Omni 1.1 Flash & Veo 3.1 (image-to-video)
+# Animate — Оживление интерьеров через Gemini Omni 1.2 Flash & Veo 3.1 (image-to-video)
 
 Документ фичи: вкладка **Video** + кнопка **🎬 Video** в Batch (карточки 9:16). Цель — короткие "живые" видео интерьеров с обоями для Pinterest-пинов и видео-листингов Etsy. Обои — продаваемый товар: узор, цвета, персонажи и фактура материала не должны искажаться при анимации.
 
@@ -6,16 +6,17 @@
 
 | Вопрос | Решение |
 |---|---|
-| Основной движок | **Gemini Omni 1.1 Flash** (`gemini-omni-1.1-flash`) по умолчанию через Google Interactions API |
+| Основной движок | **Gemini Omni 1.2 Flash** (`gemini-omni-1.2-flash`, GA 05.11.2026) по умолчанию через Google Interactions API |
 | Альтернативный движок | **Veo 3.1 Fast** (`veo-3.1-fast-generate-preview`, 6 сек, predictLongRunning) |
-| Разрешение Omni | **720p** ($0.50, минимум Etsy: 720×1280) или **360p** ($0.15, черновик) |
-| Длительность | **5 секунд** (Omni 1.1) / **6 секунд** (Veo 3.1) |
+| Разрешение Omni | **720p** (≈ $0.07/с, минимум Etsy: 720×1280), **1080p** (≈ $0.104/с, апскейл Google, рекомендация Etsy, выдаётся по ссылке Files API) (360p на сайте убран 13.11.2026: другой рендер, не обещает результат 720p). Цена = токены вывода × $12 за 1M, считается по секундам |
+| Длительность | **5 секунд по умолчанию; на выбор каждая секунда от 3 до 10 и 15 с** (Omni 1.2, отправляется явно: `response_format.duration = "5s"`, без неё Google делает 10 секунд) / **6 секунд** (Veo 3.1) |
+| Стоимость | На кнопках качества и длины стоит цена по прайсу (токены вывода × $12 за 1M). После клипа итог берётся из `usage.output_tokens_by_modality` ответа Google (подпись «по счёту Google»); если Google usage не прислал, показан расчёт по прайсу (подпись «расчёт по прайсу») |
 | Формат | **9:16** (вертикальное видео для мобильных устройств, Pinterest и Etsy) |
-| Механика | **Клиентский I2V (Image-to-Video)**: входное сгенерированное фото интерьера передается напрямую в `POST /v1beta/interactions` браузером, видео возвращается синхронно в Base64 MP4 |
-| Защита от дублирования | **Inanimate 2D Print Lock** + прямой оптический наезд (Z-axis push-in) без бокового панорамирования (gliding) |
-| Фактура материала | Omni считывает микрорельеф кварцевого песка **Craft Lambda** напрямую с пикселей исходного 2K-рендера |
+| Механика | **Клиентский I2V (Image-to-Video)**: фото интерьера уходит напрямую из браузера в `POST /v1beta/interactions` вместе с настоящим mime-типом загрузки (PNG, JPG или WebP; другой формат отклоняется до обращения к Google). Видео приходит inline в Base64 или, для 1080p и клипов длиннее 10 с, ссылкой Files API |
+| Защита обоев | К **каждому** запросу добавляется база (`composeOmniPrompt`): картинка это первый кадр, один непрерывный кадр без склеек, замок на обои в позитивной формулировке, описание звука. В поле промпта пишется только движение. Запрещены (решение владельца): push-in, zoom, dolly in, pan, tilt, orbit, боковой проезд, crane up. В тексте движения нет предметов, которых может не быть в кадре: всё названное модель может дорисовать |
+| Фактура материала | Omni видит только пиксели присланного кадра и «считывать» микрорельеф песка Craft Lambda не может. При наезде из общего плана до макро он выдумывает фактуру и перерисовывает рисунок, поэтому макро-наезда в пресетах нет; для фактуры нужен уже крупный кадр обоев |
 
-## Архитектура Gemini Omni 1.1 Flash
+## Архитектура Gemini Omni 1.2 Flash
 
 ```
 Batch (9:16 карточка) ──▶ VideoTool.tsx ──▶ services/omniService.ts
@@ -23,45 +24,49 @@ Batch (9:16 карточка) ──▶ VideoTool.tsx ──▶ services/omniSer
                                                     ▼
                              POST https://generativelanguage.googleapis.com/v1beta/interactions?key=...
                              {
-                               model: "gemini-omni-1.1-flash",
-                               input: [ { type: "image", data: base64 }, { type: "text", text: prompt } ],
-                               response_format: { type: "video", resolution: "720p", aspect_ratio: "9:16" }
+                               model: "gemini-omni-1.2-flash",
+                               input: [ { type: "image", data: base64, mime_type: "image/png|jpeg|webp" }, { type: "text", text: база + движение } ],
+                               response_format: { type: "video", resolution: "720p", aspect_ratio: "9:16", duration: "5s" }, generation_config: { seed }, store: false, stream: false, background: false
                              }
                                                     │
-                                                    ▼ (Sync Response ~35-40s)
-                                       steps[0].content[video/mp4 base64]
+                                                    ▼ (синхронный ответ, обычно 1–2 минуты)
+                                       steps[].content[video/mp4: base64 или uri] + usage
                                                     │
                                                     ▼
                                     Blob Video Player (<video>) + Download
 ```
 
-## Пресеты Omni Video (Nursery & Etsy Proof)
+## Пресеты Omni Video (переписаны 13.11.2026)
 
-1. **`omni_wall_dolly` (Архитектурный наезд на стену):**
-   - Медленный steady push-in на стену с фиксацией геометрии и 2D-рисунка обоев.
-2. **`omni_texture_macro` (Макро-фактура Craft Lambda):**
-   - Макро-наезд строго по оси Z без бокового сдвига. Подчеркивает зернистость песка и матовую основу. Защищен строгой директивой `INANIMATE 2D PRINT LOCK: zero biological animation, zero head turns, zero duplicate heads`.
-3. **`omni_sunlight_loop` (Живой свет и тени):**
-   - Ультра-медленный микро-наезд камеры с легким боковым дрейфом, скользящими лучами солнца и тенями листьев (зацикленный Pinterest-луп).
-4. **`omni_montessori` (Монтессори-ракурс от кроватки):**
-   - Низкий детский ракурс от пола: прямой стабильный наезд по оси Z (forward push-in) с сохранением деревянной кроватки на переднем плане. Исключено дуговое панорамирование (arc shot) и расширение сцены, зафиксирована геометрия реек кроватки (`GEOMETRIC & FURNITURE LOCK`) и обоев (`INANIMATE 2D PRINT LOCK`).
+Запрос = база + движение. **База добавляется к каждому запросу** (`composeOmniPrompt` в `constants.ts`), стереть её из поля нельзя: «картинка — первый кадр», «один непрерывный кадр», замок на обои в позитивной формулировке («роспись остаётся неподвижной, как в первом кадре»), звук («тихий тон комнаты, без речи и музыки»). В поле промпта пишется только движение.
+
+Запрет владельца действует и на сайте: push-in, zoom, dolly in, pan, tilt, orbit, боковой проезд, crane up. В тексте движения нет предметов, которых может не быть в кадре (всё названное модель может дорисовать: слово tripod дало треногу в клипе Листинга 11).
+
+1. **`omni_forward_drift` (Вход со смещением), статус «проверен»:** вперёд и на несколько сантиметров вправо, пыль в луче солнца. Единственная формулировка, давшая чистый клип на Omni 1.2 (Листинг 11, 10.11).
+2. **`omni_walk_in` (Вход в комнату шагом), тест:** спокойный шаг вперёд с параллаксом. Проверено на Kling 2.6.
+3. **`omni_light_only` (Живой свет, камера стоит), тест:** камера неподвижна, качаются тени ветвей.
+4. **`omni_pull_back` (Отъезд-раскрытие), тест:** отъезд примерно на 10%; края кадра модель дорисовывает.
+5. **`omni_texture_light` (Фактура крупно), тест:** только для крупного кадра обоев, камера стоит, движется боковой свет. Макро-наезд из общего плана убран: фактуру модель выдумывала.
+
+Длина клипа: любая секунда от 3 до 10 и 15 с; на кнопках стоит цена. Итоговая стоимость после клипа читается из `usage` ответа Google.
 
 | Файл | Что |
 |---|---|
-| `types.ts` | `ViewMode + 'video'`, `VeoModel`, `VeoAspectRatio`, `VeoDuration`, `VideoJobSettings`, `VideoToolPayload`, `VideoGenerationState` |
-| `constants.ts` | `VEO_MODEL_OPTIONS`, `VEO_PRICING_PER_SECOND_USD`, `VEO_DEFAULT_*` (duration/seed/промпты) |
-| `services/veoService.ts` (new) | `ensurePublicUrl`, `startVeoAnimation`, `pollVeoOperation`, `animateWithVeo` |
-| `api/animate.ts` (new) | POST submit → `generateVideos` → `{ operationName }` |
-| `api/animate/poll.ts` (new) | GET poll → при готовности перезаливка видео в Blob → `{ videoUrl }`; идемпотентен |
-| `components/VideoTool.tsx` (new) | Вкладка Video: аплоад/предзагрузка, настройки, цена, прогресс, `<video>` + Download |
-| `App.tsx` | `videoPayload` state, `handleSendToVideo`, таб Video, рендер-блок |
-| `components/BatchGenerator.tsx` | Кнопка 🎬 Animate (9:16 — активна; 4:3/2:3 — disabled + tooltip) |
-| `vercel.json` | `functions`: `api/animate.ts` maxDuration 30, `api/animate/poll.ts` maxDuration 60 |
+| `types.ts` | `VideoEngine`, `OmniResolution` (720p, 1080p), `VideoJobSettings` (для Omni `customPrompt` это только движение), `VideoGenerationState` (в том числе стоимость и её источник) |
+| `constants.ts` | `OMNI_*` (модель, токены в секунду, длительности, пресеты, база запроса и `composeOmniPrompt`), `VEO_*`, `BATCH_COUNT_OPTIONS` |
+| `services/omniService.ts` | `parseOmniImage`, `buildOmniPayload`, `generateOmniVideoOnClient` (браузер → Interactions API), `billedCostFromUsage` |
+| `services/veoService.ts` | `generateVeoVideoOnClient` (Veo, long-running операция, из браузера) |
+| `components/VideoTool.tsx` | Вкладка Video: загрузка кадра, качество, длина, пресеты, база запроса (read-only), цена, прогресс, `<video>`, скачивание |
+| `components/BatchGenerator.tsx`, `App.tsx` | Кнопка 🎬 Animate на карточках 9:16 и перенос карточки во вкладку Video (`batchToolImage`); карточки 4:3 и 2:3 кнопку не получают |
+| `api_discovery/gemini_omni/` | Pydantic-ширма запроса и ответа Google; `site_payload.sample.json` это ровно тот запрос, который шлёт сайт |
+| `e2e/ui/video.spec.ts` | Запрос, цены на кнопках, итоговая стоимость, пресеты и запреты, неизменяемая база, выбор секунды |
+
+Серверных функций у видео нет: `vercel.json` описывает только апскейл.
 
 ## Env
 
-- **`GEMINI_VEO_API_KEY`** — новый, server-only (Vercel project env, без `VITE_`-префикса). Ключ Gemini API с включённым платным биллингом.
-- `BLOB_READ_WRITE_TOKEN` — уже настроен, переиспользуется.
+- **`GEMINI_VEO_API_KEY`**: ключ Gemini API с платным биллингом. Через `vite.config.ts` попадает в клиентский бандл (`App.tsx`), как и остальные ключи; в e2e он обнуляется. Ключ можно ввести и в шапке сайта.
+- `BLOB_READ_WRITE_TOKEN` нужен апскейлу и загрузке (`/api/*`), видео он не использует.
 
 ## Pinterest (публикация — ручной процесс)
 
@@ -78,12 +83,12 @@ Batch (9:16 карточка) ──▶ VideoTool.tsx ──▶ services/omniSer
 
 ## Тестирование
 
-⚠️ **Через `vercel dev` или preview-деплой, НЕ `npm run dev`** — в `vite.config.ts` нет proxy для `/api/*`.
+Видео (Omni и Veo) считается в браузере и `/api/*` не требует: достаточно `npm run dev`. Автопроверка: `npm run test:e2e` (всё замокано, платных вызовов нет). `/api/*` нужен только апскейлу и загрузке: для них `vercel dev` или preview-деплой.
 
 1. Batch → карточка 9:16 → 🎬 Animate → Video-вкладка с предзаполненным фото → Generate → confirm → видео: обои совпадают с первым кадром, не "плывут".
 2. Вкладка Video напрямую: ручная загрузка фото → флоу работает.
 3. Карточка 4:3/2:3: кнопка disabled с подсказкой.
-4. Тот же seed/промпт/фото → стабильный результат.
+4. Seed отправляется в Google, но повторяемость клипа Google не обещает: два запуска с одним seed могут отличаться.
 5. События видео-генерации пишутся в `gemini_sessions.json` (dev).
 6. Пред-тест промпта: вручную в AI Studio (aistudio.google.com) на фото карточки.
 

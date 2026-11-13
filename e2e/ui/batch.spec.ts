@@ -65,6 +65,16 @@ test.describe('Batch generator', () => {
     await expect.poll(() => apis.logEvents.filter((e) => e.status === 'success').length).toBe(6);
   });
 
+  test('3 photos: one per format (9:16, 2:3, 4:3), three requests', async ({ page, apis }) => {
+    apis.imageFor = cardImage;
+    const tab = await runBatch(page, apis, 3);
+
+    expect(apis.openrouter).toHaveLength(3);
+    expect(apis.openrouter.map((call) => call.body.image_config.aspect_ratio).sort()).toEqual(['2:3', '4:3', '9:16']);
+    for (let i = 0; i < 3; i++) await expect(tab.getByAltText(`Result ${i + 1}`)).toBeVisible();
+    await expect.poll(() => apis.logEvents.filter((e) => e.status === 'success').length).toBe(3);
+  });
+
   test('"↑ Scale" sends that card\'s image to the Upscaler', async ({ page, apis }) => {
     apis.imageFor = cardImage;
     const tab = await runBatch(page, apis, 6);

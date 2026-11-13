@@ -125,6 +125,11 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   const selectCount = (n: number) => {
     setCount(n);
+    // A 3-photo test set: one photo per format. A proportional rescale of 6/4/2 would give 2/1/0, i.e. no 4:3 Etsy main thumbnail.
+    if (n === 3) {
+      setFormatDist({ '9:16': 1, '2:3': 1, '4:3': 1 });
+      return;
+    }
     // Rescale distribution proportionally to new count
     const total = formatDist['9:16'] + formatDist['2:3'] + formatDist['4:3'];
     if (total === 0) {

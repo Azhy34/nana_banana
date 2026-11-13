@@ -4,6 +4,7 @@ import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImag
 import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, AGE_GROUP_LABELS, getKeyObjectsForAge } from '../services/promptGenerator';
 import { generateBatchImage, isQwenModel } from '../services/generationRouter';
 import { downloadImage } from '../services/downloadService';
+import { BATCH_COUNT_OPTIONS } from '../constants';
 
 type BatchStep = 'setup' | 'cards' | 'results';
 
@@ -62,7 +63,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
       <div className="max-w-lg mx-auto animate-fadeIn">
         <div className="mb-10 text-center">
           <h2 className="text-4xl font-bold text-white mb-3 tracking-tight">Batch Generator</h2>
-          <p className="text-slate-400 text-lg">Generate 10–15 listing photos from one wallpaper</p>
+          <p className="text-slate-400 text-lg">Generate 3–15 listing photos from one wallpaper</p>
         </div>
 
         {/* Wallpaper Upload */}
@@ -129,7 +130,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-4">
           <h3 className="text-white font-semibold mb-3">Number of Photos</h3>
           <div className="flex gap-3">
-            {[6, 9, 12, 15].map(n => (
+            {BATCH_COUNT_OPTIONS.map(n => (
               <button key={n} onClick={() => selectCount(n)}
                 className={`flex-1 py-3 rounded-xl font-bold text-lg transition-all ${count === n ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
                 {n}

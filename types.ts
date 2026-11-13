@@ -112,14 +112,17 @@ export interface UpscaleState {
 }
 
 export type VideoEngine = 'veo' | 'omni';
-export type OmniResolution = '360p' | '720p';
+export type OmniResolution = '720p' | '1080p';
 
 export interface VideoJobSettings {
   engine?: VideoEngine;
-  promptPreset: 'dolly_in' | 'ambient' | 'dolly_out' | 'omni_wall_dolly' | 'omni_texture_macro' | 'omni_montessori' | 'omni_sunlight_loop';
+  promptPreset: 'dolly_in' | 'ambient' | 'dolly_out' | 'omni_forward_drift' | 'omni_walk_in' | 'omni_light_only' | 'omni_pull_back' | 'omni_texture_light';
+  /** Veo: the whole prompt. Omni: the MOTION only; the base (first frame, one shot, wallpaper freeze, sound) is added by composeOmniPrompt. */
   customPrompt: string;
   seed: number;
   resolution?: OmniResolution;
+  /** Omni clip length in whole seconds (3..15). Always sent: without it Google makes 10 s. */
+  durationSeconds?: number;
 }
 
 export interface VideoToolPayload {
@@ -132,6 +135,8 @@ export interface VideoGenerationState {
   error: string | null;
   resultVideoUrl: string | null;
   lastRunCostUsd?: number;
+  /** true = the cost was read from Google's `usage` (the real bill); false/absent = calculated from the price list */
+  lastRunCostFromUsage?: boolean;
 }
 
 export interface GeminiLogDetails {

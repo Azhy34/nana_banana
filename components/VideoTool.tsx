@@ -6,7 +6,10 @@ import {
   OMNI_PRESETS,
   VEO_NEGATIVE_PROMPT,
   VEO_FIXED_DURATION_SECONDS,
-  OMNI_FIXED_DURATION_SECONDS,
+  OMNI_DEFAULT_DURATION_SECONDS,
+  OMNI_DURATION_OPTIONS,
+  OMNI_DEFAULT_PRESET,
+  OMNI_PROMPT_BASE,
   ETSY_MIN_VIDEO_SIDE_PX,
   ETSY_RECOMMENDED_VIDEO_SIDE_PX,
   getVeoCostUsd,
@@ -28,13 +31,15 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   // Model engine selector: 'omni' by default for cheaper & more stable nursery videos
   const [engine, setEngine] = useState<VideoEngine>('omni');
   const [resolution, setResolution] = useState<OmniResolution>('720p');
+  // Omni clip length (3..15 s). Always sent to Google: without it the model makes 10 s.
+  const [durationSeconds, setDurationSeconds] = useState<number>(OMNI_DEFAULT_DURATION_SECONDS);
 
   // Settings
   const [sourceImage, setSourceImage] = useState<string | null>(initialImage || null);
   const [settings, setSettings] = useState<VideoJobSettings>({
     engine: 'omni',
-    promptPreset: 'omni_wall_dolly',
-    customPrompt: OMNI_PRESETS.omni_wall_dolly.prompt,
+    promptPreset: OMNI_DEFAULT_PRESET,
+    customPrompt: OMNI_PRESETS[OMNI_DEFAULT_PRESET].prompt,
     seed: 133466,
     resolution: '720p'
   });
@@ -67,7 +72,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   }, [initialImage]);
 
   const estimatedCost = engine === 'omni'
-    ? getOmniCostUsd(resolution)
+    ? getOmniCostUsd(resolution, durationSeconds)
     : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -104,8 +109,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       setSettings(prev => ({
         ...prev,
         engine: 'omni',
-        promptPreset: 'omni_wall_dolly',
-        customPrompt: OMNI_PRESETS.omni_wall_dolly.prompt,
+        promptPreset: OMNI_DEFAULT_PRESET,
+        customPrompt: OMNI_PRESETS[OMNI_DEFAULT_PRESET].prompt,
         resolution
       }));
     } else {
@@ -193,15 +198,20 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     try {
       const traceId = generateTraceId();
       let videoUrl: string;
+      let runCost = estimatedCost;
+      let costFromUsage = false;
 
       if (engine === 'omni') {
-        videoUrl = await generateOmniVideoOnClient(
+        const result = await generateOmniVideoOnClient(
           sourceImage,
-          { ...settings, resolution },
+          { ...settings, resolution, durationSeconds },
           geminiApiKey,
           (progress) => setState(prev => ({ ...prev, progress })),
           traceId
         );
+        videoUrl = result.videoUrl;
+        runCost = result.costUsd;               // the real bill when Google reported its token usage
+        costFromUsage = result.costFromUsage;
       } else {
         videoUrl = await generateVeoVideoOnClient(
           sourceImage,
@@ -218,7 +228,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         progress: 100,
         error: null,
         resultVideoUrl: videoUrl,
-        lastRunCostUsd: estimatedCost,
+        lastRunCostUsd: runCost,
+        lastRunCostFromUsage: costFromUsage,
       });
 
     } catch (err: any) {
@@ -235,7 +246,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     if (!state.resultVideoUrl) return;
     setIsDownloading(true);
     try {
-      const prefix = engine === 'omni' ? `omni-${resolution}` : 'veo';
+      const prefix = engine === 'omni' ? `omni-${resolution}-${durationSeconds}s` : 'veo';
       await downloadImage(state.resultVideoUrl, `${prefix}-${settings.promptPreset}-${settings.seed}.mp4`);
     } finally {
       setIsDownloading(false);
@@ -250,7 +261,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
           <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
             <span>🎬 Video Animator</span>
             <span className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full font-normal">
-              Omni 1.1 Flash & Veo 3.1
+              Omni 1.2 Flash & Veo 3.1
             </span>
           </h2>
           <p className="text-slate-400 text-sm mt-1">
@@ -265,7 +276,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       </div>
 
       {/* Model Engine Selector */}
-      <div className="bg-slate-800/60 backdrop-blur rounded-2xl border border-slate-700 p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-slate-800/60 backdrop-blur rounded-2xl border border-slate-700 p-4 mb-6 flex flex-col sm:flex-row sm:flex-wrap items-center justify-between gap-x-6 gap-y-3">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-slate-300">Модель:</span>
           <div className="inline-flex bg-slate-900/60 p-1 rounded-xl border border-slate-700">
@@ -277,7 +288,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              ✨ Gemini Omni 1.1 Flash (Быстро & Дёшево)
+              ✨ Gemini Omni 1.2 Flash (Быстро & Дёшево)
             </button>
             <button
               onClick={() => handleEngineChange('veo')}
@@ -297,16 +308,6 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             <span className="text-xs text-slate-400 font-medium">Качество:</span>
             <div className="inline-flex bg-slate-900/60 p-1 rounded-xl border border-slate-700">
               <button
-                onClick={() => setResolution('360p')}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  resolution === '360p'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                360p Черновик · не для Etsy
-              </button>
-              <button
                 onClick={() => setResolution('720p')}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                   resolution === '720p'
@@ -314,12 +315,46 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                720p Финал Etsy · 720×1280
+                {`720p Финал Etsy · 720×1280 · ≈ $${getOmniCostUsd('720p', durationSeconds).toFixed(2)}`}
+              </button>
+              <button
+                onClick={() => setResolution('1080p')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  resolution === '1080p'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {`1080p Рекомендовано Etsy · 1080×1920 · ≈ $${getOmniCostUsd('1080p', durationSeconds).toFixed(2)}`}
               </button>
             </div>
-            <span className="text-[10px] text-slate-500 hidden sm:inline">
-              ~${getOmniCostUsd(resolution).toFixed(2)}
-            </span>
+          </div>
+        )}
+
+        {engine === 'omni' && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-medium">Длина:</span>
+            <div className="inline-flex flex-wrap bg-slate-900/60 p-1 rounded-xl border border-slate-700">
+              {OMNI_DURATION_OPTIONS.map(seconds => (
+                <button
+                  key={seconds}
+                  onClick={() => setDurationSeconds(seconds)}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    durationSeconds === seconds
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {seconds} с
+                  <span className="block text-[10px] font-normal opacity-70">{`≈ $${getOmniCostUsd(resolution, seconds).toFixed(2)}`}</span>
+                </button>
+              ))}
+            </div>
+            {durationSeconds > OMNI_DEFAULT_DURATION_SECONDS && (
+              <span className="text-[10px] text-amber-400 hidden sm:inline">
+                дольше 5 с геометрия может плыть (замечено на 1.1, на 1.2 не перепроверено)
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -353,6 +388,13 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                     <div className="flex items-center justify-between">
                       <span className={`font-bold text-sm ${settings.promptPreset === key ? 'text-indigo-300' : 'text-slate-300'}`}>
                         {OMNI_PRESETS[key].label}
+                      </span>
+                      <span className={`shrink-0 ml-2 text-[10px] px-2 py-0.5 rounded-full border font-medium ${
+                        OMNI_PRESETS[key].status === 'ok'
+                          ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                          : 'text-amber-300 bg-amber-500/10 border-amber-500/30'
+                      }`}>
+                        {OMNI_PRESETS[key].status === 'ok' ? 'проверен на Omni 1.2 (KIE)' : 'тест'}
                       </span>
                     </div>
                     <span className="text-xs opacity-75 mt-1 leading-relaxed text-slate-400">
@@ -395,17 +437,27 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               </button>
             </div>
             <textarea
-              rows={3}
+              rows={5}
               value={settings.customPrompt}
               onChange={e => setSettings(prev => ({ ...prev, customPrompt: e.target.value }))}
               className="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 text-slate-200 text-xs rounded-xl p-3 focus:outline-none transition-colors leading-relaxed resize-none"
               placeholder="Введите или скорректируйте промпт анимации..."
             />
-            <span className="text-[10px] text-slate-500 mt-1.5 block">
-              {engine === 'omni' 
-                ? '✨ Omni 1.1 Flash: зашиты жесткие директивы сохранения обоев 1:1 без дорисовывания лишних деталей.' 
-                : 'Veo 3.1: использует автоматический негативный промпт для предотвращения сворачивания обоев.'}
-            </span>
+            {engine === 'omni' ? (
+              <div className="mt-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3" data-testid="omni-base-prompt">
+                <p className="text-[11px] text-emerald-300 font-semibold mb-1">
+                  🔒 Всегда добавляется к запросу (стереть нельзя):
+                </p>
+                <p className="text-[10px] text-slate-400 leading-relaxed">{OMNI_PROMPT_BASE.join(' ')}</p>
+                <p className="text-[10px] text-slate-500 mt-1.5">
+                  В поле выше пишите только движение камеры и света. Комнату не описывайте: всё названное модель может дорисовать.
+                </p>
+              </div>
+            ) : (
+              <span className="text-[10px] text-slate-500 mt-1.5 block">
+                Veo 3.1: использует автоматический негативный промпт для предотвращения сворачивания обоев.
+              </span>
+            )}
           </div>
 
           {/* Seed Input */}
@@ -427,7 +479,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               placeholder="Введите число от 0 до 4294967295"
             />
             <span className="text-[10px] text-slate-500 mt-2 block">
-              Используется для повторяемости и маркировки имени выходного MP4 файла.
+              {engine === 'omni'
+                ? 'Отправляется в Google и попадает в имя MP4. Google не обещает, что тот же seed даст тот же клип.'
+                : 'Только маркирует имя MP4: в Veo seed не отправляется (Gemini API его отклоняет).'}
             </span>
           </div>
 
@@ -436,13 +490,13 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Движок:</span>
               <span className="text-white font-bold font-mono">
-                {engine === 'omni' ? `Gemini Omni 1.1 (${resolution})` : 'Veo 3.1 Fast'}
+                {engine === 'omni' ? `Gemini Omni 1.2 (${resolution})` : 'Veo 3.1 Fast'}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Длительность:</span>
               <span className="text-white font-bold font-mono">
-                {engine === 'omni' ? OMNI_FIXED_DURATION_SECONDS : VEO_FIXED_DURATION_SECONDS} секунд
+                {engine === 'omni' ? durationSeconds : VEO_FIXED_DURATION_SECONDS} секунд
               </span>
             </div>
             <div className="flex justify-between text-sm pt-2 border-t border-slate-700/50">
@@ -481,7 +535,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                 <div>
                   <h4 className="text-white font-bold text-lg">Нейросеть оживляет кадр</h4>
                   <p className="text-slate-400 text-xs max-w-xs mt-2 leading-relaxed">
-                    Этот процесс обычно занимает около 45–60 секунд. Мы сжимаем кадр, заливаем его в облако и опрашиваем сервера Google.
+                    {engine === 'omni'
+                      ? 'Обычно 1–2 минуты, дольше при 1080p и длинных клипах. Кадр уходит в Google как есть, видео приходит готовым файлом.'
+                      : 'Этот процесс обычно занимает около 45–60 секунд. Мы сжимаем кадр, заливаем его в облако и опрашиваем сервера Google.'}
                   </p>
                 </div>
                 {/* Progress bar */}
@@ -517,7 +573,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                   </div>
                 )}
                 <div className="text-center bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-xl">
-                  <p className="text-slate-400 text-xs mb-0.5">Итоговая стоимость генерации:</p>
+                  <p className="text-slate-400 text-xs mb-0.5">
+                    {state.lastRunCostFromUsage ? 'Итоговая стоимость (по счёту Google):' : 'Итоговая стоимость (расчёт по прайсу):'}
+                  </p>
                   <p className="text-green-400 font-bold font-mono text-base">${(state.lastRunCostUsd ?? estimatedCost).toFixed(2)}</p>
                 </div>
                 <button
