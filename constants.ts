@@ -43,17 +43,36 @@ export function getVeoCostUsd(durationSeconds: number): number {
 export const ETSY_MIN_VIDEO_SIDE_PX = 500;          // hard reject below this
 export const ETSY_RECOMMENDED_VIDEO_SIDE_PX = 1080; // Etsy's recommended quality
 
-// Omni 1.1 Flash Constants & Pricing
-export const OMNI_MODEL_ID = 'gemini-omni-1.1-flash';
-export const OMNI_FIXED_DURATION_SECONDS = 5;
-// Official rate (ai.google.dev/gemini-api/docs/pricing): Omni video output is billed at
-// $17.50 / 1M tokens, at 5,792 tokens per second of 720p video => ~$0.10 per second.
-// 5s @ 720p ≈ $0.50. Google publishes no separate 360p rate, so the draft price stays an estimate.
-export const OMNI_PRICING_DRAFT_360P_USD = 0.15; // estimate — 360p draft, no published rate
-export const OMNI_PRICING_FINAL_720P_USD = 0.50; // 5s x $0.10/s at 720p
+// Batch Generator: how many listing photos one run makes. 3 is a quick test set: one photo per format (9:16, 2:3, 4:3).
+export const BATCH_COUNT_OPTIONS = [3, 6, 9, 12, 15] as const;
 
-export function getOmniCostUsd(resolution: '360p' | '720p' = '720p'): number {
-  return resolution === '360p' ? OMNI_PRICING_DRAFT_360P_USD : OMNI_PRICING_FINAL_720P_USD;
+// Omni 1.2 Flash Constants & Pricing (gemini-omni-1.2-flash, GA 2026-11-05; 1.1 is routed to 1.2 on 2026-12-03)
+export const OMNI_MODEL_ID = 'gemini-omni-1.2-flash';
+export const OMNI_DEFAULT_DURATION_SECONDS = 5;
+// Google: any whole second from 3 to 15; without `response_format.duration` the model makes 10 s.
+// Owner 13.11.2026: every second from 3 to 10 can be picked; 15 stays as the Omni 1.2 maximum.
+export const OMNI_DURATION_OPTIONS = [3, 4, 5, 6, 7, 8, 9, 10, 15] as const;
+export type OmniDurationSeconds = (typeof OMNI_DURATION_OPTIONS)[number];
+// Official rate (aistudio.google.com/docs/pricing, 2026-11-08): video output is billed at $12 per 1M tokens,
+// at 5,792 / 8,688 tokens per second of 720p / 1080p video (1080p is upscaled).
+// => 720p $0.07/s, 1080p $0.104/s. (1.1 was $17.50 per 1M: 720p about $0.10/s.)
+// 360p ($0.023/s) and 4k ($0.209/s) exist at Google but are not offered here (owner 13.11.2026: a 360p draft is a
+// different render and does not promise the 720p result; Etsy rejects 360x640 anyway). Pydantic shield still knows them.
+export const OMNI_USD_PER_M_VIDEO_TOKENS = 12;
+export const OMNI_TOKENS_PER_SECOND = { '720p': 5792, '1080p': 8688 } as const;
+export type OmniResolutionKey = keyof typeof OMNI_TOKENS_PER_SECOND;
+
+export function getOmniCostUsd(
+  resolution: OmniResolutionKey = '720p',
+  seconds: number = OMNI_DEFAULT_DURATION_SECONDS,
+): number {
+  return (OMNI_TOKENS_PER_SECOND[resolution] * seconds * OMNI_USD_PER_M_VIDEO_TOKENS) / 1_000_000;
+}
+
+// Google: "for videos larger than 4MB (>720p) use delivery=\"uri\" to avoid payload size limits".
+// 1080p and long clips are fetched through the Files API instead of inline base64.
+export function omniNeedsUriDelivery(resolution: OmniResolutionKey, seconds: number): boolean {
+  return resolution === '1080p' || seconds > 10;
 }
 
 // Topaz upscale via Replicate. Billed in units that grow with output megapixels
@@ -84,27 +103,69 @@ export const VEO_PRESETS = {
   }
 };
 
-// Specialized Nursery & Wallpaper Presets for Gemini Omni 1.1 Flash
+// Presets for Gemini Omni 1.2 Flash, rewritten 13.11.2026 (owner: the push-in ban of the reels pipeline holds on the site too).
+// A request text = BASE opening + the MOTION (the preset, editable in the form) + BASE freeze + BASE sound: see composeOmniPrompt.
+// The base is added to EVERY Omni request, whatever the user types, so the wallpaper lock cannot be erased by editing the prompt.
+// Rules behind the wording (Google's Omni prompt guide + our own measured clips, specs/video_motion.json of the reels pipeline):
+//  - the model decides from the TEXT how to use the image, so the opening says it is the first frame (no control tags: deprecated);
+//  - ONE unbroken shot: by default Omni cuts several shots into a story;
+//  - the motion text names only what MOVES and never re-describes the room; every noun may be DRAWN (10.11: the word
+//    "tripod" made Omni draw a tripod), so no crib, no baseboards, nothing that may be missing from the frame;
+//  - the freeze is POSITIVE ("stays perfectly still ... exactly as in the first frame"): it held on Omni 1.2 (10.11, two
+//    clips), while the older negative "ink lock" did not hold on Kling 2.6 (a painted balloon drifted 41 px of 960);
+//  - numbers and a pace instead of "slowly / very slowly" (owner 08.11: with "very slowly" the camera barely moves);
+//  - banned by the owner, not used here: push-in, zoom, dolly in, pan, tilt, orbit, sideways glide, crane up;
+//  - the sound is described, otherwise the model invents a soundtrack.
+export const OMNI_PROMPT_FIRST_FRAME = 'Use the attached image as the very first frame of the video.';
+export const OMNI_PROMPT_SINGLE_SHOT = 'In a single continuous shot with no scene cuts.';
+export const OMNI_PROMPT_FREEZE =
+  'The mural on the wall stays perfectly still and unchanged: its drawing, its colours and every painted detail remain exactly as in the first frame. Everything else in the frame keeps its shape and its place.';
+export const OMNI_PROMPT_AUDIO = 'The sound is a quiet room tone, with no dialogue and no music.';
+/** The sentences added to every Omni request (shown read-only under the prompt field). */
+export const OMNI_PROMPT_BASE = [OMNI_PROMPT_FIRST_FRAME, OMNI_PROMPT_SINGLE_SHOT, OMNI_PROMPT_FREEZE, OMNI_PROMPT_AUDIO] as const;
+
+/** The text really sent to Omni: opening + the motion from the form + freeze + sound. A base sentence already typed by the user is not repeated. */
+export function composeOmniPrompt(motion: string): string {
+  const text = motion.trim();
+  const missing = (sentence: string) => (text.includes(sentence) ? [] : [sentence]);
+  return [...missing(OMNI_PROMPT_FIRST_FRAME), ...missing(OMNI_PROMPT_SINGLE_SHOT), text, ...missing(OMNI_PROMPT_FREEZE), ...missing(OMNI_PROMPT_AUDIO)]
+    .filter(Boolean)
+    .join(' ');
+}
+
+// `status`: 'ok' = this wording gave a clean clip of ours on Omni 1.2; 'test' = reasonable, but not proven on Omni 1.2 yet.
 export const OMNI_PRESETS = {
-  omni_wall_dolly: {
-    label: "🎥 Архитектурный наезд на стену (Wall Focus)",
-    description: "Плавный наезд с сохранением геометрии стены, матовой текстуры Craft Lambda и жесткой фиксацией обоев.",
-    prompt: "A smooth, slow, steady architectural camera push-in towards the nursery feature wall. ABSOLUTE PRESERVATION REQUIREMENT: The wallpaper pattern, motifs, colors, and layout from the input image must remain 100% frozen, completely static, and strictly unaltered. The wallpaper features a fine tactile sand-grain matte texture (Craft Lambda). INANIMATE 2D INK LOCK: The artwork is flat 2D printed wallpaper; strictly no biological animation, no duplicate heads, no moving characters, and no morphing. Furniture and floor remain physically locked and static. Warm natural morning sunlight grazes the wall, creating soft ambient shadow occlusion along the baseboards. Flawless 9:16 interior design showcase, continuous unbroken camera motion, no warping."
+  omni_forward_drift: {
+    label: "🎥 Вход со смещением (Forward Drift)",
+    description: "Камера идёт вперёд и на несколько сантиметров вправо, в луче солнца плывёт пыль. Единственный рецепт, давший чистый клип на Omni 1.2 (Листинг 11). Лучше для кадра с солнечным светом.",
+    status: 'ok',
+    prompt: 'The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently.'
   },
-  omni_texture_macro: {
-    label: "🔍 Макро-фактура Craft Lambda (Etsy Texture Proof)",
-    description: "Крупный план реальной текстуры: тонкий минеральный песок, матовый флизелин, без бликов и дублирования объектов.",
-    prompt: "Cinematic slow-motion macro push-in camera shot, slowly zooming straight into the tactile surface of the wallpaper with zero lateral panning. INANIMATE 2D PRINT LOCK: The wallpaper artwork, animals, and illustrations are strictly flat, 100% static, non-moving ink printed on paper. Absolutely NO biological animation, NO head movement, NO blinking, NO new limbs, NO morphing, and NO duplicate heads or body parts. The printed illustration remains completely frozen and unchanged. REAL MATERIAL TEXTURE: The wallpaper is printed on a heavy-weight luxury non-woven substrate with a distinctive fine-grain sand texture (Craft Lambda Sandstruktur). Completely eliminate plastic reflections, synthetic vinyl sheen, or glare (komplett matt, keine Reflexionen). Soft, diffused warm side lighting highlights the organic matte paper grain and tactile micro-relief. Flawless focus, steady fluid motion, premium Etsy listing video proof."
+  omni_walk_in: {
+    label: "🚶 Вход в комнату шагом (Walk-In)",
+    description: "Камера входит в комнату спокойным шагом, ближние предметы смещаются сильнее дальних. Проверено на Kling 2.6, на Omni 1.2 ещё нет.",
+    status: 'test',
+    prompt: 'The camera advances straight forward into the room at a clearly visible calm walking pace, as if a person is entering, and the nearer objects shift more than the farther ones, giving a natural depth parallax.'
   },
-  omni_sunlight_loop: {
-    label: "✨ Живой свет и тени (Pinterest Viral Loop)",
-    description: "Плавный микро-наезд с легким смещением: теплые лучи солнца и тени скользят по текстуре стены 9:16.",
-    prompt: "An extremely slow, subtle architectural camera push-in gently drifting slightly sideways towards the stylish children's bedroom feature wall. ZERO MORPHING: The room architecture, furniture, and wallpaper illustration are 100% frozen and geometrically locked. The wallpaper is flat static 2D print: strictly no biological animation, no duplicate heads, and no character motion. Warm afternoon sunlight and subtle dappled leaf shadows drift smoothly across the textured matte wallpaper and floor, emphasizing the authentic fine-sand paper depth. No new motifs or objects appear. Hypnotic, calming ambient lighting and ultra-smooth micro-camera motion designed for a seamless, viral Pinterest video loop."
+  omni_light_only: {
+    label: "✨ Живой свет, камера стоит (Light Only)",
+    description: "Камера неподвижна, по стене и полу качаются мягкие тени ветвей. Меньше всего риска для рисунка обоев; тени понравились на Kling 2.6, на Omni 1.2 ещё нет.",
+    status: 'test',
+    prompt: 'The camera does not move at all: it is a fixed, static shot. Soft dappled shadows of leafy branches sway slowly on the wall and on the floor, as in a light breeze: only the shadows move, subtly and low in contrast, and they never change the colours or the drawing of the mural.'
   },
-  omni_montessori: {
-    label: "👶 Монтессори-ракурс от кроватки (Room Scale & Coziness)",
-    description: "Низкий детский ракурс: показывает масштаб обоев в интерьере и уют детской комнаты.",
-    prompt: "Smooth, ultra-slow low-angle forward push-in camera shot composed from a child's eye-level perspective (Montessori height). The camera moves steadily along a straight forward track towards the feature wall, framing the wooden crib in the foreground while keeping the entire room layout and perspective strictly consistent. GEOMETRIC & FURNITURE LOCK: The crib, slatted bars, flooring, and room architecture remain 100% frozen, solid, and geometrically locked without any bending, warping, or disappearing parts. INANIMATE 2D PRINT LOCK: The wallpaper design on the wall is an exact 1:1 static match to the reference image, flat 2D printed ink; strictly zero biological animation, zero duplicate heads, zero animal movements, and zero morphing. Warm cozy morning sunlight with soft natural shadows. Zero camera rotation, zero arc sweep, continuous smooth forward motion."
+  omni_pull_back: {
+    label: "↩ Отъезд-раскрытие (Pull-Back Reveal)",
+    description: "Камера отъезжает примерно на 10% и открывает чуть больше комнаты. Края кадра модель дорисовывает сама: проверьте клип глазами.",
+    status: 'test',
+    prompt: 'The camera pulls back by about 10 percent at a constant calm speed, revealing a little more of the room, and keeps the whole mural wall in the frame.'
+  },
+  omni_texture_light: {
+    label: "🔍 Фактура крупно (Texture Light)",
+    description: "Только для КРУПНОГО кадра обоев: камера стоит, боковой свет скользит по матовой зернистой поверхности. Из общего плана комнаты в макро не летим: фактуру модель тогда выдумывает.",
+    status: 'test',
+    prompt: 'The camera does not move at all: it is a fixed, static shot. Soft warm side light sweeps slowly across the matte fine-grain surface and reveals its tactile relief.'
   }
-};
+} as const satisfies Record<string, { label: string; description: string; status: 'ok' | 'test'; prompt: string }>;
+export type OmniPresetKey = keyof typeof OMNI_PRESETS;
+export const OMNI_DEFAULT_PRESET: OmniPresetKey = 'omni_forward_drift';
 

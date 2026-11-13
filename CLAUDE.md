@@ -48,7 +48,7 @@ All AI calls except Qwen and upscaling go straight from the browser with the key
 - **[constants.ts](constants.ts)** — Model options and pricing, aspect ratios/sizes, Veo and Omni model ids, presets, negative prompt, Etsy video limits.
 - **[services/generationRouter.ts](services/generationRouter.ts)** — Routes image generation to Qwen (Replicate) or to `geminiService` by model.
 - **[services/geminiService.ts](services/geminiService.ts)** — Generator and Batch image generation for both providers, `detectWallCoordinates()` for the cropper's warp mode (falls back to full frame on error), `enhancePromptText()`, `logGeminiEvent()`.
-- **[services/omniService.ts](services/omniService.ts)** — Gemini Omni 1.1 Flash image-to-video via `POST v1beta/interactions` (9:16, 720p final / 360p draft), reads the video from `steps[].content[]`.
+- **[services/omniService.ts](services/omniService.ts)** — Gemini Omni 1.2 Flash image-to-video via `POST v1beta/interactions` (9:16, 720p or 1080p, 3-15 s; the real mime type of the upload is sent; every preset says in words that the picture is the first frame), reads the video from `steps[].content[]`. The final cost comes from the answer's `usage.output_tokens_by_modality` (the real bill), else from the price list.
 - **[services/veoService.ts](services/veoService.ts)** — Veo 3.1 Fast image-to-video (6 s, 9:16, `allow_adult`, negative prompt; `seed` is not sent because the Gemini API rejects it).
 - **[services/promptGenerator.ts](services/promptGenerator.ts)** — `generateRandomTags()` picks values from `trends.json`; `buildGeminiPrompt()` assembles the narrative batch prompt, including its own "Absolutely avoid: …" list.
 - **[services/replicateService.ts](services/replicateService.ts)** — Qwen generation and Topaz upscale start/poll via the `/api` routes.
@@ -75,14 +75,14 @@ App.tsx
 │   └── ResultStep.tsx      — Result, cost/tokens, download, "✂️ Etsy Cropper"
 ├── Batch:
 │   └── BatchGenerator.tsx  — 3-step wizard (logic in hooks/useBatch.ts): Setup → Review Prompts → Results
-│       Setup: wallpaper, count 6/9/12/15, format distribution 9:16/2:3/4:3 (default 6/4/2), model
+│       Setup: wallpaper, count 3/6/9/12/15 (3 = one photo per format, 1/1/1), format distribution 9:16/2:3/4:3 (default 6/4/2), model
 │       Results: per-card download, ✨ Refine (2K, Pro), ↑ Scale, ✂ Cropper, 🎬 Video (9:16 only), regenerate
 ├── Cropper:
 │   └── EtsyCropper.tsx     — Canvas crops to Etsy presets (3000×2250 etc.), batch mode, wall-detection warp mode
 ├── Upscale:
 │   └── Upscaler.tsx        — Real-ESRGAN (default, ~$0.002) / Topaz via Replicate: 8K/16K/24K → 2x/4x/6x, subject detection (Topaz), JPG/PNG
 └── Video:
-    └── VideoTool.tsx       — Omni 1.1 Flash (default) or Veo 3.1 Fast, presets, editable prompt, Etsy ≥500 px check
+    └── VideoTool.tsx       — Omni 1.2 Flash (default) or Veo 3.1 Fast, presets, editable prompt, Etsy ≥500 px check
 ```
 
 ### Batch Generator — Key Design Decisions
@@ -97,9 +97,9 @@ App.tsx
 
 ### Video Animator — Key Design Decisions
 
-- Default engine: **Gemini Omni 1.1 Flash** (`gemini-omni-1.1-flash`) via Google Interactions API (`POST /v1beta/interactions`), sync response returning Base64 MP4.
-- 4 Specialized Etsy & Pinterest presets: `omni_wall_dolly`, `omni_texture_macro`, `omni_sunlight_loop`, `omni_montessori`.
-- **Inanimate 2D Print Lock**: strict prompt constraint preventing biological animation, morphing, and duplicate animal heads during camera movement. Camera uses pure optical macro push-in (Z-axis zoom) rather than lateral gliding.
+- Default engine: **Gemini Omni 1.2 Flash** (`gemini-omni-1.2-flash`; 1.1 is routed to 1.2 by Google on 2026-12-03) via Google Interactions API (`POST /v1beta/interactions`), sync response returning Base64 MP4.
+- 5 presets (13.11.2026): `omni_forward_drift` (proven on Omni 1.2), `omni_walk_in`, `omni_light_only`, `omni_pull_back`, `omni_texture_light` (all `test`). The form holds the MOTION only; `composeOmniPrompt` adds the base to every request (first frame, one shot, positive wallpaper freeze, sound). The owner's ban holds on the site: no push-in, zoom, dolly in, pan, tilt, orbit, sideways glide, crane up; no nouns that may be missing from the frame. Clip length: every second 3-10, plus 15.
+- **Wallpaper freeze**: a positive sentence ("the mural stays perfectly still and unchanged ... exactly as in the first frame") that `composeOmniPrompt` adds to EVERY Omni request, so editing the prompt field cannot remove it. The old negative "Inanimate 2D Print Lock" and the macro push-in were dropped (13.11.2026): the negative form did not hold in measured clips, push-in is banned by the owner.
 
 ### AI Models in Use
 
@@ -107,7 +107,7 @@ App.tsx
 |---|---|
 | `gemini-3.1-flash-image` | Fast image generation; also wall detection and ✨ Enhance on the Gemini provider |
 | `gemini-3-pro-image` | High-quality generation (up to 4K), batch ✨ Refine |
-| `gemini-omni-1.1-flash` | Default video engine (Interactions API, 720p/360p) |
+| `gemini-omni-1.2-flash` | Default video engine (Interactions API, 720p/1080p, 3-15 s, $0.07/s at 720p) |
 | `veo-3.1-fast-generate-preview` | Alternative video engine |
 | `google/gemini-2.5-flash` (OpenRouter) | ✨ Enhance on the OpenRouter provider |
 | `qwen/qwen-image-2` (Replicate) | Optional image model, unused in production |

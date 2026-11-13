@@ -84,6 +84,42 @@
           }
         ]
       }
+    },
+    {
+      "scenario": "synthetic_1_2_usage_sample",
+      "note": "HAND-MADE from Google's Interactions API reference (status enum, ISO created, usage by modality) and the pricing page (5792 video tokens per second at 720p). Replace by a real capture after the first paid 1.2 call.",
+      "response": {
+        "id": "v1_interactions_sample_1_2",
+        "status": "completed",
+        "model": "gemini-omni-1.2-flash",
+        "object": "interaction",
+        "created": "2026-11-08T12:00:00Z",
+        "updated": "2026-11-08T12:00:41Z",
+        "service_tier": "standard",
+        "steps": [
+          {
+            "type": "model_output",
+            "content": [
+              {
+                "type": "video",
+                "mime_type": "video/mp4",
+                "data": "AAAAIGZ0eXBpc29t"
+              }
+            ]
+          }
+        ],
+        "usage": {
+          "total_tokens": 29500,
+          "total_input_tokens": 540,
+          "total_output_tokens": 28960,
+          "output_tokens_by_modality": [
+            {
+              "modality": "video",
+              "tokens": 28960
+            }
+          ]
+        }
+      }
     }
   ],
   "error_responses": [

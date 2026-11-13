@@ -2,6 +2,17 @@
 
 This file tracks significant changes, architectural decisions, and logic updates implemented by AI agents (Gemini/Claude) in the `nana_banana` project. This helps maintain context across sessions and different agents.
 
+## [2026-11-13] Site Video tab: Omni 1.1 → 1.2, presets rewritten, real prices; Batch gets a 3-photo set
+
+- **Why:** the live site (deployed from `main`) still ran `gemini-omni-1.1-flash` at ~$0.50 per 5 s; Google routes 1.1 to 1.2 on 2026-12-03 and bills the 1.2 rate ($0.07/s at 720p, 30% below 1.1). The 1.2 code existed only on `work/simplify-2026-11`, so the Omni files were moved onto a branch from `origin/main` (`feat/omni-1-2-site`).
+- **Model and contract:** `gemini-omni-1.2-flash`, clip 3-15 s (every second 3-10, plus 15), 720p / 1080p only (360p removed: a different render that promises nothing about the 720p result). The mime type of the upload is read from the data URL (it was always sent as jpeg). Prices on every quality and length button; the final cost is read from `usage.output_tokens_by_modality` ("by Google's bill"), else calculated from the price list.
+- **Presets (owner's ban on push-in / zoom / dolly / pan / tilt / orbit / sideways glide / crane holds on the site):** `omni_forward_drift` (the only wording that gave a clean Omni 1.2 clip of ours), `omni_walk_in`, `omni_light_only`, `omni_pull_back`, `omni_texture_light`. The old four (wall dolly, macro, sunlight loop, Montessori) were dropped: push-in is banned, the macro push-in made Omni invent the texture and redraw the print, the sunlight loop asked for a camera move and a closed loop at once, the Montessori preset named a crib and a low angle that may be absent from the frame (a named noun may be DRAWN, like the tripod of 10.11).
+- **Base prompt:** `composeOmniPrompt` adds first-frame sentence + one-shot + positive wallpaper freeze + sound to EVERY request; the form holds only the motion, so the freeze cannot be erased by editing.
+- **Batch:** a "3" button (one photo per format, 1/1/1; a proportional rescale of 6/4/2 would give 2/1/0, i.e. no 4:3 Etsy thumbnail).
+- **Pydantic shield (`api_discovery/gemini_omni`):** image `data` or `uri`, more mime types, `routing_note()` for 1.1, contract fixture `site_payload.sample.json` checked by both e2e and `test_models.py`.
+- **Checked:** `tsc`, build, e2e Video + Batch. 8 other e2e tests are red on a clean `origin/main` as well (4 prompt-generator tests, 3 generator tests, 1 "results survive a reload": cards come back stuck in "Generating..."); they are not part of this change.
+- **Not done:** wallpaper as a second reference image next to the room frame (Google may read two images as first + last frame; KIE cannot mix a first frame with references), a KIE Pydantic model for `google/gemini-omni-flash-1-2`, the `delivery="uri"` threshold for 720p clips of 10 s (may exceed 4 MB), first + last frame in the UI. None of the new presets except `omni_forward_drift` has been run on Omni 1.2 yet; no paid generation was made in this change.
+
 ## [2026-11-02] Batch Generator Overhaul: Fun Haus / Dopamine Decor / Retro Kids Integration
 
 ### 1. Root Cause Analysis: Website Batch "Soap / Blurry Textures" & Dull Interiors

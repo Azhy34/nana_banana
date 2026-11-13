@@ -9,8 +9,8 @@ Gemini Image Composer (Nana Banana) — веб-приложение для по�
 ## ✨ Основные возможности
 
 *   **Generator**: генерация по промпту и до 5 референсов на `gemini-3.1-flash-image` (512–4K) или `gemini-3-pro-image` (1K–4K), кнопка ✨ Enhance для расширения промпта.
-*   **Batch**: из одного фото обоев — 6/9/12/15 карточек с рандомизированными промптами (`Promt/trends.json`), форматы 9:16 / 2:3 / 4:3, генерация по 2 параллельно, ✨ Refine в Pro 2K. Включает нативную мультимодальную передачу фактуры материала **Craft Lambda** (микрорельеф кварцевого песка, ультраматовость флизелина) прямо в Gemini 3.1 Flash.
-*   **🎬 Video**: оживление 9:16 кадров — по умолчанию **Gemini Omni 1.1 Flash** (`gemini-omni-1.1-flash`, 720p для Etsy или дешёвый 360p-черновик), альтернатива **Veo 3.1 Fast** (`veo-3.1-fast-generate-preview`, 6 с). 4 специализированных пресета камеры (включая макро-фактуру Craft Lambda) с защитой **Inanimate 2D Print Lock** от дублирования голов и биологической анимации персонажей.
+*   **Batch**: из одного фото обоев — 3/6/9/12/15 карточек (3 = быстрый тест: по одному фото на формат) с рандомизированными промптами (`Promt/trends.json`), форматы 9:16 / 2:3 / 4:3, генерация по 2 параллельно, ✨ Refine в Pro 2K. Включает нативную мультимодальную передачу фактуры материала **Craft Lambda** (микрорельеф кварцевого песка, ультраматовость флизелина) прямо в Gemini 3.1 Flash.
+*   **🎬 Video**: оживление 9:16 кадров — по умолчанию **Gemini Omni 1.2 Flash** (`gemini-omni-1.2-flash`, 720p или 1080p для Etsy, длина клипа 3–15 с), альтернатива **Veo 3.1 Fast** (`veo-3.1-fast-generate-preview`, 6 с). 5 пресетов движения (вход со смещением, вход шагом, живой свет при неподвижной камере, отъезд-раскрытие, фактура крупно); замок на обои добавляется к каждому запросу и из поля промпта не стирается; длина клипа 3–10 с по секунде или 15 с, цена на кнопках.
 *   **Cropper**: нарезка под пресеты листинга Etsy (3000×2250 и др.), пакетный режим, режим перспективы стены с автоопределением углов через Gemini.
 *   **Upscale**: Выбор модели — сверхбыстрый и доступный **Real-ESRGAN** (`nightmareai/real-esrgan`, ~$0.002/запуск, по умолчанию) или студийный **Topaz Labs** (`topazlabs/image-upscale`, ~$0.82 за 16K, High Fidelity V2 с subject detection). Разрешения 8K / 16K / 24K (2x / 4x / 6x), JPG/PNG.
 *   **Провайдеры**: Gemini API напрямую (основной продакшен-путь) или OpenRouter. Qwen Image 2 через Replicate доступен как опция.
@@ -40,7 +40,7 @@ nana_banana/
 │   ├── generationRouter.ts # Выбор пути генерации (Gemini / OpenRouter / Qwen)
 │   ├── geminiService.ts    # Картинки, мультимодальная фактура, определение стены, ✨ Enhance, логи
 │   ├── craftLambdaAsset.ts # Ин-мемори Base64 ассет физической фактуры обоев Craft Lambda
-│   ├── omniService.ts      # Видео через Gemini Omni 1.1 Flash (Interactions API)
+│   ├── omniService.ts      # Видео через Gemini Omni 1.2 Flash (Interactions API)
 │   ├── veoService.ts       # Видео через Veo (long-running operation)
 │   ├── promptGenerator.ts  # Рандомные теги, narrative prompting и физические дескрипторы материала
 │   ├── replicateService.ts # Апскейл (Real-ESRGAN / Topaz) и Qwen через /api
