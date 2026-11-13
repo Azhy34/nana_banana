@@ -144,6 +144,9 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
     const typed = `${OMNI_PROMPT_FREEZE} The camera does not move at all.`;
     expect(composeOmniPrompt(typed).split(OMNI_PROMPT_FREEZE)).toHaveLength(2);
     expect(composeOmniPrompt('  ')).toBe(OMNI_PROMPT_BASE.join(' '));   // an empty field still sends the base
+    // a motion typed without a full stop does not run into the next base sentence
+    expect(composeOmniPrompt('The camera does not move at all')).toContain(`at all. ${OMNI_PROMPT_FREEZE}`);
+    expect(composeOmniPrompt('The camera does not move at all!')).toContain(`at all! ${OMNI_PROMPT_FREEZE}`);
   });
 
   test('every second from 3 to 10 can be picked, plus the 15 s maximum', async ({ page, apis }) => {

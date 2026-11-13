@@ -394,7 +394,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                           ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
                           : 'text-amber-300 bg-amber-500/10 border-amber-500/30'
                       }`}>
-                        {OMNI_PRESETS[key].status === 'ok' ? 'проверен на Omni 1.2' : 'тест'}
+                        {OMNI_PRESETS[key].status === 'ok' ? 'проверен на Omni 1.2 (KIE)' : 'тест'}
                       </span>
                     </div>
                     <span className="text-xs opacity-75 mt-1 leading-relaxed text-slate-400">

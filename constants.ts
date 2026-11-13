@@ -52,7 +52,6 @@ export const OMNI_DEFAULT_DURATION_SECONDS = 5;
 // Google: any whole second from 3 to 15; without `response_format.duration` the model makes 10 s.
 // Owner 13.11.2026: every second from 3 to 10 can be picked; 15 stays as the Omni 1.2 maximum.
 export const OMNI_DURATION_OPTIONS = [3, 4, 5, 6, 7, 8, 9, 10, 15] as const;
-export type OmniDurationSeconds = (typeof OMNI_DURATION_OPTIONS)[number];
 // Official rate (aistudio.google.com/docs/pricing, 2026-11-08): video output is billed at $12 per 1M tokens,
 // at 5,792 / 8,688 tokens per second of 720p / 1080p video (1080p is upscaled).
 // => 720p $0.07/s, 1080p $0.104/s. (1.1 was $17.50 per 1M: 720p about $0.10/s.)
@@ -126,7 +125,8 @@ export const OMNI_PROMPT_BASE = [OMNI_PROMPT_FIRST_FRAME, OMNI_PROMPT_SINGLE_SHO
 
 /** The text really sent to Omni: opening + the motion from the form + freeze + sound. A base sentence already typed by the user is not repeated. */
 export function composeOmniPrompt(motion: string): string {
-  const text = motion.trim();
+  let text = motion.trim();
+  if (text && !/[.!?…]$/.test(text)) text += '.';   // a motion typed without a full stop must not run into the next base sentence
   const missing = (sentence: string) => (text.includes(sentence) ? [] : [sentence]);
   return [...missing(OMNI_PROMPT_FIRST_FRAME), ...missing(OMNI_PROMPT_SINGLE_SHOT), text, ...missing(OMNI_PROMPT_FREEZE), ...missing(OMNI_PROMPT_AUDIO)]
     .filter(Boolean)
@@ -137,7 +137,7 @@ export function composeOmniPrompt(motion: string): string {
 export const OMNI_PRESETS = {
   omni_forward_drift: {
     label: "🎥 Вход со смещением (Forward Drift)",
-    description: "Камера идёт вперёд и на несколько сантиметров вправо, в луче солнца плывёт пыль. Единственный рецепт, давший чистый клип на Omni 1.2 (Листинг 11). Лучше для кадра с солнечным светом.",
+    description: "Камера идёт вперёд и на несколько сантиметров вправо, в луче солнца плывёт пыль. Единственный рецепт, давший чистый клип на Omni 1.2 (Листинг 11, через KIE, 10.11). Лучше для кадра с солнечным светом.",
     status: 'ok',
     prompt: 'The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently.'
   },
