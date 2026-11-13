@@ -64,3 +64,4 @@ from api_discovery.gemini_omni.models import OmniInteractionCreateRequest, OmniI
 - `seed`: поле `generation_config.seed` в справочнике есть, но документация Omni не обещает повторяемость клипа по seed.
 - Не покрыто ширмой: 4k и upscale-задача для готового видео (в Gemini API форма запроса upscale не описана), аудио-входы (Google: не поддерживаются).
 - Регионы: в EEA, Швейцарии и Великобритании нельзя загружать картинки с несовершеннолетними и править загруженное видео; ширма это не проверяет, ограничение действует на стороне Google.
+- `delivery: "uri"` требует `store: true`: иначе Google отвечает 400 «store=true is required when response format has video delivery set to URI» (поймано на живом сайте 13.11.2026 на 1080p). Ширма теперь отвергает это сочетание; сайт шлёт `store: true` только когда просит ссылку.

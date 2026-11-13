@@ -127,7 +127,11 @@ def run_tests():
     assert OmniInteractionCreateRequest(input="x").routing_note() is None
     note = OmniInteractionCreateRequest(model="gemini-omni-1.1-flash", input="x").routing_note()
     assert note and "2026-12-03" in note and "1.2" in note
-    print("  [PASS] images (data | uri | mime types) and the 1.1 routing note.")
+    # delivery uri needs store=true (the live 400 of 13.11.2026)
+    raises.validation(lambda: OmniInteractionCreateRequest(input="x", store=False, response_format={"type": "video", "delivery": "uri"}), "uri delivery with store=false")
+    OmniInteractionCreateRequest(input="x", store=True, response_format={"type": "video", "delivery": "uri"})
+    OmniInteractionCreateRequest(input="x", store=False, response_format={"type": "video", "delivery": "inline"})
+    print("  [PASS] images (data | uri | mime types), the 1.1 routing note and uri delivery needing store=true.")
 
     # 8. The request the SITE really sends (fixture kept in step with e2e/ui/video.spec.ts)
     print("\n--- 7. Testing the site's request against the shield ---")

@@ -190,6 +190,10 @@ export class MockedApis {
       this.omni.push(request);
       // delivery "uri" (1080p / long clips): the video comes as a Files API link instead of inline base64
       const viaUri = request.body?.response_format?.delivery === 'uri';
+      if (viaUri && request.body?.store !== true) {
+        // what Google really answers (seen on the live site 13.11.2026)
+        return json(route, 400, { error: { code: 400, status: 'INVALID_ARGUMENT', message: 'store=true is required when response format has video delivery set to URI.' } });
+      }
       const video = viaUri
         ? { type: 'video', mime_type: 'video/mp4', uri: 'https://generativelanguage.googleapis.com/v1beta/files/e2e-omni:download?alt=media' }
         : { type: 'video', mime_type: 'video/mp4', data: OMNI_VIDEO_BYTES.toString('base64') };
