@@ -164,7 +164,8 @@ class OmniInteractionCreateRequest(BaseModel):
     store: Optional[bool] = Field(
         default=True,
         description="Whether to store conversation state server-side. Google: store=false is faster for a one-shot call, "
-                    "but the video can then NOT be edited by a later turn (previous_interaction_id)."
+                    "but the video can then NOT be edited by a later turn (previous_interaction_id). "
+                    "delivery='uri' REQUIRES store=true."
     )
     stream: Optional[bool] = Field(default=None, description="Google advises stream=false for a plain synchronous generation")
     background: Optional[bool] = Field(default=None, description="Google advises background=false for a plain synchronous generation")
@@ -183,6 +184,9 @@ class OmniInteractionCreateRequest(BaseModel):
         if videos > 3:
             raise ValueError(f"{videos} videos: Omni takes at most 3 reference videos")
         fmt = self.response_format
+        if fmt and fmt.delivery == "uri" and self.store is False:
+            # seen live 13.11.2026: 400 "store=true is required when response format has video delivery set to URI"
+            raise ValueError("response_format.delivery='uri' requires store=true (Google answers 400 otherwise)")
         seconds = int(fmt.duration[:-1]) if fmt and fmt.duration else None
         task = self.generation_config.video_config.task if self.generation_config and self.generation_config.video_config else None
         if seconds and seconds > 10 and videos > 1:

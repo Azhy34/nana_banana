@@ -61,8 +61,10 @@ export function billedCostFromUsage(usage: any): number | null {
  * Contract (aistudio.google.com/docs/omni):
  *  - `response_format.duration` is a string of whole seconds, "3s".."15s". NOT SENT = the model makes 10 s;
  *  - `delivery: "uri"` for 1080p / long clips (larger than 4 MB), otherwise the video comes inline as base64;
- *  - `store`, `stream`, `background` = false: Google's advice for a plain synchronous generation
+ *  - `stream`, `background` = false and `store` = false: Google's advice for a plain synchronous generation
  *    (the video then cannot be edited by a later turn, which this tool never does);
+ *  - EXCEPTION: `delivery: "uri"` makes Google answer 400 "store=true is required when response format has video delivery set to URI",
+ *    so a request that asks for a link (1080p, clips over 10 s) is sent with `store: true`;
  *  - there is no negative-prompt parameter: the wallpaper freeze is a sentence of the text, added to EVERY request (composeOmniPrompt).
  */
 export function buildOmniPayload(image: OmniImage, settings: VideoJobSettings) {
@@ -93,7 +95,7 @@ export function buildOmniPayload(image: OmniImage, settings: VideoJobSettings) {
         ...(viaUri ? { delivery: 'uri' } : {}),
       },
       ...(seed !== undefined ? { generation_config: { seed } } : {}),
-      store: false,
+      store: viaUri, // Google: delivery "uri" requires store=true; an inline answer is faster with store=false
       stream: false,
       background: false,
     },

@@ -119,12 +119,22 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
     expect(apis.omni[0].body.response_format.delivery).toBeUndefined();
   });
 
+  test('a clip over 10 s is delivered by link and also sent with store=true', async ({ page, apis }) => {
+    await openVideoWithImage(page);
+    await activeTab(page).getByRole('button', { name: /^15 с/ }).click();
+    await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
+    await expect(activeTab(page).locator('video')).toHaveAttribute('src', /^blob:/);
+    expect(apis.omni[0].body.response_format).toMatchObject({ resolution: '720p', duration: '15s', delivery: 'uri' });
+    expect(apis.omni[0].body.store).toBe(true);
+  });
+
   test('1080p is delivered through the Files API (uri), not inline', async ({ page, apis }) => {
     await openVideoWithImage(page);
     await activeTab(page).getByRole('button', { name: /1080p Рекомендовано Etsy/ }).click();
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
     await expect(activeTab(page).locator('video')).toHaveAttribute('src', /^blob:/);
     expect(apis.omni[0].body.response_format).toMatchObject({ resolution: '1080p', duration: '5s', delivery: 'uri' });
+    expect(apis.omni[0].body.store).toBe(true);                       // Google answers 400 to delivery "uri" with store=false
     expect(apis.omniFiles).toHaveLength(1);                          // the file was polled until ACTIVE before the download
   });
 
