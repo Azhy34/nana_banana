@@ -131,7 +131,7 @@ export function generateRandomTags(
     cameraElevation: pick(TAG_OPTIONS.cameraElevations),
     cameraDistance: pick(TAG_OPTIONS.cameraDistances),
     depthOfField: pick(TAG_OPTIONS.depthOfField),
-    lens: pick(TAG_OPTIONS.lenses),
+    lens: pick(TAG_OPTIONS.lenses.filter(l => !l.startsWith('24mm'))),
     aperture: pick(TAG_OPTIONS.apertures),
     cameraBody: pick(TAG_OPTIONS.cameraBodies),
     accessories: pickN(accessoriesOfAge(resolvedAgeGroup), 1 + Math.floor(Math.random() * trendsData.staging.maxAccessories)),
@@ -328,13 +328,19 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   })();
 
   if (tags.promptMode === 'brief') {
-    const toyLine = trendingToy || 'curated wooden toys and an open illustrated picture book';
+    const isBedHero = /bed|crib|cot|daybed/i.test(keyObjData?.name ?? tags.keyObject);
+    const rawToyLine = trendingToy || 'curated wooden toys and an open illustrated picture book';
+    const toyLine = isBedHero ? rawToyLine : rawToyLine.replace(/\bbeside the (?:cot|bed)\b/gi, 'on the rug');
+    const briefAccessories = activeAccessories
+      .slice(0, trendsData.staging.maxAccessories)
+      .map(a => (isBedHero ? a : a.replace(/\bon the bed\b/gi, 'neatly folded on the rug')));
+    const keyDesc = keyObjData?.description ? ` (${keyObjData.description})` : '';
     const subjectText = tags.heroRoom
       ? `a bright, uncluttered children's room for a child aged 3 to 6 with a flat-weave rug and wooden toys`
       : `a ${tags.ageGroup === 'baby' ? 'serene nursery' : tags.ageGroup === 'teenager' ? 'contemporary youth bedroom' : "children's bedroom"} with ${keyObjData?.name ?? tags.keyObject}`;
     const sceneText = tags.heroRoom
       ? `A bright airy room with ${trendsData.germanApartmentContext.floorType} and white skirting boards. No bed, no nightstand, and no shelves. On a flat-weave natural wool rug in the middle of the floor lie ${toyLine}.${personSentence}`
-      : `A bright airy room with ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}. Along the side wall, away from the mural: ${keyObjData?.name ?? tags.keyObject} crafted from ${material}, with ${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(' and ')}. On the floor rug: ${toyLine}.${personSentence}`;
+      : `A bright airy room with ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}, with realistic true-to-life furniture proportions. Along the side wall, away from the mural: ${keyObjData?.name ?? tags.keyObject}${keyDesc} in ${material}, with ${briefAccessories.join(' and ')}. On the floor rug: ${toyLine}.${personSentence}`;
     return buildBriefPrompt({
       subject: subjectText,
       scene: sceneText,

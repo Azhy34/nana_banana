@@ -112,4 +112,13 @@ test.describe('Batch generator', () => {
     await expect(tab.getByRole('heading', { name: 'Results' })).toBeVisible();
     await expect(tab.getByText('Generating...'), 'cards restored in a loading state that nothing will ever finish').toHaveCount(0);
   });
+
+  test('downloads all formats as a single ZIP when "pack_all" is selected', async ({ page, apis }) => {
+    const tab = await runBatch(page, apis, 3);
+    await tab.getByLabel('Формат выгрузки').selectOption('pack_all');
+    const downloadPromise = page.waitForEvent('download');
+    await tab.getByRole('button', { name: /⬇ Скачать ZIP/ }).click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe('moonbloom-export-pack_all.zip');
+  });
 });

@@ -58,7 +58,7 @@ const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs
 
 export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, kieApiKey = '', onViewModeChange, onSendToTool }) => {
   const { state, actions } = useBatch(provider, apiKey, replicateToken, kieApiKey);
-  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, includeHero, promptMode, exportPreset } = state;
+  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, includeHero, promptMode, exportPreset, isExporting } = state;
   const {
     setBatchStep, setWallpaper, setModel, setExpandedCard, setIncludeMacro,
     setAudience, setIncludeHero, setPromptMode, setExportPreset,
@@ -468,9 +468,10 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           </select>
           {selectedCount > 0 && (
             <button onClick={downloadSelected}
+              disabled={isExporting}
               title={activePreset.hint}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all text-sm shadow shadow-indigo-500/20">
-              ⬇ Download Selected ({selectedCount} · {activePreset.shortLabel})
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-bold rounded-lg transition-all text-sm shadow shadow-indigo-500/20">
+              {isExporting ? '⏳ Сборка ZIP...' : `⬇ Скачать ZIP (${selectedCount} · ${activePreset.shortLabel})`}
             </button>
           )}
         </div>
@@ -487,7 +488,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               : exportPreset === 'pinterest_2x3' && !isVideoMaster
               ? 'aspect-[2/3]'
               : ASPECT_CLASS_MAP[card.tags.aspectRatio] ?? 'aspect-[2/3]';
-          const show4x5Guides = exportPreset === 'pack_4x5_2x3' && card.tags.aspectRatio === '2:3';
+          const show4x5Guides = (exportPreset === 'pack_4x5_2x3' || exportPreset === 'pack_all') && card.tags.aspectRatio === '2:3';
           return (
           <div key={card.id}
             className={`bg-slate-800 rounded-xl border overflow-hidden transition-all ${card.selected && card.resultImage ? 'border-indigo-500/60 shadow-lg shadow-indigo-500/10' : 'border-slate-700'}`}>

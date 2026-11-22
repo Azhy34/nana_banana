@@ -11,7 +11,7 @@ import {
 import { generateBatchImage, isQwenModel, isKieModel } from '../services/generationRouter';
 import { compressImageFile } from '../services/imageCompressor';
 import { resolveCardTexture } from '../services/macroTexture';
-import { exportCardImage, ExportPresetId } from '../services/exportCrop';
+import { exportCardImage, exportCardsAsZip, ExportPresetId } from '../services/exportCrop';
 import { saveCardImage, loadAllCardImages, clearCardImages } from '../services/batchImageStore';
 import { generateTraceId } from '../utils/tracing';
 
@@ -51,6 +51,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   // Master strategy: 2:3 photo master (cropped free in browser to 4:5 Site/Meta + 2:3 Pinterest) + 9:16 video master
   const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '2:3': 8, '9:16': 4, '4:5': 0, '3:4': 0, '4:3': 0 });
   const [exportPreset, setExportPreset] = useState<ExportPresetId>('pack_4x5_2x3');
+  const [isExporting, setIsExporting] = useState(false);
   const [audience, setAudience] = useState<AudienceKey>('neutral');
   const [includeHero, setIncludeHero] = useState<boolean>(false);
   const [promptMode, setPromptMode] = useState<PromptMode>('full');
@@ -388,17 +389,27 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   };
 
   const downloadSelected = async () => {
-    const toDownload = cards.filter(c => c.selected && c.resultImage);
-    for (let i = 0; i < toDownload.length; i++) {
-      await exportCardImage(toDownload[i].resultImage!, i + 1, toDownload[i].tags.aspectRatio, exportPreset);
-      if (i < toDownload.length - 1) {
-        await new Promise(r => setTimeout(r, 200));
-      }
+    const toDownload = cards
+      .map((c, idx) => ({ card: c, cardIndex: idx + 1 }))
+      .filter(({ card }) => card.selected && card.resultImage);
+    if (toDownload.length === 0 || isExporting) return;
+    setIsExporting(true);
+    try {
+      await exportCardsAsZip(
+        toDownload.map(({ card, cardIndex }) => ({
+          sourceUrl: card.resultImage!,
+          cardIndex,
+          cardRatio: card.tags.aspectRatio,
+        })),
+        exportPreset,
+      );
+    } finally {
+      setIsExporting(false);
     }
   };
 
   return {
-    state: { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, includeHero, promptMode, exportPreset },
+    state: { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, includeHero, promptMode, exportPreset, isExporting },
     actions: {
       setBatchStep, setWallpaper, setModel, setExpandedCard, setIncludeMacro,
       setAudience, setIncludeHero, setPromptMode, setExportPreset,

@@ -13,6 +13,7 @@ import { BatchAspectRatio } from '../types';
  */
 
 export type ExportPresetId =
+  | 'pack_all'
   | 'pack_4x5_2x3'
   | 'site_meta_4x5'
   | 'pinterest_2x3'
@@ -35,6 +36,12 @@ export interface ExportPresetOption {
 }
 
 export const EXPORT_PRESET_OPTIONS: readonly ExportPresetOption[] = [
+  {
+    id: 'pack_all',
+    label: 'Пак: Все форматы (4:5 + 2:3 + 1:1)',
+    shortLabel: 'Все (4:5+2:3+1:1)',
+    hint: 'Из каждого 2:3 кадра качает 1440×1800 (4:5), 1000×1500 (2:3) и 1080×1080 (1:1); 9:16 кадры идут как 1080×1920',
+  },
   {
     id: 'pack_4x5_2x3',
     label: 'Пак: Сайт/Meta 4:5 + Pinterest 2:3',
@@ -67,7 +74,7 @@ export const EXPORT_PRESET_OPTIONS: readonly ExportPresetOption[] = [
   },
 ];
 
-const TARGET_SPECS: Record<Exclude<ExportPresetId, 'pack_4x5_2x3' | 'original'> | 'video_9x16', ExportTargetSpec> = {
+const TARGET_SPECS: Record<Exclude<ExportPresetId, 'pack_all' | 'pack_4x5_2x3' | 'original'> | 'video_9x16', ExportTargetSpec> = {
   site_meta_4x5: { suffix: 'site-meta-4x5', width: 1440, height: 1800, mimeType: 'image/jpeg', quality: 0.92 },
   pinterest_2x3: { suffix: 'pinterest-2x3', width: 1000, height: 1500, mimeType: 'image/jpeg', quality: 0.92 },
   meta_square_1x1: { suffix: 'meta-1x1', width: 1080, height: 1080, mimeType: 'image/jpeg', quality: 0.92 },
@@ -105,6 +112,12 @@ export function resolveTargetsForCard(
   preset: ExportPresetId,
 ): ExportTargetSpec[] {
   if (preset === 'original') return [];
+  if (preset === 'pack_all') {
+    if (cardRatio === '9:16') {
+      return [TARGET_SPECS.video_9x16];
+    }
+    return [TARGET_SPECS.site_meta_4x5, TARGET_SPECS.pinterest_2x3, TARGET_SPECS.meta_square_1x1];
+  }
   if (preset === 'pack_4x5_2x3') {
     if (cardRatio === '9:16') {
       return [TARGET_SPECS.video_9x16];
@@ -163,7 +176,21 @@ function triggerBlobDownload(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 150);
 }
 
-async function renderCroppedBlob(img: HTMLImageElement, target: ExportTargetSpec): Promise<Blob> {
+export function buildExportFilename(
+  cardIndex: number,
+  suffix: string,
+  width: number,
+  height: number,
+  ext: string = 'jpg',
+): string {
+  const num = String(cardIndex).padStart(2, '0');
+  return `wallpaper-${num}_${suffix}_${width}x${height}.${ext}`;
+}
+
+async function renderCroppedBlob(
+  img: HTMLImageElement,
+  target: ExportTargetSpec,
+): Promise<{ blob: Blob; width: number; height: number }> {
   const srcW = img.naturalWidth || img.width;
   const srcH = img.naturalHeight || img.height;
   const rect = computeCenterCoverRect(srcW, srcH, target.width, target.height);
@@ -182,17 +209,129 @@ async function renderCroppedBlob(img: HTMLImageElement, target: ExportTargetSpec
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, rect.sx, rect.sy, rect.sw, rect.sh, 0, 0, outW, outH);
 
-  return new Promise((resolve, reject) => {
+  const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('Canvas export returned empty blob'))),
+      (b) => (b ? resolve(b) : reject(new Error('Canvas export returned empty blob'))),
       target.mimeType,
       target.quality,
     );
   });
+  return { blob, width: outW, height: outH };
+}
+
+export interface RenderedExportFile {
+  folder: string;
+  filename: string;
+  blob: Blob;
 }
 
 /**
- * Exports a single generated card according to the selected preset (original or 1..2 cropped JPEGs).
+ * Renders all target files for a single card with dimensions included in both folder and filename.
+ */
+export async function renderCardExports(
+  sourceUrl: string,
+  cardIndex: number,
+  cardRatio: BatchAspectRatio,
+  preset: ExportPresetId,
+): Promise<RenderedExportFile[]> {
+  const targets = resolveTargetsForCard(cardRatio, preset);
+  const blob = await fetchImageBlob(sourceUrl);
+  const img = await loadImageFromBlob(blob);
+  const srcW = img.naturalWidth || img.width;
+  const srcH = img.naturalHeight || img.height;
+
+  if (targets.length === 0) {
+    const ext = blob.type.includes('jpeg') ? 'jpg' : blob.type.includes('webp') ? 'webp' : 'png';
+    return [{
+      folder: `original_${cardRatio.replace(':', 'x')}`,
+      filename: buildExportFilename(cardIndex, 'original', srcW, srcH, ext),
+      blob,
+    }];
+  }
+
+  const files: RenderedExportFile[] = [];
+  for (const target of targets) {
+    const rendered = await renderCroppedBlob(img, target);
+    files.push({
+      folder: `${target.suffix}_${rendered.width}x${rendered.height}`,
+      filename: buildExportFilename(cardIndex, target.suffix, rendered.width, rendered.height, 'jpg'),
+      blob: rendered.blob,
+    });
+  }
+  return files;
+}
+
+function crc32(bytes: Uint8Array): number {
+  let crc = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) {
+    crc ^= bytes[i];
+    for (let j = 0; j < 8; j++) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+/**
+ * Builds an uncompressed (STORED) PKZIP archive in-memory (ideal for already-compressed JPEGs).
+ */
+export function buildZipBlob(entries: Array<{ path: string; data: Uint8Array }>): Blob {
+  const encoder = new TextEncoder();
+  const localParts: Uint8Array[] = [];
+  const centralParts: Uint8Array[] = [];
+  let offset = 0;
+
+  for (const entry of entries) {
+    const nameBytes = encoder.encode(entry.path);
+    const data = entry.data;
+    const crc = crc32(data);
+
+    const localHeader = new Uint8Array(30 + nameBytes.length);
+    const lv = new DataView(localHeader.buffer);
+    lv.setUint32(0, 0x04034b50, true);
+    lv.setUint16(4, 20, true);
+    lv.setUint16(6, 0x0800, true); // UTF-8 filename flag
+    lv.setUint16(8, 0, true);      // STORED
+    lv.setUint32(14, crc, true);
+    lv.setUint32(18, data.length, true);
+    lv.setUint32(22, data.length, true);
+    lv.setUint16(26, nameBytes.length, true);
+    localHeader.set(nameBytes, 30);
+
+    localParts.push(localHeader, data);
+
+    const centralHeader = new Uint8Array(46 + nameBytes.length);
+    const cv = new DataView(centralHeader.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true);
+    cv.setUint16(6, 20, true);
+    cv.setUint16(8, 0x0800, true);
+    cv.setUint16(10, 0, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, data.length, true);
+    cv.setUint32(24, data.length, true);
+    cv.setUint16(28, nameBytes.length, true);
+    cv.setUint32(42, offset, true);
+    centralHeader.set(nameBytes, 46);
+
+    centralParts.push(centralHeader);
+    offset += localHeader.length + data.length;
+  }
+
+  const centralSize = centralParts.reduce((s, p) => s + p.length, 0);
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, entries.length, true);
+  ev.setUint16(10, entries.length, true);
+  ev.setUint32(12, centralSize, true);
+  ev.setUint32(16, offset, true);
+
+  return new Blob([...localParts, ...centralParts, eocd] as BlobPart[], { type: 'application/zip' });
+}
+
+/**
+ * Exports a single generated card according to the selected preset (original or cropped JPEGs with dimensions).
  */
 export async function exportCardImage(
   sourceUrl: string,
@@ -200,22 +339,36 @@ export async function exportCardImage(
   cardRatio: BatchAspectRatio,
   preset: ExportPresetId,
 ): Promise<void> {
-  const targets = resolveTargetsForCard(cardRatio, preset);
-  const blob = await fetchImageBlob(sourceUrl);
-
-  if (targets.length === 0) {
-    const ext = blob.type.includes('jpeg') ? 'jpg' : blob.type.includes('webp') ? 'webp' : 'png';
-    triggerBlobDownload(blob, `wallpaper-${cardIndex}-${cardRatio.replace(':', 'x')}.${ext}`);
-    return;
-  }
-
-  const img = await loadImageFromBlob(blob);
-  for (let i = 0; i < targets.length; i++) {
-    const target = targets[i];
-    const outBlob = await renderCroppedBlob(img, target);
-    triggerBlobDownload(outBlob, `wallpaper-${cardIndex}-${target.suffix}.jpg`);
-    if (i < targets.length - 1) {
+  const files = await renderCardExports(sourceUrl, cardIndex, cardRatio, preset);
+  for (let i = 0; i < files.length; i++) {
+    triggerBlobDownload(files[i].blob, files[i].filename);
+    if (i < files.length - 1) {
       await new Promise((r) => setTimeout(r, 150));
     }
   }
+}
+
+/**
+ * Exports multiple cards in one click as a structured ZIP archive grouped by format/dimension folders.
+ */
+export async function exportCardsAsZip(
+  cards: Array<{ sourceUrl: string; cardIndex: number; cardRatio: BatchAspectRatio }>,
+  preset: ExportPresetId,
+  zipFilename: string = `moonbloom-export-${preset}.zip`,
+): Promise<number> {
+  const entries: Array<{ path: string; data: Uint8Array }> = [];
+  for (const card of cards) {
+    const files = await renderCardExports(card.sourceUrl, card.cardIndex, card.cardRatio, preset);
+    for (const file of files) {
+      const buf = await file.blob.arrayBuffer();
+      entries.push({
+        path: `${file.folder}/${file.filename}`,
+        data: new Uint8Array(buf),
+      });
+    }
+  }
+  if (entries.length === 0) return 0;
+  const zipBlob = buildZipBlob(entries);
+  triggerBlobDownload(zipBlob, zipFilename);
+  return entries.length;
 }

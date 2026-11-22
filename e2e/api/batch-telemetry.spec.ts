@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { buildGeminiPrompt, generateRandomTags } from '../../services/promptGenerator';
-import { computeCenterCoverRect, resolveTargetsForCard } from '../../services/exportCrop';
+import { buildExportFilename, buildZipBlob, computeCenterCoverRect, resolveTargetsForCard } from '../../services/exportCrop';
 import { getModelCapability, kling30InputSchema } from '../../shared/modelContracts';
 import { getKling3CostUsd } from '../../constants';
 import { logEventSchema } from '../../api/log-event';
@@ -43,7 +43,8 @@ test.describe('Batch Prompt Generation & Realism Rules', () => {
       // 5. Layer 5: Camera & Optics (Dynamically randomized variables)
       expect(prompt).toMatch(/f\/(4\.0|5\.6|8\.0|11) aperture/);
       expect(prompt).toMatch(/Shot on (Sony A7R V|Hasselblad H6D-100c|Canon EOS R5|Fujifilm GFX 100S)/);
-      expect(prompt).toMatch(/(24mm tilt-shift lens|28mm gentle wide lens|35mm prime lens|45mm medium format lens|50mm normal lens)/);
+      expect(prompt).toMatch(/(28mm gentle wide lens|35mm prime lens|45mm medium format lens|50mm normal lens)/);
+    expect(prompt).not.toContain('24mm tilt-shift lens');
       // the real-photograph line (positive wording) comes from the same data file as the styles
       expect(prompt).toContain('A real editorial interior photograph');
       expect(prompt).toContain('Aspect ratio: 4:3');
@@ -315,7 +316,7 @@ test.describe('Zod Telemetry Contract Shield', () => {
     }
   });
 
-  test('Canvas export crop preserves 100% width for 2:3 → 4:5 and keeps 9:16 untouched in pack mode', () => {
+  test('Canvas export crop preserves 100% width for 2:3 → 4:5 and keeps 9:16 untouched in pack mode', async () => {
     const rect = computeCenterCoverRect(1696, 2528, 1440, 1800);
     expect(rect).toEqual({ sx: 0, sy: 204, sw: 1696, sh: 2120 });
 
@@ -329,6 +330,21 @@ test.describe('Zod Telemetry Contract Shield', () => {
     expect(videoTargets.map((t) => `${t.suffix}:${t.width}x${t.height}`)).toEqual([
       'reels-9x16:1080x1920',
     ]);
+
+    const allPhotoTargets = resolveTargetsForCard('2:3', 'pack_all');
+    expect(allPhotoTargets.map((t) => `${t.suffix}:${t.width}x${t.height}`)).toEqual([
+      'site-meta-4x5:1440x1800',
+      'pinterest-2x3:1000x1500',
+      'meta-1x1:1080x1080',
+    ]);
+    expect(resolveTargetsForCard('9:16', 'pack_all').map((t) => t.suffix)).toEqual(['reels-9x16']);
+    expect(buildExportFilename(1, 'meta-1x1', 1080, 1080)).toBe('wallpaper-01_meta-1x1_1080x1080.jpg');
+
+    const zip = buildZipBlob([{ path: 'meta-1x1_1080x1080/wallpaper-01_meta-1x1_1080x1080.jpg', data: new Uint8Array([1, 2, 3, 4]) }]);
+    const bytes = new Uint8Array(await zip.arrayBuffer());
+    expect(bytes[0]).toBe(0x50); // 'P'
+    expect(bytes[1]).toBe(0x4b); // 'K'
+    expect(new TextDecoder().decode(bytes)).toContain('meta-1x1_1080x1080/wallpaper-01_meta-1x1_1080x1080.jpg');
   });
 
   test('Kling 3.0 capability & Zod schema match live KIE contract and pricing', () => {
