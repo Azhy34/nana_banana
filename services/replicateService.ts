@@ -42,7 +42,9 @@ export interface UpscaleResult {
 
 export interface QwenGenerationResult {
   url: string;
+  predictionId?: string;
   predictTimeSeconds?: number;
+  billingUnits?: number;
 }
 
 interface QwenGenerateOptions {
@@ -147,7 +149,9 @@ export async function generateQwenImage(
 
   return {
     url: getPredictionOutputUrl(prediction),
+    predictionId: prediction.id,
     predictTimeSeconds: prediction.metrics?.predict_time,
+    billingUnits: prediction.metrics?.unspecified_billing_metric,
   };
 }
 

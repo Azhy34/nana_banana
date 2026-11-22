@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useBatch } from '../hooks/useBatch';
 import { AudienceKey, BatchCard, BatchAspectRatio, BatchPersonMode, BatchPromptTags, AgeGroupKey, ViewMode, ModelType, AIProvider, PromptMode } from '../types';
 import { TAG_OPTIONS, AGE_GROUP_LABELS, getColorsForStyle, muralSafeKeyObjects } from '../services/promptGenerator';
 import { getUiImageModels, getModelCapability, validateModelInput } from '../shared/modelContracts';
-import { downloadImage } from '../services/downloadService';
+import { EXPORT_PRESET_OPTIONS, ExportPresetId } from '../services/exportCrop';
 import { BATCH_COUNT_OPTIONS } from '../constants';
+
+const ASPECT_CLASS_MAP: Record<BatchAspectRatio, string> = {
+  '9:16': 'aspect-[9/16]',
+  '2:3': 'aspect-[2/3]',
+  '4:5': 'aspect-[4/5]',
+  '3:4': 'aspect-[3/4]',
+  '4:3': 'aspect-[4/3]',
+};
 
 type BatchStep = 'setup' | 'cards' | 'results';
 
@@ -50,13 +58,13 @@ const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs
 
 export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, kieApiKey = '', onViewModeChange, onSendToTool }) => {
   const { state, actions } = useBatch(provider, apiKey, replicateToken, kieApiKey);
-  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, useTextureReference, audience, includeHero, promptMode } = state;
+  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, includeHero, promptMode, exportPreset } = state;
   const {
-    setBatchStep, setWallpaper, setModel, setExpandedCard, setUseTextureReference,
-    setAudience, setIncludeHero, setPromptMode,
+    setBatchStep, setWallpaper, setModel, setExpandedCard, setIncludeMacro,
+    setAudience, setIncludeHero, setPromptMode, setExportPreset,
     handleWallpaperUpload, updateFormat, selectCount, generateCards,
     updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
-    updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadSelected
+    updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadCard, downloadSelected
   } = actions;
 
   // ── Render: SETUP ───────────────────────────────────────────────────────────
@@ -91,7 +99,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           )}
         </div>
 
-        {/* Material Texture Reference (Craft Lambda) */}
+        {/* Macro Texture in Interior (Craft Lambda) */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-5 mb-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
@@ -102,27 +110,27 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               />
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-white font-semibold text-sm">Фактура материала: Craft Lambda</h3>
+                  <h3 className="text-white font-semibold text-sm">Макро-кадр фактуры в интерьере</h3>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    Песок / Флизелин
+                    Craft Lambda · Песок
                   </span>
                 </div>
                 <p className="text-slate-400 text-xs leading-relaxed">
-                  Передает в Gemini 3.1 реальный песчаный рельеф, ультраматовость и тактильность полотна
+                  Добавляет в батч 1 крупный план стены в интерьере с чистым референсом фактуры. Обычные комнаты идут строго с 1 референсом обоев (1:1).
                 </p>
               </div>
             </div>
             <button
               type="button"
-              onClick={() => setUseTextureReference(!useTextureReference)}
+              onClick={() => setIncludeMacro(!includeMacro)}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                useTextureReference ? 'bg-indigo-600' : 'bg-slate-700'
+                includeMacro ? 'bg-indigo-600' : 'bg-slate-700'
               }`}
-              title="Переключить референс фактуры"
+              title="Добавить 1 макро-кадр фактуры в батч"
             >
               <span
                 className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  useTextureReference ? 'translate-x-5' : 'translate-x-0'
+                  includeMacro ? 'translate-x-5' : 'translate-x-0'
                 }`}
               />
             </button>
@@ -144,12 +152,19 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
 
         {/* Format Distribution */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-4">
-          <h3 className="text-white font-semibold mb-4">Format Distribution</h3>
-          {(['9:16', '4:5', '3:4', '2:3', '4:3'] as BatchAspectRatio[]).map(ar => (
-            <div key={ar} className="flex items-center gap-3 mb-3 last:mb-0">
-              <span className="text-slate-300 text-sm font-mono w-10 shrink-0">{ar}</span>
-              <span className="text-slate-500 text-xs flex-1 truncate">
-                {ar === '9:16' ? 'Portrait — Reels, Stories, Pinterest Video' : ar === '4:5' ? 'Portrait — Meta Feed & Carousel' : ar === '3:4' ? 'Portrait — Etsy Vertical' : ar === '2:3' ? 'Portrait — Pinterest & Etsy' : 'Landscape — Etsy main thumbnail'}
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <h3 className="text-white font-semibold">Format Distribution</h3>
+            <span className="text-[11px] text-indigo-300 bg-indigo-500/10 border border-indigo-500/30 px-2 py-0.5 rounded">
+              2:3 фото-мастер → Сайт/Meta 4:5 + Pinterest 2:3
+            </span>
+          </div>
+          {(['2:3', '9:16'] as BatchAspectRatio[]).map(ar => (
+            <div key={ar} className="flex items-center gap-3 mb-3">
+              <span className="text-slate-200 text-sm font-mono font-semibold w-10 shrink-0">{ar}</span>
+              <span className="text-slate-400 text-xs flex-1 truncate">
+                {ar === '2:3'
+                  ? 'Photo Master — авто-кроп в 4:5 (Сайт, Google Shopping, Meta Feed/Carousel) + 2:3 (Pinterest)'
+                  : 'Video Master — Reels, Stories, Shorts и Video Animator (9:16)'}
               </span>
               <div className="flex items-center gap-2 shrink-0">
                 <button onClick={() => updateFormat(ar, -1)} className="w-7 h-7 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold transition-colors">−</button>
@@ -158,6 +173,36 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               </div>
             </div>
           ))}
+          {(() => {
+            const extraTotal = formatDist['4:5'] + formatDist['3:4'] + formatDist['4:3'];
+            return (
+              <details className="mt-2 pt-2 border-t border-slate-700/60">
+                <summary className="text-xs text-slate-400 hover:text-slate-200 cursor-pointer select-none flex items-center justify-between">
+                  <span>Доп. форматы вручную (4:5, 3:4, 4:3)</span>
+                  {extraTotal > 0 && <span className="text-amber-300 font-semibold">{extraTotal} выбрано</span>}
+                </summary>
+                <div className="mt-3 space-y-2.5">
+                  {(['4:5', '3:4', '4:3'] as BatchAspectRatio[]).map(ar => (
+                    <div key={ar} className="flex items-center gap-3">
+                      <span className="text-slate-300 text-sm font-mono w-10 shrink-0">{ar}</span>
+                      <span className="text-slate-500 text-xs flex-1 truncate">
+                        {ar === '4:5'
+                          ? 'Portrait — прямой 4:5 без кропа (без GPT Image 2K / Grok)'
+                          : ar === '3:4'
+                          ? 'Portrait — Etsy Vertical'
+                          : 'Landscape — Etsy horizontal thumbnail'}
+                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={() => updateFormat(ar, -1)} className="w-7 h-7 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold transition-colors">−</button>
+                        <span className="w-6 text-center text-white font-bold tabular-nums">{formatDist[ar]}</span>
+                        <button onClick={() => updateFormat(ar, +1)} className="w-7 h-7 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold transition-colors">+</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            );
+          })()}
           <div className={`mt-4 pt-3 border-t border-slate-700 text-sm flex justify-between font-medium ${formatTotal === count ? 'text-green-400' : 'text-yellow-400'}`}>
             <span>Total: {formatTotal} photos</span>
             {formatTotal !== count && <span>⚠ Set to {count}</span>}
@@ -326,17 +371,26 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                   />
                   Hero room (no bed)
                 </label>
+                <label className="flex items-center gap-2 text-xs text-amber-300 cursor-pointer mt-4">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(card.tags.macroTexture)}
+                    onChange={e => updateTag(card.id, 'macroTexture', e.target.checked)}
+                    className="rounded border-slate-600 bg-slate-700 text-amber-500"
+                  />
+                  🔍 Macro texture
+                </label>
                 {(() => {
                   const v = validateModelInput({
                     modelId: card.model,
                     prompt: card.promptText,
                     aspectRatio: card.tags.aspectRatio,
                     resolution: '2K',
-                    refCount: useTextureReference ? 2 : 1,
+                    refCount: card.tags.macroTexture ? 2 : 1,
                   });
                   return (
                     <span className={`mt-4 ml-auto text-[11px] px-2 py-0.5 rounded border ${v.ok ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : 'bg-red-500/10 text-red-300 border-red-500/30'}`}>
-                      {v.ok ? `✓ ${card.promptText.length} chars` : `⚠ ${v.errors[0]}`}
+                      {v.ok ? `✓ ${card.promptText.length} chars · ${card.tags.macroTexture ? '2 refs' : '1 ref'}` : `⚠ ${v.errors[0]}`}
                     </span>
                   );
                 })()}
@@ -388,6 +442,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
 
   const doneCount = cards.filter(c => c.status === 'done').length;
   const selectedCount = cards.filter(c => c.selected && c.resultImage).length;
+  const activePreset = EXPORT_PRESET_OPTIONS.find(p => p.id === exportPreset) ?? EXPORT_PRESET_OPTIONS[0];
 
   return (
     <div className="max-w-5xl mx-auto animate-fadeIn">
@@ -398,10 +453,22 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
             {isGenerating ? `Generating... ${doneCount} / ${cards.length} done` : `${doneCount} of ${cards.length} generated`}
           </p>
         </div>
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <button onClick={() => setBatchStep('cards')} className="text-slate-400 hover:text-slate-200 text-sm transition-colors">← Back to Prompts</button>
+          <select
+            aria-label="Формат выгрузки"
+            title={activePreset.hint}
+            value={exportPreset}
+            onChange={(e) => setExportPreset(e.target.value as ExportPresetId)}
+            className="bg-slate-800 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500"
+          >
+            {EXPORT_PRESET_OPTIONS.map(opt => (
+              <option key={opt.id} value={opt.id}>{opt.label}</option>
+            ))}
+          </select>
           {selectedCount > 0 && (
             <button onClick={downloadSelected}
+              title={activePreset.hint}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all text-sm shadow shadow-indigo-500/20">
               ⬇ Download Selected ({selectedCount})
             </button>
@@ -414,7 +481,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           <div key={card.id}
             className={`bg-slate-800 rounded-xl border overflow-hidden transition-all ${card.selected && card.resultImage ? 'border-indigo-500/60 shadow-lg shadow-indigo-500/10' : 'border-slate-700'}`}>
             {/* Image Area */}
-            <div className={`relative bg-slate-900 ${card.tags.aspectRatio === '9:16' ? 'aspect-[9/16]' : card.tags.aspectRatio === '2:3' ? 'aspect-[2/3]' : 'aspect-[4/3]'}`}>
+            <div className={`relative bg-slate-900 ${ASPECT_CLASS_MAP[card.tags.aspectRatio] ?? 'aspect-[2/3]'}`}>
               {card.status === 'loading' && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                   <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -461,14 +528,11 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                         className="px-2 py-1 bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 text-xs rounded border border-amber-500/20 transition-colors font-medium" 
                         title="Generate high-detail 2K version in Pro model (ideal for Etsy)">✨ Refine (2K)</button>
                     )}
-                    <button onClick={() => downloadImage(card.resultImage!, `wallpaper-${idx + 1}-${card.tags.aspectRatio.replace(':', 'x')}.png`)}
-                      className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors" title="Download">⬇</button>
+                    <button onClick={() => downloadCard(card, idx)}
+                      className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors"
+                      title={`Скачать (${activePreset.shortLabel})`}>⬇</button>
                     <button onClick={() => onSendToTool('upscaler', card.resultImage!)}
                       className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors" title="Send to Upscaler">↑ Scale</button>
-                    {/* Cropper disabled (legacy)
-                    <button onClick={() => onSendToTool('cropper', card.resultImage!)}
-                      className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors" title="Send to Cropper">✂</button>
-                    */}
                     {(() => {
                       const canAnimate = ['9:16', '4:5', '3:4'].includes(card.tags.aspectRatio);
                       return (
@@ -482,7 +546,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                           }`}
                           title={
                             canAnimate
-                              ? 'Анимировать пролет камеры (Veo 3.1)'
+                              ? 'Анимировать кадр (Video Animator)'
                               : 'Анимация доступна для вертикальных форматов (9:16, 4:5, 3:4)'
                           }
                         >

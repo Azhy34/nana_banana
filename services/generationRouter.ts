@@ -1,8 +1,9 @@
 import { AIProvider, GenerationSettings, GenerationUsage, ModelType, UploadedImage } from '../types';
-import { isKieModelId } from '../shared/modelContracts';
-import { generateImageComposition as generateGeminiFamilyImage, generateBatchImage as generateGeminiFamilyBatch } from './geminiService';
+import { isKieModelId, getModelCapability } from '../shared/modelContracts';
+import { generateImageComposition as generateGeminiFamilyImage, generateBatchImage as generateGeminiFamilyBatch, logGeminiEvent } from './geminiService';
 import { generateQwenImage } from './replicateService';
 import { generateKieImage, generateKieBatchImage } from './kieService';
+import { generateSpanId, generateTraceId } from '../utils/tracing';
 
 export interface RoutedGenerationResult {
   image: string;
@@ -36,22 +37,52 @@ export async function generateImageComposition(
       throw new Error('Replicate Token is required for Qwen Image 2.');
     }
 
-    const { url, predictTimeSeconds } = await generateQwenImage(replicateToken, {
-      prompt: settings.prompt,
+    const tid = traceId || generateTraceId();
+    const spanId = generateSpanId();
+    const startedAt = Date.now();
+    const estimatedCost = getModelCapability(settings.model)?.costUsd2K ?? 0.035;
+    const baseDetails = {
       aspectRatio: settings.aspectRatio,
-      referenceImageDataUrl: referenceImages[0] ? buildDataUrl(referenceImages[0]) : undefined,
-      matchInputImage: Boolean(referenceImages[0]),
-    });
-
-    return {
-      image: url,
-      predictTimeSeconds,
-      usage: {
-        promptTokens: 0,
-        candidateTokens: 0,
-        totalTokens: 0,
-      },
+      resolution: settings.imageSize,
+      referenceCount: referenceImages[0] ? 1 : 0,
+      provider: 'replicate',
+      spanId,
     };
+
+    try {
+      const { url, predictionId, predictTimeSeconds, billingUnits } = await generateQwenImage(replicateToken, {
+        prompt: settings.prompt,
+        aspectRatio: settings.aspectRatio,
+        referenceImageDataUrl: referenceImages[0] ? buildDataUrl(referenceImages[0]) : undefined,
+        matchInputImage: Boolean(referenceImages[0]),
+      });
+
+      const duration = (Date.now() - startedAt) / 1000;
+      logGeminiEvent(settings.model, settings.prompt, estimatedCost, duration, 'success', null, tid, undefined, {
+        ...baseDetails,
+        predictionId,
+        predictTimeSeconds,
+        serverTimeSeconds: predictTimeSeconds,
+        billingUnits,
+        costSource: 'estimate',
+      });
+
+      return {
+        image: url,
+        predictTimeSeconds,
+        usage: {
+          promptTokens: 0,
+          candidateTokens: 0,
+          totalTokens: 0,
+          costUsd: estimatedCost,
+          responseId: predictionId,
+        },
+      };
+    } catch (err: any) {
+      const duration = (Date.now() - startedAt) / 1000;
+      logGeminiEvent(settings.model, settings.prompt, 0, duration, 'error', err?.message || 'Qwen error', tid, undefined, baseDetails);
+      throw err;
+    }
   }
 
   return generateGeminiFamilyImage(providerApiKey, referenceImages, settings, provider, traceId);
@@ -70,7 +101,7 @@ export async function generateBatchImage(
   textureImage?: UploadedImage | null,
   cardId?: string,
   kieApiKey: string = '',
-  analytics?: { promptMode?: string; style?: string; audience?: string }
+  analytics?: { promptMode?: string; style?: string; audience?: string; macroTexture?: boolean }
 ): Promise<string> {
   if (isKieModel(model)) {
     return generateKieBatchImage(kieApiKey, wallpaper, prompt, aspectRatio, model, traceId, textureImage, analytics);
@@ -80,13 +111,44 @@ export async function generateBatchImage(
       throw new Error('Replicate Token is required for Qwen Image 2.');
     }
 
-    const { url } = await generateQwenImage(replicateToken, {
-      prompt,
+    const tid = traceId || generateTraceId();
+    const spanId = generateSpanId();
+    const startedAt = Date.now();
+    const estimatedCost = getModelCapability(model)?.costUsd2K ?? 0.035;
+    const baseDetails = {
       aspectRatio,
-      referenceImageDataUrl: buildDataUrl(wallpaper),
-      matchInputImage: false,
-    });
-    return url;
+      resolution: '2K',
+      referenceCount: 1,
+      stage: 'batch_generate',
+      interactionId: cardId,
+      provider: 'replicate',
+      spanId,
+      ...analytics,
+    };
+
+    logGeminiEvent(model, prompt, 0, 0, 'started', null, tid, undefined, baseDetails);
+    try {
+      const { url, predictionId, predictTimeSeconds, billingUnits } = await generateQwenImage(replicateToken, {
+        prompt,
+        aspectRatio,
+        referenceImageDataUrl: buildDataUrl(wallpaper),
+        matchInputImage: false,
+      });
+      const duration = (Date.now() - startedAt) / 1000;
+      logGeminiEvent(model, prompt, estimatedCost, duration, 'success', null, tid, undefined, {
+        ...baseDetails,
+        predictionId,
+        predictTimeSeconds,
+        serverTimeSeconds: predictTimeSeconds,
+        billingUnits,
+        costSource: 'estimate',
+      });
+      return url;
+    } catch (err: any) {
+      const duration = (Date.now() - startedAt) / 1000;
+      logGeminiEvent(model, prompt, 0, duration, 'error', err?.message || 'Qwen error', tid, undefined, baseDetails);
+      throw err;
+    }
   }
 
   return generateGeminiFamilyBatch(providerApiKey, wallpaper, prompt, aspectRatio, model, provider, draftImage, traceId, textureImage, cardId, analytics);

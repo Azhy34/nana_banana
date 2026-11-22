@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { buildGeminiPrompt, generateRandomTags } from '../../services/promptGenerator';
+import { computeCenterCoverRect, resolveTargetsForCard } from '../../services/exportCrop';
 import { logEventSchema } from '../../api/log-event';
 import { AgeGroupKey } from '../../types';
 
@@ -33,8 +34,8 @@ test.describe('Batch Prompt Generation & Realism Rules', () => {
       expect(prompt).toContain('solid wood');
       expect(prompt).toContain('tactile natural materials');
 
-      // 4. Layer 4: Grazing Natural Daylight & Craft Lambda Texture
-      expect(prompt).toContain('Craft Lambda fine sand grain micro-relief');
+      // 4. Layer 4: Grazing Natural Daylight & Matte Sand-Grain Paper Texture (room shot uses 1 ref, no Craft Lambda brand noise)
+      expect(prompt).toContain('ultra-matte non-woven fleece paper wallpaper with subtle fine sand-grain finish');
       expect(prompt).toContain('Grazing natural morning daylight from an adjacent window');
 
       // 5. Layer 5: Camera & Optics (Dynamically randomized variables)
@@ -270,5 +271,61 @@ test.describe('Zod Telemetry Contract Shield', () => {
       expect(parsedRegen.data.traceId).toBe(newRegenTraceId);
       expect(parsedRegen.data.interactionId).toBe(cardToRegen.id);
     }
+  });
+
+  test('macro texture card uses REFERENCE_IMAGE_2 and telemetry schema preserves tokens, spans, and billing fields', () => {
+    const macroTags = { ...generateRandomTags('4:3', 'baby'), macroTexture: true };
+    const macroPrompt = buildGeminiPrompt(macroTags);
+    expect(macroPrompt).toContain('REFERENCE_IMAGE_1');
+    expect(macroPrompt).toContain('REFERENCE_IMAGE_2');
+    expect(macroPrompt).toContain('Craft Lambda');
+
+    const richTelemetry = {
+      sessionId: 'sess_tel_01',
+      model: 'gemini-omni-1.2-flash',
+      prompt: 'Forward drift',
+      cost: 0.348,
+      duration: 42.7,
+      status: 'success' as const,
+      traceId: '0123456789abcdef0123456789abcdef',
+      spanId: '0123456789abcdef',
+      provider: 'gemini',
+      promptTokens: 1200,
+      candidateTokens: 29000,
+      totalTokens: 30200,
+      videoTokens: 29000,
+      costSource: 'usage' as const,
+      kieCredits: 63,
+      kieTaskId: 'task_abc123',
+      serverTimeSeconds: 38.5,
+      apiResponseId: 'v1_interactions_xyz',
+      macroTexture: true,
+    };
+    const parsed = logEventSchema.safeParse(richTelemetry);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.spanId).toBe(richTelemetry.spanId);
+      expect(parsed.data.videoTokens).toBe(29000);
+      expect(parsed.data.costSource).toBe('usage');
+      expect(parsed.data.serverTimeSeconds).toBe(38.5);
+      expect(parsed.data.kieTaskId).toBe('task_abc123');
+      expect(parsed.data.macroTexture).toBe(true);
+    }
+  });
+
+  test('Canvas export crop preserves 100% width for 2:3 → 4:5 and keeps 9:16 untouched in pack mode', () => {
+    const rect = computeCenterCoverRect(1696, 2528, 1440, 1800);
+    expect(rect).toEqual({ sx: 0, sy: 204, sw: 1696, sh: 2120 });
+
+    const photoTargets = resolveTargetsForCard('2:3', 'pack_4x5_2x3');
+    expect(photoTargets.map((t) => `${t.suffix}:${t.width}x${t.height}`)).toEqual([
+      'site-meta-4x5:1440x1800',
+      'pinterest-2x3:1000x1500',
+    ]);
+
+    const videoTargets = resolveTargetsForCard('9:16', 'pack_4x5_2x3');
+    expect(videoTargets.map((t) => `${t.suffix}:${t.width}x${t.height}`)).toEqual([
+      'reels-9x16:1080x1920',
+    ]);
   });
 });

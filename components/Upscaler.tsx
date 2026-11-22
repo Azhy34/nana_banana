@@ -4,7 +4,7 @@ import { upscaleImage } from '../services/replicateService';
 import { logGeminiEvent } from '../services/geminiService';
 import { GeminiLogDetails, UpscaleSettings, UpscaleState } from '../types';
 import { downloadImage } from '../services/downloadService';
-import { generateTraceId } from '../utils/tracing';
+import { generateSpanId, generateTraceId } from '../utils/tracing';
 import { TOPAZ_UPSCALE_MODEL_ID, TOPAZ_USD_PER_BILLING_UNIT, REAL_ESRGAN_MODEL_ID, REAL_ESRGAN_USD_PER_RUN, REAL_ESRGAN_MAX_PIXELS } from '../constants';
 
 interface UpscalerProps {
@@ -137,12 +137,15 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         const upscaleFactor = selectedOption?.factor ?? '4x';
         const multiplier = Number.parseInt(upscaleFactor, 10);
         const traceId = generateTraceId();
+        const spanId = generateSpanId();
         const startedAt = Date.now();
         const activeModelId = settings.model === 'real-esrgan' ? REAL_ESRGAN_MODEL_ID : TOPAZ_UPSCALE_MODEL_ID;
         const sourceName = sourceFile?.name ?? 'image from another tool';
         const outputSize = sourceSize && `${sourceSize.width * multiplier}×${sourceSize.height * multiplier}`;
         const description = `Upscale ${upscaleFactor}${outputSize ? ` → ${outputSize}` : ''} (${settings.format}, ${settings.subjectDetection}): ${sourceName}`;
         const logDetails: GeminiLogDetails = {
+            provider: 'replicate',
+            spanId,
             upscaleModel: settings.model,
             upscaleFactor,
             enhanceModel: ENHANCE_MODEL,
@@ -211,7 +214,9 @@ export const Upscaler: React.FC<UpscalerProps> = ({
                 ...logDetails,
                 predictionId: result.predictionId,
                 predictTimeSeconds: result.predictTimeSeconds,
+                serverTimeSeconds: result.predictTimeSeconds,
                 billingUnits: result.billingUnits,
+                costSource: result.billingUnits !== undefined ? 'usage' : 'estimate',
             });
 
             setState({

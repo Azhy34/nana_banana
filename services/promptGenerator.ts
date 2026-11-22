@@ -1,5 +1,6 @@
 import trendsData from '../Promt/trends.json' with { type: 'json' };
 import { AudienceKey, BatchPromptTags, AgeGroupKey, BatchAspectRatio, BatchPersonMode, PromptMode } from '../types';
+import { buildMacroTexturePrompt, pickMacroSlotIndex } from './macroTexture';
 
 function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -100,6 +101,7 @@ export function accessoriesOfAge(ageGroup: string): string[] {
 export interface RandomTagOptions {
   audience?: AudienceKey;
   heroRoom?: boolean;
+  macroTexture?: boolean;
   personMode?: BatchPersonMode;
   promptMode?: PromptMode;
   style?: string;
@@ -139,6 +141,7 @@ export function generateRandomTags(
     wallArchitecture: 'full-wall',
     audience,
     heroRoom: options.heroRoom ?? false,
+    macroTexture: options.macroTexture ?? false,
     personMode: options.personMode ?? 'none',
     promptMode: options.promptMode ?? 'full',
   };
@@ -150,7 +153,7 @@ export function generateRandomTags(
  */
 export function generateBatchDeck(
   formats: BatchAspectRatio[],
-  options: { audience?: AudienceKey; includeHero?: boolean; promptMode?: PromptMode } = {},
+  options: { audience?: AudienceKey; includeHero?: boolean; includeMacro?: boolean; promptMode?: PromptMode } = {},
 ): BatchPromptTags[] {
   const ageGroupCycle: AgeGroupKey[] = ['baby', 'vorschul', 'schulkind', 'teenager'];
   const styleDeck = shuffled(TAG_OPTIONS.styles);
@@ -164,13 +167,16 @@ export function generateBatchDeck(
   };
   const ageCounters: Record<AgeGroupKey, number> = { baby: 0, vorschul: 0, schulkind: 0, teenager: 0 };
 
-  // Place Hero shot on the first wide/vertical listing card (prefer 4:3, 3:4, or 4:5) if requested.
+  // Place Hero shot on the first photo master card (prefer 2:3, 4:5, 4:3, or 3:4) if requested.
   const heroIdx = options.includeHero
     ? (() => {
-        const preferred = formats.findIndex(ar => ar === '4:3' || ar === '3:4' || ar === '4:5');
+        const preferred = formats.findIndex(ar => ar === '2:3' || ar === '4:5' || ar === '4:3' || ar === '3:4');
         return preferred >= 0 ? preferred : 0;
       })()
     : -1;
+
+  // Place 1 Macro Texture in Interior shot on a non-Hero listing slot if requested.
+  const macroIdx = options.includeMacro ? pickMacroSlotIndex(formats, heroIdx) : -1;
 
   return formats.map((ar, idx) => {
     const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
@@ -179,6 +185,7 @@ export function generateBatchDeck(
     return generateRandomTags(ar, ageGroup, {
       audience: options.audience ?? 'neutral',
       heroRoom: idx === heroIdx,
+      macroTexture: idx === macroIdx,
       personMode: 'none',
       promptMode: options.promptMode ?? 'full',
       style: styleDeck[idx % styleDeck.length],
@@ -197,6 +204,14 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const keyObjData = (trendsData.keyObjects as Array<{ name: string; description: string; ageGroup?: string }>).find(k => k.name === keyObjectToUse);
   const lightingData = trendsData.lighting.find(l => l.name === tags.lighting);
   const camDistData = trendsData.cameraDistances.find(d => d.name === tags.cameraDistance);
+
+  if (tags.macroTexture) {
+    return buildMacroTexturePrompt(tags, {
+      lightingDescription: lightingData?.description,
+      styleName: styleData?.name ?? tags.style,
+      colorName: colorData?.name ?? tags.color,
+    });
+  }
 
   const material = tags.ageGroup === 'teenager'
     ? 'solid wood with visible grain, matte metal accents, clean lines'
@@ -279,7 +294,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
 
   const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch} The styling is warm, cheerful, and tactile, featuring rich natural wood grain, soft matte ceramics, and crisp organic cotton without any artificial gloss or sterile CGI look.`;
 
-  const lightingSection = `Grazing natural morning daylight from an adjacent window streams across the room, illuminating the tactile ultra-matte non-woven paper texture (Craft Lambda fine sand grain micro-relief) and creating authentic grounding ambient shadows where furniture meets the floor and wall. Light setting: ${lightingData?.description ?? tags.lighting}. ${tags.cinematicDetail}`;
+  const lightingSection = `Grazing natural morning daylight from an adjacent window streams across the room, illuminating the tactile ultra-matte non-woven fleece paper wallpaper with subtle fine sand-grain finish and creating authentic grounding ambient shadows where furniture meets the floor and wall. Light setting: ${lightingData?.description ?? tags.lighting}. ${tags.cinematicDetail}`;
 
   const angle = tags.cameraAngle || TAG_OPTIONS.cameraAngles[0];
   const elevation = tags.cameraElevation || TAG_OPTIONS.cameraElevations[0];
@@ -328,7 +343,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
       cameraBody,
       lens,
       aperture,
-      withTexture: true,
+      withTexture: false,
       anchor: true,
       people: (tags.personMode && tags.personMode !== 'none') ? 'from_behind' : 'none',
       style: styleData?.name,

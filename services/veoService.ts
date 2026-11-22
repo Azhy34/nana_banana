@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { VideoJobSettings, GeminiLogDetails } from '../types';
 import { logGeminiEvent } from './geminiService';
+import { generateSpanId, generateTraceId } from '../utils/tracing';
 import {
   VEO_MODEL_ID,
   VEO_FIXED_DURATION_SECONDS,
@@ -33,6 +34,10 @@ export async function generateVeoVideoOnClient(
 
   if (onProgress) onProgress(10);
  
+  const startedAt = Date.now();
+  const tid = traceId || generateTraceId();
+  const spanId = generateSpanId();
+
   // Clean base64 prefix if present
   const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
@@ -41,13 +46,15 @@ export async function generateVeoVideoOnClient(
     durationSeconds: VEO_FIXED_DURATION_SECONDS,
     personGeneration: VEO_PERSON_GENERATION,
     seed: settings.seed,
+    provider: 'gemini',
+    spanId,
   };
 
   let operationName: string | undefined;
 
   // 3. Trigger video generation LRO
   try {
-    logGeminiEvent(VEO_MODEL_ID, `Video Start: ${settings.customPrompt}`, 0, 0, 'started', null, traceId, negativePrompt, requestDetails);
+    logGeminiEvent(VEO_MODEL_ID, `Video Start: ${settings.customPrompt}`, 0, 0, 'started', null, tid, negativePrompt, requestDetails);
 
     const operation = await ai.models.generateVideos({
       model: VEO_MODEL_ID,
@@ -139,18 +146,20 @@ export async function generateVeoVideoOnClient(
         }
       }
 
+      const elapsedSeconds = (Date.now() - startedAt) / 1000;
       logGeminiEvent(
         VEO_MODEL_ID,
         `Video Success: ${settings.customPrompt} | Output: ${downloadUrl.split('key=')[0]}${downloadUrl.includes('key=') ? 'key=[REDACTED]' : ''}`,
         getVeoCostUsd(VEO_FIXED_DURATION_SECONDS),
-        VEO_FIXED_DURATION_SECONDS,
+        elapsedSeconds,
         'success',
         null,
-        traceId,
+        tid,
         negativePrompt,
         {
           ...requestDetails,
           operationName,
+          costSource: 'estimate',
           raiMediaFilteredCount: raiMediaFilteredCount || undefined,
           raiMediaFilteredReasons: raiMediaFilteredReasons?.length ? raiMediaFilteredReasons : undefined,
         }
@@ -166,12 +175,13 @@ export async function generateVeoVideoOnClient(
       throw error;
     }
   } catch (error: any) {
+    const elapsedSeconds = (Date.now() - startedAt) / 1000;
     logGeminiEvent(
       VEO_MODEL_ID,
       `Video Error: ${settings.customPrompt}`,
-      0, 0, 'error',
+      0, elapsedSeconds, 'error',
       error.message || String(error),
-      traceId,
+      tid,
       negativePrompt,
       {
         ...requestDetails,

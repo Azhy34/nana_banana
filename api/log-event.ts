@@ -12,8 +12,21 @@ const DETAIL_FIELDS = [
   'inputWidth', 'inputHeight', 'outputWidth', 'outputHeight', 'billingUnits', 'predictTimeSeconds', 'stage',
   // GMC & Multi-frame Video Interpolation
   'gmcItemGroupId', 'videoMode', 'startImageUrl', 'endImageUrl', 'referenceCount', 'promptPreset',
-  'spanId', 'provider', 'promptMode', 'style', 'audience',
+  // OpenTelemetry & Prompt Analytics
+  'spanId', 'provider', 'promptMode', 'style', 'audience', 'macroTexture',
+  // Provider usage, tokens & billing metadata
+  'promptTokens', 'candidateTokens', 'totalTokens', 'videoTokens',
+  'costSource', 'kieCredits', 'kieTaskId', 'serverTimeSeconds', 'apiResponseId',
 ] as const;
+
+/** Zero-trust redaction for secrets that could accidentally slip into URLs or error strings. */
+function redactSecrets(value: string): string {
+  return value
+    .replace(/([?&](?:key|api_key|token|sig|access_token)=)[^&\s"'<>]+/gi, '$1[REDACTED]')
+    .replace(/(Bearer\s+)[A-Za-z0-9._~+/=-]{8,}/gi, '$1[REDACTED]')
+    .replace(/\bAIza[0-9A-Za-z_-]{25,}\b/g, '[REDACTED]')
+    .replace(/\bsk-(?:or-v1-|ant-)?[0-9A-Za-z_-]{16,}\b/g, '[REDACTED]');
+}
 
 export const logEventSchema = z.object({
   sessionId: z.string().min(1, 'sessionId is required'),
@@ -61,6 +74,17 @@ export const logEventSchema = z.object({
   promptMode: z.string().optional(),
   style: z.string().optional(),
   audience: z.string().optional(),
+  macroTexture: z.boolean().optional(),
+  // Provider usage, tokens & billing metadata
+  promptTokens: z.coerce.number().optional(),
+  candidateTokens: z.coerce.number().optional(),
+  totalTokens: z.coerce.number().optional(),
+  videoTokens: z.coerce.number().optional(),
+  costSource: z.enum(['usage', 'credits', 'estimate']).optional(),
+  kieCredits: z.coerce.number().optional(),
+  kieTaskId: z.string().optional(),
+  serverTimeSeconds: z.coerce.number().optional(),
+  apiResponseId: z.string().optional(),
 });
 
 export type LogEventRequest = z.infer<typeof logEventSchema>;
@@ -92,17 +116,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const {
-    sessionId, model, prompt, cost, duration, status, error, traceId,
+    sessionId, model, cost, duration, status, traceId,
   } = parsed.data;
+  const prompt = redactSecrets(parsed.data.prompt);
+  const error = parsed.data.error ? redactSecrets(parsed.data.error) : parsed.data.error;
   const timestamp = new Date().toISOString();
 
   // Optional fields are persisted only if listed here (mirrors GeminiLogDetails in types.ts).
   const details = Object.fromEntries(
-    DETAIL_FIELDS.filter((key) => parsed.data[key] !== undefined && parsed.data[key] !== null).map((key) => [key, parsed.data[key]])
+    DETAIL_FIELDS
+      .filter((key) => parsed.data[key] !== undefined && parsed.data[key] !== null)
+      .map((key) => {
+        const val = parsed.data[key];
+        return [key, typeof val === 'string' ? redactSecrets(val) : val];
+      })
   );
   const { negativePrompt } = details;
 
-  // 1. Format and write to server/console stdout in structured JSON format
+  // 1. Format and write to server/console stdout in structured Cloud Logging + OpenTelemetry JSON format
   const detailsSummary = Object.entries(details)
     .map(([key, value]) => {
       if (key === 'negativePrompt') return null;
@@ -116,11 +147,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log(JSON.stringify({
     message: `[GEMINI LOG] [Session: ${sessionId}] [Model: ${model}] [Status: ${status}] cost=$${Number(cost).toFixed(4)} duration=${Number(duration).toFixed(1)}s ${error ? `error="${error}"` : ''} prompt="${prompt}"${negativePrompt ? ` negativePrompt="${negativePrompt}"` : ''}${detailsSummary ? ` ${detailsSummary}` : ''}`,
     severity: status === 'error' ? 'ERROR' : 'INFO',
+    time: timestamp,
     "logging.googleapis.com/trace": traceId ? `projects/pro-import-agent/traces/${traceId}` : undefined,
+    "logging.googleapis.com/spanId": typeof details.spanId === 'string' ? details.spanId : undefined,
+    "logging.googleapis.com/trace_sampled": traceId ? true : undefined,
+    // Structured telemetry payload for Logs Explorer filtering & logs-based metrics
+    sessionId,
+    model,
+    status,
+    cost,
+    duration,
+    ...(error ? { error } : {}),
+    ...details,
     labels: {
       sessionId,
       model,
-      status
+      status,
+      ...(typeof details.provider === 'string' ? { provider: details.provider } : {}),
     }
   }));
 

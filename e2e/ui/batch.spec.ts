@@ -32,6 +32,7 @@ async function runBatch(page: Page, apis: MockedApis, count = 6) {
 
   await expect(tab.getByRole('heading', { name: 'Results' })).toBeVisible();
   await expect(tab.getByText(`${count} of ${count} generated`)).toBeVisible({ timeout: 30_000 });
+  await expect(tab.getByLabel('Формат выгрузки')).toHaveValue('pack_4x5_2x3');
   return tab;
 }
 
@@ -59,18 +60,18 @@ test.describe('Batch generator', () => {
       const parts = call.body.messages[0].content as Array<{ type: string; image_url?: { url: string } }>;
       expect(parts.filter((p) => p.type === 'image_url')).toHaveLength(1);
     }
-    expect(aspectRatios.every((ar: string) => ['9:16', '2:3', '4:3'].includes(ar))).toBe(true);
+    expect(aspectRatios.every((ar: string) => ['2:3', '9:16'].includes(ar))).toBe(true);
 
     for (let i = 0; i < 6; i++) await expect(tab.getByAltText(`Result ${i + 1}`)).toBeVisible();
     await expect.poll(() => apis.logEvents.filter((e) => e.status === 'success').length).toBe(6);
   });
 
-  test('3 photos: one per format (9:16, 2:3, 4:3), three requests', async ({ page, apis }) => {
+  test('3 photos: 2x 2:3 photo masters + 1x 9:16 video master, three requests', async ({ page, apis }) => {
     apis.imageFor = cardImage;
     const tab = await runBatch(page, apis, 3);
 
     expect(apis.openrouter).toHaveLength(3);
-    expect(apis.openrouter.map((call) => call.body.image_config.aspect_ratio).sort()).toEqual(['2:3', '4:3', '9:16']);
+    expect(apis.openrouter.map((call) => call.body.image_config.aspect_ratio).sort()).toEqual(['2:3', '2:3', '9:16']);
     for (let i = 0; i < 3; i++) await expect(tab.getByAltText(`Result ${i + 1}`)).toBeVisible();
     await expect.poll(() => apis.logEvents.filter((e) => e.status === 'success').length).toBe(3);
   });
@@ -89,7 +90,7 @@ test.describe('Batch generator', () => {
     apis.imageFor = cardImage;
     const tab = await runBatch(page, apis, 6);
 
-    const verticalCard = tab.getByTitle('Анимировать пролет камеры (Veo 3.1)').first();
+    const verticalCard = tab.getByTitle('Анимировать кадр (Video Animator)').first();
     const cardRoot = verticalCard.locator('xpath=ancestor::div[.//img[starts-with(@alt, "Result ")]][1]');
     const imageSrc = await cardRoot.locator('img[alt^="Result "]').getAttribute('src');
     await verticalCard.click();

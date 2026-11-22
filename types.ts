@@ -39,6 +39,7 @@ export interface BatchPromptTags {
   wallArchitecture?: 'full-wall' | 'scallop-trim';
   audience?: AudienceKey;
   heroRoom?: boolean;
+  macroTexture?: boolean;
   personMode?: BatchPersonMode;
   promptMode?: PromptMode;
 }
@@ -91,6 +92,10 @@ export interface GenerationUsage {
   promptTokens: number;
   candidateTokens: number;
   totalTokens: number;
+  /** Exact billed USD reported by the provider (e.g. OpenRouter usage.cost), when present. */
+  costUsd?: number;
+  /** Provider-assigned response / generation ID for cross-checking bills. */
+  responseId?: string;
 }
 
 export interface GenerationState {
@@ -189,5 +194,16 @@ export interface GeminiLogDetails {
   promptMode?: string;
   style?: string;
   audience?: string;
+  macroTexture?: boolean;
+  // Provider usage, tokens & billing metadata
+  promptTokens?: number;
+  candidateTokens?: number;
+  totalTokens?: number;
+  videoTokens?: number;
+  costSource?: 'usage' | 'credits' | 'estimate';
+  kieCredits?: number;
+  kieTaskId?: string;
+  serverTimeSeconds?: number;
+  apiResponseId?: string;
 }
 

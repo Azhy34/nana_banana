@@ -1,13 +1,11 @@
 import { GenerationSettings, GenerationUsage, UploadedImage } from '../types';
 import { getModelCapability, validateModelInput, kling26InputSchema } from '../shared/modelContracts';
 import { logGeminiEvent } from './geminiService';
+import { MACRO_TEXTURE_LABEL } from './macroTexture';
 import { generateSpanId, generateTraceId } from '../utils/tracing';
 
 const WALLPAPER_LABEL =
   'REFERENCE_IMAGE_1 (Wallpaper Graphic Artwork): This is the exact wallpaper graphic design to display on the accent wall. Preserve all colors, illustrations, lines, and composition 1:1 without alteration.';
-
-const TEXTURE_LABEL =
-  'REFERENCE_IMAGE_2 (Physical Material Texture Reference - Craft Lambda Non-Woven Sand Texture): This is a macro photograph of the real physical wallpaper material. Extract and copy ONLY the physical surface micro-relief: the fine-grain sand texture (Sandstruktur), non-woven paper fleece substrate, and ultra-matte chalky finish under natural daylight. DO NOT copy or transfer any graphic drawings or gold leaf designs from REFERENCE_IMAGE_2. Only transfer its physical paper texture and tactile surface grain onto the wall.';
 
 /**
  * KIE models accept references as a flat URL array (no per-image text parts),
@@ -22,7 +20,7 @@ function withKieReferenceLabels(
 ): string {
   if (refCount === 0 || promptMode === 'brief') return prompt;
   if (prompt.includes('REFERENCE_IMAGE_1')) return prompt;
-  const labels = [WALLPAPER_LABEL, ...(withTexture && refCount > 1 ? [TEXTURE_LABEL] : [])];
+  const labels = [WALLPAPER_LABEL, ...(withTexture && refCount > 1 ? [MACRO_TEXTURE_LABEL] : [])];
   return `${labels.join('\n')}\n\n${prompt}`;
 }
 
@@ -55,11 +53,40 @@ async function uploadReference(kieKey: string, image: UploadedImage, fileName: s
   return url;
 }
 
-async function pollKieTask(kieKey: string, taskId: string, timeoutMs = 240_000): Promise<string> {
+const KIE_USD_PER_CREDIT = 0.005;
+
+interface KieRecordData {
+  state?: string;
+  resultJson?: string;
+  failMsg?: string;
+  costTime?: number;
+  consumeCredits?: number;
+  creditsConsumed?: number;
+  credits_consumed?: number;
+}
+
+interface KieTaskResult {
+  url: string;
+  serverTimeSeconds?: number;
+  creditsConsumed?: number;
+}
+
+function parseKieRecordTelemetry(data?: KieRecordData): { serverTimeSeconds?: number; creditsConsumed?: number } {
+  if (!data) return {};
+  const rawTime = Number(data.costTime);
+  const serverTimeSeconds = Number.isFinite(rawTime) && rawTime > 0
+    ? (rawTime > 3600 ? rawTime / 1000 : rawTime)
+    : undefined;
+  const rawCredits = Number(data.consumeCredits ?? data.creditsConsumed ?? data.credits_consumed);
+  const creditsConsumed = Number.isFinite(rawCredits) && rawCredits > 0 ? rawCredits : undefined;
+  return { serverTimeSeconds, creditsConsumed };
+}
+
+async function pollKieTask(kieKey: string, taskId: string, timeoutMs = 240_000): Promise<KieTaskResult> {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
     await new Promise(r => setTimeout(r, 3500));
-    const res = await callKieProxy<{ data?: { state?: string; resultJson?: string; failMsg?: string } }>(kieKey, {
+    const res = await callKieProxy<{ data?: KieRecordData }>(kieKey, {
       action: 'recordInfo',
       taskId,
     });
@@ -68,7 +95,7 @@ async function pollKieTask(kieKey: string, taskId: string, timeoutMs = 240_000):
       const parsed = JSON.parse(res.data?.resultJson || '{}');
       const url = parsed?.resultUrls?.[0] || parsed?.images?.[0]?.url || parsed?.url;
       if (!url) throw new Error('KIE task succeeded but returned no image URL');
-      return url;
+      return { url, ...parseKieRecordTelemetry(res.data) };
     }
     if (state === 'fail' || state === 'failed') {
       throw new Error(res?.data?.failMsg || 'KIE generation task failed');
@@ -149,19 +176,25 @@ export async function generateKieImage(
     const taskId = created?.data?.taskId;
     if (!taskId) throw new Error('KIE createTask returned no taskId');
 
-    const image = await pollKieTask(kieKey, taskId);
+    const taskResult = await pollKieTask(kieKey, taskId);
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(settings.model, settings.prompt, cost, duration, 'success', null, tid, undefined, {
+    const credits = taskResult.creditsConsumed ?? cap?.kieCredits2K;
+    const finalCost = taskResult.creditsConsumed ? taskResult.creditsConsumed * KIE_USD_PER_CREDIT : cost;
+    logGeminiEvent(settings.model, settings.prompt, finalCost, duration, 'success', null, tid, undefined, {
       aspectRatio: settings.aspectRatio,
       resolution: settings.imageSize,
       referenceCount: referenceImages.length,
       provider: 'kie',
       spanId,
+      kieTaskId: taskId,
+      kieCredits: credits,
+      serverTimeSeconds: taskResult.serverTimeSeconds,
+      costSource: taskResult.creditsConsumed ? 'credits' : 'estimate',
     });
 
     return {
-      image,
-      usage: { promptTokens: 0, candidateTokens: 0, totalTokens: 0 },
+      image: taskResult.url,
+      usage: { promptTokens: 0, candidateTokens: 0, totalTokens: 0, costUsd: finalCost, responseId: taskId },
     };
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
@@ -183,7 +216,7 @@ export async function generateKieBatchImage(
   modelId: string,
   traceId?: string,
   textureImage?: UploadedImage | null,
-  analytics?: { promptMode?: string; style?: string; audience?: string },
+  analytics?: { promptMode?: string; style?: string; audience?: string; macroTexture?: boolean },
 ): Promise<string> {
   if (!kieKey) throw new Error('KIE API Key is required in the header.');
   const tid = traceId || generateTraceId();
@@ -230,17 +263,23 @@ export async function generateKieBatchImage(
     const taskId = created?.data?.taskId;
     if (!taskId) throw new Error('KIE createTask returned no taskId');
 
-    const imageUrl = await pollKieTask(kieKey, taskId);
+    const taskResult = await pollKieTask(kieKey, taskId);
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(modelId, prompt, cost, duration, 'success', null, tid, undefined, {
+    const credits = taskResult.creditsConsumed ?? cap?.kieCredits2K;
+    const finalCost = taskResult.creditsConsumed ? taskResult.creditsConsumed * KIE_USD_PER_CREDIT : cost;
+    logGeminiEvent(modelId, prompt, finalCost, duration, 'success', null, tid, undefined, {
       aspectRatio,
       resolution: '2K',
       referenceCount: refs.length,
       provider: 'kie',
       spanId,
+      kieTaskId: taskId,
+      kieCredits: credits,
+      serverTimeSeconds: taskResult.serverTimeSeconds,
+      costSource: taskResult.creditsConsumed ? 'credits' : 'estimate',
       ...analytics,
     });
-    return imageUrl;
+    return taskResult.url;
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
     logGeminiEvent(modelId, prompt, 0, duration, 'error', err?.message || 'KIE error', tid, undefined, {
@@ -322,7 +361,7 @@ export async function generateKieVideo(
       const elapsedRatio = Math.min(0.65, (Date.now() - startedPoll) / 180_000);
       onProgress?.(Math.round(25 + elapsedRatio * 100));
 
-      const res = await callKieProxy<{ data?: { state?: string; resultJson?: string; failMsg?: string } }>(kieKey, {
+      const res = await callKieProxy<{ data?: KieRecordData }>(kieKey, {
         action: 'recordInfo',
         taskId,
       });
@@ -332,10 +371,18 @@ export async function generateKieVideo(
         const url = parsed?.resultUrls?.[0] || parsed?.video?.url || parsed?.url;
         if (!url) throw new Error('KIE Kling task succeeded but returned no video URL');
         const duration = (Date.now() - startTime) / 1000;
-        logGeminiEvent(modelId, prompt, cost, duration, 'success', null, tid, undefined, {
+        const tel = parseKieRecordTelemetry(res.data);
+        const estimatedCredits = durationStr === '10' ? 126 : 63;
+        const credits = tel.creditsConsumed ?? estimatedCredits;
+        const finalCost = tel.creditsConsumed ? tel.creditsConsumed * KIE_USD_PER_CREDIT : cost;
+        logGeminiEvent(modelId, prompt, finalCost, duration, 'success', null, tid, undefined, {
           durationSeconds: Number(durationStr),
           provider: 'kie',
           spanId,
+          kieTaskId: taskId,
+          kieCredits: credits,
+          serverTimeSeconds: tel.serverTimeSeconds,
+          costSource: tel.creditsConsumed ? 'credits' : 'estimate',
         });
         onProgress?.(100);
         return url;

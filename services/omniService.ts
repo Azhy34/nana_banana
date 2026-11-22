@@ -1,5 +1,6 @@
 import { VideoJobSettings, GeminiLogDetails } from '../types';
 import { logGeminiEvent } from './geminiService';
+import { generateSpanId, generateTraceId } from '../utils/tracing';
 import {
   OMNI_MODEL_ID,
   OMNI_DEFAULT_DURATION_SECONDS,
@@ -47,11 +48,29 @@ export interface OmniResult {
  * `usage.output_tokens_by_modality` (Interactions API reference); null when the answer carries no video tokens.
  */
 export function billedCostFromUsage(usage: any): number | null {
+  const tokens = videoTokensFromUsage(usage);
+  return tokens > 0 ? (tokens * OMNI_USD_PER_M_VIDEO_TOKENS) / 1_000_000 : null;
+}
+
+function videoTokensFromUsage(usage: any): number {
   const entries: any[] = Array.isArray(usage?.output_tokens_by_modality) ? usage.output_tokens_by_modality : [];
-  const tokens = entries
+  return entries
     .filter((m) => m?.modality === 'video')
     .reduce((sum, m) => sum + (Number(m?.tokens) || 0), 0);
-  return tokens > 0 ? (tokens * OMNI_USD_PER_M_VIDEO_TOKENS) / 1_000_000 : null;
+}
+
+function extractOmniTokenUsage(usage: any): Pick<GeminiLogDetails, 'promptTokens' | 'candidateTokens' | 'totalTokens' | 'videoTokens'> {
+  if (!usage || typeof usage !== 'object') return {};
+  const promptTokens = Number(usage.total_input_tokens ?? usage.prompt_tokens ?? usage.input_tokens);
+  const candidateTokens = Number(usage.total_output_tokens ?? usage.output_tokens);
+  const totalTokens = Number(usage.total_tokens);
+  const videoTokens = videoTokensFromUsage(usage);
+  return {
+    ...(Number.isFinite(promptTokens) && promptTokens > 0 ? { promptTokens } : {}),
+    ...(Number.isFinite(candidateTokens) && candidateTokens > 0 ? { candidateTokens } : {}),
+    ...(Number.isFinite(totalTokens) && totalTokens > 0 ? { totalTokens } : {}),
+    ...(videoTokens > 0 ? { videoTokens } : {}),
+  };
 }
 
 /**
@@ -160,6 +179,9 @@ export async function generateOmniVideoOnClient(
     throw new Error("Gemini API key is required. Please set it in the header settings.");
   }
 
+  const startedAt = Date.now();
+  const tid = traceId || generateTraceId();
+  const spanId = generateSpanId();
   const image = parseOmniImage(imageBase64);
   const resolution = settings.resolution || '720p';
   const { payload, seconds, viaUri, seed } = buildOmniPayload(image, settings);
@@ -170,6 +192,10 @@ export async function generateOmniVideoOnClient(
     aspectRatio: '9:16',
     durationSeconds: seconds,
     seed,
+    resolution,
+    provider: 'gemini',
+    spanId,
+    videoMode: viaUri ? 'uri' : 'inline',
   };
 
   if (onProgress) onProgress(15);
@@ -181,9 +207,9 @@ export async function generateOmniVideoOnClient(
     0,
     'started',
     null,
-    traceId,
+    tid,
     undefined,
-    { ...requestDetails, resolution }
+    requestDetails
   );
 
   const endpoint = `${API_ROOT}/interactions?key=${apiKey}`;
@@ -252,6 +278,8 @@ export async function generateOmniVideoOnClient(
     const videoUrl = URL.createObjectURL(blob);
     const billed = billedCostFromUsage(interaction.usage);
     const finalCost = billed ?? cost; // the real bill when Google sent it, else the price-list estimate
+    const elapsedSeconds = (Date.now() - startedAt) / 1000;
+    const tokenUsage = extractOmniTokenUsage(interaction.usage);
 
     if (onProgress) onProgress(100);
 
@@ -259,24 +287,31 @@ export async function generateOmniVideoOnClient(
       OMNI_MODEL_ID,
       `Omni Video Success [${resolution}, ${seconds}s${viaUri ? ', uri' : ''}]: ${settings.customPrompt}`,
       finalCost,
-      seconds,
+      elapsedSeconds,
       'success',
       null,
-      traceId,
+      tid,
       undefined,
-      { ...requestDetails, resolution, interactionId: interaction.id }
+      {
+        ...requestDetails,
+        ...tokenUsage,
+        interactionId: interaction.id,
+        apiResponseId: interaction.id,
+        costSource: billed !== null ? 'usage' : 'estimate',
+      }
     );
 
     return { videoUrl, costUsd: finalCost, costFromUsage: billed !== null };
   } catch (error: any) {
+    const elapsedSeconds = (Date.now() - startedAt) / 1000;
     logGeminiEvent(
       OMNI_MODEL_ID,
       `Omni Video Error: ${settings.customPrompt}`,
       0,
-      0,
+      elapsedSeconds,
       'error',
       error.message || String(error),
-      traceId,
+      tid,
       undefined,
       {
         ...requestDetails,

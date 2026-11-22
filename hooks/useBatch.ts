@@ -9,9 +9,9 @@ import {
   accessoriesOfAge,
 } from '../services/promptGenerator';
 import { generateBatchImage, isQwenModel, isKieModel } from '../services/generationRouter';
-import { downloadImage } from '../services/downloadService';
 import { compressImageFile } from '../services/imageCompressor';
-import { CRAFT_LAMBDA_TEXTURE_IMAGE } from '../services/craftLambdaAsset';
+import { resolveCardTexture } from '../services/macroTexture';
+import { exportCardImage, ExportPresetId } from '../services/exportCrop';
 import { saveCardImage, loadAllCardImages, clearCardImages } from '../services/batchImageStore';
 import { generateTraceId } from '../utils/tracing';
 
@@ -48,13 +48,15 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   });
   const [count, setCount] = useState(12);
   const [model, setModel] = useState<ModelType>(ModelType.Flash31);
-  const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '9:16': 6, '4:5': 0, '3:4': 0, '2:3': 4, '4:3': 2 });
+  // Master strategy: 2:3 photo master (cropped free in browser to 4:5 Site/Meta + 2:3 Pinterest) + 9:16 video master
+  const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '2:3': 8, '9:16': 4, '4:5': 0, '3:4': 0, '4:3': 0 });
+  const [exportPreset, setExportPreset] = useState<ExportPresetId>('pack_4x5_2x3');
   const [audience, setAudience] = useState<AudienceKey>('neutral');
   const [includeHero, setIncludeHero] = useState<boolean>(false);
   const [promptMode, setPromptMode] = useState<PromptMode>('full');
-  const [useTextureReference, setUseTextureReference] = useState<boolean>(() => {
+  const [includeMacro, setIncludeMacro] = useState<boolean>(() => {
     try {
-      const saved = localStorage.getItem('nana_banana_batch_use_texture');
+      const saved = localStorage.getItem('nana_banana_batch_include_macro');
       return saved !== null ? JSON.parse(saved) : true;
     } catch {
       return true;
@@ -122,11 +124,11 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   useEffect(() => {
     try {
-      localStorage.setItem('nana_banana_batch_use_texture', JSON.stringify(useTextureReference));
+      localStorage.setItem('nana_banana_batch_include_macro', JSON.stringify(includeMacro));
     } catch (e) {
-      console.warn('Failed to save useTextureReference to localStorage:', e);
+      console.warn('Failed to save includeMacro to localStorage:', e);
     }
-  }, [useTextureReference]);
+  }, [includeMacro]);
 
   const formatTotal = formatDist['9:16'] + formatDist['4:5'] + formatDist['3:4'] + formatDist['2:3'] + formatDist['4:3'];
 
@@ -154,21 +156,25 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   const selectCount = (n: number) => {
     setCount(n);
-    if (n === 3) {
-      setFormatDist({ '9:16': 1, '4:5': 0, '3:4': 0, '2:3': 1, '4:3': 1 });
-      return;
-    }
     const total = formatTotal;
     if (total === 0) {
-      setFormatDist({ '9:16': Math.round(n * 0.5), '4:5': 0, '3:4': 0, '2:3': Math.round(n * 0.33), '4:3': n - Math.round(n * 0.5) - Math.round(n * 0.33) });
+      const videoCount = Math.max(1, Math.round(n / 3));
+      setFormatDist({ '2:3': n - videoCount, '9:16': videoCount, '4:5': 0, '3:4': 0, '4:3': 0 });
       return;
     }
+    const p23 = Math.round((formatDist['2:3'] / total) * n);
     const p9 = Math.round((formatDist['9:16'] / total) * n);
     const p45 = Math.round((formatDist['4:5'] / total) * n);
     const p34 = Math.round((formatDist['3:4'] / total) * n);
-    const p23 = Math.round((formatDist['2:3'] / total) * n);
-    const p43 = Math.max(0, n - p9 - p45 - p34 - p23);
-    setFormatDist({ '9:16': p9, '4:5': p45, '3:4': p34, '2:3': p23, '4:3': p43 });
+    const p43 = Math.round((formatDist['4:3'] / total) * n);
+    const diff = n - (p23 + p9 + p45 + p34 + p43);
+    setFormatDist({
+      '2:3': Math.max(0, p23 + diff),
+      '9:16': p9,
+      '4:5': p45,
+      '3:4': p34,
+      '4:3': p43,
+    });
   };
 
   const generateCards = () => {
@@ -183,7 +189,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
     clearCardImages();
 
-    const dealtTags = generateBatchDeck(formats, { audience, includeHero, promptMode });
+    const dealtTags = generateBatchDeck(formats, { audience, includeHero, includeMacro, promptMode });
 
     setCards(dealtTags.map((tags, idx) => {
       const ar = tags.aspectRatio;
@@ -203,6 +209,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     setCards(prev => prev.map(c => {
       if (c.id !== cardId) return c;
       const newTags = { ...c.tags, [key]: value };
+      if (key === 'macroTexture' && value) newTags.heroRoom = false;
+      if (key === 'heroRoom' && value) newTags.macroTexture = false;
       if (key === 'ageGroup') {
         const ageOptions = muralSafeKeyObjects(value as AgeGroupKey);
         newTags.keyObject = ageOptions[Math.floor(Math.random() * ageOptions.length)];
@@ -276,13 +284,13 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     setBatchStep('results');
 
     const concurrencyLimit = 2;
-    const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
     
     for (let i = 0; i < selectedCards.length; i += concurrencyLimit) {
       const chunk = selectedCards.slice(i, i + concurrencyLimit);
       await Promise.allSettled(chunk.map(async (card) => {
         try {
           const cardTraceId = generateTraceId();
+          const texture = resolveCardTexture(card.tags);
           const img = await generateBatchImage(
             apiKey,
             replicateToken,
@@ -296,7 +304,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
             texture,
             card.id,
             kieApiKey,
-            { promptMode: card.tags.promptMode || 'full', style: card.tags.style, audience: card.tags.audience || 'neutral' }
+            { promptMode: card.tags.promptMode || 'full', style: card.tags.style, audience: card.tags.audience || 'neutral', macroTexture: Boolean(card.tags.macroTexture) }
           );
           if (img.startsWith('data:')) void saveCardImage(card.id, img);
           setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
@@ -315,7 +323,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     if (isKieModel(card.model) && !kieApiKey) return;
     if (isQwenModel(card.model) && !replicateToken) return;
     if (!isKieModel(card.model) && !isQwenModel(card.model) && !apiKey) return;
-    const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
+    const texture = resolveCardTexture(card.tags);
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
       const cardTraceId = generateTraceId();
@@ -332,7 +340,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         texture,
         card.id,
         kieApiKey,
-        { promptMode: card.tags.promptMode || 'full', style: card.tags.style, audience: card.tags.audience || 'neutral' }
+        { promptMode: card.tags.promptMode || 'full', style: card.tags.style, audience: card.tags.audience || 'neutral', macroTexture: Boolean(card.tags.macroTexture) }
       );
       if (img.startsWith('data:')) void saveCardImage(cardId, img);
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img } : c));
@@ -346,7 +354,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     const card = cards.find(c => c.id === cardId);
     if (!card || !card.resultImage) return;
 
-    const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
+    const texture = resolveCardTexture(card.tags);
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
       const cardTraceId = generateTraceId();
@@ -374,22 +382,29 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, selected: !c.selected } : c));
   };
 
+  const downloadCard = async (card: BatchCard, idx: number) => {
+    if (!card.resultImage) return;
+    await exportCardImage(card.resultImage, idx + 1, card.tags.aspectRatio, exportPreset);
+  };
+
   const downloadSelected = async () => {
     const toDownload = cards.filter(c => c.selected && c.resultImage);
     for (let i = 0; i < toDownload.length; i++) {
-      await downloadImage(toDownload[i].resultImage!, `wallpaper-${i + 1}-${toDownload[i].tags.aspectRatio.replace(':', 'x')}.png`);
-      await new Promise(r => setTimeout(r, 200));
+      await exportCardImage(toDownload[i].resultImage!, i + 1, toDownload[i].tags.aspectRatio, exportPreset);
+      if (i < toDownload.length - 1) {
+        await new Promise(r => setTimeout(r, 200));
+      }
     }
   };
 
   return {
-    state: { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, useTextureReference, audience, includeHero, promptMode },
+    state: { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, includeHero, promptMode, exportPreset },
     actions: {
-      setBatchStep, setWallpaper, setModel, setExpandedCard, setUseTextureReference,
-      setAudience, setIncludeHero, setPromptMode,
+      setBatchStep, setWallpaper, setModel, setExpandedCard, setIncludeMacro,
+      setAudience, setIncludeHero, setPromptMode, setExportPreset,
       handleWallpaperUpload, updateFormat, selectCount, generateCards,
       updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
-      updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadSelected
+      updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadCard, downloadSelected
     }
   };
 }

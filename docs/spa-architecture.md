@@ -38,11 +38,15 @@ All AI calls except Qwen and upscaling go straight from the browser with the key
 - **[services/replicateService.ts](services/replicateService.ts)** — Qwen generation and Topaz upscale start/poll via the `/api` routes.
 - **[shared/upscaleContract.ts](shared/upscaleContract.ts)** — zod schema shared by the Upscaler and `/api/upscale*`; enums mirror the live Replicate model schema (checked by `e2e/live`). API routes must import it with a `.js` extension.
 - **[services/imageCompressor.ts](services/imageCompressor.ts)** — Re-encodes uploads to JPEG ≤2048 px before they are sent to a model.
-- **[services/imageCropService.ts](services/imageCropService.ts)** — Crop geometry and export helpers for `EtsyCropper`.
+- **[services/imageCropService.ts](services/imageCropService.ts)** — Crop geometry and export helpers for legacy `EtsyCropper` (currently disabled in UI).
+- **[services/exportCrop.ts](services/exportCrop.ts)** — Single module for zero-cost browser Canvas export/crop from Batch Results: `2:3` photo master → `4:5` Site/Meta (`1440×1800`) + `2:3` Pinterest (`1000×1500`) + `1:1` Meta (`1080×1080`), while `9:16` video masters stay `1080×1920`; includes `/api/kie` (`action: 'fetchImage'`) CORS relay fallback.
+- **[services/macroTexture.ts](services/macroTexture.ts)** — Single module for the `"Macro Texture in Interior"` Batch card and Craft Lambda sand-grain reference (`REFERENCE_IMAGE_2`); standard rooms strictly send 1 reference (wallpaper 1:1).
+- **[services/batchImageStore.ts](services/batchImageStore.ts)** — IndexedDB storage for Batch 2K result images (avoids `localStorage` quota overflow and reload hangs).
+- **[shared/modelContracts.ts](shared/modelContracts.ts)** — Single Zod capability & billing registry for Gemini, KIE (`Nano Banana 2.1`, `GPT Image 2`, `Grok Imagine 2.0`, `Kling 2.6`), and Replicate (`Qwen Image 2`).
 - **[services/downloadService.ts](services/downloadService.ts)** — Blob-based download helper (avoids cross-origin download issues).
 - **[services/sessionTracker.ts](services/sessionTracker.ts)** — Per-page-load session id (`sess_*`) used to group logs.
-- **[hooks/useBatch.ts](hooks/useBatch.ts)** — All Batch state and handlers; persists step, wallpaper and cards to `localStorage`.
-- **[api/](api/)** — `upscale.ts` + `upscale/poll.ts` (Replicate proxy, client token in `Authorization`), `upload.ts` (Vercel Blob client tokens), `log-event.ts`, `list-sessions.ts` (returns all logged sessions), `qwen.ts` + `qwen/poll.ts` (use the server `REPLICATE_API_TOKEN`).
+- **[hooks/useBatch.ts](hooks/useBatch.ts)** — All Batch state, master-format scaling (`2:3` photo + `9:16` video), export preset selection (`pack_4x5_2x3` default), and IndexedDB hydration.
+- **[api/](api/)** — `kie.ts` (KIE proxy + allowlisted `fetchImage` CORS relay), `upscale.ts` + `upscale/poll.ts` (Replicate proxy, client token in `Authorization`), `upload.ts` (Vercel Blob client tokens), `log-event.ts` (structured Cloud Logging + `spanId`, token/cost/timing fields, secret redaction), `list-sessions.ts`, `qwen.ts` + `qwen/poll.ts`.
 - **[.agents/skills/log-trace-debugger/SKILL.md](.agents/skills/log-trace-debugger/SKILL.md)** — Project-scoped skill for trace-based log analysis and debugging API errors.
 - **[Promt/trends.json](Promt/trends.json)** — THE single source of styles and variables for the site and the boards: `styles` (cards: signature, suitable colours, what to avoid), colors, brands, age groups, key objects, room zones, lighting, camera pools, accessories, materials, `realism` (the real-photograph line), `negatives` (the Avoid list), German apartment context, `latestMarketInsights` (measured, every entry with its source). Guard against styles leaking into code: `comfy_nodes/test_trends_single_source.py` (acceptance of builder changes, not a routine run).
 - **[Promt/Promt.md](Promt/Promt.md)** — Prompt rules; `trends.json` + `promptGenerator.ts` are the source of truth (Rule #6).
@@ -59,10 +63,10 @@ App.tsx
 │   └── ResultStep.tsx      — Result, cost/tokens, download, "✂️ Etsy Cropper"
 ├── Batch:
 │   └── BatchGenerator.tsx  — 3-step wizard (logic in hooks/useBatch.ts): Setup → Review Prompts → Results
-│       Setup: wallpaper, count 6/9/12/15, format distribution 9:16/2:3/4:3 (default 6/4/2), model
-│       Results: per-card download, ✨ Refine (2K, Pro), ↑ Scale, ✂ Cropper, 🎬 Video (9:16 only), regenerate
-├── Cropper:
-│   └── EtsyCropper.tsx     — Canvas crops to Etsy presets (3000×2250 etc.), batch mode, wall-detection warp mode
+│       Setup: wallpaper, count 3/6/9/12/15, 2 master ratios (2:3 photo + 9:16 video; extra ratios collapsed), macro texture toggle, model
+│       Results: export preset selector (default 4:5 + 2:3 pack via services/exportCrop.ts), per-card export, ✨ Refine (2K, Pro), ↑ Scale, 🎬 Animate, regenerate
+├── Cropper (disabled in UI):
+│   └── EtsyCropper.tsx     — Legacy wall-detection warp / Etsy cropper (commented out in UI)
 ├── Upscale:
 │   └── Upscaler.tsx        — Real-ESRGAN (default, ~$0.002) / Topaz via Replicate: 8K/16K/24K → 2x/4x/6x, subject detection (Topaz), JPG/PNG
 └── Video:
@@ -71,13 +75,11 @@ App.tsx
 
 ### Batch Generator — Key Design Decisions
 
-- Model per batch: 3.1 Flash (default), 3 Pro, 50/50 split (first half Pro, second half Flash) or Qwen 2; images are requested at `2K`.
-- Multimodal Material Conditioning: When `useTextureReference` is active (default), passes `REFERENCE_IMAGE_1` (wallpaper artwork 1:1) and `REFERENCE_IMAGE_2` (Craft Lambda macro photo, `services/craftLambdaAsset.ts`). Explicit prompt instructs Gemini 3.1 to extract exclusively the sand grain micro-relief and matte fleece texture, discarding sample graphics.
-- Setup UI has toggle card with thumbnail preview for Craft Lambda texture reference, persisted in `localStorage`.
-- Cards generate in chunks of 2 with `Promise.allSettled`; each result updates its card through functional `setCards(prev => ...)`.
-- ✨ Refine sends the card result as a draft plus the wallpaper to 3 Pro at 2K.
-- Text overlays (USP / promo brushstrokes) are disabled: `generateCards()` clears `overlayText`, although `buildGeminiPrompt()` still supports it.
-- `batchToolImage` in `App.tsx` carries a result to Cropper/Upscaler/Video.
+- Model per batch: Gemini 3.1 Flash (default), Gemini 3 Pro, Nano Banana 2.1 (KIE), GPT Image 2 (KIE), Grok Imagine 2.0 (KIE), ABTest, or Qwen 2; images are requested at `2K`.
+- **Two-master format & zero-cost Canvas export (`services/exportCrop.ts`):** Photos are generated once in `2:3` (~1696×2528) and cropped client-side on download into `4:5` (`1440×1800` for Site, Google Shopping, Meta Feed/Carousel — trimming 8.3% top/bottom only, keeping 100% wall width) and `2:3` (`1000×1500` for Pinterest) or `1:1` (`1080×1080`). Video masters stay `9:16` (`1080×1920`).
+- **Clean 1-ref rooms + dedicated Macro card (`services/macroTexture.ts`):** Standard rooms send ONLY 1 reference (the wallpaper 1:1) to avoid artwork contamination. When `"Макро-кадр фактуры в интерьере"` is enabled, 1 card is assigned `macroTexture: true` and attaches the clean `460×460` Craft Lambda sand-grain crop (`services/craftLambdaAsset.ts`).
+- Cards generate in chunks of 2 with `Promise.allSettled`; 2K result data URLs are stored in IndexedDB (`services/batchImageStore.ts`).
+- Text overlays (USP / promo brushstrokes) are disabled (`ENABLE_USP_OVERLAYS = false`).
 
 ### Video Animator — Key Design Decisions
 

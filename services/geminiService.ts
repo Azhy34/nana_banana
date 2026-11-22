@@ -2,6 +2,8 @@ import { GoogleGenAI, Part } from "@google/genai";
 import { AIProvider, GenerationSettings, GenerationUsage, GeminiLogDetails, ModelType, UploadedImage } from "../types";
 import { MODEL_PRICING } from "../constants";
 import { getSessionId } from "./sessionTracker";
+import { MACRO_TEXTURE_LABEL } from "./macroTexture";
+import { generateSpanId, generateTraceId } from "../utils/tracing";
 
 export interface GenerationResult {
   image: string;
@@ -25,6 +27,7 @@ interface OpenRouterResponseImage {
 }
 
 interface OpenRouterResponse {
+  id?: string;
   choices?: Array<{
     message?: {
       content?: string | Array<{ type?: string; text?: string }>;
@@ -35,6 +38,7 @@ interface OpenRouterResponse {
     prompt_tokens?: number;
     completion_tokens?: number;
     total_tokens?: number;
+    cost?: number;
   };
   error?: {
     code?: number | string;
@@ -241,6 +245,8 @@ const generateImageCompositionWithOpenRouter = async (
     promptTokens: response.usage?.prompt_tokens ?? 0,
     candidateTokens: response.usage?.completion_tokens ?? 0,
     totalTokens: response.usage?.total_tokens ?? 0,
+    ...(typeof response.usage?.cost === 'number' && Number.isFinite(response.usage.cost) ? { costUsd: response.usage.cost } : {}),
+    ...(response.id ? { responseId: response.id } : {}),
   };
 
   return { image, usage };
@@ -326,7 +332,7 @@ const generateBatchWithOpenRouter = async (
   aspectRatio: string,
   model: ModelType,
   draftImage?: string
-): Promise<string> => {
+): Promise<GenerationResult> => {
   const content: OpenRouterContentPart[] = [];
 
   if (draftImage) {
@@ -360,7 +366,16 @@ const generateBatchWithOpenRouter = async (
   if (!image) {
     throw new Error("No image generated in the OpenRouter response.");
   }
-  return image;
+  return {
+    image,
+    usage: {
+      promptTokens: response.usage?.prompt_tokens ?? 0,
+      candidateTokens: response.usage?.completion_tokens ?? 0,
+      totalTokens: response.usage?.total_tokens ?? 0,
+      ...(typeof response.usage?.cost === 'number' && Number.isFinite(response.usage.cost) ? { costUsd: response.usage.cost } : {}),
+      ...(response.id ? { responseId: response.id } : {}),
+    },
+  };
 };
 
 const generateBatchWithGemini = async (
@@ -371,7 +386,7 @@ const generateBatchWithGemini = async (
   model: ModelType,
   draftImage?: string,
   textureImage?: UploadedImage | null
-): Promise<string> => {
+): Promise<GenerationResult> => {
   const ai = new GoogleGenAI({ apiKey });
   const parts: Part[] = [];
 
@@ -393,7 +408,7 @@ const generateBatchWithGemini = async (
   } else if (textureImage) {
     parts.push({ text: "REFERENCE_IMAGE_1 (Wallpaper Graphic Artwork): This is the exact wallpaper graphic design to display on the accent wall. Preserve all colors, illustrations, lines, and composition 1:1 without alteration." });
     parts.push({ inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } });
-    parts.push({ text: "REFERENCE_IMAGE_2 (Physical Material Texture Reference - Craft Lambda Non-Woven Sand Texture): This is a macro photograph of the real physical wallpaper material. Extract and copy ONLY the physical surface micro-relief: the fine-grain sand texture (Sandstruktur), non-woven paper fleece substrate, and ultra-matte chalky finish under natural daylight. DO NOT copy or transfer any graphic drawings or gold leaf designs from REFERENCE_IMAGE_2. Only transfer its physical paper texture and tactile surface grain onto the wall." });
+    parts.push({ text: MACRO_TEXTURE_LABEL });
     parts.push({ inlineData: { data: textureImage.data, mimeType: textureImage.mimeType } });
     parts.push({ text: prompt });
   } else {
@@ -419,7 +434,15 @@ const generateBatchWithGemini = async (
   if (response.candidates?.[0]?.content?.parts) {
     for (const part of response.candidates[0].content.parts) {
       if (part.inlineData?.data) {
-        return `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+        const usage: GenerationUsage = {
+          promptTokens: response.usageMetadata?.promptTokenCount ?? 0,
+          candidateTokens: response.usageMetadata?.candidatesTokenCount ?? 0,
+          totalTokens: response.usageMetadata?.totalTokenCount ?? 0,
+        };
+        return {
+          image: `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`,
+          usage,
+        };
       }
     }
   }
@@ -527,11 +550,15 @@ export const generateImageComposition = async (
   }
 
   const startTime = Date.now();
+  const tid = traceId || generateTraceId();
+  const spanId = generateSpanId();
   const pricing = MODEL_PRICING[settings.model] || { inputPer1M: 0, outputPerImage: 0 };
   const logDetails: GeminiLogDetails = {
     aspectRatio: settings.aspectRatio,
     resolution: settings.imageSize,
+    referenceCount: referenceImages.length,
     provider,
+    spanId,
   };
 
   try {
@@ -543,13 +570,23 @@ export const generateImageComposition = async (
     }
 
     const duration = (Date.now() - startTime) / 1000;
-    const cost = (result.usage.promptTokens / 1_000_000) * pricing.inputPer1M + pricing.outputPerImage;
+    const hasProviderCost = typeof result.usage.costUsd === 'number';
+    const cost = hasProviderCost
+      ? result.usage.costUsd!
+      : (result.usage.promptTokens / 1_000_000) * pricing.inputPer1M + pricing.outputPerImage;
 
-    logGeminiEvent(settings.model, settings.prompt, cost, duration, "success", null, traceId, undefined, logDetails);
+    logGeminiEvent(settings.model, settings.prompt, cost, duration, "success", null, tid, undefined, {
+      ...logDetails,
+      promptTokens: result.usage.promptTokens || undefined,
+      candidateTokens: result.usage.candidateTokens || undefined,
+      totalTokens: result.usage.totalTokens || undefined,
+      costSource: hasProviderCost ? 'usage' : 'estimate',
+      apiResponseId: result.usage.responseId,
+    });
     return result;
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(settings.model, settings.prompt, 0.0, duration, "error", err.message || "Unknown error", traceId, undefined, logDetails);
+    logGeminiEvent(settings.model, settings.prompt, 0.0, duration, "error", err.message || "Unknown error", tid, undefined, logDetails);
     throw err;
   }
 };
@@ -565,7 +602,7 @@ export const generateBatchImage = async (
   traceId?: string,
   textureImage?: UploadedImage | null,
   cardId?: string,
-  analytics?: { promptMode?: string; style?: string; audience?: string }
+  analytics?: { promptMode?: string; style?: string; audience?: string; macroTexture?: boolean }
 ): Promise<string> => {
   if (!apiKey) {
     const label = provider === "openrouter" ? "OpenRouter" : "Gemini";
@@ -573,19 +610,25 @@ export const generateBatchImage = async (
   }
 
   const startTime = Date.now();
+  const tid = traceId || generateTraceId();
+  const spanId = generateSpanId();
   const stage = draftImage ? 'batch_refine' : 'batch_generate';
+  const pricing = MODEL_PRICING[model] || { inputPer1M: 0, outputPerImage: model === ModelType.Pro ? 0.134 : 0.0672 };
   const logDetails: GeminiLogDetails = {
     aspectRatio,
+    resolution: '2K',
+    referenceCount: provider === 'gemini' && textureImage ? 2 : 1,
     stage,
     interactionId: cardId,
     provider,
+    spanId,
     ...analytics,
   };
 
-  logGeminiEvent(model, prompt, 0, 0, "started", null, traceId, undefined, logDetails);
+  logGeminiEvent(model, prompt, 0, 0, "started", null, tid, undefined, logDetails);
 
   try {
-    let result: string;
+    let result: GenerationResult;
     if (provider === "gemini") {
       result = await generateBatchWithGemini(apiKey, wallpaper, prompt, aspectRatio, model, draftImage, textureImage);
     } else {
@@ -593,13 +636,23 @@ export const generateBatchImage = async (
     }
 
     const duration = (Date.now() - startTime) / 1000;
-    const estimatedCost = model === ModelType.Pro ? 0.134 : 0.0672;
+    const hasProviderCost = typeof result.usage.costUsd === 'number';
+    const finalCost = hasProviderCost
+      ? result.usage.costUsd!
+      : (result.usage.promptTokens / 1_000_000) * pricing.inputPer1M + pricing.outputPerImage;
 
-    logGeminiEvent(model, prompt, estimatedCost, duration, "success", null, traceId, undefined, logDetails);
-    return result;
+    logGeminiEvent(model, prompt, finalCost, duration, "success", null, tid, undefined, {
+      ...logDetails,
+      promptTokens: result.usage.promptTokens || undefined,
+      candidateTokens: result.usage.candidateTokens || undefined,
+      totalTokens: result.usage.totalTokens || undefined,
+      costSource: hasProviderCost ? 'usage' : 'estimate',
+      apiResponseId: result.usage.responseId,
+    });
+    return result.image;
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(model, prompt, 0.0, duration, "error", err.message || "Unknown error", traceId, undefined, logDetails);
+    logGeminiEvent(model, prompt, 0.0, duration, "error", err.message || "Unknown error", tid, undefined, logDetails);
     throw err;
   }
 };
@@ -616,6 +669,8 @@ export const detectWallCoordinates = async (
 
   const model = provider === "gemini" ? GEMINI_WALL_DETECT_MODEL : OPENROUTER_WALL_DETECT_MODEL;
   const startTime = Date.now();
+  const tid = generateTraceId();
+  const spanId = generateSpanId();
 
   try {
     const { coords, promptTokens } = provider === "gemini"
@@ -626,11 +681,21 @@ export const detectWallCoordinates = async (
       .join(" ");
     // The answer is a few dozen JSON tokens, so only the image input is priced.
     const cost = (promptTokens / 1_000_000) * MODEL_PRICING[ModelType.Flash31].inputPer1M;
-    logGeminiEvent(model, `Wall detection → ${corners}`, cost, (Date.now() - startTime) / 1000, "success");
+    logGeminiEvent(model, `Wall detection → ${corners}`, cost, (Date.now() - startTime) / 1000, "success", null, tid, undefined, {
+      provider,
+      spanId,
+      stage: 'wall_detect',
+      promptTokens: promptTokens || undefined,
+      costSource: 'estimate',
+    });
     return coords;
   } catch (error: any) {
     console.error(`Vision API Error (${provider}):`, error);
-    logGeminiEvent(model, "Wall detection failed — full frame used instead", 0, (Date.now() - startTime) / 1000, "error", error?.message || "Unknown error");
+    logGeminiEvent(model, "Wall detection failed — full frame used instead", 0, (Date.now() - startTime) / 1000, "error", error?.message || "Unknown error", tid, undefined, {
+      provider,
+      spanId,
+      stage: 'wall_detect',
+    });
     return {
       topLeft: { x: 0, y: 0 },
       topRight: { x: 1, y: 0 },
@@ -650,7 +715,9 @@ export const enhancePromptText = async (
   }
 
   const startTime = Date.now();
-  const modelName = provider === "gemini" ? "gemini-3.1-flash-image" : "google/gemini-3.1-flash-image";
+  const tid = generateTraceId();
+  const spanId = generateSpanId();
+  const modelName = provider === "gemini" ? "gemini-3.1-flash-image" : "google/gemini-2.5-flash";
   const systemInstruction = `You are an expert prompt engineer for Gemini Image Generation. Translate (if needed) and expand the user's short prompt into a high-end, detailed architectural interior photography prompt for children's room wallpaper mockups.
 
 Apply these strict rules:
@@ -663,6 +730,7 @@ Apply these strict rules:
 
   try {
     let resultText = userPrompt;
+    let usage: Partial<GenerationUsage> = {};
     if (provider === "gemini") {
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
@@ -673,6 +741,11 @@ Apply these strict rules:
         ]
       });
       resultText = response.text?.trim() || userPrompt;
+      usage = {
+        promptTokens: response.usageMetadata?.promptTokenCount ?? 0,
+        candidateTokens: response.usageMetadata?.candidatesTokenCount ?? 0,
+        totalTokens: response.usageMetadata?.totalTokenCount ?? 0,
+      };
     } else {
       const response = await postToOpenRouter(apiKey, {
         model: "google/gemini-2.5-flash",
@@ -682,14 +755,36 @@ Apply these strict rules:
         ]
       });
       resultText = extractOpenRouterText(response) || userPrompt;
+      usage = {
+        promptTokens: response.usage?.prompt_tokens ?? 0,
+        candidateTokens: response.usage?.completion_tokens ?? 0,
+        totalTokens: response.usage?.total_tokens ?? 0,
+        ...(typeof response.usage?.cost === 'number' ? { costUsd: response.usage.cost } : {}),
+        ...(response.id ? { responseId: response.id } : {}),
+      };
     }
 
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(modelName, `Enhanced: "${userPrompt}" -> "${resultText}"`, 0.0001, duration, "success");
+    const hasProviderCost = typeof usage.costUsd === 'number';
+    const cost = hasProviderCost ? usage.costUsd! : 0.0001;
+    logGeminiEvent(modelName, `Enhanced: "${userPrompt}" -> "${resultText}"`, cost, duration, "success", null, tid, undefined, {
+      provider,
+      spanId,
+      stage: 'prompt_enhance',
+      promptTokens: usage.promptTokens || undefined,
+      candidateTokens: usage.candidateTokens || undefined,
+      totalTokens: usage.totalTokens || undefined,
+      costSource: hasProviderCost ? 'usage' : 'estimate',
+      apiResponseId: usage.responseId,
+    });
     return resultText;
   } catch (error: any) {
     const duration = (Date.now() - startTime) / 1000;
-    logGeminiEvent(modelName, `Enhance Failed: "${userPrompt}"`, 0.0, duration, "error", error.message || "Unknown error");
+    logGeminiEvent(modelName, `Enhance Failed: "${userPrompt}"`, 0.0, duration, "error", error.message || "Unknown error", tid, undefined, {
+      provider,
+      spanId,
+      stage: 'prompt_enhance',
+    });
     console.error("Failed to enhance prompt:", error);
     return userPrompt;
   }
