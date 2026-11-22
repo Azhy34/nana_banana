@@ -2,9 +2,9 @@
  "1": {
   "class_type": "MoonbloomWallpaper",
   "inputs": {
-   "wallpaper_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 31/fototapete-kinderzimmer-heissluftballon-flugzeug-berge.png",
+   "wallpaper_path": "C:/Users/Mikhail/Desktop/Обои/Листинг 36/Листинг 36.PNG",
    "use_texture": true,
-   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 31"
+   "out_dir": "C:/Users/Mikhail/Desktop/Обои/Листинг 36"
   }
  },
  "2": {
@@ -19,13 +19,13 @@
  "3": {
   "class_type": "MoonbloomDesign",
   "inputs": {
-   "scene_id": "l31_reel01_s1_play_brief",
+   "scene_id": "l36_ikea02_s1_run_in_brief",
    "aspect_ratio": "9:16",
    "age_group": "vorschul",
-   "style": "Biophilic Nursery",
-   "color": "Warm Greige",
+   "style": "IKEA Kids",
+   "color": "Powder Blue",
    "key_object": "random",
-   "lighting": "crisp morning window daylight",
+   "lighting": "soft afternoon window light",
    "camera_angle": "random",
    "camera_elevation": "random",
    "camera_distance": "random",
@@ -33,13 +33,13 @@
    "composition": "unobstructed",
    "clean_random_details": false,
    "variation": 0,
-   "camera_body": "Fujifilm GFX 100S",
-   "lens": "35mm prime lens",
-   "aperture": "f/11 aperture",
+   "camera_body": "Hasselblad H6D-100c",
+   "lens": "24mm tilt-shift lens",
+   "aperture": "f/8.0 aperture",
    "prompt_mode": "brief",
-   "brief_subject": "a calm biophilic bedroom for a child aged 2 to 5, with a low birch toddler daybed and a round oak wall shelf",
-   "brief_scene": "A bright room with a pale ash floor and warm greige walls. An oval wool rug with wavy edges holds wax crayons in a wooden cup, an open drawing book and a small wooden car. On the LEFT side wall, away from the mural: a low natural birch toddler daybed, 140 by 70 cm, with checkered and striped bolster pillows, a small potted fern on the floor beside it and a round oak shelf with two picture books. Crisp morning daylight from a window on the LEFT falls in clear patches on the floor. A toddler boy of about two and a half in a navy knit sweater and light grey trousers sits on the rug in the middle of the floor with his back to the camera, holding wax crayons in a wooden cup with an open drawing book on the rug, his face turned away from the camera so no facial detail is visible, well away from the mural. Palette: pale birch, soft sage, oat, bouclé cream and white.",
-   "brief_framing": "Shot from the right part of the room at eye level, turned about 25 degrees toward the mural wall, so the LEFT side wall is in view. The frame shows a floor-to-ceiling section of the mural wall around the biplanes and the striped hot-air balloons: the ceiling line at the top of the frame, the skirting board and a strip of floor at the bottom; the mural continues beyond the frame edges at its true scale.",
+   "brief_subject": "a bright IKEA Kids bedroom for a child aged 2 to 5, with a flower-shaped craft table and poufs",
+   "brief_scene": "A light room with a pine plank floor. A powder blue cotton rug with wax crayons in a wooden cup and an open drawing book. On the RIGHT side wall, away from the mural: a low flower-shaped birch craft table, a stack of ochre and barberry bouclé poufs and a low white bed with powder blue bedding. Soft afternoon light from a window on the RIGHT lies in patches on the floor. At the left edge of the frame an open white door leads into the room; a toddler girl of about two and a half in a sunny ochre knit sweater and cream trousers has just come through it and stands two steps inside the room at the left edge of the frame with her back to the camera, in mid-stride with both arms swinging out to the sides, her face turned away from the camera so no facial detail is visible, well away from the mural. Palette: pale birch, ochre, barberry red and white.",
+   "brief_framing": "Shot from the left part of the room at eye level, turned about 25 degrees toward the mural wall, so the RIGHT side wall is in view. The frame shows a floor-to-ceiling section of the mural wall around the big pink and yellow cosmos flowers of the meadow: the ceiling line at the top of the frame, the skirting board and a strip of floor at the bottom; the mural continues beyond the frame edges at its true scale.",
    "with_texture": true,
    "brief_people": "from_behind",
    "brief_product": "the wall mural",
@@ -211,205 +211,6 @@
   "inputs": {
    "source": [
     "11",
-    2
-   ]
-  }
- },
- "14": {
-  "class_type": "MoonbloomDesign",
-  "inputs": {
-   "scene_id": "l31_reel01_s2_product_brief",
-   "aspect_ratio": "9:16",
-   "age_group": "baby",
-   "style": "Boho",
-   "color": "Soft Sand",
-   "key_object": "random",
-   "lighting": "soft afternoon window light",
-   "camera_angle": "random",
-   "camera_elevation": "random",
-   "camera_distance": "random",
-   "brand": "random",
-   "composition": "unobstructed",
-   "clean_random_details": false,
-   "variation": 0,
-   "camera_body": "Sony A7R V",
-   "lens": "28mm gentle wide lens",
-   "aperture": "f/11 aperture",
-   "prompt_mode": "brief",
-   "brief_subject": "a warm boho nursery for a baby under 2, with a circular quilted play mat and a low birch book ledge",
-   "brief_scene": "A soft nursery with a terracotta tile floor and sand-coloured walls. A rust-striped cotton dhurrie lies on the tiles, with two cloth baby books and a wooden teething ring on the quilted mat. On the RIGHT side wall, away from the mural: a circular quilted organic cotton mat with wooden sensory blocks, a low birch book ledge 35 cm high with cloth books, and a small round ceramic vase with dried grasses. Soft afternoon light from a window on the RIGHT lies in warm patches on the tiles. A sheer cream linen curtain hangs at the extreme left edge of the frame, close to the camera and slightly out of focus, as a foreground layer. Palette: terracotta, warm brown, muted green, cream and birch.",
-   "brief_framing": "Shot from the left part of the room at natural eye level, turned about 30 degrees toward the mural wall, so the RIGHT side wall is in view. The frame shows a floor-to-ceiling section of the mural wall around the biplanes and the striped hot-air balloons: the ceiling line at the top of the frame, the skirting board and a strip of floor at the bottom; the mural continues beyond the frame edges at its true scale. Nothing stands in front of the mural.",
-   "with_texture": true,
-   "brief_people": "none",
-   "brief_product": "the wall mural",
-   "brief_product_short": "the mural",
-   "brief_wall_rule": "It covers the whole feature wall edge to edge, floor to ceiling, at its true scale, drawing and colours unchanged; nothing stands in front of it."
-  }
- },
- "15": {
-  "class_type": "PreviewAny",
-  "inputs": {
-   "source": [
-    "14",
-    0
-   ]
-  }
- },
- "16": {
-  "class_type": "MoonbloomKieImage",
-  "inputs": {
-   "prompt": [
-    "14",
-    0
-   ],
-   "scene_id": [
-    "14",
-    1
-   ],
-   "wallpaper_path": [
-    "1",
-    1
-   ],
-   "texture_path": [
-    "1",
-    2
-   ],
-   "out_dir": [
-    "1",
-    3
-   ],
-   "listing": [
-    "1",
-    4
-   ],
-   "aspect_ratio": "9:16",
-   "use_texture": true,
-   "reuse_existing": true,
-   "dry_run": true,
-   "reference_labels": false,
-   "model": "nano-banana-2-1",
-   "resolution": "2K"
-  }
- },
- "17": {
-  "class_type": "PreviewImage",
-  "inputs": {
-   "images": [
-    "16",
-    0
-   ]
-  }
- },
- "18": {
-  "class_type": "PreviewAny",
-  "inputs": {
-   "source": [
-    "16",
-    2
-   ]
-  }
- },
- "19": {
-  "class_type": "MoonbloomKieGptImage2",
-  "inputs": {
-   "prompt": [
-    "14",
-    0
-   ],
-   "scene_id": [
-    "14",
-    1
-   ],
-   "wallpaper_path": [
-    "1",
-    1
-   ],
-   "texture_path": [
-    "1",
-    2
-   ],
-   "out_dir": [
-    "1",
-    3
-   ],
-   "listing": [
-    "1",
-    4
-   ],
-   "aspect_ratio": "9:16",
-   "use_texture": true,
-   "reuse_existing": true,
-   "dry_run": true,
-   "reference_labels": false,
-   "resolution": "2K"
-  }
- },
- "20": {
-  "class_type": "PreviewImage",
-  "inputs": {
-   "images": [
-    "19",
-    0
-   ]
-  }
- },
- "21": {
-  "class_type": "PreviewAny",
-  "inputs": {
-   "source": [
-    "19",
-    2
-   ]
-  }
- },
- "22": {
-  "class_type": "MoonbloomKieGrokImagineEdit",
-  "inputs": {
-   "prompt": [
-    "14",
-    0
-   ],
-   "scene_id": [
-    "14",
-    1
-   ],
-   "wallpaper_path": [
-    "1",
-    1
-   ],
-   "texture_path": [
-    "1",
-    2
-   ],
-   "out_dir": [
-    "1",
-    3
-   ],
-   "listing": [
-    "1",
-    4
-   ],
-   "aspect_ratio": "9:16",
-   "use_texture": true,
-   "reuse_existing": true,
-   "dry_run": true,
-   "reference_labels": false
-  }
- },
- "23": {
-  "class_type": "PreviewImage",
-  "inputs": {
-   "images": [
-    "22",
-    0
-   ]
-  }
- },
- "24": {
-  "class_type": "PreviewAny",
-  "inputs": {
-   "source": [
-    "22",
     2
    ]
   }

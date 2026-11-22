@@ -11,6 +11,8 @@ interface HeaderProps {
   setGeminiApiKey: (key: string) => void;
   replicateToken: string;
   setReplicateToken: (token: string) => void;
+  kieApiKey: string;
+  setKieApiKey: (key: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,7 +24,9 @@ export const Header: React.FC<HeaderProps> = ({
   geminiApiKey,
   setGeminiApiKey,
   replicateToken,
-  setReplicateToken
+  setReplicateToken,
+  kieApiKey,
+  setKieApiKey
 }) => {
   const activeLabel = provider === 'openrouter' ? 'OpenRouter' : 'Gemini';
   const activeApiKey = provider === 'openrouter' ? openRouterApiKey : geminiApiKey;
@@ -85,13 +89,26 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="relative group">
             <input
               type="password"
+              placeholder="KIE API Key"
+              value={kieApiKey}
+              onChange={(e) => setKieApiKey(e.target.value)}
+              className="bg-slate-800 border border-emerald-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none w-32 transition-all"
+            />
+            <div className="absolute right-0 top-full mt-2 w-56 p-2 bg-slate-800 text-xs text-slate-400 rounded border border-slate-700 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+              KIE API key for Nano Banana 2.1, GPT Image 2, Grok, and Kling 2.6.
+            </div>
+          </div>
+
+          <div className="relative group">
+            <input
+              type="password"
               placeholder="Replicate Token"
               value={replicateToken}
               onChange={(e) => setReplicateToken(e.target.value)}
-              className="bg-slate-800 border border-purple-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none w-36 transition-all"
+              className="bg-slate-800 border border-purple-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none w-32 transition-all"
             />
             <div className="absolute right-0 top-full mt-2 w-56 p-2 bg-slate-800 text-xs text-slate-400 rounded border border-slate-700 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-              Replicate token for upscaling and Qwen Image 2 generation.
+              Replicate token for AI Upscaler (Real-ESRGAN / Topaz).
             </div>
           </div>
 

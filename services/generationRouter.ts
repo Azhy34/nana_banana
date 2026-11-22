@@ -1,6 +1,8 @@
 import { AIProvider, GenerationSettings, GenerationUsage, ModelType, UploadedImage } from '../types';
+import { isKieModelId } from '../shared/modelContracts';
 import { generateImageComposition as generateGeminiFamilyImage, generateBatchImage as generateGeminiFamilyBatch } from './geminiService';
 import { generateQwenImage } from './replicateService';
+import { generateKieImage, generateKieBatchImage } from './kieService';
 
 export interface RoutedGenerationResult {
   image: string;
@@ -14,14 +16,21 @@ const buildDataUrl = (image: UploadedImage): string =>
 export const isQwenModel = (model: ModelType): boolean =>
   model === ModelType.QwenImage2;
 
+export const isKieModel = (model: ModelType): boolean =>
+  isKieModelId(model);
+
 export async function generateImageComposition(
   providerApiKey: string,
   replicateToken: string,
   referenceImages: UploadedImage[],
   settings: GenerationSettings,
   provider: AIProvider = 'openrouter',
-  traceId?: string
+  traceId?: string,
+  kieApiKey: string = ''
 ): Promise<RoutedGenerationResult> {
+  if (isKieModel(settings.model)) {
+    return generateKieImage(kieApiKey, referenceImages, settings, traceId);
+  }
   if (isQwenModel(settings.model)) {
     if (!replicateToken) {
       throw new Error('Replicate Token is required for Qwen Image 2.');
@@ -59,8 +68,13 @@ export async function generateBatchImage(
   draftImage?: string,
   traceId?: string,
   textureImage?: UploadedImage | null,
-  cardId?: string
+  cardId?: string,
+  kieApiKey: string = '',
+  analytics?: { promptMode?: string; style?: string; audience?: string }
 ): Promise<string> {
+  if (isKieModel(model)) {
+    return generateKieBatchImage(kieApiKey, wallpaper, prompt, aspectRatio, model, traceId, textureImage, analytics);
+  }
   if (isQwenModel(model)) {
     if (!replicateToken) {
       throw new Error('Replicate Token is required for Qwen Image 2.');
@@ -75,5 +89,5 @@ export async function generateBatchImage(
     return url;
   }
 
-  return generateGeminiFamilyBatch(providerApiKey, wallpaper, prompt, aspectRatio, model, provider, draftImage, traceId, textureImage, cardId);
+  return generateGeminiFamilyBatch(providerApiKey, wallpaper, prompt, aspectRatio, model, provider, draftImage, traceId, textureImage, cardId, analytics);
 }

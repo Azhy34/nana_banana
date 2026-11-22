@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
-import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ModelType, AIProvider, OverlayPosition } from '../types';
-import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, getKeyObjectsForAge } from '../services/promptGenerator';
-import { generateBatchImage, isQwenModel } from '../services/generationRouter';
+import { AudienceKey, BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ModelType, AIProvider, PromptMode } from '../types';
+import {
+  generateRandomTags,
+  generateBatchDeck,
+  buildGeminiPrompt,
+  muralSafeKeyObjects,
+  getColorsForStyle,
+  accessoriesOfAge,
+} from '../services/promptGenerator';
+import { generateBatchImage, isQwenModel, isKieModel } from '../services/generationRouter';
 import { downloadImage } from '../services/downloadService';
 import { compressImageFile } from '../services/imageCompressor';
 import { CRAFT_LAMBDA_TEXTURE_IMAGE } from '../services/craftLambdaAsset';
+import { saveCardImage, loadAllCardImages, clearCardImages } from '../services/batchImageStore';
 import { generateTraceId } from '../utils/tracing';
 
 export type BatchStep = 'setup' | 'cards' | 'results';
@@ -19,7 +27,7 @@ export type BatchStep = 'setup' | 'cards' | 'results';
  * @param replicateToken - Token for Replicate (used if Qwen model is selected)
  * @returns An object containing the current state and action handlers for the UI.
  */
-export function useBatch(provider: AIProvider, apiKey: string, replicateToken: string) {
+export function useBatch(provider: AIProvider, apiKey: string, replicateToken: string, kieApiKey: string = '') {
   const [batchStep, setBatchStep] = useState<BatchStep>(() => {
     try {
       const saved = localStorage.getItem('nana_banana_batch_step');
@@ -40,7 +48,10 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   });
   const [count, setCount] = useState(12);
   const [model, setModel] = useState<ModelType>(ModelType.Flash31);
-  const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '9:16': 6, '2:3': 4, '4:3': 2 });
+  const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '9:16': 6, '4:5': 0, '3:4': 0, '2:3': 4, '4:3': 2 });
+  const [audience, setAudience] = useState<AudienceKey>('neutral');
+  const [includeHero, setIncludeHero] = useState<boolean>(false);
+  const [promptMode, setPromptMode] = useState<PromptMode>('full');
   const [useTextureReference, setUseTextureReference] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('nana_banana_batch_use_texture');
@@ -50,17 +61,31 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     }
   });
 
-  // Cards
+  // Cards (metadata in localStorage; multi-MB resultImage data URLs in IndexedDB)
   const [cards, setCards] = useState<BatchCard[]>(() => {
     try {
       const saved = localStorage.getItem('nana_banana_batch_cards');
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved) as BatchCard[];
+      return parsed.map(c => (c.status === 'loading' ? { ...c, status: 'idle' } : c));
     } catch {
       return [];
     }
   });
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Hydrate saved card images from IndexedDB on mount
+  useEffect(() => {
+    let active = true;
+    loadAllCardImages().then(images => {
+      if (!active || Object.keys(images).length === 0) return;
+      setCards(prev =>
+        prev.map(c => (images[c.id] ? { ...c, resultImage: images[c.id], status: 'done' } : c))
+      );
+    });
+    return () => { active = false; };
+  }, []);
 
   // Sync state to localStorage on changes
   useEffect(() => {
@@ -85,7 +110,11 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   useEffect(() => {
     try {
-      localStorage.setItem('nana_banana_batch_cards', JSON.stringify(cards));
+      // Strip inline data: URLs before writing to localStorage to stay well below the 5 MB quota.
+      const compact = cards.map(c =>
+        c.resultImage && c.resultImage.startsWith('data:') ? { ...c, resultImage: null } : c
+      );
+      localStorage.setItem('nana_banana_batch_cards', JSON.stringify(compact));
     } catch (e) {
       console.warn('Failed to save cards to localStorage:', e);
     }
@@ -99,7 +128,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     }
   }, [useTextureReference]);
 
-  const formatTotal = formatDist['9:16'] + formatDist['2:3'] + formatDist['4:3'];
+  const formatTotal = formatDist['9:16'] + formatDist['4:5'] + formatDist['3:4'] + formatDist['2:3'] + formatDist['4:3'];
 
   // ── Setup handlers ──────────────────────────────────────────────────────────
 
@@ -125,66 +154,35 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   const selectCount = (n: number) => {
     setCount(n);
-    // Rescale distribution proportionally to new count
-    const total = formatDist['9:16'] + formatDist['2:3'] + formatDist['4:3'];
+    const total = formatTotal;
     if (total === 0) {
-      setFormatDist({ '9:16': Math.round(n * 0.5), '2:3': Math.round(n * 0.33), '4:3': n - Math.round(n * 0.5) - Math.round(n * 0.33) });
+      setFormatDist({ '9:16': Math.round(n * 0.5), '4:5': 0, '3:4': 0, '2:3': Math.round(n * 0.33), '4:3': n - Math.round(n * 0.5) - Math.round(n * 0.33) });
       return;
     }
     const p9 = Math.round((formatDist['9:16'] / total) * n);
+    const p45 = Math.round((formatDist['4:5'] / total) * n);
+    const p34 = Math.round((formatDist['3:4'] / total) * n);
     const p23 = Math.round((formatDist['2:3'] / total) * n);
-    const p43 = n - p9 - p23;
-    setFormatDist({ '9:16': p9, '2:3': p23, '4:3': Math.max(0, p43) });
+    const p43 = Math.max(0, n - p9 - p45 - p34 - p23);
+    setFormatDist({ '9:16': p9, '4:5': p45, '3:4': p34, '2:3': p23, '4:3': p43 });
   };
 
   const generateCards = () => {
     if (!wallpaper || formatTotal === 0) return;
     const formats: BatchAspectRatio[] = [
       ...Array(formatDist['9:16']).fill('9:16'),
+      ...Array(formatDist['4:5']).fill('4:5'),
+      ...Array(formatDist['3:4']).fill('3:4'),
       ...Array(formatDist['2:3']).fill('2:3'),
       ...Array(formatDist['4:3']).fill('4:3'),
     ].sort(() => Math.random() - 0.5);
 
-    const USP_OPTIONS = [
-      'Custom Sizes Available',
-      '100% Toxin-Free & Odorless',
-      'Washable & Easy Clean',
-      'Easy Paste-the-Wall',
-      'Premium Tactile Texture',
-      'Certified EU Quality',
-    ];
+    clearCardImages();
 
-    const ageGroupCycle: AgeGroupKey[] = ['baby', 'vorschul', 'schulkind', 'teenager'];
-    
-    // Select non-video formats (4:3 and 2:3) for Etsy listing USP overlays.
-    // 9:16 formats are always kept 100% clean for video animation.
-    const nonVideoIndices = formats
-      .map((ar, idx) => (ar !== '9:16' ? idx : -1))
-      .filter((idx) => idx !== -1);
+    const dealtTags = generateBatchDeck(formats, { audience, includeHero, promptMode });
 
-    // Give USP overlay to ~35% of listing photo cards (at least 1 if non-video cards exist)
-    const textCardsCount = Math.min(
-      nonVideoIndices.length,
-      Math.max(1, Math.round(nonVideoIndices.length * 0.35))
-    );
-
-    const shuffledNonVideo = [...nonVideoIndices].sort(() => Math.random() - 0.5);
-    const textIndices = new Set<number>(shuffledNonVideo.slice(0, textCardsCount));
-
-    setCards(formats.map((ar, idx) => {
-      const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
-      const tags = generateRandomTags(ar, ageGroup);
-      
-      // USP overlay text only for 4:3 and 2:3 formats; 9:16 is strictly clean for video
-      if (textIndices.has(idx) && ar !== '9:16') {
-        tags.overlayText = USP_OPTIONS[Math.floor(Math.random() * USP_OPTIONS.length)];
-        tags.overlayPosition = Math.random() < 0.5 ? 'bottom left' : 'bottom right';
-      } else {
-        tags.overlayText = undefined;
-        tags.overlayPosition = undefined;
-      }
-
-      // Разделение 50/50 для моделей при A/B-тесте
+    setCards(dealtTags.map((tags, idx) => {
+      const ar = tags.aspectRatio;
       const cardModel = model === ModelType.ABTest
         ? (idx < formats.length / 2 ? ModelType.Pro : ModelType.Flash31)
         : model;
@@ -197,13 +195,19 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   // ── Card handlers ───────────────────────────────────────────────────────────
 
-  const updateTag = (cardId: string, key: keyof BatchPromptTags, value: string | string[]) => {
+  const updateTag = (cardId: string, key: keyof BatchPromptTags, value: string | string[] | boolean) => {
     setCards(prev => prev.map(c => {
       if (c.id !== cardId) return c;
       const newTags = { ...c.tags, [key]: value };
       if (key === 'ageGroup') {
-        const ageOptions = getKeyObjectsForAge(value as AgeGroupKey);
+        const ageOptions = muralSafeKeyObjects(value as AgeGroupKey);
         newTags.keyObject = ageOptions[Math.floor(Math.random() * ageOptions.length)];
+      }
+      if (key === 'style') {
+        const allowedColors = getColorsForStyle(value as string, c.tags.audience);
+        if (!allowedColors.includes(newTags.color)) {
+          newTags.color = allowedColors[0];
+        }
       }
       return { ...c, tags: newTags, promptText: buildGeminiPrompt(newTags) };
     }));
@@ -212,7 +216,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const rerandomize = (cardId: string) => {
     setCards(prev => prev.map(c => {
       if (c.id !== cardId) return c;
-      const tags = generateRandomTags(c.tags.aspectRatio);
+      const tags = generateRandomTags(c.tags.aspectRatio, undefined, { audience, promptMode });
       return { ...c, tags, promptText: buildGeminiPrompt(tags) };
     }));
   };
@@ -220,7 +224,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const rerandomizeAccessories = (cardId: string) => {
     setCards(prev => prev.map(c => {
       if (c.id !== cardId) return c;
-      const acc = [...TAG_OPTIONS.accessories].sort(() => Math.random() - 0.5).slice(0, 2 + Math.floor(Math.random() * 2));
+      const pool = accessoriesOfAge(c.tags.ageGroup);
+      const acc = [...pool].sort(() => Math.random() - 0.5).slice(0, 2);
       const newTags = { ...c.tags, accessories: acc };
       return { ...c, tags: newTags, promptText: buildGeminiPrompt(newTags) };
     }));
@@ -229,7 +234,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const deleteCard = (cardId: string) => setCards(prev => prev.filter(c => c.id !== cardId));
 
   const addCard = () => {
-    const tags = generateRandomTags('9:16');
+    const tags = generateRandomTags('9:16', undefined, { audience, promptMode });
     const cardModel = model === ModelType.ABTest ? ModelType.Pro : model;
     const cardId = `card_${String(cards.length + 1).padStart(2, '0')}_9x16_${Math.random().toString(36).substring(2, 7)}`;
     setCards(prev => [...prev, { id: cardId, tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel }]);
@@ -242,22 +247,31 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   // ── Generation ──────────────────────────────────────────────────────────────
 
   const handleGenerateAll = async () => {
-    if (isQwenModel(model) && !replicateToken) {
+    const selectedCards = cards.filter(c => c.selected);
+    const needsKie = selectedCards.some(c => isKieModel(c.model));
+    const needsQwen = selectedCards.some(c => isQwenModel(c.model));
+    const needsPrimary = selectedCards.some(c => !isKieModel(c.model) && !isQwenModel(c.model));
+
+    if (needsKie && !kieApiKey) {
+      alert('Please enter your KIE API Key in the header first.');
+      return;
+    }
+    if (needsQwen && !replicateToken) {
       alert('Please enter your Replicate Token first.');
       return;
     }
-    if (!isQwenModel(model) && !apiKey) {
+    if (needsPrimary && !apiKey) {
       const providerLabel = provider === 'openrouter' ? 'OpenRouter' : 'Gemini';
       alert(`Please enter your ${providerLabel} API Key first.`);
       return;
     }
     if (!wallpaper) return;
     setIsGenerating(true);
+    clearCardImages();
     setCards(prev => prev.map(c => ({ ...c, status: 'loading', resultImage: null, error: null })));
     setBatchStep('results');
 
     const concurrencyLimit = 2;
-    const selectedCards = cards.filter(c => c.selected);
     const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
     
     for (let i = 0; i < selectedCards.length; i += concurrencyLimit) {
@@ -276,8 +290,11 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
             undefined,
             cardTraceId,
             texture,
-            card.id
+            card.id,
+            kieApiKey,
+            { promptMode: card.tags.promptMode || 'full', style: card.tags.style, audience: card.tags.audience || 'neutral' }
           );
+          if (img.startsWith('data:')) void saveCardImage(card.id, img);
           setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'done', resultImage: img } : c));
         } catch (err: any) {
           setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
@@ -289,9 +306,11 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   };
 
   const regenerate = async (cardId: string) => {
-    if ((!apiKey && !isQwenModel(model)) || !wallpaper || (isQwenModel(model) && !replicateToken)) return;
     const card = cards.find(c => c.id === cardId);
-    if (!card) return;
+    if (!card || !wallpaper) return;
+    if (isKieModel(card.model) && !kieApiKey) return;
+    if (isQwenModel(card.model) && !replicateToken) return;
+    if (!isKieModel(card.model) && !isQwenModel(card.model) && !apiKey) return;
     const texture = useTextureReference ? CRAFT_LAMBDA_TEXTURE_IMAGE : null;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'loading', error: null } : c));
     try {
@@ -307,8 +326,11 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         undefined,
         cardTraceId,
         texture,
-        card.id
+        card.id,
+        kieApiKey,
+        { promptMode: card.tags.promptMode || 'full', style: card.tags.style, audience: card.tags.audience || 'neutral' }
       );
+      if (img.startsWith('data:')) void saveCardImage(cardId, img);
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img } : c));
     } catch (err: any) {
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message } : c));
@@ -337,6 +359,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         texture,
         card.id
       );
+      if (img.startsWith('data:')) void saveCardImage(cardId, img);
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img, model: ModelType.Pro } : c));
     } catch (err: any) {
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message || 'Refinement failed' } : c));
@@ -356,9 +379,10 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   };
 
   return {
-    state: { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, useTextureReference },
+    state: { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, useTextureReference, audience, includeHero, promptMode },
     actions: {
       setBatchStep, setWallpaper, setModel, setExpandedCard, setUseTextureReference,
+      setAudience, setIncludeHero, setPromptMode,
       handleWallpaperUpload, updateFormat, selectCount, generateCards,
       updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
       updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadSelected

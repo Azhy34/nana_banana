@@ -1,0 +1,80 @@
+{
+  "description": "Listing 39 (Watercolour Dinosaurs Panorama) — two 4:5 Meta feed interior variants: s1 = empty Scandi preschool bedroom in muted sage and dusty blue; s2 = Japandi preschool bedroom in soft sand with a four-year-old boy sitting on the rug from behind.",
+  "id": "l39_meta01",
+  "listing_spec": "listing39_interiors.json",
+  "video_spec": "listing39_video.json",
+  "aspect": "4:5",
+  "for": ["meta_feed_ad"],
+  "child": {
+    "gender": "boy"
+  },
+  "seed": 391,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 2,
+    "distinct_kits": true,
+    "ages": []
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "room",
+      "kit": {
+        "id": "l39_meta01_s1",
+        "name": "Birch toddler bed, sage and dusty blue",
+        "audience": "neutral",
+        "room_type": "sleep zone",
+        "child": {
+          "gender": "neutral",
+          "age_band": "vorschul"
+        },
+        "age": "vorschul",
+        "side": "right",
+        "style": "Scandi",
+        "color": "Muted Sage",
+        "lighting": "warm morning sunbeams",
+        "subject": "a bright Scandinavian bedroom for a child aged 3 to 5, with a low solid birch toddler bed and a birch book ledge",
+        "room": "A bright airy room with wide pale oak floorboards and white skirting boards.",
+        "floor": "On a rectangular flat-weave oat-and-sage wool rug lie three small carved wooden dinosaur figurines and an open hardcover picture book.",
+        "side_wall": "a low solid birch toddler bed 140 by 70 cm under 40 cm high neatly made with dusty blue washed linen bedding and two small sage-green and oat cotton pillows, a small solid oak bedside cube with a matte cream ceramic night light beside it, and a low birch book ledge holding three illustrated children's books",
+        "ceiling": "",
+        "light": "Warm morning sunbeams from a window on the {side} lie in soft patches across the oak floor and rug.",
+        "palette": "muted sage, dusty blue, pale birch, oat and warm white",
+        "items": "birch toddler bed, oak bedside cube, ceramic night light, birch book ledge, wool rug, wooden dinosaur figurines, picture book and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "three small carved wooden dinosaur figurines and an open hardcover picture book"
+      }
+    },
+    {
+      "slot": "s2",
+      "role": "life",
+      "kit": {
+        "id": "l39_meta01_s2",
+        "name": "Oak toddler bed, sand linen and boy on rug",
+        "audience": "neutral",
+        "room_type": "play zone",
+        "child": {
+          "gender": "neutral",
+          "age_band": "vorschul"
+        },
+        "age": "vorschul",
+        "side": "left",
+        "style": "Japandi",
+        "color": "Soft Sand",
+        "lighting": "soft afternoon window light",
+        "subject": "a calm Japandi bedroom for a child aged 3 to 5, with a low solid oak toddler bed and a wooden toy bench",
+        "room": "A bright airy room with wide warm oak floorboards and white skirting boards.",
+        "floor": "On a round flat-weave cream cotton rug lie wooden building blocks and small carved wooden dinosaur toys.",
+        "side_wall": "a low solid oak toddler bed 140 by 70 cm under 40 cm high neatly made with warm sand linen bedding and a dusty blue cotton cushion, and a low wooden toy bench beside it holding two stacked wooden puzzle boxes",
+        "ceiling": "",
+        "light": "Soft afternoon window light from the {side} casts gentle natural shadows across the oak floor and rug.",
+        "palette": "soft sand, pale oak, cream, muted sage and dusty slate blue",
+        "items": "oak toddler bed, wooden toy bench, wooden puzzle boxes, round cotton rug, wooden building blocks, wooden dinosaur toys and architecture",
+        "life_pose": "{person} sits on the rug in the middle of the floor about two metres from the mural wall, facing the mural with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible, arranging the small wooden dinosaur toys on the rug",
+        "life_action": "slowly arranges the small wooden dinosaur toys on the rug",
+        "toy": "wooden building blocks and small carved wooden dinosaur toys"
+      }
+    }
+  ]
+}

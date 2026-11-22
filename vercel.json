@@ -1,5 +1,6 @@
 {
   "functions": {
+    "api/kie.ts": { "maxDuration": 30 },
     "api/upscale.ts": { "maxDuration": 30 },
     "api/upscale/poll.ts": { "maxDuration": 60 }
   },

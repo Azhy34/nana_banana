@@ -1,0 +1,206 @@
+{
+  "description": "Designed by scripts/director.py design (seed 147): the roles, ages, styles and colours were dealt by code, the rooms written from the picture of the wallpaper by a model; each slot carries its own kit. Re-shoot under a NEW set name.",
+  "id": "l36_ikea02",
+  "listing_spec": "listing36_interiors.json",
+  "video_spec": "listing36_video.json",
+  "aspect": "9:16",
+  "seed": 147,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 2,
+    "distinct_kits": true,
+    "ages": []
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "run_in",
+      "kit": {
+        "id": "l36_ikea02_s1",
+        "name": "Birch flower table and poufs",
+        "audience": "girl",
+        "room_type": "play zone",
+        "child": {
+          "gender": "girl",
+          "age_band": "vorschul"
+        },
+        "age": "vorschul",
+        "side": "right",
+        "style": "IKEA Kids",
+        "color": "Powder Blue",
+        "lighting": "soft afternoon window light",
+        "subject": "a bright IKEA Kids bedroom for a child aged 2 to 5, with a flower-shaped craft table and poufs",
+        "room": "A light room with a pine plank floor.",
+        "floor": "A powder blue cotton rug with wax crayons in a wooden cup and an open drawing book.",
+        "side_wall": "a low flower-shaped birch craft table, a stack of ochre and barberry bouclé poufs and a low white bed with powder blue bedding",
+        "ceiling": "",
+        "light": "Soft afternoon light from a window on the {side} lies in patches on the floor.",
+        "palette": "powder blue, pale birch, ochre, barberry red and white",
+        "items": "flower-shaped craft table, bouclé poufs, low white bed, rug, crayon cup, drawing book, picture frame and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "wax crayons in a wooden cup with an open drawing book on the rug"
+      }
+    },
+    {
+      "slot": "s2",
+      "role": "product",
+      "kit": {
+        "id": "l36_ikea02_s2",
+        "name": "Sage nursery corner with quilted mat",
+        "audience": "girl",
+        "room_type": "sleep zone",
+        "child": {
+          "gender": "girl",
+          "age_band": "baby"
+        },
+        "age": "baby",
+        "side": "left",
+        "style": "Playful Curves",
+        "color": "Muted Sage",
+        "lighting": "warm morning sunbeams",
+        "subject": "a calm Playful Curves nursery for a baby under 2, with a round quilted mat and a low birch book ledge",
+        "room": "A quiet cream room with a pale ash herringbone floor.",
+        "floor": "A cream oval rug with scalloped edges holds a wooden push-along walker cart and a few wooden blocks beside the cot.",
+        "side_wall": "a round quilted sage organic cotton mat with wooden sensory blocks, a low birch book ledge with two board books, and a slatted birch cot 120 by 60 cm with sage bedding",
+        "ceiling": "",
+        "light": "Warm morning sunbeams from a window on the {side} lie in soft patches on the floor.",
+        "palette": "muted sage, cream, pale birch, soft clay pink, butter yellow and white",
+        "items": "quilted mat, sensory blocks, book ledge, slatted cot, walker cart, wooden blocks, oval rug, picture frame and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "a wooden push-along walker cart with a few wooden blocks standing on the floor beside the cot"
+      }
+    }
+  ],
+  "design": {
+    "seed": 147,
+    "frames": 2,
+    "hands": [
+      {
+        "slot": "s1",
+        "role": "run_in",
+        "age": "vorschul",
+        "side": "right",
+        "lighting": "soft afternoon window light",
+        "role_label": "Run in: a toddler runs in through the door toward the mural and throws both arms up in delight, the camera is still",
+        "person": true,
+        "audience": "girl",
+        "child": "a child of 2 to 5 years",
+        "room_of_that_age": "A children's bedroom: the bed is a child's bed of 140 by 70 cm, no higher than 40 cm, and every piece of furniture stands at the height of a small child, with the proportions of a playroom.",
+        "style": "IKEA Kids",
+        "style_card": "classic Swedish family-home look: light solid pine and white painted wood, a low pine children's table and stool (FLISAT style), a low white bed (KRITTER style), a low white-and-pine toy storage unit with pastel boxes (TROFAST style), simple cotton bedding, calm pastel accents on a white and wood base",
+        "color": "Dusty Rose",
+        "color_description": "soft vintage dusty rose, gentle and comforting",
+        "allowed_colors": [
+          {
+            "name": "Pepper White",
+            "description": "warm off-white, softer on the eyes than pure white"
+          },
+          {
+            "name": "Soft Sand",
+            "description": "soft sandy beige, warm and neutral"
+          },
+          {
+            "name": "Powder Blue",
+            "description": "soft dusty powder blue, light and calm"
+          },
+          {
+            "name": "Dusty Rose",
+            "description": "soft vintage dusty rose, gentle and comforting"
+          },
+          {
+            "name": "Muted Sage",
+            "description": "fresh botanical sage green, grounding and natural"
+          },
+          {
+            "name": "Butter Yellow",
+            "description": "soft creamy butter yellow, sunny and gentle"
+          },
+          {
+            "name": "Lilac Mist",
+            "description": "soft dusty lilac with a hint of lavender, gentle and calm"
+          },
+          {
+            "name": "Warm Greige",
+            "description": "warm grey-beige, a quiet base that lets colour accents glow"
+          }
+        ],
+        "hero_piece": {
+          "name": "Flower-shaped wooden craft table",
+          "description": "charming flower-shaped craft table in pale lacquered birch, accompanied by a stack of round bouclé poufs in warm ochre and barberry red"
+        },
+        "toy": "wax crayons in a wooden cup with an open drawing book on the rug"
+      },
+      {
+        "slot": "s2",
+        "role": "product",
+        "age": "baby",
+        "side": "left",
+        "lighting": "warm morning sunbeams",
+        "role_label": "Product: the whole mural, a walk-in with parallax",
+        "person": false,
+        "audience": "girl",
+        "child": "a baby under 2 years old",
+        "room_of_that_age": "A nursery: the bed is a slatted cot of 120 by 60 cm, every piece of furniture is low, small and soft-cornered, and the play space is a quilted mat on the floor; the proportions are those of a baby's room.",
+        "style": "Playful Curves",
+        "style_card": "rounded arches, scalloped edges and soft curved furniture in gentle pastel colour pops on a calm cream base, clean Scandinavian craftsmanship",
+        "color": "Muted Sage",
+        "color_description": "fresh botanical sage green, grounding and natural",
+        "allowed_colors": [
+          {
+            "name": "Dusty Rose",
+            "description": "soft vintage dusty rose, gentle and comforting"
+          },
+          {
+            "name": "Strawberry Milk",
+            "description": "soft playful pastel strawberry, cheerful and gentle"
+          },
+          {
+            "name": "Lilac Mist",
+            "description": "soft dusty lilac with a hint of lavender, gentle and calm"
+          },
+          {
+            "name": "Butter Yellow",
+            "description": "soft creamy butter yellow, sunny and gentle"
+          },
+          {
+            "name": "Muted Sage",
+            "description": "fresh botanical sage green, grounding and natural"
+          },
+          {
+            "name": "Eucalyptus",
+            "description": "deep eucalyptus green, grounding and organic"
+          },
+          {
+            "name": "Soft Sand",
+            "description": "soft sandy beige, warm and neutral"
+          },
+          {
+            "name": "Cool Blue",
+            "description": "calm cool blue with a clear fresh feel, as a quiet accent"
+          },
+          {
+            "name": "Pepper White",
+            "description": "warm off-white, softer on the eyes than pure white"
+          }
+        ],
+        "hero_piece": {
+          "name": "Cozy nursery corner with circular quilted mat",
+          "description": "soft quilted organic cotton floor mat with curated wooden sensory blocks and a low birch book ledge"
+        },
+        "toy": "a wooden push-along walker cart with a few wooden blocks standing on the floor beside the cot"
+      }
+    ],
+    "writer": {
+      "how": "claude -p (subscription)",
+      "calls": [
+        {
+          "model": "sonnet",
+          "tokens": 16019,
+          "list_price_usd": 0.0415
+        }
+      ]
+    }
+  }
+}

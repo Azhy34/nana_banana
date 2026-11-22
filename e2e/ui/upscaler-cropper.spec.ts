@@ -170,7 +170,7 @@ test.describe('Upscaler', () => {
   });
 });
 
-test.describe('Etsy Cropper — wall detection', () => {
+test.describe.skip('Etsy Cropper — wall detection (disabled)', () => {
   async function openWarpPreset(page: import('@playwright/test').Page) {
     await openApp(page);
     await switchTab(page, 'Cropper');
@@ -216,7 +216,7 @@ test.describe('Etsy Cropper — wall detection', () => {
   });
 });
 
-test.describe('Etsy Cropper', () => {
+test.describe.skip('Etsy Cropper (disabled)', () => {
   test('replacing the photo renders the upload into the preview canvas', async ({ page }) => {
     await openApp(page);
     await switchTab(page, 'Cropper');

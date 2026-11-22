@@ -6,11 +6,12 @@ import { ReferenceStep } from './components/ReferenceStep';
 import { ResultStep } from './components/ResultStep';
 import { Step, UploadedImage, GenerationSettings, ModelType, GenerationState, ViewMode, AIProvider } from './types';
 import { MODEL_OPTIONS, MODEL_PRICING } from './constants';
-import { EtsyCropper } from './components/EtsyCropper';
+// Cropper disabled (legacy): uncomment import + tab + view below to re-enable.
+// import { EtsyCropper } from './components/EtsyCropper';
 import { Upscaler } from './components/Upscaler';
 import { BatchGenerator } from './components/BatchGenerator';
 import { VideoTool } from './components/VideoTool';
-import { generateImageComposition, isQwenModel } from './services/generationRouter';
+import { generateImageComposition, isQwenModel, isKieModel } from './services/generationRouter';
 import { compressImageFile } from './services/imageCompressor';
 import { generateTraceId } from './utils/tracing';
 
@@ -52,6 +53,10 @@ function App() {
     (((import.meta as any).env?.VITE_REPLICATE_API_TOKEN as string | undefined) ||
       (process.env.REPLICATE_API_TOKEN as string | undefined) ||
       '');
+  const envKieApiKey =
+    (((import.meta as any).env?.VITE_KIE_API_KEY as string | undefined) ||
+      (process.env.KIE_API_KEY as string | undefined) ||
+      '');
 
   const [viewMode, setViewMode] = useState<ViewMode>('generator');
   const [step, setStep] = useState<Step>(Step.Prompt);
@@ -63,6 +68,7 @@ function App() {
   const [openRouterApiKey, setOpenRouterApiKey] = useState<string>(() => readSecret(['openrouter_api_key'], envOpenRouterApiKey));
   const [geminiApiKey, setGeminiApiKey] = useState<string>(() => readSecret(['gemini_api_key'], envGeminiApiKey));
   const [replicateToken, setReplicateToken] = useState<string>(() => readSecret(['replicate_token'], envReplicateToken));
+  const [kieApiKey, setKieApiKey] = useState<string>(() => readSecret(['kie_api_key'], envKieApiKey));
 
   const activeApiKey = provider === 'openrouter' ? openRouterApiKey : geminiApiKey;
   const providerLabel = provider === 'openrouter' ? 'OpenRouter' : 'Gemini';
@@ -71,12 +77,20 @@ function App() {
   const [referenceImages, setReferenceImages] = useState<UploadedImage[]>([]);
   const [settings, setSettings] = useState<GenerationSettings>({
     prompt: "",
-    model: MODEL_OPTIONS[0].value,
+    model: ModelType.Flash31,
     aspectRatio: '1:1',
     imageSize: '1K',
   });
-  const generationCredential = isQwenModel(settings.model) ? replicateToken : activeApiKey;
-  const generationCredentialLabel = isQwenModel(settings.model) ? 'Replicate Token' : `${providerLabel} API Key`;
+  const generationCredential = isKieModel(settings.model)
+    ? kieApiKey
+    : isQwenModel(settings.model)
+      ? replicateToken
+      : activeApiKey;
+  const generationCredentialLabel = isKieModel(settings.model)
+    ? 'KIE API Key'
+    : isQwenModel(settings.model)
+      ? 'Replicate Token'
+      : `${providerLabel} API Key`;
 
   const [generationState, setGenerationState] = useState<GenerationState>({
     isLoading: false,
@@ -104,6 +118,10 @@ function App() {
   useEffect(() => {
     writeSecret('replicate_token', replicateToken);
   }, [replicateToken]);
+
+  useEffect(() => {
+    writeSecret('kie_api_key', kieApiKey);
+  }, [kieApiKey]);
 
   const handleSendToTool = (mode: ViewMode, image: string) => {
     setLastViewMode(viewMode);
@@ -171,7 +189,8 @@ function App() {
         referenceImages,
         settings,
         provider,
-        traceId
+        traceId,
+        kieApiKey
       );
       const pricing = MODEL_PRICING[settings.model];
       const estimatedCostUsd =
@@ -248,6 +267,8 @@ function App() {
         setGeminiApiKey={setGeminiApiKey}
         replicateToken={replicateToken}
         setReplicateToken={setReplicateToken}
+        kieApiKey={kieApiKey}
+        setKieApiKey={setKieApiKey}
       />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -255,7 +276,7 @@ function App() {
           <div className="inline-flex bg-slate-800/50 p-1.5 rounded-2xl border border-slate-700 shadow-xl">
             <button onClick={() => switchTab('generator')} className={tabClass('generator')}>Generator</button>
             <button onClick={() => switchTab('batch')} className={tabClass('batch')}>Batch</button>
-            <button onClick={() => switchTab('cropper')} className={tabClass('cropper')}>Cropper</button>
+            {/* <button onClick={() => switchTab('cropper')} className={tabClass('cropper')}>Cropper</button> */}
             <button onClick={() => switchTab('upscaler')} className={tabClass('upscaler')}>Upscale</button>
             <button onClick={() => switchTab('video')} className={tabClass('video')}>Video</button>
           </div>
@@ -290,11 +311,13 @@ function App() {
             provider={provider}
             apiKey={activeApiKey}
             replicateToken={replicateToken}
+            kieApiKey={kieApiKey}
             onViewModeChange={setViewMode}
             onSendToTool={handleSendToTool}
           />
         </div>
 
+        {/* Cropper disabled (legacy)
         <div style={{ display: viewMode === 'cropper' ? 'block' : 'none' }}>
           <EtsyCropper
             provider={provider}
@@ -303,6 +326,7 @@ function App() {
             onBack={() => setViewMode(lastViewMode)}
           />
         </div>
+        */}
 
         <div style={{ display: viewMode === 'upscaler' ? 'block' : 'none' }}>
           <Upscaler
@@ -317,6 +341,7 @@ function App() {
             initialImage={batchToolImage}
             onBack={handleGoHome}
             geminiApiKey={geminiApiKey}
+            kieApiKey={kieApiKey}
           />
         </div>
       </main>

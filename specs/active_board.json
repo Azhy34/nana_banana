@@ -5,25 +5,25 @@
     "models": "all",
     "cards": [
       {
-        "id": "l31_reel01_s1_play",
+        "id": "l39_meta01_s1_room",
         "model": "nano-banana-2-1",
         "prompt": "brief"
       },
       {
-        "id": "l31_reel01_s2_product",
+        "id": "l39_meta01_s2_life",
         "model": "nano-banana-2-1",
         "prompt": "brief"
       }
     ],
-    "spec": "listing31_interiors.json"
+    "spec": "listing39_interiors.json"
   },
   "video": {
     "scenes": [
-      "l31_reel01_s1_play",
-      "l31_reel01_s2_product"
+      "l36_run_in_touch",
+      "l36_reading_page"
     ],
-    "spec": "listing31_interiors.json",
-    "video_spec": "listing31_video.json"
+    "spec": "listing36_interiors.json",
+    "video_spec": "listing36_video.json"
   },
-  "set": "l31_reel01"
+  "set": "l39_meta01"
 }

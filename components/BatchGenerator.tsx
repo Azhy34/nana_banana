@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useBatch } from '../hooks/useBatch';
-import { BatchCard, BatchAspectRatio, BatchPromptTags, AgeGroupKey, UploadedImage, ViewMode, ModelType, AIProvider } from '../types';
-import { generateRandomTags, buildGeminiPrompt, TAG_OPTIONS, AGE_GROUP_LABELS, getKeyObjectsForAge } from '../services/promptGenerator';
-import { generateBatchImage, isQwenModel } from '../services/generationRouter';
+import { AudienceKey, BatchCard, BatchAspectRatio, BatchPersonMode, BatchPromptTags, AgeGroupKey, ViewMode, ModelType, AIProvider, PromptMode } from '../types';
+import { TAG_OPTIONS, AGE_GROUP_LABELS, getColorsForStyle, muralSafeKeyObjects } from '../services/promptGenerator';
+import { getUiImageModels, getModelCapability, validateModelInput } from '../shared/modelContracts';
 import { downloadImage } from '../services/downloadService';
 
 type BatchStep = 'setup' | 'cards' | 'results';
@@ -11,6 +11,7 @@ interface Props {
   provider: AIProvider;
   apiKey: string;
   replicateToken: string;
+  kieApiKey?: string;
   onViewModeChange: (mode: ViewMode) => void;
   onSendToTool: (mode: ViewMode, image: string) => void;
 }
@@ -30,26 +31,28 @@ const TAG_KEYS: Array<{ key: keyof Omit<BatchPromptTags, 'accessories' | 'aspect
 
 function getOptionsForKey(key: keyof Omit<BatchPromptTags, 'accessories' | 'aspectRatio'>, card: BatchCard): string[] {
   switch (key) {
-    case 'color': return TAG_OPTIONS.colors;
+    case 'color': return getColorsForStyle(card.tags.style, card.tags.audience);
     case 'style': return TAG_OPTIONS.styles;
     case 'brand': return TAG_OPTIONS.brands;
     case 'ageGroup': return TAG_OPTIONS.ageGroups;
-    case 'keyObject': return getKeyObjectsForAge(card.tags.ageGroup);
+    case 'keyObject': return muralSafeKeyObjects(card.tags.ageGroup);
     case 'roomZone': return TAG_OPTIONS.roomZones;
     case 'lighting': return TAG_OPTIONS.lighting;
     case 'cameraAngle': return TAG_OPTIONS.cameraAngles;
     case 'cameraDistance': return TAG_OPTIONS.cameraDistances;
     case 'depthOfField': return TAG_OPTIONS.depthOfField;
+    default: return [];
   }
 }
 
 const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500 w-full truncate";
 
-export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, onViewModeChange, onSendToTool }) => {
-  const { state, actions } = useBatch(provider, apiKey, replicateToken);
-  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, useTextureReference } = state;
+export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, kieApiKey = '', onViewModeChange, onSendToTool }) => {
+  const { state, actions } = useBatch(provider, apiKey, replicateToken, kieApiKey);
+  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, useTextureReference, audience, includeHero, promptMode } = state;
   const {
     setBatchStep, setWallpaper, setModel, setExpandedCard, setUseTextureReference,
+    setAudience, setIncludeHero, setPromptMode,
     handleWallpaperUpload, updateFormat, selectCount, generateCards,
     updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
     updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadSelected
@@ -139,13 +142,13 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
         </div>
 
         {/* Format Distribution */}
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-4">
           <h3 className="text-white font-semibold mb-4">Format Distribution</h3>
-          {(['9:16', '2:3', '4:3'] as BatchAspectRatio[]).map(ar => (
+          {(['9:16', '4:5', '3:4', '2:3', '4:3'] as BatchAspectRatio[]).map(ar => (
             <div key={ar} className="flex items-center gap-3 mb-3 last:mb-0">
               <span className="text-slate-300 text-sm font-mono w-10 shrink-0">{ar}</span>
               <span className="text-slate-500 text-xs flex-1 truncate">
-                {ar === '9:16' ? 'Portrait — mobile, vertical shots' : ar === '2:3' ? 'Portrait — vertical room views' : 'Landscape — Etsy main thumbnail'}
+                {ar === '9:16' ? 'Portrait — Reels, Stories, Pinterest Video' : ar === '4:5' ? 'Portrait — Meta Feed & Carousel' : ar === '3:4' ? 'Portrait — Etsy Vertical' : ar === '2:3' ? 'Portrait — Pinterest & Etsy' : 'Landscape — Etsy main thumbnail'}
               </span>
               <div className="flex items-center gap-2 shrink-0">
                 <button onClick={() => updateFormat(ar, -1)} className="w-7 h-7 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold transition-colors">−</button>
@@ -160,22 +163,81 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           </div>
         </div>
 
-        {/* Model */}
+        {/* Audience, Hero & Prompt Mode */}
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-4 space-y-4">
+          <div>
+            <h3 className="text-white font-semibold mb-2 text-sm">Wallpaper Audience</h3>
+            <div className="flex gap-2">
+              {([
+                { value: 'neutral', label: 'Neutral' },
+                { value: 'boy', label: 'Boy (no pink/lilac)' },
+                { value: 'girl', label: 'Girl' },
+              ] as const).map(opt => (
+                <button key={opt.value} type="button" onClick={() => setAudience(opt.value as AudienceKey)}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${audience === opt.value ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-700">
+            <div>
+              <h3 className="text-white font-semibold text-sm">Include 1 Hero Shot (no bed)</h3>
+              <p className="text-slate-400 text-xs">Open floor + rug + toys, 100% unobstructed mural for #1 listing photo</p>
+            </div>
+            <button type="button" onClick={() => setIncludeHero(!includeHero)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${includeHero ? 'bg-indigo-600' : 'bg-slate-700'}`}>
+              <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${includeHero ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+          </div>
+
+          <div className="pt-2 border-t border-slate-700">
+            <h3 className="text-white font-semibold mb-2 text-sm">Prompt Mode</h3>
+            <div className="flex gap-2">
+              {([
+                { value: 'full', label: 'Full (~6200 chars)' },
+                { value: 'brief', label: 'Brief (~1800 chars, positive)' },
+              ] as const).map(opt => (
+                <button key={opt.value} type="button" onClick={() => setPromptMode(opt.value as PromptMode)}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${promptMode === opt.value ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Model (driven by shared/modelContracts.ts) */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
-          <h3 className="text-white font-semibold mb-3">Model</h3>
-          <div className="flex gap-3 flex-wrap">
-            {([
-              { value: ModelType.Flash31, label: '3.1 Flash Image', sub: 'Fast & cheap' },
-              { value: ModelType.Pro, label: '3 Pro Image', sub: 'High quality' },
-              { value: ModelType.ABTest, label: '50/50 Split', sub: 'Pro & Flash A/B' },
-              { value: ModelType.QwenImage2, label: 'Qwen 2', sub: 'Replicate' },
-            ] as const).map(({ value, label, sub }) => (
-              <button key={value} onClick={() => setModel(value)}
-                className={`flex-1 min-w-[100px] py-3 px-2 rounded-xl transition-all text-center ${model === value ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
-                <div className="font-bold text-sm">{label}</div>
-                <div className="text-xs opacity-70 mt-0.5">{sub}</div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-white font-semibold">Model</h3>
+            {(() => {
+              const cap = getModelCapability(model);
+              if (model === ModelType.ABTest) return <span className="text-xs text-slate-400">~${((0.0672 + 0.134) / 2 * formatTotal).toFixed(2)} est.</span>;
+              if (!cap) return null;
+              return (
+                <span className="text-xs text-slate-400">
+                  {cap.kieCredits2K ? `${cap.kieCredits2K * formatTotal} KIE credits ($${(cap.costUsd2K * formatTotal).toFixed(2)})` : `~$${(cap.costUsd2K * formatTotal).toFixed(2)} est.`}
+                </span>
+              );
+            })()}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {getUiImageModels().map((m) => (
+              <button key={m.id} onClick={() => setModel(m.id as ModelType)}
+                className={`py-3 px-2.5 rounded-xl transition-all text-center ${model === m.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
+                <div className="font-bold text-xs leading-tight">{m.label}</div>
+                <div className="text-[11px] opacity-75 mt-1">
+                  {m.kieCredits2K ? `${m.kieCredits2K} cr · $${m.costUsd2K}` : `$${m.costUsd2K.toFixed(3)} / 2K`}
+                </div>
               </button>
             ))}
+            <button onClick={() => setModel(ModelType.ABTest)}
+              className={`py-3 px-2.5 rounded-xl transition-all text-center ${model === ModelType.ABTest ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
+              <div className="font-bold text-xs leading-tight">50/50 Split</div>
+              <div className="text-[11px] opacity-75 mt-1">Pro & Flash A/B</div>
+            </button>
           </div>
         </div>
 
@@ -209,7 +271,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                   <span className="text-slate-400 text-sm font-medium">#{idx + 1}</span>
                   <span className="bg-indigo-500/20 text-indigo-300 text-xs font-mono px-2 py-0.5 rounded-full border border-indigo-500/30">{card.tags.aspectRatio}</span>
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${card.model === ModelType.Pro ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-teal-500/20 text-teal-300 border-teal-500/30'}`}>
-                    {card.model === ModelType.Pro ? 'Pro' : 'Flash'}
+                    {getModelCapability(card.model)?.label || card.model}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -238,6 +300,45 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                     </select>
                   </div>
                 ))}
+              </div>
+
+              {/* People & Hero + Schema Check */}
+              <div className="px-4 pb-3 flex flex-wrap items-center gap-3">
+                <div className="min-w-[180px]">
+                  <label className="text-slate-500 text-xs block mb-1">People (from behind)</label>
+                  <select
+                    value={card.tags.personMode || 'none'}
+                    onChange={e => updateTag(card.id, 'personMode', e.target.value as BatchPersonMode)}
+                    className={selectClass}
+                  >
+                    <option value="none">No people</option>
+                    <option value="child_rug">Child on rug (from behind)</option>
+                    <option value="child_gaze">Child gazing at mural (from behind)</option>
+                  </select>
+                </div>
+                <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer mt-4">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(card.tags.heroRoom)}
+                    onChange={e => updateTag(card.id, 'heroRoom', e.target.checked)}
+                    className="rounded border-slate-600 bg-slate-700 text-indigo-500"
+                  />
+                  Hero room (no bed)
+                </label>
+                {(() => {
+                  const v = validateModelInput({
+                    modelId: card.model,
+                    prompt: card.promptText,
+                    aspectRatio: card.tags.aspectRatio,
+                    resolution: '2K',
+                    refCount: useTextureReference ? 2 : 1,
+                  });
+                  return (
+                    <span className={`mt-4 ml-auto text-[11px] px-2 py-0.5 rounded border ${v.ok ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : 'bg-red-500/10 text-red-300 border-red-500/30'}`}>
+                      {v.ok ? `✓ ${card.promptText.length} chars` : `⚠ ${v.errors[0]}`}
+                    </span>
+                  );
+                })()}
               </div>
 
               {/* Accessories */}
@@ -344,7 +445,11 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               <div className="flex items-center gap-2">
                 <span className="text-slate-500 text-xs font-mono shrink-0">{card.tags.aspectRatio}</span>
                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${card.model === ModelType.Pro ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-teal-500/20 text-teal-400 border-teal-500/30'}`}>
-                  {card.model === ModelType.Pro ? 'Pro ($0.13)' : 'Flash ($0.05)'}
+                  {(() => {
+                    const cap = getModelCapability(card.model);
+                    if (!cap) return card.model;
+                    return cap.kieCredits2K ? `${cap.label} (${cap.kieCredits2K} cr)` : `${cap.label} ($${cap.costUsd2K.toFixed(2)})`;
+                  })()}
                 </span>
               </div>
               <div className="flex gap-1">
@@ -359,24 +464,31 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                       className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors" title="Download">⬇</button>
                     <button onClick={() => onSendToTool('upscaler', card.resultImage!)}
                       className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors" title="Send to Upscaler">↑ Scale</button>
+                    {/* Cropper disabled (legacy)
                     <button onClick={() => onSendToTool('cropper', card.resultImage!)}
                       className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors" title="Send to Cropper">✂</button>
-                    <button 
-                      onClick={() => card.tags.aspectRatio === '9:16' ? onSendToTool('video', card.resultImage!) : null}
-                      disabled={card.tags.aspectRatio !== '9:16'}
-                      className={`px-2 py-1 text-xs rounded transition-colors font-medium ${
-                        card.tags.aspectRatio === '9:16'
-                          ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                          : 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                      }`}
-                      title={
-                        card.tags.aspectRatio === '9:16'
-                          ? 'Анимировать пролет камеры (Veo 3.1)'
-                          : 'Анимация доступна только для вертикального формата 9:16 (Pinterest)'
-                      }
-                    >
-                      🎬 Animate
-                    </button>
+                    */}
+                    {(() => {
+                      const canAnimate = ['9:16', '4:5', '3:4'].includes(card.tags.aspectRatio);
+                      return (
+                        <button
+                          onClick={() => canAnimate ? onSendToTool('video', card.resultImage!) : null}
+                          disabled={!canAnimate}
+                          className={`px-2 py-1 text-xs rounded transition-colors font-medium ${
+                            canAnimate
+                              ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                              : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                          }`}
+                          title={
+                            canAnimate
+                              ? 'Анимировать пролет камеры (Veo 3.1)'
+                              : 'Анимация доступна для вертикальных форматов (9:16, 4:5, 3:4)'
+                          }
+                        >
+                          🎬 Animate
+                        </button>
+                      );
+                    })()}
                   </>
                 )}
                 {(card.status === 'done' || card.status === 'error') && (

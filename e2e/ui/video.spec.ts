@@ -41,14 +41,13 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
     expect(apis.logEvents[1]).toMatchObject({ model: 'gemini-omni-1.2-flash', resolution: '720p' });
   });
 
-  test('the chosen clip length is sent as the duration and priced per second', async ({ page, apis }) => {
+  test('fixed 5s duration is sent to Omni and priced accurately', async ({ page, apis }) => {
     await openVideoWithImage(page);
-    await activeTab(page).getByRole('button', { name: '8 с', exact: true }).click();
-    await expect(activeTab(page).getByText('8 секунд', { exact: true })).toBeVisible();
-    await expect(activeTab(page).getByText('$0.56', { exact: true })).toBeVisible();   // 720p: 5,792 tokens/s x 8 s x $12 / 1M = $0.556
+    await expect(activeTab(page).getByText('5 секунд', { exact: true })).toBeVisible();
+    await expect(activeTab(page).getByText('$0.35', { exact: true })).toBeVisible();
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
     await expect(activeTab(page).locator('video')).toBeVisible();
-    expect(apis.omni[0].body.response_format.duration).toBe('8s');
+    expect(apis.omni[0].body.response_format.duration).toBe('5s');
     expect(apis.omni[0].body.response_format.delivery).toBeUndefined();
   });
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { generateVeoVideoOnClient } from '../services/veoService';
 import { generateOmniVideoOnClient } from '../services/omniService';
+import { generateKieVideo } from '../services/kieService';
 import {
   VEO_PRESETS,
   OMNI_PRESETS,
@@ -8,12 +9,16 @@ import {
   VEO_FIXED_DURATION_SECONDS,
   OMNI_DEFAULT_DURATION_SECONDS,
   OMNI_DURATION_OPTIONS,
+  KLING_DURATION_OPTIONS,
   ETSY_MIN_VIDEO_SIDE_PX,
   ETSY_RECOMMENDED_VIDEO_SIDE_PX,
   getVeoCostUsd,
-  getOmniCostUsd
+  getOmniCostUsd,
+  getKlingCostUsd,
+  toKlingPrompt,
 } from '../constants';
 import { VideoJobSettings, VideoGenerationState, VideoEngine, OmniResolution } from '../types';
+import { getModelCapability } from '../shared/modelContracts';
 import { downloadImage } from '../services/downloadService';
 import { generateTraceId } from '../utils/tracing';
 
@@ -21,9 +26,10 @@ interface VideoToolProps {
   initialImage?: string | null;
   onBack?: () => void;
   geminiApiKey?: string;
+  kieApiKey?: string;
 }
 
-export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, geminiApiKey }) => {
+export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, geminiApiKey, kieApiKey }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Model engine selector: 'omni' by default for cheaper & more stable nursery videos
@@ -71,7 +77,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
 
   const estimatedCost = engine === 'omni'
     ? getOmniCostUsd(resolution, durationSeconds)
-    : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
+    : engine === 'kling'
+      ? getKlingCostUsd(durationSeconds >= 10 ? 10 : 5)
+      : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
 
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -111,6 +119,14 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         customPrompt: OMNI_PRESETS.omni_wall_dolly.prompt,
         resolution
       }));
+    } else if (newEngine === 'kling') {
+      setDurationSeconds(5);
+      setSettings(prev => ({
+        ...prev,
+        engine: 'kling',
+        promptPreset: 'omni_locked_light',
+        customPrompt: toKlingPrompt(OMNI_PRESETS.omni_locked_light.prompt),
+      }));
     } else {
       setSettings(prev => ({
         ...prev,
@@ -123,12 +139,13 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
 
   // Sync preset choice with prompt text
   const handlePresetChange = (presetKey: string) => {
-    if (engine === 'omni' && presetKey in OMNI_PRESETS) {
+    if ((engine === 'omni' || engine === 'kling') && presetKey in OMNI_PRESETS) {
       const key = presetKey as keyof typeof OMNI_PRESETS;
+      const rawPrompt = OMNI_PRESETS[key].prompt;
       setSettings(prev => ({
         ...prev,
         promptPreset: key,
-        customPrompt: OMNI_PRESETS[key].prompt
+        customPrompt: engine === 'kling' ? toKlingPrompt(rawPrompt) : rawPrompt,
       }));
     } else if (presetKey in VEO_PRESETS) {
       const key = presetKey as keyof typeof VEO_PRESETS;
@@ -165,24 +182,36 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       return;
     }
 
-    if (!geminiApiKey) {
-      setState({
-        isLoading: false,
-        progress: 0,
-        error: 'Пожалуйста, введите ваш API-ключ Gemini в шапке сайта для запуска генерации видео.',
-        resultVideoUrl: null
-      });
-      return;
-    }
+    if (engine === 'kling') {
+      if (!kieApiKey) {
+        setState({
+          isLoading: false,
+          progress: 0,
+          error: 'Пожалуйста, введите ваш KIE API Key в шапке сайта для запуска Kling 2.6.',
+          resultVideoUrl: null
+        });
+        return;
+      }
+    } else {
+      if (!geminiApiKey) {
+        setState({
+          isLoading: false,
+          progress: 0,
+          error: 'Пожалуйста, введите ваш API-ключ Gemini в шапке сайта для запуска генерации видео.',
+          resultVideoUrl: null
+        });
+        return;
+      }
 
-    if (geminiApiKey.startsWith('sk-or-')) {
-      setState({
-        isLoading: false,
-        progress: 0,
-        error: 'Ключ не подходит! Похоже, вы используете API-ключ OpenRouter для Gemini. Пожалуйста, переключите провайдера на Gemini или введите ключ AIzaSy... в шапке.',
-        resultVideoUrl: null
-      });
-      return;
+      if (geminiApiKey.startsWith('sk-or-')) {
+        setState({
+          isLoading: false,
+          progress: 0,
+          error: 'Ключ не подходит! Похоже, вы используете API-ключ OpenRouter для Gemini. Пожалуйста, переключите провайдера на Gemini или введите ключ AIzaSy... в шапке.',
+          resultVideoUrl: null
+        });
+        return;
+      }
     }
 
     setVideoDims(null);
@@ -197,7 +226,16 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       const traceId = generateTraceId();
       let videoUrl: string;
 
-      if (engine === 'omni') {
+      if (engine === 'kling') {
+        videoUrl = await generateKieVideo(
+          kieApiKey!,
+          sourceImage,
+          settings.customPrompt,
+          durationSeconds >= 10 ? 10 : 5,
+          (progress) => setState(prev => ({ ...prev, progress })),
+          traceId
+        );
+      } else if (engine === 'omni') {
         videoUrl = await generateOmniVideoOnClient(
           sourceImage,
           { ...settings, resolution, durationSeconds },
@@ -238,7 +276,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     if (!state.resultVideoUrl) return;
     setIsDownloading(true);
     try {
-      const prefix = engine === 'omni' ? `omni-${resolution}` : 'veo';
+      const prefix = engine === 'omni' ? `omni-${resolution}` : engine === 'kling' ? 'kling-26' : 'veo';
       await downloadImage(state.resultVideoUrl, `${prefix}-${settings.promptPreset}-${settings.seed}.mp4`);
     } finally {
       setIsDownloading(false);
@@ -253,7 +291,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
           <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
             <span>🎬 Video Animator</span>
             <span className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full font-normal">
-              Omni 1.2 Flash & Veo 3.1
+              Omni 1.2 · Kling 2.6 · Veo 3.1
             </span>
           </h2>
           <p className="text-slate-400 text-sm mt-1">
@@ -268,97 +306,111 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       </div>
 
       {/* Model Engine Selector */}
-      <div className="bg-slate-800/60 backdrop-blur rounded-2xl border border-slate-700 p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-slate-300">Модель:</span>
-          <div className="inline-flex bg-slate-900/60 p-1 rounded-xl border border-slate-700">
-            <button
-              onClick={() => handleEngineChange('omni')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                engine === 'omni'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/30'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              ✨ Gemini Omni 1.2 Flash (Быстро & Дёшево)
-            </button>
-            <button
-              onClick={() => handleEngineChange('veo')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                engine === 'veo'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Veo 3.1 Fast
-            </button>
+      <div className="bg-slate-800/60 backdrop-blur rounded-2xl border border-slate-700 p-5 mb-6 space-y-4">
+        <div>
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Модель генерации видео</span>
+            <span className="text-xs text-slate-400 bg-slate-900/80 border border-slate-700 px-2.5 py-0.5 rounded-full">
+              ⏱ Стандарт: {engine === 'veo' ? VEO_FIXED_DURATION_SECONDS : OMNI_DEFAULT_DURATION_SECONDS} сек
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {(() => {
+              const omniCost = getOmniCostUsd(resolution, OMNI_DEFAULT_DURATION_SECONDS);
+              const klingCap = getModelCapability('kling-2.6/image-to-video');
+              const klingCredits = klingCap?.kieCredits2K ?? 63;
+              const klingCost = getKlingCostUsd(5);
+              const veoCost = getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
+              return (
+                <>
+                  <button
+                    onClick={() => handleEngineChange('omni')}
+                    className={`p-3 rounded-xl text-left border transition-all ${
+                      engine === 'omni'
+                        ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-500/20'
+                        : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-sm">✨ Gemini Omni 1.2 Flash</span>
+                      <span className="text-xs font-mono font-bold text-emerald-300">~${omniCost.toFixed(2)}</span>
+                    </div>
+                    <div className="text-[11px] opacity-80 mt-0.5">5 с · {resolution} · Google API</div>
+                  </button>
+                  <button
+                    onClick={() => handleEngineChange('kling')}
+                    className={`p-3 rounded-xl text-left border transition-all ${
+                      engine === 'kling'
+                        ? 'bg-emerald-600/20 border-emerald-500 text-white shadow-md shadow-emerald-500/20'
+                        : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-sm">🎬 Kling 2.6 (KIE)</span>
+                      <span className="text-xs font-mono font-bold text-emerald-300">{klingCredits} cr · ${klingCost.toFixed(2)}</span>
+                    </div>
+                    <div className="text-[11px] opacity-80 mt-0.5">5 с · без звука · KIE API</div>
+                  </button>
+                  <button
+                    onClick={() => handleEngineChange('veo')}
+                    className={`p-3 rounded-xl text-left border transition-all ${
+                      engine === 'veo'
+                        ? 'bg-purple-600/20 border-purple-500 text-white shadow-md shadow-purple-500/20'
+                        : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-sm">🚀 Veo 3.1 Fast</span>
+                      <span className="text-xs font-mono font-bold text-emerald-300">${veoCost.toFixed(2)}</span>
+                    </div>
+                    <div className="text-[11px] opacity-80 mt-0.5">6 с · 720p · Google API</div>
+                  </button>
+                </>
+              );
+            })()}
           </div>
         </div>
 
         {engine === 'omni' && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-medium">Качество:</span>
-            <div className="inline-flex bg-slate-900/60 p-1 rounded-xl border border-slate-700">
-              <button
-                onClick={() => setResolution('360p')}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  resolution === '360p'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                360p Черновик · не для Etsy
-              </button>
-              <button
-                onClick={() => setResolution('720p')}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  resolution === '720p'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                720p Финал Etsy · 720×1280
-              </button>
-              <button
-                onClick={() => setResolution('1080p')}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  resolution === '1080p'
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                1080p Рекомендовано Etsy · 1080×1920
-              </button>
-            </div>
-            <span className="text-[10px] text-slate-500 hidden sm:inline">
-              ~${getOmniCostUsd(resolution, durationSeconds).toFixed(2)}
-            </span>
-          </div>
-        )}
-
-        {engine === 'omni' && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-medium">Длина:</span>
-            <div className="inline-flex bg-slate-900/60 p-1 rounded-xl border border-slate-700">
-              {OMNI_DURATION_OPTIONS.map(seconds => (
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-700/60">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-slate-400 font-medium">Качество:</span>
+              <div className="inline-flex flex-wrap bg-slate-900/60 p-1 rounded-xl border border-slate-700 gap-1">
                 <button
-                  key={seconds}
-                  onClick={() => setDurationSeconds(seconds)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    durationSeconds === seconds
+                  onClick={() => setResolution('360p')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    resolution === '360p'
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  360p Черновик · ~${getOmniCostUsd('360p', OMNI_DEFAULT_DURATION_SECONDS).toFixed(2)}
+                </button>
+                <button
+                  onClick={() => setResolution('720p')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    resolution === '720p'
                       ? 'bg-indigo-600 text-white shadow-sm'
                       : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  {seconds} с
+                  720p Финал Etsy · ~${getOmniCostUsd('720p', OMNI_DEFAULT_DURATION_SECONDS).toFixed(2)}
                 </button>
-              ))}
+                <button
+                  onClick={() => setResolution('1080p')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    resolution === '1080p'
+                      ? 'bg-purple-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  1080p Рекомендовано Etsy · ~${getOmniCostUsd('1080p', OMNI_DEFAULT_DURATION_SECONDS).toFixed(2)}
+                </button>
+              </div>
             </div>
-            {durationSeconds > OMNI_DEFAULT_DURATION_SECONDS && (
-              <span className="text-[10px] text-amber-400 hidden sm:inline">
-                дольше 5 с геометрия может плыть (проверено на 1.1)
-              </span>
-            )}
+            <span className="text-xs font-mono text-slate-300">
+              ~${getOmniCostUsd(resolution, OMNI_DEFAULT_DURATION_SECONDS).toFixed(2)} за 5 с
+            </span>
           </div>
         )}
       </div>
@@ -370,7 +422,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
           <div className="bg-slate-800/50 backdrop-blur rounded-2xl border border-slate-700 p-6">
             <h3 className="text-white font-semibold mb-4 flex items-center justify-between">
               <span className="flex items-center gap-2">🎥 Режим анимации интерьера</span>
-              {engine === 'omni' && (
+              {(engine === 'omni' || engine === 'kling') && (
                 <span className="text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">
                   Обои зафиксированы 1:1
                 </span>
@@ -378,7 +430,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             </h3>
 
             <div className="space-y-3">
-              {engine === 'omni' ? (
+              {(engine === 'omni' || engine === 'kling') ? (
                 (Object.keys(OMNI_PRESETS) as Array<keyof typeof OMNI_PRESETS>).map(key => (
                   <button
                     key={key}
@@ -441,9 +493,11 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               placeholder="Введите или скорректируйте промпт анимации..."
             />
             <span className="text-[10px] text-slate-500 mt-1.5 block">
-              {engine === 'omni' 
-                ? '✨ Omni 1.2 Flash: один непрерывный кадр, только движение (комнату не переописываем), запреты и звук прописаны в самом промпте.'
-                : 'Veo 3.1: использует автоматический негативный промпт для предотвращения сворачивания обоев.'}
+              {engine === 'omni'
+                ? '✨ Omni 1.2 Flash: один непрерывный кадр (5 с), только движение (комнату не переописываем), звук и фиксация обоев в промпте.'
+                : engine === 'kling'
+                  ? `🎬 Kling 2.6 (KIE · Zod schema): 5 с, sound=false (${settings.customPrompt.length}/2500 симв.). Для 100% статики обоев используйте пресеты со стоящей камерой (Light Only / Human Hook).`
+                  : '🚀 Veo 3.1: 6 с, использует автоматический негативный промпт для фиксации обоев.'}
             </span>
           </div>
 
@@ -475,13 +529,13 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Движок:</span>
               <span className="text-white font-bold font-mono">
-                {engine === 'omni' ? `Gemini Omni 1.2 (${resolution})` : 'Veo 3.1 Fast'}
+                {engine === 'omni' ? `Gemini Omni 1.2 (${resolution})` : engine === 'kling' ? 'Kling 2.6 (KIE)' : 'Veo 3.1 Fast'}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Длительность:</span>
               <span className="text-white font-bold font-mono">
-                {engine === 'omni' ? durationSeconds : VEO_FIXED_DURATION_SECONDS} секунд
+                {engine === 'omni' ? durationSeconds : engine === 'kling' ? (durationSeconds >= 10 ? 10 : 5) : VEO_FIXED_DURATION_SECONDS} секунд
               </span>
             </div>
             <div className="flex justify-between text-sm pt-2 border-t border-slate-700/50">
@@ -499,7 +553,11 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                   Рендеринг видео... {Math.round(state.progress)}%
                 </>
               ) : (
-                engine === 'omni' ? '✨ Запустить анимацию обоев (Omni Flash)' : '🚀 Запустить анимацию обоев (Veo)'
+                engine === 'omni'
+                  ? '✨ Запустить анимацию обоев (Omni Flash)'
+                  : engine === 'kling'
+                    ? '🎬 Запустить анимацию обоев (Kling 2.6)'
+                    : '🚀 Запустить анимацию обоев (Veo)'
               )}
             </button>
 

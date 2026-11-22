@@ -1,0 +1,211 @@
+{
+  "description": "Designed by scripts/director.py design (seed 2): the roles, ages, styles and colours were dealt by code, the rooms written from the picture of the wallpaper by a model; each slot carries its own kit. Re-shoot under a NEW set name.",
+  "id": "l36_final02",
+  "listing_spec": "listing36_interiors.json",
+  "video_spec": "listing36_video.json",
+  "aspect": "9:16",
+  "seed": 2,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 2,
+    "distinct_kits": true,
+    "ages": []
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "play",
+      "kit": {
+        "id": "l36_final02_s1",
+        "name": "Birch daybed and crocheted play mat",
+        "audience": "girl",
+        "room_type": "play zone",
+        "child": {
+          "gender": "girl",
+          "age_band": "vorschul"
+        },
+        "age": "vorschul",
+        "side": "right",
+        "style": "Playful Montessori",
+        "color": "Soft Sand",
+        "lighting": "crisp morning window daylight",
+        "subject": "a bright playful Montessori bedroom for a child aged 2 to 5, with a low birch toddler daybed and a crocheted play mat",
+        "room": "A bright airy room with a pale ash plank floor.",
+        "floor": "A rectangular sand crocheted play mat lies on the floor with a few vintage wooden toys on it: a stacking ring tower, a small wooden train and painted blocks.",
+        "side_wall": "a low birch toddler daybed, 140 by 70 cm and 35 cm high, with checkered and striped cotton bolster pillows in sand and oat, beside it an open birch shelf 60 cm high with three picture books facing front, and one small framed botanical print at child eye level",
+        "ceiling": "",
+        "light": "Crisp morning daylight from a window on the {side} falls in clear bright patches on the floor.",
+        "palette": "soft sand, oat, pale birch, warm cream, muted sage and white",
+        "items": "birch daybed, bolster pillows, play mat, wooden toys, open shelf, picture books, picture frame and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "a crocheted play mat on the floor with a few vintage-style wooden toys on it"
+      }
+    },
+    {
+      "slot": "s2",
+      "role": "product",
+      "kit": {
+        "id": "l36_final02_s2",
+        "name": "Striped linen daybed reading nook",
+        "audience": "girl",
+        "room_type": "reading nook",
+        "child": {
+          "gender": "girl",
+          "age_band": "schulkind"
+        },
+        "age": "schulkind",
+        "side": "left",
+        "style": "Fun Haus",
+        "color": "Barberry",
+        "lighting": "warm golden hour sunlight",
+        "subject": "a warm playful Fun Haus bedroom for a child aged 6 to 10, with a low linen-cushioned daybed and an arch-front shelf",
+        "room": "A golden room with a walnut herringbone floor.",
+        "floor": "A flat-weave wool rug in blush pink and cream stripes lies on the floor, with a round dusty-rose pouf and a pill-shaped cream cushion on it.",
+        "side_wall": "a low cream Oliver daybed, 90 by 200 cm, with natural linen cushions, a blush-pink-and-cream striped bolster and a small sage cushion, beside it a low cream arch-front shelf 70 cm high with chapter books and a pencil cup, and a small framed botanical watercolour print above",
+        "ceiling": "",
+        "light": "Warm golden hour sunlight from a window on the {side} stretches in long amber patches across the floor.",
+        "palette": "cream, blush pink, dusty rose, muted sage and soft barberry",
+        "items": "daybed, linen cushions, striped bolster, arch shelf, chapter books, pencil cup, striped rug, pouf, picture frame and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "a few chapter books and a pencil cup standing on a low shelf beside the bed"
+      }
+    }
+  ],
+  "design": {
+    "seed": 2,
+    "frames": 2,
+    "hands": [
+      {
+        "slot": "s1",
+        "role": "play",
+        "age": "vorschul",
+        "side": "right",
+        "lighting": "crisp morning window daylight",
+        "role_label": "Play: a child already sits on the rug with the back to the camera and plays, the camera is still",
+        "person": true,
+        "audience": "girl",
+        "child": "a child of 2 to 5 years",
+        "room_of_that_age": "A children's bedroom: the bed is a child's bed of 140 by 70 cm, no higher than 40 cm, and every piece of furniture stands at the height of a small child, with the proportions of a playroom.",
+        "style": "Playful Montessori",
+        "style_card": "everything at child height: a low floor bed about 10 to 15 cm high, an open shelf no deeper than 40 cm with few toys and picture books facing front, art hung at child eye level, natural wood, wool and cotton, calm colours",
+        "color": "Soft Sand",
+        "color_description": "soft sandy beige, warm and neutral",
+        "allowed_colors": [
+          {
+            "name": "Muted Sage",
+            "description": "fresh botanical sage green, grounding and natural"
+          },
+          {
+            "name": "Soft Sand",
+            "description": "soft sandy beige, warm and neutral"
+          },
+          {
+            "name": "Warm Greige",
+            "description": "warm grey-beige, a quiet base that lets colour accents glow"
+          },
+          {
+            "name": "Honey Amber",
+            "description": "warm honey wood tone, rich and glowing"
+          },
+          {
+            "name": "Dusty Rose",
+            "description": "soft vintage dusty rose, gentle and comforting"
+          },
+          {
+            "name": "Olive",
+            "description": "calm natural olive green, grounding and earthy"
+          },
+          {
+            "name": "Butter Yellow",
+            "description": "soft creamy butter yellow, sunny and gentle"
+          },
+          {
+            "name": "Pepper White",
+            "description": "warm off-white, softer on the eyes than pure white"
+          }
+        ],
+        "hero_piece": {
+          "name": "Low Scandinavian birch toddler daybed with checkered and striped bolster pillows",
+          "description": ""
+        },
+        "toy": "a crocheted play mat on the floor with a few vintage-style wooden toys on it"
+      },
+      {
+        "slot": "s2",
+        "role": "product",
+        "age": "schulkind",
+        "side": "left",
+        "lighting": "warm golden hour sunlight",
+        "role_label": "Product: the whole mural, a walk-in with parallax",
+        "person": false,
+        "audience": "girl",
+        "child": "a schoolchild of 6 to 10 years",
+        "room_of_that_age": "A school child's room: the bed is a single bed of 90 by 200 cm in a low frame, furniture is slim and sized for a schoolchild, and books and learning things stand at child height.",
+        "style": "Fun Haus",
+        "style_card": "circus-inspired playfulness: striped upholstery (caramel-and-cream or blue-and-cream) on the bed and cushions, sculptural arch- and pill-shaped cream furniture fronts, wavy edges, vintage circus art in small frames, one saturated blue accent; the loud pattern is balanced by a restrained blue, cream, caramel and brick palette, and stripes never appear on the wall behind the wallpaper",
+        "color": "Barberry",
+        "color_description": "soft berry red, warm and sophisticated, for small accents only",
+        "allowed_colors": [
+          {
+            "name": "Brick Red",
+            "description": "warm brick red, for striped cushions and small accents"
+          },
+          {
+            "name": "Powder Blue",
+            "description": "soft dusty powder blue, light and calm"
+          },
+          {
+            "name": "Cool Blue",
+            "description": "calm cool blue with a clear fresh feel, as a quiet accent"
+          },
+          {
+            "name": "Butter Yellow",
+            "description": "soft creamy butter yellow, sunny and gentle"
+          },
+          {
+            "name": "Honey Amber",
+            "description": "warm honey wood tone, rich and glowing"
+          },
+          {
+            "name": "Cocoa Brown",
+            "description": "warm cocoa and rusty brown, cosy and earthy"
+          },
+          {
+            "name": "Barberry",
+            "description": "soft berry red, warm and sophisticated, for small accents only"
+          },
+          {
+            "name": "Pepper White",
+            "description": "warm off-white, softer on the eyes than pure white"
+          },
+          {
+            "name": "Soft Sand",
+            "description": "soft sandy beige, warm and neutral"
+          }
+        ],
+        "hero_piece": {
+          "name": "Oliver Furniture low daybed with natural linen cushions functioning as daytime reading nook",
+          "description": ""
+        },
+        "toy": "a few chapter books and a pencil cup standing on a low shelf beside the bed"
+      }
+    ],
+    "writer": {
+      "how": "claude -p (subscription)",
+      "calls": [
+        {
+          "model": "sonnet",
+          "tokens": 14877,
+          "list_price_usd": 0.028
+        },
+        {
+          "model": "sonnet",
+          "tokens": 7853,
+          "list_price_usd": 0.027
+        }
+      ]
+    }
+  }
+}

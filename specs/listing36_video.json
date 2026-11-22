@@ -1,0 +1,69 @@
+{
+  "listing": "Листинг 36",
+  "description": "Image-to-video lock of Listing 36 (watercolour wildflower meadow with butterflies). Rules: faces are never shown, no plain zoom, the mural stays flat static ink: the painted flowers and butterflies must NOT move.",
+  "duration": "5",
+  "sound": false,
+  "min_motion_delta": 15.0,
+  "lock": {
+    "description": "Facts of THIS listing used by every clip prompt: the mural is flat printed ink and never moves; the furniture is frozen.",
+    "product": "The mural on the wall stays perfectly still and unchanged: the painted cosmos, daisies, grasses and butterflies remain exactly as in the first frame, flat printed artwork.",
+    "furniture": "The {items} stay perfectly still, solid and fixed in the room.",
+    "people": "Every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are and nothing turns toward the lens."
+  },
+  "frames": [
+    {
+      "scene_id": "l36_run_in_touch",
+      "frame_file": "l36_final01_s1_run_in_brief__nb21.png",
+      "people": true,
+      "min_motion_delta": 2.0,
+      "motion_zone": [
+        [
+          0.5,
+          0.5
+        ],
+        [
+          0.97,
+          0.5
+        ],
+        [
+          0.97,
+          0.99
+        ],
+        [
+          0.5,
+          0.99
+        ]
+      ],
+      "clip": "Nano Banana s1: the girl runs in to the mural and touches the painted flowers; locked-off camera",
+      "motion": "The camera does not move at all: it is a fixed, static shot. A toddler girl of about two and a half in an ochre knit sweater and cream trousers, standing just inside the open doorway at the right edge of the frame with her back to the camera, runs five quick happy steps across the floor toward the mural wall and stops about one metre in front of it; on the last step she reaches out one hand and lightly touches the painted flowers with her fingertips while her other arm rises in delight. Only the back of her head, her hair and her clothes are seen, and her head stays turned toward the wall.",
+      "items": "open door, flower-shaped craft table, bouclé poufs, scalloped rug, crayon cup, drawing book, picture frame and architecture"
+    },
+    {
+      "scene_id": "l36_reading_page",
+      "frame_file": "l36_gpt01_s2_life_brief__gpt2.png",
+      "people": true,
+      "min_motion_delta": 1.0,
+      "motion_zone": [
+        [
+          0.02,
+          0.55
+        ],
+        [
+          0.45,
+          0.55
+        ],
+        [
+          0.45,
+          0.86
+        ],
+        [
+          0.02,
+          0.86
+        ]
+      ],
+      "clip": "GPT s2: the girl turns a page of her picture book; locked-off camera",
+      "motion": "The camera does not move at all: it is a fixed, static shot. A girl of about eight in a cream hoodie sits cross-legged on a floor cushion at the left of the frame with her back to the camera, an open picture book on her knees. Calmly and at a natural pace she turns one page of the book with her right hand and rests her hand on the new page; her head stays bowed over the book. Only her right hand and forearm move. Only the back of her head, her hair and her clothes are seen.",
+      "items": "daybed, bolster pillows, floor cushion, round pouf, striped rug, picture frame and architecture"
+    }
+  ]
+}

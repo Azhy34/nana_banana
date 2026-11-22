@@ -180,8 +180,9 @@ const isWallCoordinates = (value: any): value is WallCoordinates => {
 };
 
 const buildReferenceInstructions = (referenceImages: UploadedImage[], prompt: string): string => {
+  const avoidTail = prompt.includes("Avoid:") ? "" : `\n\nAvoid: ${GEMINI_NEGATIVE_PROMPT}.`;
   if (referenceImages.length === 0) {
-    return `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: Generate the image solely based on USER PROMPT.`;
+    return `USER PROMPT: ${prompt}${avoidTail}\n\nINSTRUCTIONS: Generate the image solely based on USER PROMPT.`;
   }
 
   const isWallpaperPrompt = prompt.toLowerCase().includes("wallpaper") || prompt.toLowerCase().includes("mural");
@@ -190,11 +191,11 @@ const buildReferenceInstructions = (referenceImages: UploadedImage[], prompt: st
     const instruction = isWallpaperPrompt
       ? "REFERENCE_IMAGE_1 is a single full-scale wallpaper mural (not a repeating tileable pattern). Flawlessly map and stretch this entire reference image onto the feature wall from edge to edge as a single, continuous, seamless mural without any repeating, tiling, cuts, or visible seams. The bottom of REFERENCE_IMAGE_1 must align perfectly with the floor/baseboard, and the top must reach the ceiling. Apply USER PROMPT to style the room around it."
       : "Use REFERENCE_IMAGE_1 as the style and composition base. Apply USER PROMPT on top of it.";
-    return `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: ${instruction}`;
+    return `USER PROMPT: ${prompt}${avoidTail}\n\nINSTRUCTIONS: ${instruction}`;
   }
 
   const instruction = `Use REFERENCE_IMAGE_1 as the style/composition base. Extract subjects from REFERENCE_IMAGE_2-${referenceImages.length} and place them naturally into the generated scene.`;
-  return `USER PROMPT: ${prompt}\n\nINSTRUCTIONS: ${instruction}`;
+  return `USER PROMPT: ${prompt}${avoidTail}\n\nINSTRUCTIONS: ${instruction}`;
 };
 
 const generateImageCompositionWithOpenRouter = async (
@@ -530,9 +531,8 @@ export const generateImageComposition = async (
   const logDetails: GeminiLogDetails = {
     aspectRatio: settings.aspectRatio,
     resolution: settings.imageSize,
+    provider,
   };
-
-  logGeminiEvent(settings.model, settings.prompt, 0, 0, "started", null, traceId, undefined, logDetails);
 
   try {
     let result: GenerationResult;
@@ -564,7 +564,8 @@ export const generateBatchImage = async (
   draftImage?: string,
   traceId?: string,
   textureImage?: UploadedImage | null,
-  cardId?: string
+  cardId?: string,
+  analytics?: { promptMode?: string; style?: string; audience?: string }
 ): Promise<string> => {
   if (!apiKey) {
     const label = provider === "openrouter" ? "OpenRouter" : "Gemini";
@@ -577,6 +578,8 @@ export const generateBatchImage = async (
     aspectRatio,
     stage,
     interactionId: cardId,
+    provider,
+    ...analytics,
   };
 
   logGeminiEvent(model, prompt, 0, 0, "started", null, traceId, undefined, logDetails);

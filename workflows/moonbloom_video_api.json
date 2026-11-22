@@ -2,7 +2,7 @@
  "1": {
   "class_type": "MoonbloomFramePicker",
   "inputs": {
-   "frame": "l31_reel01_s1_play_brief__nb21.png"
+   "frame": "l36_final01_s1_run_in_brief__nb21.png"
   }
  },
  "2": {
@@ -35,12 +35,12 @@
    ],
    "duration": "5",
    "sound": false,
-   "min_motion_delta": 1.0,
+   "min_motion_delta": 2.0,
    "reuse_existing": true,
    "dry_run": true,
    "prompt_suffix": "",
-   "prompt_override": "The camera does not move at all: it is a fixed, static shot. A toddler boy of about two and a half in a navy knit sweater and light grey trousers sits on the rug with his back to the camera, his head bowed toward the open drawing book on the rug in front of him. Calmly and at a natural pace he draws on the page with a crayon in his right hand, making small unhurried strokes, while his left hand rests on the page. Only his right hand and forearm move; he stays seated and his head stays bowed. Only the back of his head, his hair and his clothes are seen. The mural on the wall stays perfectly still and unchanged: the painted biplanes, hot-air balloons, birds, clouds, mountains and pine trees remain exactly as in the first frame, flat printed artwork. The daybed, bolster pillows, round shelf, potted fern, oval rug, crayon cup, drawing book, wooden car, picture frame and architecture stay perfectly still, solid and fixed in the room. Every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are and nothing turns toward the lens.",
-   "motion_zone": "[[0.27, 0.605], [0.47, 0.605], [0.5, 0.725], [0.84, 0.752], [0.84, 0.86], [0.27, 0.86]]"
+   "prompt_override": "The camera does not move at all: it is a fixed, static shot. A toddler girl of about two and a half in an ochre knit sweater and cream trousers, standing just inside the open doorway at the right edge of the frame with her back to the camera, runs five quick happy steps across the floor toward the mural wall and stops about one metre in front of it; on the last step she reaches out one hand and lightly touches the painted flowers with her fingertips while her other arm rises in delight. Only the back of her head, her hair and her clothes are seen, and her head stays turned toward the wall. The mural on the wall stays perfectly still and unchanged: the painted cosmos, daisies, grasses and butterflies remain exactly as in the first frame, flat printed artwork. The open door, flower-shaped craft table, bouclé poufs, scalloped rug, crayon cup, drawing book, picture frame and architecture stay perfectly still, solid and fixed in the room. Every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are and nothing turns toward the lens.",
+   "motion_zone": "[[0.5, 0.5], [0.97, 0.5], [0.97, 0.99], [0.5, 0.99]]"
   }
  },
  "4": {
@@ -55,7 +55,7 @@
  "5": {
   "class_type": "MoonbloomFramePicker",
   "inputs": {
-   "frame": "l31_reel01_s2_product_brief__nb21.png"
+   "frame": "l36_gpt01_s2_life_brief__gpt2.png"
   }
  },
  "6": {
@@ -88,12 +88,12 @@
    ],
    "duration": "5",
    "sound": false,
-   "min_motion_delta": 10.0,
+   "min_motion_delta": 1.0,
    "reuse_existing": true,
    "dry_run": true,
    "prompt_suffix": "",
-   "prompt_override": "The camera advances straight forward into the room at a clearly visible calm walking pace, about one metre in five seconds, as if a person is entering, with no sideways drift, no tilt and no rotation. The sheer cream curtain at the extreme left edge of the frame leaves the frame as the camera advances past it, and the nearer objects shift more than the farther ones, giving a natural depth parallax. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently. The mural on the wall stays perfectly still and unchanged: the painted biplanes, hot-air balloons, birds, clouds, mountains and pine trees remain exactly as in the first frame, flat printed artwork. The quilted mat, sensory blocks, book ledge, dhurrie rug, cloth books, teething ring, ceramic vase, picture frame and architecture stay perfectly still, solid and fixed in the room.",
-   "motion_zone": ""
+   "prompt_override": "The camera does not move at all: it is a fixed, static shot. A girl of about eight in a cream hoodie sits cross-legged on a floor cushion at the left of the frame with her back to the camera, an open picture book on her knees. Calmly and at a natural pace she turns one page of the book with her right hand and rests her hand on the new page; her head stays bowed over the book. Only her right hand and forearm move. Only the back of her head, her hair and her clothes are seen. The mural on the wall stays perfectly still and unchanged: the painted cosmos, daisies, grasses and butterflies remain exactly as in the first frame, flat printed artwork. The daybed, bolster pillows, floor cushion, round pouf, striped rug, picture frame and architecture stay perfectly still, solid and fixed in the room. Every person is seen only from behind and keeps the head turned away from the camera exactly as in the first frame for the whole clip; the hair, the back of the head and the back of the neck stay as they are and nothing turns toward the lens.",
+   "motion_zone": "[[0.02, 0.55], [0.45, 0.55], [0.45, 0.86], [0.02, 0.86]]"
   }
  },
  "8": {

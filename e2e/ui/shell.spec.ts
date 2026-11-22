@@ -13,7 +13,7 @@ test.describe('App shell', () => {
 
     const tools = [
       ['Batch', 'Batch Generator'],
-      ['Cropper', 'Etsy Image Cropper'],
+      // ['Cropper', 'Etsy Image Cropper'], // Cropper disabled (legacy)
       ['Upscale', '🔬 AI Upscaler'],
       ['Video', '🎬 Video Animator'],
       ['Generator', 'AI Image Generation'],

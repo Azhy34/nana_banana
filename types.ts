@@ -8,7 +8,10 @@ export enum Step {
 export type ViewMode = 'generator' | 'cropper' | 'upscaler' | 'batch' | 'video';
 export type AIProvider = 'openrouter' | 'gemini';
 export type AgeGroupKey = 'baby' | 'vorschul' | 'schulkind' | 'teenager';
-export type BatchAspectRatio = '9:16' | '2:3' | '4:3';
+export type BatchAspectRatio = '9:16' | '4:5' | '3:4' | '2:3' | '4:3';
+export type AudienceKey = 'neutral' | 'boy' | 'girl';
+export type BatchPersonMode = 'none' | 'child_rug' | 'child_gaze';
+export type PromptMode = 'full' | 'brief';
 
 export type OverlayPosition = 'bottom left' | 'bottom right' | 'top left' | 'top right';
 
@@ -34,6 +37,10 @@ export interface BatchPromptTags {
   overlayText?: string;
   overlayPosition?: OverlayPosition;
   wallArchitecture?: 'full-wall' | 'scallop-trim';
+  audience?: AudienceKey;
+  heroRoom?: boolean;
+  personMode?: BatchPersonMode;
+  promptMode?: PromptMode;
 }
 
 export type BatchCardStatus = 'idle' | 'loading' | 'done' | 'error';
@@ -52,6 +59,9 @@ export interface BatchCard {
 export enum ModelType {
   Flash31 = 'google/gemini-3.1-flash-image',
   Pro = 'google/gemini-3-pro-image',
+  NanoBanana21 = 'nano-banana-2-1',
+  GptImage2 = 'gpt-image-2-image-to-image',
+  GrokImagine = 'grok-imagine-image-2-0/image-edit',
   QwenImage2 = 'qwen/qwen-image-2',
   ABTest = 'ab-test',
 }
@@ -111,12 +121,12 @@ export interface UpscaleState {
   upscaledImage: string | null;
 }
 
-export type VideoEngine = 'veo' | 'omni';
+export type VideoEngine = 'veo' | 'omni' | 'kling';
 export type OmniResolution = '360p' | '720p' | '1080p';
 
 export interface VideoJobSettings {
   engine?: VideoEngine;
-  promptPreset: 'dolly_in' | 'ambient' | 'dolly_out' | 'omni_wall_dolly' | 'omni_texture_macro' | 'omni_montessori' | 'omni_sunlight_loop';
+  promptPreset: 'dolly_in' | 'ambient' | 'dolly_out' | 'omni_wall_dolly' | 'omni_locked_light' | 'omni_locked_person' | 'omni_walk_in' | 'omni_pull_back' | 'omni_texture_macro' | 'omni_montessori' | 'omni_sunlight_loop';
   customPrompt: string;
   seed: number;
   resolution?: OmniResolution;
@@ -170,5 +180,11 @@ export interface GeminiLogDetails {
   endImageUrl?: string;
   referenceCount?: number;
   promptPreset?: string;
+  // OpenTelemetry & Prompt Analytics
+  spanId?: string;
+  provider?: string;
+  promptMode?: string;
+  style?: string;
+  audience?: string;
 }
 

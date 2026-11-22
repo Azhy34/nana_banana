@@ -37,6 +37,22 @@ AUDIENCES = ("boy", "girl", "neutral")
 AUDIENCE_KITS = {"boy": ("boy", "neutral"), "girl": ("girl", "neutral"), "neutral": ("neutral",)}  # the kits that suit a wallpaper / a requested child
 FALLBACK_CAMERA_TURN = 15  # degrees toward the mural wall: less is a frontal shot (the owner's "cage" look, 05.11); the real minimum is the smallest of trends.cameraAngles
 FRONTAL_WORDS = ("head-on", "straight on", "straight-on", "frontal", "square to the wall", "perpendicular")
+# Where a person of a `life` frame may NOT be put (13.11 Listing 36: "stands on the rug on the RIGHT side" while the daybed stood on the RIGHT side wall, the girl stood ON the bed):
+# a side (the decor and its hero furniture stand there; {side} belongs to `light` only) or on a piece of furniture.
+LIFE_POSE_SIDE = re.compile(r"\{side\}|\b(left|right)\b", re.I)
+LIFE_POSE_ON_FURNITURE = re.compile(r"\b(stand|stands|standing|jump|jumps|jumping|climb|climbs|climbing)\b[^,.;]{0,30}\b(on|onto|in)\b[^,.;]{0,15}\b(bed|daybed|sofa|bench|table|desk|shelf|chair|cot|crib|pouf)\b", re.I)
+
+
+def life_pose_problems(pose: str) -> list:
+    """The ways a hand-written or model-written `life_pose` puts the person where the photo model draws nonsense: on a side of the room or on furniture."""
+    problems = []
+    if LIFE_POSE_SIDE.search(pose or ""):
+        problems.append("life_pose names a side ({side}, left, right): the decor and its furniture stand there; put the person on the floor in the middle of the room, away from the furniture")
+    if LIFE_POSE_ON_FURNITURE.search(pose or ""):
+        problems.append("life_pose puts the person ON a piece of furniture: a standing or jumping person is on the floor")
+    return problems
+
+
 MALE_WORDS = re.compile(r"\b(he|his|him|himself)\b", re.I)
 FEMALE_WORDS = re.compile(r"\b(she|her|hers|herself)\b", re.I)
 KIT_PARTS = ("id", "audience", "age", "side", "style", "color", "lighting", "subject", "room", "floor", "side_wall", "light", "palette", "items",
@@ -213,7 +229,7 @@ def compose(kit: Dict[str, Any], role_name: str, roles: Dict[str, Any], listing:
     scene_parts = [kit["room"], kit["floor"], f"On the {side} side wall, away from the mural: {kit['side_wall']}.",
                    _fill(kit.get("ceiling", ""), **names), _fill(kit["light"], **names)]
     if role_name == "life":
-        scene_parts.append(_fill(kit["life_pose"], **names))
+        scene_parts.append(_fill(kit["life_pose"], **names).strip().rstrip(".") + ".")  # a hand-written pose without a full stop ran into "Palette:" (13.11)
     elif role["photo_scene"]:
         scene_parts.append(_fill(role["photo_scene"], **names))
     scene_parts.append(f"Palette: {_palette_without(kit['palette'], kit['color'])}.")
@@ -469,6 +485,8 @@ def check_plan(plan: Dict[str, Any], spec: Dict[str, Any], kits: Dict[str, Dict[
             problems.append(f"{cid}: the role has no person but the scene names one")
         if card["people"] == "from_behind" and "face turned away" not in card["scene"] and "face is turned away" not in card["scene"]:
             problems.append(f"{cid}: a person is in the photo but the scene does not say the face is turned away")
+        if card["reel"].get("role") == "life":
+            problems.extend(f"{cid}: {text_}" for text_ in life_pose_problems(kits[card["reel"]["kit"]].get("life_pose", "")))
         if kits[card["reel"]["kit"]].get("ceiling") and "above the top edge of the mural" not in card["scene"]:
             problems.append(f"{cid}: a ceiling fixture must hang 'well above the top edge of the mural'")
         prompt = clip_prompt(clip, video_spec)

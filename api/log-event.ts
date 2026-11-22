@@ -12,6 +12,7 @@ const DETAIL_FIELDS = [
   'inputWidth', 'inputHeight', 'outputWidth', 'outputHeight', 'billingUnits', 'predictTimeSeconds', 'stage',
   // GMC & Multi-frame Video Interpolation
   'gmcItemGroupId', 'videoMode', 'startImageUrl', 'endImageUrl', 'referenceCount', 'promptPreset',
+  'spanId', 'provider', 'promptMode', 'style', 'audience',
 ] as const;
 
 export const logEventSchema = z.object({
@@ -55,6 +56,11 @@ export const logEventSchema = z.object({
   endImageUrl: z.string().optional(),
   referenceCount: z.coerce.number().optional(),
   promptPreset: z.string().optional(),
+  spanId: z.string().optional(),
+  provider: z.string().optional(),
+  promptMode: z.string().optional(),
+  style: z.string().optional(),
+  audience: z.string().optional(),
 });
 
 export type LogEventRequest = z.infer<typeof logEventSchema>;

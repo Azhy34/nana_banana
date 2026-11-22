@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ModelType, GenerationSettings, Step, AIProvider } from '../types';
-import { MODEL_OPTIONS, ASPECT_RATIOS, IMAGE_SIZES, IMAGE_SIZES_FLASH31, QWEN_ASPECT_RATIOS } from '../constants';
+import { ModelType, GenerationSettings, Step, AIProvider, AspectRatio, ImageSize } from '../types';
+import { ASPECT_RATIOS } from '../constants';
+import { getModelCapability, getUiImageModels, validateModelInput } from '../shared/modelContracts';
 import { enhancePromptText } from '../services/geminiService';
 
 interface PromptStepProps {
@@ -27,26 +28,29 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
     }
   };
 
-  const getModelDescription = (model: ModelType) => {
-    if (model === ModelType.Pro) {
-      return 'Best for high fidelity, complex instructions, and 4K resolution. (Recommended)';
-    }
-    if (model === ModelType.Flash31) {
-      return 'Gemini 3.1 Flash: fast generation with lower cost.';
-    }
-    if (model === ModelType.QwenImage2) {
-      return 'Qwen Image 2 via Replicate: photorealistic generation and editing for $0.035 per image.';
-    }
-    return 'Optimized for quick experiments.';
-  };
-
-  const availableAspectRatios = settings.model === ModelType.QwenImage2 ? QWEN_ASPECT_RATIOS : ASPECT_RATIOS;
-  const showResolutionSelector = settings.model === ModelType.Pro || settings.model === ModelType.Flash31;
+  const uiModels = getUiImageModels();
+  const activeCap = getModelCapability(settings.model);
+  const availableAspectRatios = (activeCap?.aspectRatios.filter(r => r !== 'auto') || ASPECT_RATIOS) as AspectRatio[];
+  const availableResolutions = (activeCap?.resolutions || []) as ImageSize[];
+  const showResolutionSelector = availableResolutions.length > 0;
+  const validation = validateModelInput({
+    modelId: settings.model,
+    prompt: settings.prompt || 'preview',
+    aspectRatio: settings.aspectRatio,
+    resolution: showResolutionSelector ? settings.imageSize : undefined,
+    refCount: 0,
+  });
 
   const handleModelChange = (model: ModelType) => {
-    const nextAspectRatios = model === ModelType.QwenImage2 ? QWEN_ASPECT_RATIOS : ASPECT_RATIOS;
+    const nextCap = getModelCapability(model);
+    const nextAspectRatios = (nextCap?.aspectRatios.filter(r => r !== 'auto') || ASPECT_RATIOS) as AspectRatio[];
     const nextAspectRatio = nextAspectRatios.includes(settings.aspectRatio) ? settings.aspectRatio : nextAspectRatios[0];
-    const nextImageSize = settings.imageSize;
+    const nextResolutions = (nextCap?.resolutions || []) as ImageSize[];
+    const nextImageSize = nextResolutions.length === 0
+      ? settings.imageSize
+      : nextResolutions.includes(settings.imageSize)
+        ? settings.imageSize
+        : (nextResolutions.includes('2K') ? '2K' : nextResolutions[0]);
 
     setSettings({
       ...settings,
@@ -98,13 +102,18 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
             onChange={(e) => handleModelChange(e.target.value as ModelType)}
             className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white outline-none focus:border-indigo-500"
           >
-            {MODEL_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            {uiModels.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label} {m.kieCredits2K ? `(${m.kieCredits2K} cr)` : `($${m.costUsd2K.toFixed(3)})`}
+              </option>
             ))}
           </select>
           <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-            {getModelDescription(settings.model)}
+            {activeCap?.notes || 'Optimized for quick experiments.'}
           </p>
+          {!validation.ok && (
+            <p className="text-xs text-amber-300 mt-2">⚠ {validation.errors[0]}</p>
+          )}
         </div>
 
         <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50">
@@ -124,7 +133,7 @@ export const PromptStep: React.FC<PromptStepProps> = ({ settings, setSettings, s
           <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 md:col-span-2">
             <label className="block text-sm font-medium text-slate-300 mb-2">Resolution</label>
             <div className="flex gap-4">
-              {(settings.model === ModelType.Flash31 ? IMAGE_SIZES_FLASH31 : IMAGE_SIZES).map((size) => (
+              {availableResolutions.map((size) => (
                 <label
                   key={size}
                   className={`

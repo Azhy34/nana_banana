@@ -1,5 +1,5 @@
 import trendsData from '../Promt/trends.json' with { type: 'json' };
-import { BatchPromptTags, AgeGroupKey, BatchAspectRatio } from '../types';
+import { AudienceKey, BatchPromptTags, AgeGroupKey, BatchAspectRatio, BatchPersonMode, PromptMode } from '../types';
 
 function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -8,6 +8,27 @@ function pick<T>(arr: T[]): T {
 function pickN<T>(arr: T[], n: number): T[] {
   return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
 }
+
+function shuffled<T>(arr: readonly T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+const BOY_EXCLUDED_COLORS = new Set(['Dusty Rose', 'Strawberry Milk', 'Lilac Mist']);
+
+export function getColorsForStyle(styleName: string, audience: AudienceKey = 'neutral'): string[] {
+  const allowed = (trendsData.styles.find(s => s.name === styleName) as { colors?: string[] } | undefined)?.colors;
+  const base = allowed && allowed.length > 0 ? allowed : trendsData.colors.map(c => c.name);
+  if (audience !== 'boy') return base;
+  const filtered = base.filter(c => !BOY_EXCLUDED_COLORS.has(c));
+  return filtered.length > 0 ? filtered : base;
+}
+
+export const ENABLE_USP_OVERLAYS = false;
 
 export const TAG_OPTIONS = {
   colors: trendsData.colors.map(c => c.name),
@@ -50,7 +71,7 @@ export function getKeyObjectsForAge(ageGroup: AgeGroupKey): string[] {
 const NOT_MURAL_SAFE = new Set(
   (trendsData.keyObjects as Array<{ name: string; muralSafe?: boolean }>).filter(k => k.muralSafe === false).map(k => k.name),
 );
-function muralSafeKeyObjects(ageGroup: AgeGroupKey): string[] {
+export function muralSafeKeyObjects(ageGroup: AgeGroupKey): string[] {
   const all = getKeyObjectsForAge(ageGroup);
   const safe = all.filter(name => !NOT_MURAL_SAFE.has(name));
   return safe.length > 0 ? safe : all;
@@ -71,26 +92,40 @@ export function ageLine(ageGroup: string): string {
   return age?.child && age?.room ? `This is the room of ${age.child}. ${age.room}` : '';
 }
 
-function accessoriesOfAge(ageGroup: string): string[] {
+export function accessoriesOfAge(ageGroup: string): string[] {
   const list = (trendsData.ageGroups as any)?.[ageGroup]?.accessories as string[] | undefined;
   return list && list.length > 0 ? list : trendsData.accessories;
 }
 
-export function generateRandomTags(aspectRatio: BatchAspectRatio, ageGroup?: AgeGroupKey): BatchPromptTags {
+export interface RandomTagOptions {
+  audience?: AudienceKey;
+  heroRoom?: boolean;
+  personMode?: BatchPersonMode;
+  promptMode?: PromptMode;
+  style?: string;
+  lighting?: string;
+  cameraAngle?: string;
+  keyObject?: string;
+}
+
+export function generateRandomTags(
+  aspectRatio: BatchAspectRatio,
+  ageGroup?: AgeGroupKey,
+  options: RandomTagOptions = {},
+): BatchPromptTags {
   const resolvedAgeGroup = ageGroup ?? pick(TAG_OPTIONS.ageGroups);
-  // The style is picked first: its card in trends.json lists the colours that suit it, so a random batch never mixes
-  // a calm style with a loud pop colour. A card that pins style and colour itself is not touched by this.
-  const style = pick(TAG_OPTIONS.styles);
-  const allowedColors = (trendsData.styles.find(s => s.name === style) as { colors?: string[] } | undefined)?.colors;
+  const audience = options.audience ?? 'neutral';
+  const style = options.style ?? pick(TAG_OPTIONS.styles);
+  const allowedColors = getColorsForStyle(style, audience);
   return {
-    color: pick(allowedColors && allowedColors.length > 0 ? allowedColors : TAG_OPTIONS.colors),
+    color: pick(allowedColors),
     style,
     brand: pick(TAG_OPTIONS.brands),
     ageGroup: resolvedAgeGroup,
-    keyObject: pick(muralSafeKeyObjects(resolvedAgeGroup)),
+    keyObject: options.keyObject ?? pick(muralSafeKeyObjects(resolvedAgeGroup)),
     roomZone: pick(TAG_OPTIONS.roomZones),
-    lighting: pick(TAG_OPTIONS.lighting),
-    cameraAngle: pick(TAG_OPTIONS.cameraAngles),
+    lighting: options.lighting ?? pick(TAG_OPTIONS.lighting),
+    cameraAngle: options.cameraAngle ?? pick(TAG_OPTIONS.cameraAngles),
     cameraElevation: pick(TAG_OPTIONS.cameraElevations),
     cameraDistance: pick(TAG_OPTIONS.cameraDistances),
     depthOfField: pick(TAG_OPTIONS.depthOfField),
@@ -101,8 +136,57 @@ export function generateRandomTags(aspectRatio: BatchAspectRatio, ageGroup?: Age
     aspectRatio,
     compositionStrategy: Math.random() < 0.4 ? 'unobstructed' : 'natural',
     cinematicDetail: pick(CINEMATIC_DETAILS),
-    wallArchitecture: (aspectRatio !== '9:16' && Math.random() < 0.35) ? 'scallop-trim' : 'full-wall',
+    wallArchitecture: 'full-wall',
+    audience,
+    heroRoom: options.heroRoom ?? false,
+    personMode: options.personMode ?? 'none',
+    promptMode: options.promptMode ?? 'full',
   };
+}
+
+/**
+ * Deals a batch of non-repeating styles, lighting, camera angles, and age-appropriate furniture
+ * using a shuffled deck so cards within the same batch look genuinely distinct.
+ */
+export function generateBatchDeck(
+  formats: BatchAspectRatio[],
+  options: { audience?: AudienceKey; includeHero?: boolean; promptMode?: PromptMode } = {},
+): BatchPromptTags[] {
+  const ageGroupCycle: AgeGroupKey[] = ['baby', 'vorschul', 'schulkind', 'teenager'];
+  const styleDeck = shuffled(TAG_OPTIONS.styles);
+  const lightDeck = shuffled(TAG_OPTIONS.lighting);
+  const angleDeck = shuffled(TAG_OPTIONS.cameraAngles);
+  const keyObjDecks: Record<AgeGroupKey, string[]> = {
+    baby: shuffled(muralSafeKeyObjects('baby')),
+    vorschul: shuffled(muralSafeKeyObjects('vorschul')),
+    schulkind: shuffled(muralSafeKeyObjects('schulkind')),
+    teenager: shuffled(muralSafeKeyObjects('teenager')),
+  };
+  const ageCounters: Record<AgeGroupKey, number> = { baby: 0, vorschul: 0, schulkind: 0, teenager: 0 };
+
+  // Place Hero shot on the first wide/vertical listing card (prefer 4:3, 3:4, or 4:5) if requested.
+  const heroIdx = options.includeHero
+    ? (() => {
+        const preferred = formats.findIndex(ar => ar === '4:3' || ar === '3:4' || ar === '4:5');
+        return preferred >= 0 ? preferred : 0;
+      })()
+    : -1;
+
+  return formats.map((ar, idx) => {
+    const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
+    const ageIdx = ageCounters[ageGroup]++;
+    const keyDeck = keyObjDecks[ageGroup];
+    return generateRandomTags(ar, ageGroup, {
+      audience: options.audience ?? 'neutral',
+      heroRoom: idx === heroIdx,
+      personMode: 'none',
+      promptMode: options.promptMode ?? 'full',
+      style: styleDeck[idx % styleDeck.length],
+      lighting: lightDeck[idx % lightDeck.length],
+      cameraAngle: angleDeck[idx % angleDeck.length],
+      keyObject: keyDeck[ageIdx % keyDeck.length],
+    });
+  });
 }
 
 export function buildGeminiPrompt(tags: BatchPromptTags): string {
@@ -213,11 +297,59 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     ? `${angle.replace(/ and pulled well back.*$/, '')}, at ${elevation}. Framing: ${staging.framingTall}`
     : `${angle}, at ${elevation}. Framing: ${distance}${distanceNote}`;
 
+  const personSentence = (() => {
+    const mode = tags.personMode ?? 'none';
+    if (mode === 'none') return '';
+    const childDesc =
+      tags.ageGroup === 'baby'
+        ? 'a young mother in a soft oat knit cardigan and light linen trousers'
+        : tags.audience === 'boy'
+          ? 'a small boy of about four in a navy knit sweater and light grey trousers'
+          : 'a small child of about four in a soft oat knit sweater and cream linen trousers';
+    if (mode === 'child_gaze') {
+      return ` In the middle of the room about two metres from the mural wall, ${childDesc} stands with their back to the camera, head tilted slightly up looking at the mural, face turned completely away from the camera so no facial detail or profile is visible.`;
+    }
+    return ` On the rug in the middle of the floor about two metres from the mural wall, ${childDesc} sits facing the mural with their back to the camera, playing calmly with the toys, face turned completely away from the camera so no facial detail or profile is visible.`;
+  })();
+
+  if (tags.promptMode === 'brief') {
+    const toyLine = trendingToy || 'curated wooden toys and an open illustrated picture book';
+    const subjectText = tags.heroRoom
+      ? `a bright, uncluttered children's room for a child aged 3 to 6 with a flat-weave rug and wooden toys`
+      : `a ${tags.ageGroup === 'baby' ? 'serene nursery' : tags.ageGroup === 'teenager' ? 'contemporary youth bedroom' : "children's bedroom"} with ${keyObjData?.name ?? tags.keyObject}`;
+    const sceneText = tags.heroRoom
+      ? `A bright airy room with ${trendsData.germanApartmentContext.floorType} and white skirting boards. No bed, no nightstand, and no shelves. On a flat-weave natural wool rug in the middle of the floor lie ${toyLine}.${personSentence}`
+      : `A bright airy room with ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}. Along the side wall, away from the mural: ${keyObjData?.name ?? tags.keyObject} crafted from ${material}, with ${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(' and ')}. On the floor rug: ${toyLine}.${personSentence}`;
+    return buildBriefPrompt({
+      subject: subjectText,
+      scene: sceneText,
+      framing: `Photographed ${view}.`,
+      lighting: lightingData?.description ?? tags.lighting,
+      cameraBody,
+      lens,
+      aperture,
+      withTexture: true,
+      anchor: true,
+      people: (tags.personMode && tags.personMode !== 'none') ? 'from_behind' : 'none',
+      style: styleData?.name,
+      color: colorData?.name,
+      rules: {
+        product: 'the wall mural',
+        product_short: 'the mural',
+        wall_rule: 'It covers the whole feature wall edge to edge, floor to ceiling, at its true scale, drawing and colours unchanged; nothing stands in front of it.',
+      },
+    });
+  }
+
+  const effectiveFurnitureSection = tags.heroRoom
+    ? `Open hero room layout: NO bed, NO nightstand, NO shelves, NO cabinets. Floor and architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}, leaving 100% of the feature wall completely open and unobstructed from skirting board to ceiling. On a flat-weave natural wool rug in the foreground/middle of the floor rest ${trendingToy || 'two small carved wooden toys and an open illustrated picture book'}. Styling: ${styleData?.name ?? tags.style} (${styleData?.description ?? ''}).${personSentence}`
+    : `${furnitureSection}${personSentence}`;
+
   const cameraSection = `Photographed ${view}. Shot on ${cameraBody}, ${lens}, ${aperture}, sharp mural focus across the entire wall, natural optical depth. ${trendsData.realism.photo} Aspect ratio: ${tags.aspectRatio}.`;
 
-  let promptText = `${wallpaperRule}\n\n${sceneSetting}\n\n${furnitureSection}\n\n${stylingSection}\n\n${lightingSection}\n\n${cameraSection}`;
+  let promptText = `${wallpaperRule}\n\n${sceneSetting}\n\n${effectiveFurnitureSection}\n\n${stylingSection}\n\n${lightingSection}\n\n${cameraSection}`;
 
-  if (tags.overlayText && tags.overlayPosition) {
+  if (ENABLE_USP_OVERLAYS && tags.overlayText && tags.overlayPosition) {
     const WATERCOLOR_COLORS = [
       'soft sage green',
       'soft dusty rose',

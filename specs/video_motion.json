@@ -50,7 +50,29 @@
     "orbit": {"phrase": "The camera orbits around the room.", "status": "banned_by_owner", "risk": "high", "evidence": {}, "source": "community; owner ban; it opens surfaces that the first frame does not show"},
     "lateral_glide": {"phrase": "The camera is sliding sideways along the room.", "status": "banned_by_owner", "risk": "high", "evidence": {}, "source": "community: elser.ai; owner ban (sliding, gliding)"},
     "handheld": {"phrase": "A subtle handheld micro-movement.", "status": "avoid", "risk": "high", "evidence": {}, "source": "community: picassoia, elser.ai. A shake reads as a distortion of the mural"},
-    "rack_focus": {"phrase": "A rack focus.", "status": "avoid", "risk": "medium", "evidence": {}, "source": "community: elser.ai (Grok). A mural wall must stay sharp (f/8 or smaller in the briefs)"}
+    "rack_focus": {"phrase": "A rack focus.", "status": "avoid", "risk": "medium", "evidence": {}, "source": "community: elser.ai (Grok). A mural wall must stay sharp (f/8 or smaller in the briefs)"},
+    "pull_back_reveal": {
+      "phrase": "The camera pulls back by about 10 percent at a constant calm speed, revealing a little more of the room, and keeps the whole mural wall in the frame.",
+      "status": "test",
+      "risk": "medium",
+      "energy": "medium",
+      "best_for": "reveals, scale",
+      "evidence": {"kling26": "untested", "omni12": "untested"},
+      "source": "owner's camera-move table 12.11 ('camera pulls back to reveal'). Risk (inference): a pull-back invents the edges that are not in the first frame; a moving camera cannot be locked (CLAUDE.md rule 17), so measure the mural drift"
+    },
+    "side_tracking": {
+      "phrase": "The camera tracks sideways about 30 centimetres at a constant calm speed, following the line of the room, and keeps the whole mural wall in the frame.",
+      "status": "test",
+      "risk": "high",
+      "energy": "medium",
+      "best_for": "movement, story",
+      "evidence": {"kling26": "ours: Listing 40 b-roll, a lateral slider shot along the X axis, the mural was not the hero there", "omni12": "journal of the site: side glides hallucinate on Omni 1.1"},
+      "source": "owner's camera-move table 12.11 ('side tracking shot following'); the words sliding and gliding stay banned (lateral_glide). A moving camera cannot be locked (rule 17)"
+    },
+    "dolly_in": {"phrase": "A slow dolly in toward the child.", "status": "banned_by_owner", "risk": "medium", "energy": "low to medium", "best_for": "emotion, tension", "evidence": {}, "source": "owner's table 12.11; the same move as push_in (owner ban: push-in, zoom, dolly in). Lift the ban by the owner's word"},
+    "crane_up": {"phrase": "The camera does a crane up and away.", "status": "banned_by_owner", "risk": "high", "energy": "medium to high", "best_for": "finales, scope", "evidence": {}, "source": "owner's table 12.11; the journal records a permanent ban on pedestal, crane up and tilt up"},
+    "fpv_drone": {"phrase": "A fast FPV drone shot dives through the room.", "status": "avoid", "risk": "high", "energy": "very high", "best_for": "action, hype", "evidence": {}, "source": "owner's table 12.11. Not for a mural wall: the camera passes through surfaces the first frame does not show"},
+    "whip_pan": {"phrase": "A rapid whip pan from the child to the window.", "status": "avoid", "risk": "high", "energy": "very high", "best_for": "transitions", "evidence": {}, "source": "owner's table 12.11. A transition, not a clip of one picture; a pan is banned by the owner (pan_left, pan_right)"}
   },
   "light_motions": {
     "dust_and_sun_patches": {

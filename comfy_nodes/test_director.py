@@ -636,3 +636,25 @@ def test_a_scene_that_names_a_thing_by_denying_it_is_rejected(specs):
                                               "usage": {"model": model, "tokens": 1, "list_price_usd": 0.0}}
     result = scene_writer.design_set("n_set", "listing07_interiors.json", seed=5, runner=denying)
     assert result["status"] == "problems" and any("macramé-free" in p or "-free" in p for p in result["problems"]) and not (specs / "sets" / "n_set.json").exists()
+
+
+# ------------------------------------------------------------------ where a `life` person may stand (13.11, Listing 36: the girl ended up standing ON the daybed)
+
+def test_a_life_pose_on_a_side_of_the_room_or_on_furniture_is_refused():
+    assert director.life_pose_problems("{person} stands on the rug on the {side} side of the room with {her} back to the camera")      # {side} belongs to `light` only
+    assert director.life_pose_problems("{person} stands on the rug on the RIGHT side of the room with {her} back to the camera")      # the decor and its furniture stand there
+    assert director.life_pose_problems("{person} stands on the daybed with one arm raised")
+    assert not director.life_pose_problems("{person} stands barefoot on the floor in the middle of the room, about two metres from the mural wall, one arm raised")
+    assert not director.life_pose_problems("{person} sits cross-legged on a cushion with {her} back to the camera, an open picture book on {her} knees")
+
+
+def test_the_poses_of_the_sets_we_made_pass_the_life_pose_check():
+    import json as _json
+
+    for path in sorted((director.SPECS / "sets").glob("*.json")):
+        if path.name.endswith(".generated.json") or path.stem == "l36_gpt01":          # l36_gpt01 s1 is the frame that went wrong: it is the reason for the check
+            continue
+        for slot in _json.loads(path.read_text(encoding="utf-8")).get("slots", []):
+            kit = slot.get("kit")
+            if slot.get("role") == "life" and isinstance(kit, dict):                         # older sets name a shared kit by id: nothing is written by hand there
+                assert not director.life_pose_problems(kit.get("life_pose", "")), (path.name, slot["slot"])

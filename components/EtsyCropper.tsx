@@ -215,6 +215,8 @@ export const EtsyCropper: React.FC<EtsyCropperProps> = ({
   useEffect(() => {
     if (initialImage) {
       setSourceImage(initialImage);
+      setCrops({});
+      setWallPoints(null);
     }
   }, [initialImage]);
   const [selectedPreset, setSelectedPreset] = useState<CropPreset>(ETSY_PRESETS[0]);

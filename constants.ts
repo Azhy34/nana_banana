@@ -4,10 +4,13 @@ import { AspectRatio, ImageSize, ModelType } from './types';
 // inputPer1M — price per 1M input tokens when generating images
 // outputPerImage — flat price per output image
 export const MODEL_PRICING: Record<ModelType, { inputPer1M: number; outputPerImage: number }> = {
-  [ModelType.Pro]:     { inputPer1M: 2.00, outputPerImage: 0.134  },
-  [ModelType.Flash31]: { inputPer1M: 0.50, outputPerImage: 0.0672 },
-  [ModelType.QwenImage2]: { inputPer1M: 0, outputPerImage: 0.035 },
-  [ModelType.ABTest]:  { inputPer1M: 0,    outputPerImage: 0 },
+  [ModelType.Pro]:          { inputPer1M: 2.00, outputPerImage: 0.134  },
+  [ModelType.Flash31]:      { inputPer1M: 0.50, outputPerImage: 0.0672 },
+  [ModelType.NanoBanana21]: { inputPer1M: 0,    outputPerImage: 0.03   },
+  [ModelType.GptImage2]:    { inputPer1M: 0,    outputPerImage: 0.05   },
+  [ModelType.GrokImagine]:  { inputPer1M: 0,    outputPerImage: 0.04   },
+  [ModelType.QwenImage2]:   { inputPer1M: 0,    outputPerImage: 0.035  },
+  [ModelType.ABTest]:       { inputPer1M: 0,    outputPerImage: 0      },
 };
 
 export const ASPECT_RATIOS: AspectRatio[] = ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'];
@@ -104,31 +107,71 @@ export const VEO_PRESETS = {
 //  - there is no negative-prompt parameter: the bans are plain sentences inside the prompt;
 //  - the audio is described, otherwise the model invents a soundtrack.
 // The locks below are the ones that fixed real glitches in 2026-10 (flat 2D print, frozen furniture, no duplicated animal heads).
+// Kling 2.6 via KIE (kling-2.6/image-to-video: 5s = 63 credits / $0.315, 10s = 126 credits / $0.63, sound=false)
+export const KLING_MODEL_ID = 'kling-2.6/image-to-video';
+export const KLING_DURATION_OPTIONS = [5, 10] as const;
+export function getKlingCostUsd(seconds: number = 5): number {
+  return seconds >= 10 ? 0.63 : 0.315;
+}
+
 export const OMNI_PROMPT_SINGLE_SHOT = 'In a single continuous shot with no scene cuts.';
 export const OMNI_PROMPT_PRINT_LOCK =
-  'The wallpaper artwork is flat printed ink and stays exactly as in the image: nothing on it moves, blinks, turns or changes, and no animal or figure on it is animated, duplicated or redrawn. Furniture, floor and architecture stay still and undistorted.';
+  'The mural on the wall is flat printed ink and remains identical to the first frame: every painted motif, colour and line stays completely still. Furniture, floor and architecture stay fixed in place.';
 export const OMNI_PROMPT_AUDIO = 'No dialogue, no music, only a faint natural room ambience.';
+
+/**
+ * Strips Omni-specific wrapper phrases ("In a single continuous shot...", "No dialogue...")
+ * when the user switches to Kling 2.6, because Kling takes `sound: false` as an API field
+ * and performs better with pure positive motion + freeze sentences (specs/video_motion.json).
+ */
+export function toKlingPrompt(omniPrompt: string): string {
+  return omniPrompt
+    .replace(OMNI_PROMPT_SINGLE_SHOT, '')
+    .replace(OMNI_PROMPT_AUDIO, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 export const OMNI_PRESETS = {
   omni_wall_dolly: {
-    label: "🎥 Архитектурный наезд на стену (Wall Focus)",
-    description: "Плавный наезд с сохранением геометрии стены и жесткой фиксацией обоев.",
-    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera pushes in slowly and steadily along a straight line toward the feature wall, with no rotation and no sideways drift. Warm morning sunlight stays constant and soft shadows rest along the baseboards. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
+    label: "🎥 Вход со смещением (Forward Drift) · проверен",
+    description: "Камера плавно идёт вперёд и на пару сантиметров вправо, в луче солнца плывёт пыль. Проверено на Omni 1.2.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera moves smoothly forward and drifts a few centimetres to the right at a calm pace, so nearer objects shift slightly more than farther ones. Fine dust drifts slowly through the warm sunbeam on the floor. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
+  },
+  omni_locked_light: {
+    label: "✨ Живой свет, камера стоит (Light Only) · топ-безопасно",
+    description: "Камера полностью неподвижна, по полу и краю стены мягко качаются тени ветвей и скользит солнечный свет. Минимум риска для обоев.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera stays completely still as a fixed, static shot. Warm morning sunlight and soft dappled shadows of leafy branches sway gently across the floor and rug, with subtle dust motes in the sunbeam. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
+  },
+  omni_locked_person: {
+    label: "👶 Человек со спины, камера стоит (Human Hook) · для Reels",
+    description: "Камера стоит неподвижно, ребёнок/мама со спины делает одно спокойное действие (играет на ковре или закрывает дверь).",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera stays completely still as a fixed, static shot. The person seen from behind performs one calm, slow natural movement while keeping their head turned away from the camera, with only the back of their head and clothes visible. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
+  },
+  omni_walk_in: {
+    label: "🚶 Вход в комнату шагом (Walk-In) · параллакс",
+    description: "Камера входит в комнату спокойным шагом от первого лица, ближние предметы смещаются сильнее дальних. Проверено на Kling 2.6.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera advances straight forward into the room at a clearly visible calm walking pace, as if a person is entering, giving a natural depth parallax between foreground objects and the wall. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
+  },
+  omni_pull_back: {
+    label: "↩ Отъезд-раскрытие (Pull-Back Reveal) · тест",
+    description: "Камера плавно отъезжает примерно на 10%, открывая чуть больше комнаты и масштаб панно. Проверять края глазом.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera slowly pulls back by about 10 percent at a constant calm speed, revealing a little more of the room while keeping the whole mural wall in the frame. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
   },
   omni_texture_macro: {
-    label: "🔍 Макро-фактура Craft Lambda (Etsy Texture Proof)",
-    description: "Крупный план реальной текстуры: матовая зернистая поверхность без бликов и дублирования объектов.",
-    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera pushes in very slowly and straight toward the wallpaper surface until it is close to macro distance, with no sideways motion. Soft warm side light skims across the matte fine-grain surface and reveals its tactile relief, with no glare and no plastic sheen. The printed illustration is flat static ink: nothing on it moves, blinks, turns or duplicates, and no head, limb or object appears or disappears. ${OMNI_PROMPT_AUDIO}`
+    label: "🔍 Фактура крупно (Texture Light) · только для макро-кадра",
+    description: "Только для КРУПНОГО кадра обоев: камера стоит, боковой свет скользит по матовой зернистой поверхности Craft Lambda.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera stays completely still as a fixed, static shot. Soft warm side light skims gently across the matte fine-grain paper surface, revealing its tactile micro-relief without glare. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
   },
   omni_sunlight_loop: {
-    label: "✨ Живой свет и тени (Pinterest Viral Loop)",
-    description: "Едва заметный дрейф камеры: теплые лучи солнца и тени листьев скользят по стене 9:16, клип можно зациклить.",
-    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera drifts very slowly forward and slightly sideways. Warm afternoon sunlight and soft dappled leaf shadows glide smoothly across the wall and floor, and the clip ends close to where it began so it loops. Nothing new appears in the room. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
+    label: "☀ Лучи и тени на полу (Sunlight Loop)",
+    description: "Лёгкое дыхание утреннего света и теней на ковре и полу для зацикленного Pinterest-пина.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera stays completely still as a fixed, static shot. Warm afternoon sunlight and soft dappled leaf shadows glide smoothly across the floor and rug. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
   },
   omni_montessori: {
-    label: "👶 Монтессори-ракурс от кроватки (Room Scale & Coziness)",
-    description: "Низкий детский ракурс: показывает масштаб обоев в интерьере и уют детской комнаты.",
-    prompt: `${OMNI_PROMPT_SINGLE_SHOT} Low-angle shot at a child's eye height: the camera moves steadily straight forward toward the feature wall, keeping the crib in the foreground, with no rotation, no arc and no sweep. Warm cozy morning sunlight with soft natural shadows. The crib bars stay straight and solid, with no part bending or disappearing. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
+    label: "🛏 От кроватки (Room Scale)",
+    description: "Спокойный вход в комнату с акцентом на масштаб мебели у стены.",
+    prompt: `${OMNI_PROMPT_SINGLE_SHOT} The camera moves steadily straight forward at a calm pace, keeping the foreground furniture solid and grounded. Warm cozy morning sunlight rests along the floor. ${OMNI_PROMPT_PRINT_LOCK} ${OMNI_PROMPT_AUDIO}`
   }
 };
 

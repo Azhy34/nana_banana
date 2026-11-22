@@ -214,6 +214,21 @@
         "Pepper White"
       ],
       "avoid": "taxidermy, cartoon animals"
+    },
+    {
+      "name": "IKEA Kids",
+      "description": "classic Swedish family-home look: light solid pine and white painted wood, a low pine children's table and stool (FLISAT style), a low white bed (KRITTER style), a low white-and-pine toy storage unit with pastel boxes (TROFAST style), simple cotton bedding, calm pastel accents on a white and wood base",
+      "colors": [
+        "Pepper White",
+        "Soft Sand",
+        "Powder Blue",
+        "Dusty Rose",
+        "Muted Sage",
+        "Butter Yellow",
+        "Lilac Mist",
+        "Warm Greige"
+      ],
+      "avoid": "wardrobes, loft and bunk beds, tall units, a table with chairs, logos, brand labels or any readable text on furniture, glossy plastic toys"
     }
   ],
   "brands": [

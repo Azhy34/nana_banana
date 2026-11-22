@@ -1,0 +1,215 @@
+{
+  "description": "Designed by scripts/director.py design (seed 1): the roles, ages, styles and colours were dealt by code, the rooms written from the picture of the wallpaper by a model; each slot carries its own kit. Re-shoot under a NEW set name.",
+  "id": "l36_final01",
+  "listing_spec": "listing36_interiors.json",
+  "video_spec": "listing36_video.json",
+  "aspect": "9:16",
+  "seed": 1,
+  "model": "nano-banana-2-1",
+  "constraints": {
+    "min_styles": 2,
+    "distinct_kits": true,
+    "ages": []
+  },
+  "slots": [
+    {
+      "slot": "s1",
+      "role": "run_in",
+      "kit": {
+        "id": "l36_final01_s1",
+        "name": "Flower table and ochre poufs",
+        "audience": "girl",
+        "room_type": "play zone",
+        "child": {
+          "gender": "girl",
+          "age_band": "vorschul"
+        },
+        "age": "vorschul",
+        "side": "left",
+        "style": "Playful Curves",
+        "color": "Eucalyptus",
+        "lighting": "crisp morning window daylight",
+        "subject": "a bright Playful Curves bedroom for a child aged 2 to 5, with a flower-shaped craft table and a stack of round bouclé poufs",
+        "room": "A calm airy room with a pale ash floor.",
+        "floor": "A scalloped felt rug in deep eucalyptus green holds wax crayons in a wooden cup and an open drawing book.",
+        "side_wall": "a flower-shaped craft table 45 cm high in pale lacquered birch, with a stack of two round bouclé poufs in warm ochre and barberry red beside it, and a small arch-shaped framed picture above",
+        "ceiling": "",
+        "light": "Crisp morning daylight from a window on the {side} lies in clear patches on the floor. Two or three small real peach and yellow butterflies flutter in the sunbeam by the window.",
+        "palette": "eucalyptus green, pale birch, warm ochre, barberry red, cream and white",
+        "items": "flower-shaped craft table, bouclé poufs, scalloped rug, crayon cup, drawing book, arch block, picture frame and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "wax crayons in a wooden cup with an open drawing book on the rug"
+      }
+    },
+    {
+      "slot": "s2",
+      "role": "product",
+      "kit": {
+        "id": "l36_final01_s2",
+        "name": "Birch desk and blush striped bed",
+        "audience": "girl",
+        "room_type": "study zone",
+        "child": {
+          "gender": "girl",
+          "age_band": "schulkind"
+        },
+        "age": "schulkind",
+        "side": "right",
+        "style": "Fun Haus",
+        "color": "Soft Sand",
+        "lighting": "warm morning sunbeams",
+        "subject": "a warm Fun Haus bedroom for a child aged 6 to 10, with a curved birch study desk and a low striped single bed",
+        "room": "A sunny tidy room with a dark walnut herringbone floor.",
+        "floor": "A flat-weave rug in sand and blush pink lies on the floor, with a classic globe on a turned solid wood stand beside the bed.",
+        "side_wall": "a curved birch study desk 75 cm high with an open book ledge, illustrated books, wooden pencil cups and an ergonomic wooden chair, beside a single bed 90 by 200 cm in a low frame with blush-pink-and-cream striped bedding and one sage cushion, and a small framed botanical watercolour above the desk",
+        "ceiling": "",
+        "light": "Warm morning sunbeams from a window on the {side} lie in soft patches on the floor.",
+        "palette": "soft sand, blush pink, cream, muted sage and walnut brown",
+        "items": "study desk, book ledge, wooden chair, striped bed, globe, rug, picture frame and architecture",
+        "life_pose": "{person} stands on the rug with {her} back to the camera, {her} face turned away from the camera so no facial detail is visible.",
+        "life_action": "stays still",
+        "toy": "a classic globe on a turned solid wood stand on the floor beside the bed"
+      }
+    }
+  ],
+  "design": {
+    "seed": 1,
+    "frames": 2,
+    "hands": [
+      {
+        "slot": "s1",
+        "role": "run_in",
+        "age": "vorschul",
+        "side": "left",
+        "lighting": "crisp morning window daylight",
+        "role_label": "Run in: a toddler runs in through the door toward the mural and throws both arms up in delight, the camera is still",
+        "person": true,
+        "audience": "girl",
+        "child": "a child of 2 to 5 years",
+        "room_of_that_age": "A children's bedroom: the bed is a child's bed of 140 by 70 cm, no higher than 40 cm, and every piece of furniture stands at the height of a small child, with the proportions of a playroom.",
+        "style": "Playful Curves",
+        "style_card": "rounded arches, scalloped edges and soft curved furniture in gentle pastel colour pops on a calm cream base, clean Scandinavian craftsmanship",
+        "color": "Eucalyptus",
+        "color_description": "deep eucalyptus green, grounding and organic",
+        "allowed_colors": [
+          {
+            "name": "Dusty Rose",
+            "description": "soft vintage dusty rose, gentle and comforting"
+          },
+          {
+            "name": "Strawberry Milk",
+            "description": "soft playful pastel strawberry, cheerful and gentle"
+          },
+          {
+            "name": "Lilac Mist",
+            "description": "soft dusty lilac with a hint of lavender, gentle and calm"
+          },
+          {
+            "name": "Butter Yellow",
+            "description": "soft creamy butter yellow, sunny and gentle"
+          },
+          {
+            "name": "Muted Sage",
+            "description": "fresh botanical sage green, grounding and natural"
+          },
+          {
+            "name": "Eucalyptus",
+            "description": "deep eucalyptus green, grounding and organic"
+          },
+          {
+            "name": "Soft Sand",
+            "description": "soft sandy beige, warm and neutral"
+          },
+          {
+            "name": "Cool Blue",
+            "description": "calm cool blue with a clear fresh feel, as a quiet accent"
+          },
+          {
+            "name": "Pepper White",
+            "description": "warm off-white, softer on the eyes than pure white"
+          }
+        ],
+        "hero_piece": {
+          "name": "Flower-shaped wooden craft table",
+          "description": "charming flower-shaped craft table in pale lacquered birch, accompanied by a stack of round bouclé poufs in warm ochre and barberry red"
+        },
+        "toy": "wax crayons in a wooden cup with an open drawing book on the rug"
+      },
+      {
+        "slot": "s2",
+        "role": "product",
+        "age": "schulkind",
+        "side": "right",
+        "lighting": "warm morning sunbeams",
+        "role_label": "Product: the whole mural, a walk-in with parallax",
+        "person": false,
+        "audience": "girl",
+        "child": "a schoolchild of 6 to 10 years",
+        "room_of_that_age": "A school child's room: the bed is a single bed of 90 by 200 cm in a low frame, furniture is slim and sized for a schoolchild, and books and learning things stand at child height.",
+        "style": "Fun Haus",
+        "style_card": "circus-inspired playfulness: striped upholstery (caramel-and-cream or blue-and-cream) on the bed and cushions, sculptural arch- and pill-shaped cream furniture fronts, wavy edges, vintage circus art in small frames, one saturated blue accent; the loud pattern is balanced by a restrained blue, cream, caramel and brick palette, and stripes never appear on the wall behind the wallpaper",
+        "color": "Soft Sand",
+        "color_description": "soft sandy beige, warm and neutral",
+        "allowed_colors": [
+          {
+            "name": "Brick Red",
+            "description": "warm brick red, for striped cushions and small accents"
+          },
+          {
+            "name": "Powder Blue",
+            "description": "soft dusty powder blue, light and calm"
+          },
+          {
+            "name": "Cool Blue",
+            "description": "calm cool blue with a clear fresh feel, as a quiet accent"
+          },
+          {
+            "name": "Butter Yellow",
+            "description": "soft creamy butter yellow, sunny and gentle"
+          },
+          {
+            "name": "Honey Amber",
+            "description": "warm honey wood tone, rich and glowing"
+          },
+          {
+            "name": "Cocoa Brown",
+            "description": "warm cocoa and rusty brown, cosy and earthy"
+          },
+          {
+            "name": "Barberry",
+            "description": "soft berry red, warm and sophisticated, for small accents only"
+          },
+          {
+            "name": "Pepper White",
+            "description": "warm off-white, softer on the eyes than pure white"
+          },
+          {
+            "name": "Soft Sand",
+            "description": "soft sandy beige, warm and neutral"
+          }
+        ],
+        "hero_piece": {
+          "name": "Curved birch study desk with open book ledge",
+          "description": "clean natural oak and birch desk with tidy illustrated children's books, wooden pencil cups, and an ergonomic wooden chair"
+        },
+        "toy": "a classic globe on a turned solid wood stand on the floor beside the bed"
+      }
+    ],
+    "writer": {
+      "how": "claude -p (subscription)",
+      "calls": [
+        {
+          "model": "sonnet",
+          "tokens": 14986,
+          "list_price_usd": 0.0275
+        },
+        {
+          "model": "sonnet",
+          "tokens": 7641,
+          "list_price_usd": 0.0245
+        }
+      ]
+    }
+  }
+}

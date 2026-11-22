@@ -65,6 +65,8 @@ export const Upscaler: React.FC<UpscalerProps> = ({
         if (initialImage) {
             setSourceImage(initialImage);
             setSourceFile(null);
+            setSourceSize(null);
+            setState({ isUpscaling: false, progress: 0, error: null, upscaledImage: null });
         }
     }, [initialImage]);
     const [sourceFile, setSourceFile] = useState<File | null>(null);
