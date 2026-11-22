@@ -470,18 +470,29 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
             <button onClick={downloadSelected}
               title={activePreset.hint}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all text-sm shadow shadow-indigo-500/20">
-              ⬇ Download Selected ({selectedCount})
+              ⬇ Download Selected ({selectedCount} · {activePreset.shortLabel})
             </button>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {cards.map((card, idx) => (
+        {cards.map((card, idx) => {
+          const isVideoMaster = card.tags.aspectRatio === '9:16';
+          const previewAspectClass =
+            exportPreset === 'site_meta_4x5' && !isVideoMaster
+              ? 'aspect-[4/5]'
+              : exportPreset === 'meta_square_1x1' && !isVideoMaster
+              ? 'aspect-square'
+              : exportPreset === 'pinterest_2x3' && !isVideoMaster
+              ? 'aspect-[2/3]'
+              : ASPECT_CLASS_MAP[card.tags.aspectRatio] ?? 'aspect-[2/3]';
+          const show4x5Guides = exportPreset === 'pack_4x5_2x3' && card.tags.aspectRatio === '2:3';
+          return (
           <div key={card.id}
             className={`bg-slate-800 rounded-xl border overflow-hidden transition-all ${card.selected && card.resultImage ? 'border-indigo-500/60 shadow-lg shadow-indigo-500/10' : 'border-slate-700'}`}>
             {/* Image Area */}
-            <div className={`relative bg-slate-900 ${ASPECT_CLASS_MAP[card.tags.aspectRatio] ?? 'aspect-[2/3]'}`}>
+            <div className={`relative bg-slate-900 transition-all ${previewAspectClass}`}>
               {card.status === 'loading' && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                   <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -491,6 +502,11 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               {card.status === 'done' && card.resultImage && (
                 <>
                   <img src={card.resultImage} alt={`Result ${idx + 1}`} className="w-full h-full object-cover" />
+                  {show4x5Guides && (
+                    <div className="pointer-events-none absolute inset-x-0 inset-y-[8.33%] border-y border-dashed border-amber-300/75 flex items-start justify-start p-1.5">
+                      <span className="bg-slate-950/75 text-amber-300 text-[10px] font-mono px-1.5 py-0.5 rounded">4:5 кроп</span>
+                    </div>
+                  )}
                   <button onClick={() => toggleSelected(card.id)}
                     className={`absolute top-2 right-2 w-7 h-7 rounded-full border-2 flex items-center justify-center text-sm font-bold transition-all ${card.selected ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-900/70 border-slate-500 text-transparent hover:border-slate-300'}`}>
                     ✓
@@ -563,7 +579,8 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -293,6 +293,53 @@ export async function generateKieBatchImage(
   }
 }
 
+const KIE_CDN_HOSTS = ['tempfile.aiquickdraw.com', '.kie.ai', '.redpandaai.co'];
+
+function isKieCdnUrl(rawUrl: string): boolean {
+  try {
+    const host = new URL(rawUrl).hostname.toLowerCase();
+    return KIE_CDN_HOSTS.some((s) => (s.startsWith('.') ? host.endsWith(s) : host === s));
+  } catch {
+    return false;
+  }
+}
+
+async function resolveVideoFrameUrl(kieKey: string, imageInput: string): Promise<string> {
+  if (/^https?:\/\//i.test(imageInput)) {
+    // Images generated via KIE Batch are already hosted on KIE CDN — pass directly without re-uploading
+    if (isKieCdnUrl(imageInput)) return imageInput;
+
+    const proxied = await fetch('/api/kie', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'fetchImage', url: imageInput }),
+    });
+    if (!proxied.ok) throw new Error(`Failed to fetch source frame (${proxied.status})`);
+    const blob = await proxied.blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error('Failed to encode fetched frame to base64'));
+      reader.readAsDataURL(blob);
+    });
+    imageInput = dataUrl;
+  }
+
+  const normalized = imageInput.startsWith('data:')
+    ? imageInput
+    : `data:image/jpeg;base64,${imageInput}`;
+
+  const uploadRes = await callKieProxy<{ data?: { downloadUrl?: string; download_url?: string } }>(kieKey, {
+    action: 'upload',
+    base64Data: normalized,
+    fileName: 'video_frame.jpg',
+    uploadPath: 'nana-banana/video',
+  });
+  const frameUrl = uploadRes?.data?.downloadUrl || uploadRes?.data?.download_url;
+  if (!frameUrl) throw new Error('KIE frame upload returned no downloadUrl');
+  return frameUrl;
+}
+
 export async function generateKieVideo(
   kieKey: string,
   imageDataUrl: string,
@@ -326,14 +373,7 @@ export async function generateKieVideo(
 
   try {
     onProgress?.(10);
-    const uploadRes = await callKieProxy<{ data?: { downloadUrl?: string; download_url?: string } }>(kieKey, {
-      action: 'upload',
-      base64Data: imageDataUrl,
-      fileName: 'video_frame.jpg',
-      uploadPath: 'nana-banana/video',
-    });
-    const frameUrl = uploadRes?.data?.downloadUrl || uploadRes?.data?.download_url;
-    if (!frameUrl) throw new Error('KIE frame upload returned no downloadUrl');
+    const frameUrl = await resolveVideoFrameUrl(kieKey, imageDataUrl);
 
     onProgress?.(25);
     const klingInput = {
