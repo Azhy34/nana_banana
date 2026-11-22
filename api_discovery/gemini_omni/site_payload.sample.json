@@ -1,0 +1,13 @@
+{
+  "_comment": "Contract fixture: the exact request the site (services/omniService.ts buildOmniPayload, default form: 720p, 5 s, seed 133466) sends to POST /v1beta/interactions. Placeholders: <base64 image> and <preset prompt>. e2e/ui/video.spec.ts checks that the site still sends exactly this; test_models.py checks that the Pydantic shield accepts it. Change the site or the shield and the other test fails.",
+  "model": "gemini-omni-1.2-flash",
+  "input": [
+    { "type": "image", "data": "<base64 image>", "mime_type": "image/png" },
+    { "type": "text", "text": "<preset prompt>" }
+  ],
+  "response_format": { "type": "video", "resolution": "720p", "aspect_ratio": "9:16", "duration": "5s" },
+  "generation_config": { "seed": 133466 },
+  "store": false,
+  "stream": false,
+  "background": false
+}

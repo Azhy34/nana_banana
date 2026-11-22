@@ -3,6 +3,8 @@ import { logGeminiEvent } from './geminiService';
 import {
   OMNI_MODEL_ID,
   OMNI_DEFAULT_DURATION_SECONDS,
+  OMNI_USD_PER_M_VIDEO_TOKENS,
+  composeOmniPrompt,
   getOmniCostUsd,
   omniNeedsUriDelivery,
 } from '../constants';
@@ -12,6 +14,46 @@ const FILE_POLL_INTERVAL_MS = 3000;
 const FILE_POLL_TIMEOUT_MS = 5 * 60 * 1000;
 const MAX_SEED = 2147483647; // the API takes an integer seed; the form allows up to 2^32-1, so it is folded into this range
 
+/** Image types the Interactions API accepts as input (API reference): png, jpeg, webp, heic, heif, gif, bmp, tiff. We allow the three a browser can produce. */
+const OMNI_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const;
+export type OmniImageMime = (typeof OMNI_IMAGE_MIME_TYPES)[number];
+export interface OmniImage { data: string; mimeType: OmniImageMime }
+
+/**
+ * Splits an uploaded picture (a data URL from the file input) into raw base64 + its REAL mime type.
+ * The type used to be hard-coded as image/jpeg although the uploader accepts any image/*, so a PNG mockup was mislabelled.
+ * A bare base64 string without a prefix keeps the old default (jpeg).
+ */
+export function parseOmniImage(imageBase64: string): OmniImage {
+  const prefix = /^data:(image\/[\w.+-]+);base64,/i.exec(imageBase64);
+  const declared = (prefix?.[1] ?? 'image/jpeg').toLowerCase();
+  const mimeType = (declared === 'image/jpg' ? 'image/jpeg' : declared) as OmniImageMime;
+  if (!OMNI_IMAGE_MIME_TYPES.includes(mimeType)) {
+    throw new Error(`Omni принимает кадр в PNG, JPG или WebP, а загружен ${declared}. Сохраните кадр как PNG или JPG и загрузите снова.`);
+  }
+  return { data: prefix ? imageBase64.slice(prefix[0].length) : imageBase64, mimeType };
+}
+
+export interface OmniResult {
+  videoUrl: string;
+  /** What the clip cost: the real bill when Google reported it, otherwise the price-list calculation. */
+  costUsd: number;
+  /** true = read from Google's `usage` (video output tokens x $12 / 1M); false = calculated from the price list. */
+  costFromUsage: boolean;
+}
+
+/**
+ * The real bill of an interaction: video output tokens x $12 per 1M. Google reports them in
+ * `usage.output_tokens_by_modality` (Interactions API reference); null when the answer carries no video tokens.
+ */
+export function billedCostFromUsage(usage: any): number | null {
+  const entries: any[] = Array.isArray(usage?.output_tokens_by_modality) ? usage.output_tokens_by_modality : [];
+  const tokens = entries
+    .filter((m) => m?.modality === 'video')
+    .reduce((sum, m) => sum + (Number(m?.tokens) || 0), 0);
+  return tokens > 0 ? (tokens * OMNI_USD_PER_M_VIDEO_TOKENS) / 1_000_000 : null;
+}
+
 /**
  * Builds the request of the Google Interactions API for Gemini Omni 1.2 Flash (image-to-video).
  * Exported so a test can check the contract without calling the network.
@@ -19,11 +61,13 @@ const MAX_SEED = 2147483647; // the API takes an integer seed; the form allows u
  * Contract (aistudio.google.com/docs/omni):
  *  - `response_format.duration` is a string of whole seconds, "3s".."15s". NOT SENT = the model makes 10 s;
  *  - `delivery: "uri"` for 1080p / long clips (larger than 4 MB), otherwise the video comes inline as base64;
- *  - `store`, `stream`, `background` = false: Google's advice for a plain synchronous generation
+ *  - `stream`, `background` = false and `store` = false: Google's advice for a plain synchronous generation
  *    (the video then cannot be edited by a later turn, which this tool never does);
- *  - there is no negative-prompt parameter: bans live inside the prompt text.
+ *  - EXCEPTION: `delivery: "uri"` makes Google answer 400 "store=true is required when response format has video delivery set to URI",
+ *    so a request that asks for a link (1080p, clips over 10 s) is sent with `store: true`;
+ *  - there is no negative-prompt parameter: the wallpaper freeze is a sentence of the text, added to EVERY request (composeOmniPrompt).
  */
-export function buildOmniPayload(cleanBase64: string, settings: VideoJobSettings) {
+export function buildOmniPayload(image: OmniImage, settings: VideoJobSettings) {
   const resolution = settings.resolution || '720p';
   const seconds = settings.durationSeconds ?? OMNI_DEFAULT_DURATION_SECONDS;
   if (!Number.isInteger(seconds) || seconds < 3 || seconds > 15) {
@@ -39,8 +83,9 @@ export function buildOmniPayload(cleanBase64: string, settings: VideoJobSettings
     payload: {
       model: OMNI_MODEL_ID,
       input: [
-        { type: 'image', data: cleanBase64, mime_type: 'image/jpeg' },
-        { type: 'text', text: settings.customPrompt },
+        { type: 'image', data: image.data, mime_type: image.mimeType },
+        // the form holds the MOTION only: the first-frame sentence, the wallpaper freeze and the sound are always added here
+        { type: 'text', text: composeOmniPrompt(settings.customPrompt) },
       ],
       response_format: {
         type: 'video',
@@ -50,7 +95,7 @@ export function buildOmniPayload(cleanBase64: string, settings: VideoJobSettings
         ...(viaUri ? { delivery: 'uri' } : {}),
       },
       ...(seed !== undefined ? { generation_config: { seed } } : {}),
-      store: false,
+      store: viaUri, // Google: delivery "uri" requires store=true; an inline answer is faster with store=false
       stream: false,
       background: false,
     },
@@ -101,7 +146,6 @@ async function fetchVideoFromUri(uri: string, apiKey: string, onProgress?: (prog
  * Supports:
  * - 720p Final (default, 720x1280, the minimum Etsy accepts)
  * - 1080p (upscaled by Google, Etsy's recommended quality; delivered through the Files API)
- * - 360p Draft (cheap prompt iteration only; 360x640 is REJECTED by Etsy)
  * - 3 to 15 seconds (default 5); the price is per second, see getOmniCostUsd
  * - Image-to-Video with locked wallpaper pattern & nursery physics
  */
@@ -111,14 +155,14 @@ export async function generateOmniVideoOnClient(
   apiKey: string,
   onProgress?: (progress: number) => void,
   traceId?: string
-): Promise<string> {
+): Promise<OmniResult> {
   if (!apiKey) {
     throw new Error("Gemini API key is required. Please set it in the header settings.");
   }
 
-  const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+  const image = parseOmniImage(imageBase64);
   const resolution = settings.resolution || '720p';
-  const { payload, seconds, viaUri, seed } = buildOmniPayload(cleanBase64, settings);
+  const { payload, seconds, viaUri, seed } = buildOmniPayload(image, settings);
   const cost = getOmniCostUsd(resolution, seconds);
 
   const requestDetails: GeminiLogDetails = {
@@ -206,13 +250,15 @@ export async function generateOmniVideoOnClient(
     }
     // Blob URL for smooth memory management in the video element
     const videoUrl = URL.createObjectURL(blob);
+    const billed = billedCostFromUsage(interaction.usage);
+    const finalCost = billed ?? cost; // the real bill when Google sent it, else the price-list estimate
 
     if (onProgress) onProgress(100);
 
     logGeminiEvent(
       OMNI_MODEL_ID,
       `Omni Video Success [${resolution}, ${seconds}s${viaUri ? ', uri' : ''}]: ${settings.customPrompt}`,
-      cost,
+      finalCost,
       seconds,
       'success',
       null,
@@ -221,7 +267,7 @@ export async function generateOmniVideoOnClient(
       { ...requestDetails, resolution, interactionId: interaction.id }
     );
 
-    return videoUrl;
+    return { videoUrl, costUsd: finalCost, costFromUsage: billed !== null };
   } catch (error: any) {
     logGeminiEvent(
       OMNI_MODEL_ID,

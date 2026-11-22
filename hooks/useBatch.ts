@@ -154,6 +154,10 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   const selectCount = (n: number) => {
     setCount(n);
+    if (n === 3) {
+      setFormatDist({ '9:16': 1, '4:5': 0, '3:4': 0, '2:3': 1, '4:3': 1 });
+      return;
+    }
     const total = formatTotal;
     if (total === 0) {
       setFormatDist({ '9:16': Math.round(n * 0.5), '4:5': 0, '3:4': 0, '2:3': Math.round(n * 0.33), '4:3': n - Math.round(n * 0.5) - Math.round(n * 0.33) });

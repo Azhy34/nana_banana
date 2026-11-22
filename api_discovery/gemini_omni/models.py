@@ -51,12 +51,29 @@ class GoogleApiErrorResponse(BaseModel):
 # 2. Request Contract Models
 # ==========================================
 
+# Image types both Google docs agree on (Interactions API reference lists more: gif, bmp, tiff; Vertex lists exactly these five).
+OmniImageMime = Literal["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]
+
+
 class ImageContentInput(BaseModel):
+    """An image is passed EITHER inline (`data`, base64) OR by reference (`uri`, Files API: docs "Extending with reference media")."""
     model_config = ConfigDict(extra="forbid")
 
     type: Literal["image"] = "image"
-    data: str = Field(description="Base64 encoded image string (JPEG or PNG)")
-    mime_type: Literal["image/jpeg", "image/png"] = Field(default="image/jpeg", description="MIME type of input image")
+    data: Optional[str] = Field(default=None, description="Base64 encoded image (inline). Exactly one of `data` / `uri`.")
+    uri: Optional[str] = Field(default=None, description="URI of an image uploaded with the Files API. Exactly one of `data` / `uri`.")
+    mime_type: Optional[OmniImageMime] = Field(
+        default=None,
+        description="MIME type of the image. Inline data without it is read as image/jpeg (the old default); a `uri` image needs none.",
+    )
+
+    @model_validator(mode="after")
+    def _one_source(self):
+        if (self.data is None) == (self.uri is None):
+            raise ValueError("an image takes exactly one of `data` (base64) or `uri` (Files API)")
+        if self.data is not None and self.mime_type is None:
+            self.mime_type = "image/jpeg"
+        return self
 
 
 class TextContentInput(BaseModel):
@@ -125,7 +142,7 @@ class OmniGenerationConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     video_config: Optional[VideoConfig] = None
-    seed: Optional[int] = Field(default=None, description="Decoding seed: the same seed + the same character description keeps scenes consistent")
+    seed: Optional[int] = Field(default=None, description="Decoding seed (the field exists in generation_config); Google's Omni docs do not promise that the same seed repeats a clip")
 
 
 class OmniInteractionCreateRequest(BaseModel):
@@ -147,7 +164,8 @@ class OmniInteractionCreateRequest(BaseModel):
     store: Optional[bool] = Field(
         default=True,
         description="Whether to store conversation state server-side. Google: store=false is faster for a one-shot call, "
-                    "but the video can then NOT be edited by a later turn (previous_interaction_id)."
+                    "but the video can then NOT be edited by a later turn (previous_interaction_id). "
+                    "delivery='uri' REQUIRES store=true."
     )
     stream: Optional[bool] = Field(default=None, description="Google advises stream=false for a plain synchronous generation")
     background: Optional[bool] = Field(default=None, description="Google advises background=false for a plain synchronous generation")
@@ -166,6 +184,9 @@ class OmniInteractionCreateRequest(BaseModel):
         if videos > 3:
             raise ValueError(f"{videos} videos: Omni takes at most 3 reference videos")
         fmt = self.response_format
+        if fmt and fmt.delivery == "uri" and self.store is False:
+            # seen live 13.11.2026: 400 "store=true is required when response format has video delivery set to URI"
+            raise ValueError("response_format.delivery='uri' requires store=true (Google answers 400 otherwise)")
         seconds = int(fmt.duration[:-1]) if fmt and fmt.duration else None
         task = self.generation_config.video_config.task if self.generation_config and self.generation_config.video_config else None
         if seconds and seconds > 10 and videos > 1:
@@ -173,6 +194,13 @@ class OmniInteractionCreateRequest(BaseModel):
         if seconds and seconds > 10 and task == "image_to_video" and images == 2:
             raise ValueError("first + last frame (two images, task image_to_video) supports 3-10 s only")
         return self
+
+    def routing_note(self) -> Optional[str]:
+        """A warning (not an error) for the caller / UI: 1.1 still answers until 2026-12-03, then Google routes it to 1.2 at the 1.2 rate."""
+        if self.model == "gemini-omni-1.1-flash":
+            return ("gemini-omni-1.1-flash: from 2026-12-03 Google routes it to gemini-omni-1.2-flash and bills the 1.2 rate "
+                    "($0.07/s at 720p). Use gemini-omni-1.2-flash.")
+        return None
 
 
 # ==========================================

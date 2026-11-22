@@ -110,6 +110,8 @@ export class MockedApis {
   readonly gemini: Captured[] = [];
   readonly omni: Captured[] = [];
   readonly omniFiles: Captured[] = [];
+  /** Video output tokens the mocked Omni answer reports in `usage` (null = an answer without usage). 30,000 tokens = $0.36 at $12 / 1M. */
+  omniUsageTokens: number | null = 30_000;
   readonly veo: Captured[] = [];
   readonly upload: Captured[] = [];
   readonly blobPut: Captured[] = [];
@@ -188,6 +190,10 @@ export class MockedApis {
       this.omni.push(request);
       // delivery "uri" (1080p / long clips): the video comes as a Files API link instead of inline base64
       const viaUri = request.body?.response_format?.delivery === 'uri';
+      if (viaUri && request.body?.store !== true) {
+        // what Google really answers (seen on the live site 13.11.2026)
+        return json(route, 400, { error: { code: 400, status: 'INVALID_ARGUMENT', message: 'store=true is required when response format has video delivery set to URI.' } });
+      }
       const video = viaUri
         ? { type: 'video', mime_type: 'video/mp4', uri: 'https://generativelanguage.googleapis.com/v1beta/files/e2e-omni:download?alt=media' }
         : { type: 'video', mime_type: 'video/mp4', data: OMNI_VIDEO_BYTES.toString('base64') };
@@ -200,6 +206,9 @@ export class MockedApis {
           { type: 'user_input', content: [] },
           { type: 'model_output', content: [video] },
         ],
+        ...(this.omniUsageTokens === null
+          ? {}
+          : { usage: { total_output_tokens: this.omniUsageTokens, output_tokens_by_modality: [{ modality: 'video', tokens: this.omniUsageTokens }] } }),
       });
     });
     // Files API status poll of a URI-delivered Omni video: ready at once

@@ -23,7 +23,7 @@
   - `GoogleApiErrorResponse`: разбор ошибок Google RPC (`INVALID_ARGUMENT`, `RESOURCE_EXHAUSTED` и др.).
   - `ServiceResult[T]`: эталонная двухслойная ширма (Two-Layer Shield), исключающая падения приложения.
 
-* **[`test_models.py`](file:///c:/Users/Mikhail/OneDrive/nocode/nana_banana/api_discovery/gemini_omni/test_models.py)**: Автотесты валидации всех контрактов (все 5 тестов успешно пройдены).
+* **[`test_models.py`](file:///c:/Users/Mikhail/OneDrive/nocode/nana_banana/api_discovery/gemini_omni/test_models.py)**: Автотесты валидации всех контрактов (8 проверок: ответы, ошибки, ширма, контракт 1.2, картинки, запрос сайта).
 
 ---
 
@@ -40,7 +40,7 @@ from api_discovery.gemini_omni.models import OmniInteractionCreateRequest, OmniI
 ```
 
 ### 3. Подключение в TypeScript фронтенд (`nana_banana`):
-Контракты из `models.py` транслируются 1-в-1 в интерфейсы для `omniService.ts` при готовности перейти к фронтенду.
+Сайт уже использует эти контракты в `omniService.ts`. Чтобы они не разошлись, запрос сайта лежит в [`site_payload.sample.json`](site_payload.sample.json): e2e (`e2e/ui/video.spec.ts`) проверяет, что сайт шлёт ровно его, а `test_models.py` проверяет, что ширма его принимает.
 
 ---
 
@@ -54,3 +54,14 @@ from api_discovery.gemini_omni.models import OmniInteractionCreateRequest, OmniI
 - Образец ответа 1.2 в `raw_endpoints_audit.json` составлен вручную по документации (помечен `synthetic`); заменить реальным после первого платного вызова.
 - Нет негативного промпта-параметра: запреты писать в тексте («No dialogue. No extra sound effects.»).
 - Запуск проверок: `py -3.12 -X utf8 api_discovery/gemini_omni/test_models.py` (без сети и без денег).
+
+## Что обновлено 13.11.2026
+- Картинка во входе: `data` (base64) **или** `uri` (Files API), ровно одно из двух; типы `image/jpeg`, `image/png`, `image/webp`, `image/heic`, `image/heif` (их называют обе документации Google). Голый inline без типа читается как jpeg.
+- `OmniInteractionCreateRequest.routing_note()`: предупреждение для `gemini-omni-1.1-flash` (с 2026-12-03 Google отправляет его на 1.2 по тарифу 1.2). Сама модель 1.1 в списке допустимых осталась.
+- `site_payload.sample.json`: контрактная фикстура запроса сайта (проверяют и `test_models.py`, и e2e сайта).
+- Сайт больше не предлагает 360p (другой рендер, не обещает результат 720p; Etsy отклоняет 360×640). Ширма 360p по-прежнему допускает: это формат Google.
+- Сайт читает `usage.output_tokens_by_modality` из ответа (в справочнике Interactions API это документированное поле) и показывает итоговую стоимость по счёту Google; без usage показывает расчёт по прайсу.
+- `seed`: поле `generation_config.seed` в справочнике есть, но документация Omni не обещает повторяемость клипа по seed.
+- Не покрыто ширмой: 4k и upscale-задача для готового видео (в Gemini API форма запроса upscale не описана), аудио-входы (Google: не поддерживаются).
+- Регионы: в EEA, Швейцарии и Великобритании нельзя загружать картинки с несовершеннолетними и править загруженное видео; ширма это не проверяет, ограничение действует на стороне Google.
+- `delivery: "uri"` требует `store: true`: иначе Google отвечает 400 «store=true is required when response format has video delivery set to URI» (поймано на живом сайте 13.11.2026 на 1080p). Ширма теперь отвергает это сочетание; сайт шлёт `store: true` только когда просит ссылку.

@@ -8,14 +8,15 @@ import {
   VEO_NEGATIVE_PROMPT,
   VEO_FIXED_DURATION_SECONDS,
   OMNI_DEFAULT_DURATION_SECONDS,
-  OMNI_DURATION_OPTIONS,
-  KLING_DURATION_OPTIONS,
+  OMNI_DEFAULT_PRESET,
+  OMNI_PROMPT_BASE,
+  OMNI_PROMPT_FREEZE,
   ETSY_MIN_VIDEO_SIDE_PX,
   ETSY_RECOMMENDED_VIDEO_SIDE_PX,
   getVeoCostUsd,
   getOmniCostUsd,
   getKlingCostUsd,
-  toKlingPrompt,
+  composeKlingPrompt,
 } from '../constants';
 import { VideoJobSettings, VideoGenerationState, VideoEngine, OmniResolution } from '../types';
 import { getModelCapability } from '../shared/modelContracts';
@@ -42,8 +43,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   const [sourceImage, setSourceImage] = useState<string | null>(initialImage || null);
   const [settings, setSettings] = useState<VideoJobSettings>({
     engine: 'omni',
-    promptPreset: 'omni_wall_dolly',
-    customPrompt: OMNI_PRESETS.omni_wall_dolly.prompt,
+    promptPreset: OMNI_DEFAULT_PRESET,
+    customPrompt: OMNI_PRESETS[OMNI_DEFAULT_PRESET].prompt,
     seed: 133466,
     resolution: '720p'
   });
@@ -76,9 +77,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   }, [initialImage]);
 
   const estimatedCost = engine === 'omni'
-    ? getOmniCostUsd(resolution, durationSeconds)
+    ? getOmniCostUsd(resolution, OMNI_DEFAULT_DURATION_SECONDS)
     : engine === 'kling'
-      ? getKlingCostUsd(durationSeconds >= 10 ? 10 : 5)
+      ? getKlingCostUsd(5)
       : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -115,8 +116,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       setSettings(prev => ({
         ...prev,
         engine: 'omni',
-        promptPreset: 'omni_wall_dolly',
-        customPrompt: OMNI_PRESETS.omni_wall_dolly.prompt,
+        promptPreset: OMNI_DEFAULT_PRESET,
+        customPrompt: OMNI_PRESETS[OMNI_DEFAULT_PRESET].prompt,
         resolution
       }));
     } else if (newEngine === 'kling') {
@@ -124,8 +125,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       setSettings(prev => ({
         ...prev,
         engine: 'kling',
-        promptPreset: 'omni_locked_light',
-        customPrompt: toKlingPrompt(OMNI_PRESETS.omni_locked_light.prompt),
+        promptPreset: 'omni_light_only',
+        customPrompt: OMNI_PRESETS.omni_light_only.prompt,
       }));
     } else {
       setSettings(prev => ({
@@ -141,11 +142,10 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   const handlePresetChange = (presetKey: string) => {
     if ((engine === 'omni' || engine === 'kling') && presetKey in OMNI_PRESETS) {
       const key = presetKey as keyof typeof OMNI_PRESETS;
-      const rawPrompt = OMNI_PRESETS[key].prompt;
       setSettings(prev => ({
         ...prev,
         promptPreset: key,
-        customPrompt: engine === 'kling' ? toKlingPrompt(rawPrompt) : rawPrompt,
+        customPrompt: OMNI_PRESETS[key].prompt,
       }));
     } else if (presetKey in VEO_PRESETS) {
       const key = presetKey as keyof typeof VEO_PRESETS;
@@ -225,24 +225,29 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     try {
       const traceId = generateTraceId();
       let videoUrl: string;
+      let runCost = estimatedCost;
+      let costFromUsage = false;
 
       if (engine === 'kling') {
         videoUrl = await generateKieVideo(
           kieApiKey!,
           sourceImage,
-          settings.customPrompt,
-          durationSeconds >= 10 ? 10 : 5,
+          composeKlingPrompt(settings.customPrompt),
+          5,
           (progress) => setState(prev => ({ ...prev, progress })),
           traceId
         );
       } else if (engine === 'omni') {
-        videoUrl = await generateOmniVideoOnClient(
+        const result = await generateOmniVideoOnClient(
           sourceImage,
-          { ...settings, resolution, durationSeconds },
+          { ...settings, resolution, durationSeconds: OMNI_DEFAULT_DURATION_SECONDS },
           geminiApiKey,
           (progress) => setState(prev => ({ ...prev, progress })),
           traceId
         );
+        videoUrl = result.videoUrl;
+        runCost = result.costUsd;               // the real bill when Google reported its token usage
+        costFromUsage = result.costFromUsage;
       } else {
         videoUrl = await generateVeoVideoOnClient(
           sourceImage,
@@ -259,7 +264,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         progress: 100,
         error: null,
         resultVideoUrl: videoUrl,
-        lastRunCostUsd: estimatedCost,
+        lastRunCostUsd: runCost,
+        lastRunCostFromUsage: costFromUsage,
       });
 
     } catch (err: any) {
@@ -276,7 +282,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     if (!state.resultVideoUrl) return;
     setIsDownloading(true);
     try {
-      const prefix = engine === 'omni' ? `omni-${resolution}` : engine === 'kling' ? 'kling-26' : 'veo';
+      const prefix = engine === 'omni' ? `omni-${resolution}-${OMNI_DEFAULT_DURATION_SECONDS}s` : engine === 'kling' ? 'kling-26-5s' : 'veo';
       await downloadImage(state.resultVideoUrl, `${prefix}-${settings.promptPreset}-${settings.seed}.mp4`);
     } finally {
       setIsDownloading(false);
@@ -377,16 +383,6 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               <span className="text-xs text-slate-400 font-medium">Качество:</span>
               <div className="inline-flex flex-wrap bg-slate-900/60 p-1 rounded-xl border border-slate-700 gap-1">
                 <button
-                  onClick={() => setResolution('360p')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    resolution === '360p'
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  360p Черновик · ~${getOmniCostUsd('360p', OMNI_DEFAULT_DURATION_SECONDS).toFixed(2)}
-                </button>
-                <button
                   onClick={() => setResolution('720p')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     resolution === '720p'
@@ -394,7 +390,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                       : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  720p Финал Etsy · ~${getOmniCostUsd('720p', OMNI_DEFAULT_DURATION_SECONDS).toFixed(2)}
+                  {`720p Финал Etsy · 720×1280 · ≈ $${getOmniCostUsd('720p', OMNI_DEFAULT_DURATION_SECONDS).toFixed(2)}`}
                 </button>
                 <button
                   onClick={() => setResolution('1080p')}
@@ -404,7 +400,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                       : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  1080p Рекомендовано Etsy · ~${getOmniCostUsd('1080p', OMNI_DEFAULT_DURATION_SECONDS).toFixed(2)}
+                  {`1080p Рекомендовано Etsy · 1080×1920 · ≈ $${getOmniCostUsd('1080p', OMNI_DEFAULT_DURATION_SECONDS).toFixed(2)}`}
                 </button>
               </div>
             </div>
@@ -444,6 +440,13 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                     <div className="flex items-center justify-between">
                       <span className={`font-bold text-sm ${settings.promptPreset === key ? 'text-indigo-300' : 'text-slate-300'}`}>
                         {OMNI_PRESETS[key].label}
+                      </span>
+                      <span className={`shrink-0 ml-2 text-[10px] px-2 py-0.5 rounded-full border font-medium ${
+                        OMNI_PRESETS[key].status === 'ok'
+                          ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                          : 'text-amber-300 bg-amber-500/10 border-amber-500/30'
+                      }`}>
+                        {OMNI_PRESETS[key].status === 'ok' ? 'проверен на Omni 1.2 (KIE)' : 'тест'}
                       </span>
                     </div>
                     <span className="text-xs opacity-75 mt-1 leading-relaxed text-slate-400">
@@ -486,19 +489,34 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               </button>
             </div>
             <textarea
-              rows={3}
+              rows={5}
               value={settings.customPrompt}
               onChange={e => setSettings(prev => ({ ...prev, customPrompt: e.target.value }))}
               className="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 text-slate-200 text-xs rounded-xl p-3 focus:outline-none transition-colors leading-relaxed resize-none"
               placeholder="Введите или скорректируйте промпт анимации..."
             />
-            <span className="text-[10px] text-slate-500 mt-1.5 block">
-              {engine === 'omni'
-                ? '✨ Omni 1.2 Flash: один непрерывный кадр (5 с), только движение (комнату не переописываем), звук и фиксация обоев в промпте.'
-                : engine === 'kling'
-                  ? `🎬 Kling 2.6 (KIE · Zod schema): 5 с, sound=false (${settings.customPrompt.length}/2500 симв.). Для 100% статики обоев используйте пресеты со стоящей камерой (Light Only / Human Hook).`
-                  : '🚀 Veo 3.1: 6 с, использует автоматический негативный промпт для фиксации обоев.'}
-            </span>
+            {engine === 'omni' ? (
+              <div className="mt-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3" data-testid="omni-base-prompt">
+                <p className="text-[11px] text-emerald-300 font-semibold mb-1">
+                  🔒 Всегда добавляется к запросу (стереть нельзя):
+                </p>
+                <p className="text-[10px] text-slate-400 leading-relaxed">{OMNI_PROMPT_BASE.join(' ')}</p>
+                <p className="text-[10px] text-slate-500 mt-1.5">
+                  В поле выше пишите только движение камеры и света. Комнату не описывайте: всё названное модель может дорисовать.
+                </p>
+              </div>
+            ) : engine === 'kling' ? (
+              <div className="mt-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                <p className="text-[11px] text-emerald-300 font-semibold mb-1">
+                  🔒 Защита обоев Kling 2.6 (Zod schema · 5 с · sound=false · {composeKlingPrompt(settings.customPrompt).length}/2500 симв.):
+                </p>
+                <p className="text-[10px] text-slate-400 leading-relaxed">{OMNI_PROMPT_FREEZE}</p>
+              </div>
+            ) : (
+              <span className="text-[10px] text-slate-500 mt-1.5 block">
+                Veo 3.1: использует автоматический негативный промпт для предотвращения сворачивания обоев.
+              </span>
+            )}
           </div>
 
           {/* Seed Input */}
@@ -520,7 +538,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               placeholder="Введите число от 0 до 4294967295"
             />
             <span className="text-[10px] text-slate-500 mt-2 block">
-              Используется для повторяемости и маркировки имени выходного MP4 файла.
+              {engine === 'omni'
+                ? 'Отправляется в Google и попадает в имя MP4. Google не обещает, что тот же seed даст тот же клип.'
+                : 'Только маркирует имя MP4: в Veo seed не отправляется (Gemini API его отклоняет).'}
             </span>
           </div>
 
@@ -535,7 +555,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Длительность:</span>
               <span className="text-white font-bold font-mono">
-                {engine === 'omni' ? durationSeconds : engine === 'kling' ? (durationSeconds >= 10 ? 10 : 5) : VEO_FIXED_DURATION_SECONDS} секунд
+                {engine === 'veo' ? VEO_FIXED_DURATION_SECONDS : OMNI_DEFAULT_DURATION_SECONDS} секунд
               </span>
             </div>
             <div className="flex justify-between text-sm pt-2 border-t border-slate-700/50">
@@ -578,7 +598,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                 <div>
                   <h4 className="text-white font-bold text-lg">Нейросеть оживляет кадр</h4>
                   <p className="text-slate-400 text-xs max-w-xs mt-2 leading-relaxed">
-                    Этот процесс обычно занимает около 45–60 секунд. Мы сжимаем кадр, заливаем его в облако и опрашиваем сервера Google.
+                    {engine === 'omni'
+                      ? 'Обычно 1–2 минуты, дольше при 1080p и длинных клипах. Кадр уходит в Google как есть, видео приходит готовым файлом.'
+                      : 'Этот процесс обычно занимает около 45–60 секунд. Мы сжимаем кадр, заливаем его в облако и опрашиваем сервера Google.'}
                   </p>
                 </div>
                 {/* Progress bar */}
@@ -614,7 +636,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                   </div>
                 )}
                 <div className="text-center bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-xl">
-                  <p className="text-slate-400 text-xs mb-0.5">Итоговая стоимость генерации:</p>
+                  <p className="text-slate-400 text-xs mb-0.5">
+                    {state.lastRunCostFromUsage ? 'Итоговая стоимость (по счёту Google):' : 'Итоговая стоимость (расчёт по прайсу):'}
+                  </p>
                   <p className="text-green-400 font-bold font-mono text-base">${(state.lastRunCostUsd ?? estimatedCost).toFixed(2)}</p>
                 </div>
                 <button

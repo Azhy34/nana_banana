@@ -113,7 +113,39 @@ def run_tests():
     assert expected_cost_usd("720p", 5) == 0.3475 and expected_cost_usd("1080p", 5) == 0.5213  # Google's published token rates
     print("  [PASS] 1.2 contract: default model/resolution, duration pattern, limits, tags, video input, statuses, usage cost.")
 
-    print("\nALL 6 TESTS PASSED SUCCESSFULLY! The schema is 100% compliant with api-discovery.")
+    # 7. Images: inline OR by Files API uri, the types both Google docs list (13.11.2026 audit)
+    print("\n--- 6. Testing image inputs (data | uri, mime types) ---")
+    inline = OmniInteractionCreateRequest(input=[{"type": "image", "data": "b64"}, {"type": "text", "text": "x"}])
+    assert inline.input[0].mime_type == "image/jpeg"  # bare inline data keeps the old default
+    by_uri = OmniInteractionCreateRequest(input=[{"type": "image", "uri": "https://generativelanguage.googleapis.com/v1beta/files/abc"}, {"type": "text", "text": "x"}])
+    assert by_uri.input[0].uri and by_uri.input[0].data is None and by_uri.input[0].mime_type is None
+    for mime in ("image/png", "image/jpeg", "image/webp", "image/heic", "image/heif"):
+        OmniInteractionCreateRequest(input=[{"type": "image", "data": "b64", "mime_type": mime}])
+    raises.validation(lambda: OmniInteractionCreateRequest(input=[{"type": "image"}]), "image without data and uri")
+    raises.validation(lambda: OmniInteractionCreateRequest(input=[{"type": "image", "data": "b64", "uri": "files/abc"}]), "image with both data and uri")
+    raises.validation(lambda: OmniInteractionCreateRequest(input=[{"type": "image", "data": "b64", "mime_type": "image/svg+xml"}]), "svg image")
+    assert OmniInteractionCreateRequest(input="x").routing_note() is None
+    note = OmniInteractionCreateRequest(model="gemini-omni-1.1-flash", input="x").routing_note()
+    assert note and "2026-12-03" in note and "1.2" in note
+    # delivery uri needs store=true (the live 400 of 13.11.2026)
+    raises.validation(lambda: OmniInteractionCreateRequest(input="x", store=False, response_format={"type": "video", "delivery": "uri"}), "uri delivery with store=false")
+    OmniInteractionCreateRequest(input="x", store=True, response_format={"type": "video", "delivery": "uri"})
+    OmniInteractionCreateRequest(input="x", store=False, response_format={"type": "video", "delivery": "inline"})
+    print("  [PASS] images (data | uri | mime types), the 1.1 routing note and uri delivery needing store=true.")
+
+    # 8. The request the SITE really sends (fixture kept in step with e2e/ui/video.spec.ts)
+    print("\n--- 7. Testing the site's request against the shield ---")
+    with open(os.path.join(os.path.dirname(__file__), "site_payload.sample.json"), "r", encoding="utf-8") as f:
+        site_payload = json.load(f)
+    site_payload.pop("_comment", None)
+    site_req = OmniInteractionCreateRequest.model_validate(site_payload)
+    assert site_req.model == "gemini-omni-1.2-flash" and site_req.routing_note() is None
+    assert site_req.response_format.resolution == "720p" and site_req.response_format.duration == "5s" and site_req.response_format.aspect_ratio == "9:16"
+    assert site_req.generation_config.seed == 133466 and site_req.store is False and site_req.stream is False and site_req.background is False
+    assert site_req.input[0].mime_type == "image/png" and site_req.input[1].text == "<preset prompt>"
+    print("  [PASS] the site's request is accepted by the Pydantic shield.")
+
+    print("\nALL 8 TESTS PASSED SUCCESSFULLY! The schema is 100% compliant with api-discovery.")
 
 
 if __name__ == "__main__":

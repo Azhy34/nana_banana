@@ -122,11 +122,12 @@ export interface UpscaleState {
 }
 
 export type VideoEngine = 'veo' | 'omni' | 'kling';
-export type OmniResolution = '360p' | '720p' | '1080p';
+export type OmniResolution = '720p' | '1080p';
 
 export interface VideoJobSettings {
   engine?: VideoEngine;
-  promptPreset: 'dolly_in' | 'ambient' | 'dolly_out' | 'omni_wall_dolly' | 'omni_locked_light' | 'omni_locked_person' | 'omni_walk_in' | 'omni_pull_back' | 'omni_texture_macro' | 'omni_montessori' | 'omni_sunlight_loop';
+  promptPreset: 'dolly_in' | 'ambient' | 'dolly_out' | 'omni_forward_drift' | 'omni_walk_in' | 'omni_light_only' | 'omni_locked_person' | 'omni_pull_back' | 'omni_texture_light';
+  /** Veo: the whole prompt. Omni/Kling: the MOTION only; the wallpaper freeze is added automatically. */
   customPrompt: string;
   seed: number;
   resolution?: OmniResolution;
@@ -144,6 +145,8 @@ export interface VideoGenerationState {
   error: string | null;
   resultVideoUrl: string | null;
   lastRunCostUsd?: number;
+  /** true = the cost was read from Google's `usage` (the real bill); false/absent = calculated from the price list */
+  lastRunCostFromUsage?: boolean;
 }
 
 export interface GeminiLogDetails {
