@@ -63,6 +63,17 @@ export const KLING_DURATION_OPTIONS = [5, 10] as const;
 export function getKlingCostUsd(seconds: number = 5): number {
   return seconds >= 10 ? 0.63 : 0.315;
 }
+
+// Kling 3.0 via KIE (kling-3.0/video: std 720p = 15.1 cr/s ($0.0755/s), pro 1080p = 20.2 cr/s ($0.101/s), sound=false)
+export const KLING3_MODEL_ID = 'kling-3.0/video';
+export type Kling3Mode = 'std' | 'pro';
+export function getKling3Credits(seconds: number = 5, mode: Kling3Mode = 'std'): number {
+  const perSec = mode === 'pro' ? 20.2 : 15.1;
+  return Number((perSec * seconds).toFixed(1));
+}
+export function getKling3CostUsd(seconds: number = 5, mode: Kling3Mode = 'std'): number {
+  return Number((getKling3Credits(seconds, mode) * 0.005).toFixed(4));
+}
 export function getOmniCostUsd(
   resolution: OmniResolutionKey = '720p',
   seconds: number = OMNI_DEFAULT_DURATION_SECONDS,
@@ -122,11 +133,15 @@ export function composeOmniPrompt(motion: string): string {
     .join(' ');
 }
 
-/** For Kling 2.6: wraps the motion with the positive wallpaper freeze (without Omni-specific frame/audio wrappers). */
+/** Kling-specific wall lock: freezes ONLY the printed wallpaper mural so light, shadows, curtains and people can move freely. */
+export const KLING_WALL_FREEZE =
+  'The wallpaper mural on the wall stays completely still and unchanged: its illustration, colours and proportions remain identical to the first frame.';
+
+/** For Kling 2.6: wraps the motion with the positive wallpaper freeze (without freezing the rest of the room). */
 export function composeKlingPrompt(motion: string): string {
   let text = motion.trim();
   if (text && !/[.!?…]$/.test(text)) text += '.';
-  return text.includes(OMNI_PROMPT_FREEZE) ? text : `${text} ${OMNI_PROMPT_FREEZE}`.trim();
+  return text.includes(KLING_WALL_FREEZE) ? text : `${text} ${KLING_WALL_FREEZE}`.trim();
 }
 
 export const OMNI_PRESETS = {
@@ -144,27 +159,27 @@ export const OMNI_PRESETS = {
   },
   omni_light_only: {
     label: "✨ Живой свет, камера стоит (Light Only)",
-    description: "Камера неподвижна, по стене и полу качаются мягкие тени ветвей. Меньше всего риска для рисунка обоев; тени понравились на Kling 2.6, на Omni 1.2 ещё нет.",
+    description: "Камера неподвижна: по полу и комнате плывёт тёплый солнечный свет с тенями листвы, слегка шевелится штора у окна и летит пыль в луче.",
     status: 'test',
-    prompt: 'The camera does not move at all: it is a fixed, static shot. Soft dappled shadows of leafy branches sway slowly on the wall and on the floor, as in a light breeze: only the shadows move, subtly and low in contrast, and they never change the colours or the drawing of the mural.'
+    prompt: 'Locked static camera, no camera movement. Warm golden sunlight from the window visibly brightens and sweeps across the floor, rug and lower room while distinct dappled shadows of leafy branches sway clearly in a gentle breeze. Fine dust motes drift visibly through the sunbeam and sheer window fabric stirs softly.'
   },
   omni_locked_person: {
     label: "👶 Человек со спины, камера стоит (Human Hook)",
-    description: "Камера неподвижна, ребёнок или мама со спины делает одно спокойное действие (играет на ковре или закрывает дверь). Виральный хук для Reels/TikTok.",
+    description: "Камера неподвижна, ребёнок или мама со спины делает заметное спокойное действие (играет на ковре или поправляет одеяло). Виральный хук для Reels/TikTok.",
     status: 'test',
-    prompt: 'The camera does not move at all: it is a fixed, static shot. The person seen from behind performs one calm natural movement while keeping their head turned toward the room and away from the lens, with only the back of their head and clothes visible.'
+    prompt: 'Locked static camera, no camera movement. The person seen from behind performs a clear calm natural movement, leaning gently toward the floor rug or bedding while keeping their head turned toward the room and away from the lens, with only the back of their head and clothes visible.'
   },
   omni_pull_back: {
     label: "↩ Отъезд-раскрытие (Pull-Back Reveal)",
-    description: "Камера отъезжает примерно на 10% и открывает чуть больше комнаты. Края кадра модель дорисовывает сама: проверьте клип глазами.",
+    description: "Камера плавно отъезжает примерно на 10% и открывает чуть больше комнаты. Края кадра модель дорисовывает сама: проверьте клип глазами.",
     status: 'test',
-    prompt: 'The camera pulls back by about 10 percent at a constant calm speed, revealing a little more of the room, and keeps the whole mural wall in the frame.'
+    prompt: 'The camera pulls back steadily by about 10 percent at a calm constant speed, smoothly expanding the view of the room while keeping the entire mural wall centered and intact in the frame.'
   },
   omni_texture_light: {
     label: "🔍 Фактура крупно (Texture Light)",
-    description: "Только для КРУПНОГО кадра обоев: камера стоит, боковой свет скользит по матовой зернистой поверхности. Из общего плана комнаты в макро не летим: фактуру модель тогда выдумывает.",
+    description: "Только для КРУПНОГО кадра обоев: камера стоит, яркий косой свет заметно скользит по матовому песчаному рельефу, проявляя фактуру.",
     status: 'test',
-    prompt: 'The camera does not move at all: it is a fixed, static shot. Soft warm side light sweeps slowly across the matte fine-grain surface and reveals its tactile relief.'
+    prompt: 'Locked static camera, no camera movement. Clearly visible warm raking side light sweeps steadily across the matte fine-grain surface, bringing out the tactile sand-grain paper relief and soft micro-shadows while fine dust drifts in the air.'
   }
 } as const satisfies Record<string, { label: string; description: string; status: 'ok' | 'test'; prompt: string }>;
 export type OmniPresetKey = keyof typeof OMNI_PRESETS;

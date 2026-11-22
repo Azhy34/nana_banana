@@ -176,6 +176,23 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapability> = {
     kieCredits2K: 63,
     notes: '5s or 10s clip (63 credits / 5s). Strictly max 2500 chars; best for locked-camera person motion.',
   },
+  'kling-3.0/video': {
+    id: 'kling-3.0/video',
+    label: 'Kling 3.0 (KIE)',
+    provider: 'kie',
+    kind: 'video',
+    aspectRatios: ['9:16', '1:1', '16:9'],
+    resolutions: ['720p', '1080p', '4K'],
+    maxRefs: 2,
+    refField: 'image_urls',
+    maxPromptChars: 2500,
+    negativePromptMode: 'positive_only',
+    recommendedPromptMode: 'brief',
+    supportsTextureRef: false,
+    costUsd2K: 0.3775,
+    kieCredits2K: 75.5,
+    notes: '720p std 15.1 cr/s ($0.38/5s) or 1080p pro 20.2 cr/s ($0.51/5s); supports start/end frame + elements.',
+  },
 };
 
 export const kling26InputSchema = z.object({
@@ -186,6 +203,17 @@ export const kling26InputSchema = z.object({
 });
 
 export type Kling26Input = z.infer<typeof kling26InputSchema>;
+
+export const kling30InputSchema = z.object({
+  prompt: z.string().min(1, 'Prompt cannot be empty').max(2500, 'Kling 3.0 prompt max length is 2500 characters'),
+  image_urls: z.array(z.string().url('Frame URL must be a valid URI')).min(1).max(2),
+  sound: z.boolean(),
+  duration: z.enum(['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']),
+  mode: z.enum(['std', 'pro', '4K']),
+  multi_shots: z.boolean(),
+});
+
+export type Kling30Input = z.infer<typeof kling30InputSchema>;
 
 export const modelInputValidationSchema = z.object({
   modelId: z.string().min(1),

@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { buildGeminiPrompt, generateRandomTags } from '../../services/promptGenerator';
 import { computeCenterCoverRect, resolveTargetsForCard } from '../../services/exportCrop';
+import { getModelCapability, kling30InputSchema } from '../../shared/modelContracts';
+import { getKling3CostUsd } from '../../constants';
 import { logEventSchema } from '../../api/log-event';
 import { AgeGroupKey } from '../../types';
 
@@ -327,5 +329,24 @@ test.describe('Zod Telemetry Contract Shield', () => {
     expect(videoTargets.map((t) => `${t.suffix}:${t.width}x${t.height}`)).toEqual([
       'reels-9x16:1080x1920',
     ]);
+  });
+
+  test('Kling 3.0 capability & Zod schema match live KIE contract and pricing', () => {
+    const cap = getModelCapability('kling-3.0/video');
+    expect(cap).toBeDefined();
+    expect(cap!.provider).toBe('kie');
+    expect(cap!.kieCredits2K).toBe(75.5);
+    expect(getKling3CostUsd(5, 'std')).toBe(0.3775);
+    expect(getKling3CostUsd(5, 'pro')).toBe(0.505);
+
+    const parsed = kling30InputSchema.safeParse({
+      prompt: 'Locked static camera. The wallpaper mural on the wall stays completely still.',
+      image_urls: ['https://tempfile.aiquickdraw.com/frame.jpg'],
+      sound: false,
+      duration: '5',
+      mode: 'std',
+      multi_shots: false,
+    });
+    expect(parsed.success).toBe(true);
   });
 });

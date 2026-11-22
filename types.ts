@@ -126,7 +126,7 @@ export interface UpscaleState {
   upscaledImage: string | null;
 }
 
-export type VideoEngine = 'veo' | 'omni' | 'kling';
+export type VideoEngine = 'veo' | 'omni' | 'kling' | 'kling3';
 export type OmniResolution = '720p' | '1080p';
 
 export interface VideoJobSettings {

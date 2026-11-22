@@ -221,3 +221,69 @@ test.describe('Video — Veo 3.1 Fast', () => {
     expect(polls.length).toBeGreaterThanOrEqual(1);
   });
 });
+
+test.describe('Video — Kling 3.0 (KIE)', () => {
+  test('selects Kling 3.0, switches 720p/1080p price, and submits valid KIE createTask + telemetry', async ({ page, apis }) => {
+    await page.addInitScript(() => localStorage.setItem('kie_api_key', 'kie_test_key_12345'));
+    const kieCalls: any[] = [];
+    await page.route('/api/kie', async (route) => {
+      const body = route.request().postDataJSON();
+      kieCalls.push(body);
+      if (body.action === 'upload') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ code: 200, data: { downloadUrl: 'https://tempfile.aiquickdraw.com/test_frame.jpg' } }) });
+      }
+      if (body.action === 'createTask') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ code: 200, data: { taskId: 'task_kling3_001' } }) });
+      }
+      if (body.action === 'recordInfo') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            code: 200,
+            data: {
+              state: 'success',
+              costTime: 18,
+              consumeCredits: 101,
+              resultJson: JSON.stringify({ resultUrls: ['https://tempfile.aiquickdraw.com/kling3_out.mp4'] }),
+            },
+          }),
+        });
+      }
+      return route.fallback();
+    });
+
+    await openVideoWithImage(page);
+    const tab = activeTab(page);
+    await tab.getByRole('button', { name: /Kling 3\.0 \(KIE\)/ }).click();
+    await expect(tab.getByRole('button', { name: /720p Standard/ })).toBeVisible();
+    await tab.getByRole('button', { name: /1080p Pro/ }).click();
+    await expect(tab.getByText('$0.51').first()).toBeVisible();
+
+    await tab.getByRole('button', { name: /Запустить анимацию обоев \(Kling 3\.0\)/ }).click();
+    await expect(tab.locator('video')).toHaveAttribute('src', 'https://tempfile.aiquickdraw.com/kling3_out.mp4', { timeout: 15_000 });
+
+    const createCall = kieCalls.find((c) => c.action === 'createTask');
+    expect(createCall).toMatchObject({
+      action: 'createTask',
+      model: 'kling-3.0/video',
+      input: {
+        sound: false,
+        duration: '5',
+        mode: 'pro',
+        multi_shots: false,
+        image_urls: ['https://tempfile.aiquickdraw.com/test_frame.jpg'],
+      },
+    });
+    await expect.poll(() => apis.logEvents.map((e) => e.status)).toEqual(['started', 'success']);
+    expect(apis.logEvents[1]).toMatchObject({
+      model: 'kling-3.0/video',
+      provider: 'kie',
+      kieTaskId: 'task_kling3_001',
+      kieCredits: 101,
+      serverTimeSeconds: 18,
+      costSource: 'credits',
+      resolution: '1080p',
+    });
+  });
+});

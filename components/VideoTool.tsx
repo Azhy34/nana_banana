@@ -10,12 +10,15 @@ import {
   OMNI_DEFAULT_DURATION_SECONDS,
   OMNI_DEFAULT_PRESET,
   OMNI_PROMPT_BASE,
-  OMNI_PROMPT_FREEZE,
+  KLING_WALL_FREEZE,
   ETSY_MIN_VIDEO_SIDE_PX,
   ETSY_RECOMMENDED_VIDEO_SIDE_PX,
   getVeoCostUsd,
   getOmniCostUsd,
   getKlingCostUsd,
+  getKling3CostUsd,
+  getKling3Credits,
+  Kling3Mode,
   composeKlingPrompt,
 } from '../constants';
 import { VideoJobSettings, VideoGenerationState, VideoEngine, OmniResolution } from '../types';
@@ -36,6 +39,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   // Model engine selector: 'omni' by default for cheaper & more stable nursery videos
   const [engine, setEngine] = useState<VideoEngine>('omni');
   const [resolution, setResolution] = useState<OmniResolution>('720p');
+  const [kling3Mode, setKling3Mode] = useState<Kling3Mode>('std');
   // Omni clip length (3..15 s). Always sent to Google: without it the model makes 10 s.
   const [durationSeconds, setDurationSeconds] = useState<number>(OMNI_DEFAULT_DURATION_SECONDS);
 
@@ -80,7 +84,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     ? getOmniCostUsd(resolution, OMNI_DEFAULT_DURATION_SECONDS)
     : engine === 'kling'
       ? getKlingCostUsd(5)
-      : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
+      : engine === 'kling3'
+        ? getKling3CostUsd(5, kling3Mode)
+        : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
 
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -120,11 +126,11 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         customPrompt: OMNI_PRESETS[OMNI_DEFAULT_PRESET].prompt,
         resolution
       }));
-    } else if (newEngine === 'kling') {
+    } else if (newEngine === 'kling' || newEngine === 'kling3') {
       setDurationSeconds(5);
       setSettings(prev => ({
         ...prev,
-        engine: 'kling',
+        engine: newEngine,
         promptPreset: 'omni_light_only',
         customPrompt: OMNI_PRESETS.omni_light_only.prompt,
       }));
@@ -140,7 +146,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
 
   // Sync preset choice with prompt text
   const handlePresetChange = (presetKey: string) => {
-    if ((engine === 'omni' || engine === 'kling') && presetKey in OMNI_PRESETS) {
+    if ((engine === 'omni' || engine === 'kling' || engine === 'kling3') && presetKey in OMNI_PRESETS) {
       const key = presetKey as keyof typeof OMNI_PRESETS;
       setSettings(prev => ({
         ...prev,
@@ -182,12 +188,12 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       return;
     }
 
-    if (engine === 'kling') {
+    if (engine === 'kling' || engine === 'kling3') {
       if (!kieApiKey) {
         setState({
           isLoading: false,
           progress: 0,
-          error: 'Пожалуйста, введите ваш KIE API Key в шапке сайта для запуска Kling 2.6.',
+          error: 'Пожалуйста, введите ваш KIE API Key в шапке сайта для запуска Kling.',
           resultVideoUrl: null
         });
         return;
@@ -228,14 +234,17 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       let runCost = estimatedCost;
       let costFromUsage = false;
 
-      if (engine === 'kling') {
+      if (engine === 'kling' || engine === 'kling3') {
         videoUrl = await generateKieVideo(
           kieApiKey!,
           sourceImage,
           composeKlingPrompt(settings.customPrompt),
           5,
           (progress) => setState(prev => ({ ...prev, progress })),
-          traceId
+          traceId,
+          engine === 'kling3'
+            ? { modelId: 'kling-3.0/video', mode: kling3Mode }
+            : { modelId: 'kling-2.6/image-to-video' },
         );
       } else if (engine === 'omni') {
         const result = await generateOmniVideoOnClient(
@@ -282,7 +291,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     if (!state.resultVideoUrl) return;
     setIsDownloading(true);
     try {
-      const prefix = engine === 'omni' ? `omni-${resolution}-${OMNI_DEFAULT_DURATION_SECONDS}s` : engine === 'kling' ? 'kling-26-5s' : 'veo';
+      const prefix = engine === 'omni' ? `omni-${resolution}-${OMNI_DEFAULT_DURATION_SECONDS}s` : engine === 'kling3' ? `kling3-${kling3Mode}-5s` : engine === 'kling' ? 'kling-26-5s' : 'veo';
       await downloadImage(state.resultVideoUrl, `${prefix}-${settings.promptPreset}-${settings.seed}.mp4`);
     } finally {
       setIsDownloading(false);
@@ -297,7 +306,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
           <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
             <span>🎬 Video Animator</span>
             <span className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full font-normal">
-              Omni 1.2 · Kling 2.6 · Veo 3.1
+              Omni 1.2 · Kling 2.6 · Kling 3.0 · Veo 3.1
             </span>
           </h2>
           <p className="text-slate-400 text-sm mt-1">
@@ -320,12 +329,14 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               ⏱ Стандарт: {engine === 'veo' ? VEO_FIXED_DURATION_SECONDS : OMNI_DEFAULT_DURATION_SECONDS} сек
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {(() => {
               const omniCost = getOmniCostUsd(resolution, OMNI_DEFAULT_DURATION_SECONDS);
               const klingCap = getModelCapability('kling-2.6/image-to-video');
               const klingCredits = klingCap?.kieCredits2K ?? 63;
               const klingCost = getKlingCostUsd(5);
+              const kling3Credits = getKling3Credits(5, kling3Mode);
+              const kling3Cost = getKling3CostUsd(5, kling3Mode);
               const veoCost = getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
               return (
                 <>
@@ -355,7 +366,21 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                       <span className="font-bold text-sm">🎬 Kling 2.6 (KIE)</span>
                       <span className="text-xs font-mono font-bold text-emerald-300">{klingCredits} cr · ${klingCost.toFixed(2)}</span>
                     </div>
-                    <div className="text-[11px] opacity-80 mt-0.5">5 с · без звука · KIE API</div>
+                    <div className="text-[11px] opacity-80 mt-0.5">5 с · 720p · KIE API</div>
+                  </button>
+                  <button
+                    onClick={() => handleEngineChange('kling3')}
+                    className={`p-3 rounded-xl text-left border transition-all ${
+                      engine === 'kling3'
+                        ? 'bg-amber-600/20 border-amber-500 text-white shadow-md shadow-amber-500/20'
+                        : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-sm">⚡ Kling 3.0 (KIE)</span>
+                      <span className="text-xs font-mono font-bold text-amber-300">{kling3Credits} cr · ${kling3Cost.toFixed(2)}</span>
+                    </div>
+                    <div className="text-[11px] opacity-80 mt-0.5">5 с · {kling3Mode === 'pro' ? '1080p Pro' : '720p Std'} · KIE API</div>
                   </button>
                   <button
                     onClick={() => handleEngineChange('veo')}
@@ -376,6 +401,39 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             })()}
           </div>
         </div>
+
+        {engine === 'kling3' && (
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-700/60">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-slate-400 font-medium">Качество Kling 3.0:</span>
+              <div className="inline-flex flex-wrap bg-slate-900/60 p-1 rounded-xl border border-slate-700 gap-1">
+                <button
+                  onClick={() => setKling3Mode('std')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    kling3Mode === 'std'
+                      ? 'bg-amber-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {`720p Standard · ${getKling3Credits(5, 'std')} cr · $${getKling3CostUsd(5, 'std').toFixed(2)}`}
+                </button>
+                <button
+                  onClick={() => setKling3Mode('pro')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    kling3Mode === 'pro'
+                      ? 'bg-amber-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {`1080p Pro · ${getKling3Credits(5, 'pro')} cr · $${getKling3CostUsd(5, 'pro').toFixed(2)}`}
+                </button>
+              </div>
+            </div>
+            <span className="text-xs font-mono text-amber-300">
+              {getKling3Credits(5, kling3Mode)} cr · ${getKling3CostUsd(5, kling3Mode).toFixed(2)} за 5 с
+            </span>
+          </div>
+        )}
 
         {engine === 'omni' && (
           <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-700/60">
@@ -418,7 +476,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
           <div className="bg-slate-800/50 backdrop-blur rounded-2xl border border-slate-700 p-6">
             <h3 className="text-white font-semibold mb-4 flex items-center justify-between">
               <span className="flex items-center gap-2">🎥 Режим анимации интерьера</span>
-              {(engine === 'omni' || engine === 'kling') && (
+              {(engine === 'omni' || engine === 'kling' || engine === 'kling3') && (
                 <span className="text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">
                   Обои зафиксированы 1:1
                 </span>
@@ -426,7 +484,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             </h3>
 
             <div className="space-y-3">
-              {(engine === 'omni' || engine === 'kling') ? (
+              {(engine === 'omni' || engine === 'kling' || engine === 'kling3') ? (
                 (Object.keys(OMNI_PRESETS) as Array<keyof typeof OMNI_PRESETS>).map(key => (
                   <button
                     key={key}
@@ -505,12 +563,12 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                   В поле выше пишите только движение камеры и света. Комнату не описывайте: всё названное модель может дорисовать.
                 </p>
               </div>
-            ) : engine === 'kling' ? (
+            ) : (engine === 'kling' || engine === 'kling3') ? (
               <div className="mt-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
                 <p className="text-[11px] text-emerald-300 font-semibold mb-1">
-                  🔒 Защита обоев Kling 2.6 (Zod schema · 5 с · sound=false · {composeKlingPrompt(settings.customPrompt).length}/2500 симв.):
+                  🔒 Защита обоев {engine === 'kling3' ? 'Kling 3.0' : 'Kling 2.6'} (Zod schema · 5 с · sound=false · {composeKlingPrompt(settings.customPrompt).length}/2500 симв.):
                 </p>
-                <p className="text-[10px] text-slate-400 leading-relaxed">{OMNI_PROMPT_FREEZE}</p>
+                <p className="text-[10px] text-slate-400 leading-relaxed">{KLING_WALL_FREEZE}</p>
               </div>
             ) : (
               <span className="text-[10px] text-slate-500 mt-1.5 block">
@@ -540,7 +598,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             <span className="text-[10px] text-slate-500 mt-2 block">
               {engine === 'omni'
                 ? 'Отправляется в Google и попадает в имя MP4. Google не обещает, что тот же seed даст тот же клип.'
-                : 'Только маркирует имя MP4: в Veo seed не отправляется (Gemini API его отклоняет).'}
+                : (engine === 'kling' || engine === 'kling3')
+                  ? 'Только маркирует имя MP4: в KIE Kling API параметр seed не используется.'
+                  : 'Только маркирует имя MP4: в Veo seed не отправляется (Gemini API его отклоняет).'}
             </span>
           </div>
 
@@ -549,7 +609,13 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Движок:</span>
               <span className="text-white font-bold font-mono">
-                {engine === 'omni' ? `Gemini Omni 1.2 (${resolution})` : engine === 'kling' ? 'Kling 2.6 (KIE)' : 'Veo 3.1 Fast'}
+                {engine === 'omni'
+                  ? `Gemini Omni 1.2 (${resolution})`
+                  : engine === 'kling3'
+                    ? `Kling 3.0 (${kling3Mode === 'pro' ? '1080p Pro' : '720p Std'})`
+                    : engine === 'kling'
+                      ? 'Kling 2.6 (KIE)'
+                      : 'Veo 3.1 Fast'}
               </span>
             </div>
             <div className="flex justify-between text-sm">
@@ -575,9 +641,11 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
               ) : (
                 engine === 'omni'
                   ? '✨ Запустить анимацию обоев (Omni Flash)'
-                  : engine === 'kling'
-                    ? '🎬 Запустить анимацию обоев (Kling 2.6)'
-                    : '🚀 Запустить анимацию обоев (Veo)'
+                  : engine === 'kling3'
+                    ? '⚡ Запустить анимацию обоев (Kling 3.0)'
+                    : engine === 'kling'
+                      ? '🎬 Запустить анимацию обоев (Kling 2.6)'
+                      : '🚀 Запустить анимацию обоев (Veo)'
               )}
             </button>
 
@@ -600,7 +668,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                   <p className="text-slate-400 text-xs max-w-xs mt-2 leading-relaxed">
                     {engine === 'omni'
                       ? 'Обычно 1–2 минуты, дольше при 1080p и длинных клипах. Кадр уходит в Google как есть, видео приходит готовым файлом.'
-                      : 'Этот процесс обычно занимает около 45–60 секунд. Мы сжимаем кадр, заливаем его в облако и опрашиваем сервера Google.'}
+                      : (engine === 'kling' || engine === 'kling3')
+                        ? 'Обычно 1–3 минуты: кадр передаётся в KIE API и опрашивается статус задачи.'
+                        : 'Этот процесс обычно занимает около 45–60 секунд. Мы сжимаем кадр, заливаем его в облако и опрашиваем сервера Google.'}
                   </p>
                 </div>
                 {/* Progress bar */}

@@ -1,0 +1,580 @@
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "model": "kling-3.0/video",
+    "openapi": {
+      "openapi": "3.1.0",
+      "info": {
+        "title": "kie.ai",
+        "description": "kie.ai API 文档",
+        "version": "1.0.0",
+        "contact": {
+          "name": "技术支持",
+          "email": "support@kie.ai"
+        }
+      },
+      "tags": [],
+      "paths": {
+        "/api/v1/jobs/createTask": {
+          "post": {
+            "summary": "Kling 3.0",
+            "deprecated": false,
+            "description": "Generate high-quality videos with advanced multi-shot capabilities and element references using Kling 3.0 AI \n\n## Overview\n\nKling 3.0 is an advanced video generation model that supports both single-shot and multi-shot video creation with element references. It offers three modes: std, pro and 4K, with different resolution options, and supports sound effects for enhanced video output.\n\n## Key Features\n\n- **Multiple Generation Modes**: Choose between `std` (standard resolution), `pro` (higher resolution), and `4K` (ultra-high resolution) modes\n- **Multi-Shot Support**: Create videos with multiple shots, each with its own prompt and duration\n- **Element Reference**: Use the `@element_name` syntax to reference image/video/audio elements within prompts\n- **Native Audio**: Speech, sound effects and ambience\n- **Flexible Aspect Ratios**: Support for 16:9, 9:16, and 1:1 aspect ratios\n- **Configurable Duration**: Video duration from 3 to 15 seconds\n\n:::tip\nIn std and pro modes, enabling sound costs more. In multi-shot mode, billing is based on the sum of the shot durations. For current prices, see [kie.ai/pricing](https://kie.ai/pricing).\n:::\n\n## Resolution Mappings\n\nThe resolution depends on both the `mode` and `aspect_ratio` parameters:\n\n<Tabs groupId=\"mode\">\n<TabItem value=\"std\" label=\"Standard Mode (std)\">\n\n| Aspect Ratio | Resolution |\n|--------------|------------|\n| 16:9         | 1280×720   |\n| 9:16         | 720×1280   |\n| 1:1          | 720×720    |\n\n</TabItem>\n<TabItem value=\"pro\" label=\"Pro Mode (pro)\">\n\n| Aspect Ratio | Resolution |\n|--------------|------------|\n| 16:9         | 1920×1080  |\n| 9:16         | 1080×1920  |\n| 1:1          | 1440×1440  |\n\n</TabItem>\n<TabItem value=\"4K\" label=\"4K Mode (4K)\">\n\n| Aspect Ratio | Resolution |\n|--------------|------------|\n| 16:9         | 3840×2160  |\n| 9:16         | 2160×3840  |\n| 1:1          | 2160×2160  |\n\n</TabItem>\n</Tabs>\n\n:::info[]\n4K mode provides higher resolution output but may take longer to generate and consume more credits.\n:::\n\n## Single-Shot vs Multi-Shot Mode\n\n### Single-Shot Mode (`multi_shots: false`)\n- Uses the main `prompt` field for video generation\n- Supports first and last frame images via `image_urls`\n- Sound effects are optional\n\n### Multi-Shot Mode (`multi_shots: true`)\n- Uses `multi_prompt` array to define multiple shots\n- Each shot has its own prompt and duration (1-12 seconds)\n- Only supports first frame image (via `image_urls[0]`)\n- The maximum number of characters per shot is 500\n\n\n## Aspect Ratio Auto-Adaptation\n\nWhen you provide `image_urls` (first and/or last frame images), the `aspect_ratio` parameter becomes optional. The system will automatically adapt the aspect ratio based on the uploaded images, so you don't need to specify it manually.\n\n:::tip[]\nIf you upload reference images, you can omit the `aspect_ratio` parameter and let the system automatically match the aspect ratio of your images.\n:::\n\n## Element References\n\nYou can reference element in your prompts using the `@element_name` syntax. Define elements in the `kling_elements` array:\n\n- **Image Elements**: 2-4 image URLs (JPG/PNG, max 10MB each)\n- **Video Elements**: Up to 1 video URL (MP4/MOV format, the video duration must be at least 3 seconds, and the effective segment length should be between 3 and 8 seconds)\n- **Audio Reference**: Up to 1 audio URL (audio duration must be between 5 and 30 seconds)\n\n:::tip[]\nUse descriptive element names and ensure the element name in `kling_elements` matches the name used in your prompt (without the @ symbol).\nA single task can reference a maximum of 3 elements, and each `@element` will occupy 37 characters.\n:::\n\n## File Upload Requirements\n\nBefore using element references, upload your image  files:\n\n### 1. Upload Files\n\nUse the File Upload API to upload your source images.\n\n:::info[File Upload API]\nLearn how to upload files and get file URLs: [File Upload API Quickstart](/file-upload-api/quickstart)\n:::\n\n### 2. Get File URLs\n\nAfter upload, you'll receive file URLs that you can use in `element_input_urls` and `element_input_audio_urls`.\n\n:::caution[]\n- formats: \n    - Image (JPG, PNG, max 10MB per file, 2-4 files per element)\n    - Video (MP4, MOV format. Video duration should be at least 3 seconds. The effective video segment length should be between 3 and 8 seconds)\n    - Audio (Audio duration must be between 5 and 30 seconds)\n- Ensure file URLs are accessible and not expired\n:::\n\n## Usage Examples\n\n### Single-Shot Video with Element Reference\n\n```json\n{\n  \"model\": \"kling-3.0/video\",\n  \"input\": {\n    \"prompt\": \"In a bright rehearsal room, sunlight streams through the window@element_dog\",\n    \"image_urls\": [\n      \"https://static.aiquickdraw.com/tools/example/1764851002741_i0lEiI8I.png\"\n    ],\n    \"sound\": false,\n    \"duration\": \"5\",\n    \"aspect_ratio\": \"16:9\",\n    \"mode\": \"std\",\n    \"multi_shots\": false,\n    \"kling_elements\": [\n      {\n        \"name\": \"element_dog\",\n        \"description\": \"dog\",\n        \"element_input_urls\": [\n          \"https://example.com/your-image.png\",\n          \"https://example.com/your-image.png\"\n        ]\n      }\n    ]\n  }\n}\n```\n\n### Multi-Shot Video\n\n```json\n{\n  \"model\": \"kling-3.0/video\",\n  \"input\": {\n    \"multi_shots\": true,\n    \"image_urls\": [\n      \"https://static.aiquickdraw.com/tools/example/1764851002741_i0lEiI8I.png\"\n    ],\n    \"sound\": false,\n    \"duration\": \"5\",\n    \"aspect_ratio\": \"16:9\",\n    \"mode\": \"std\",\n    \"multi_prompt\": [\n      {\n        \"prompt\": \"a happy dog in running@element_cat\",\n        \"duration\": 2\n      },\n      {\n        \"prompt\": \"a happy dog play with a cat@element_dog\",\n        \"duration\": 3\n      }\n    ],\n    \"kling_elements\": [\n      {\n        \"name\": \"element_cat\",\n        \"description\": \"cat\",\n        \"element_input_urls\": [ \"https://example.com/your-image.png\",    \"https://example.com/your-image.png\"\n        ]\n      },\n      {\n        \"name\": \"element_dog\",\n        \"description\": \"dog\",\n        \"element_input_urls\": [ \"https://example.com/your-image.png\",    \"https://example.com/your-image.png\"\n        ]\n      }\n    ]\n  }\n}\n```\n\n## Query Task Status\n\nAfter submitting a task, use the unified query endpoint to check progress and retrieve results:\n\n:::tip[Get Task Details]\nLearn how to query task status and retrieve generation results: [Get Task Details](/market/common/get-task-detail)\n:::\n\n:::tip[]\nFor production use, we recommend using the `callBackUrl` parameter to receive automatic notifications when generation completes, rather than polling the status endpoint.\n:::\n\n## Best Practices\n\n- **Prompt Writing**: Be specific and descriptive in your prompts. Include details about motion, camera angles, and scene composition\n- **Element Usage**: Use high-quality reference images/video/audio for better results. Ensure elements match the style and theme of your video\n- **Duration Planning**: For multi-shot videos, plan your shot durations to match the total video duration\n- **Mode Selection**: Use `4K` mode for final output when quality is important, and `std` mode for faster iterations\n- **Sound Effects**: Enable sound effects for more immersive videos, especially for action or dynamic scenes\n\n## Related Resources\n\n<CardGroup cols={2}>\n  <Card title=\"Market Overview\" icon=\"lucide-store\" href=\"/market/quickstart\">\n  </Card>\n  <Card title=\"Common API\" icon=\"lucide-cog\" href=\"/common-api/get-account-credits\">\n  </Card>\n</CardGroup>",
+            "operationId": "kling-3.0",
+            "tags": [],
+            "parameters": [],
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "model"
+                    ],
+                    "properties": {
+                      "model": {
+                        "type": "string",
+                        "enum": [
+                          "kling-3.0/video"
+                        ],
+                        "default": "kling-3.0/video",
+                        "description": "The model name. Must be kling-3.0/video.",
+                        "examples": [
+                          "kling-3.0/video"
+                        ]
+                      },
+                      "callBackUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "The URL to receive generation task completion updates. Optional but recommended for production use.\n\n- System will POST task status and results to this URL when generation completes\n- Callback includes generated content URLs and task information\n- Your callback endpoint should accept POST requests with JSON payload containing results\n- Alternatively, use the Get Task Details endpoint to poll task status\n- To ensure callback security, see [Webhook Verification Guide](/common-api/webhook-verification) for signature verification implementation",
+                        "examples": [
+                          "https://your-domain.com/api/callback"
+                        ]
+                      },
+                      "input": {
+                        "type": "object",
+                        "description": "Input parameters for the generation task",
+                        "properties": {
+                          "prompt": {
+                            "type": "string",
+                            "description": "Required when multi_shots is false. Up to 2,500 characters.",
+                            "examples": [
+                              "In a bright rehearsal room, sunlight streams through the window@element_dog"
+                            ]
+                          },
+                          "image_urls": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "format": "uri"
+                            },
+                            "description": "First and last frame image URLs. Optional; not required when using kling_elements. When multi_shots is false: if length is 2, index 0 is the first frame and index 1 is the last frame; if length is 1, the array item serves as the first frame. When multi_shots is true: only the first frame is supported.",
+                            "examples": [
+                              [
+                                "https://static.aiquickdraw.com/tools/example/1764851002741_i0lEiI8I.png"
+                              ]
+                            ]
+                          },
+                          "sound": {
+                            "type": "boolean",
+                            "description": "Required. Whether to generate audio (speech, sound effects, ambience) with the video. Affects price.",
+                            "examples": [
+                              true
+                            ]
+                          },
+                          "duration": {
+                            "type": "string",
+                            "description": "Required. Video duration in seconds, 3–15 (string, e.g. \"5\"). In multi-shot mode, output length and billing follow the sum of multi_prompt[].duration (3–15 s); set duration to the same total.",
+                            "enum": [
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                              "10",
+                              "11",
+                              "12",
+                              "13",
+                              "14",
+                              "15"
+                            ],
+                            "examples": [
+                              "5"
+                            ]
+                          },
+                          "aspect_ratio": {
+                            "type": "string",
+                            "description": "Optional when image_urls is provided (the output follows the first frame's aspect ratio). For text-to-video, set it explicitly: 16:9, 9:16 or 1:1.",
+                            "enum": [
+                              "16:9",
+                              "9:16",
+                              "1:1"
+                            ],
+                            "examples": [
+                              "16:9"
+                            ]
+                          },
+                          "mode": {
+                            "type": "string",
+                            "description": "Required. Generation mode. std has standard resolution, pro has higher resolution, 4K has 4K resolution.\n\nResolution mapping:\n- **std mode**: 16:9 (1280×720), 9:16 (720×1280), 1:1 (720×720)\n- **pro mode**: 16:9 (1920×1080), 9:16 (1080×1920), 1:1 (1080×1080)\n- **4K mode**: 16:9 (3840×2160), 9:16 (2160×3840), 1:1 (2160×2160)",
+                            "enum": [
+                              "std",
+                              "pro",
+                              "4K"
+                            ],
+                            "examples": [
+                              "pro"
+                            ]
+                          },
+                          "multi_shots": {
+                            "type": "boolean",
+                            "description": "Required. Whether to use multi-shot mode. true enables multi-shot mode, false enables single-shot mode.",
+                            "examples": [
+                              false
+                            ]
+                          },
+                          "multi_prompt": {
+                            "type": "array",
+                            "description": "Shot prompts. Takes effect when multi_shots is true. Used to describe the text and duration of each shot. Supports up to 5 shots. Each shot duration is 1-12 seconds. If you need to use elements, add them after the prompt.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "prompt": {
+                                  "type": "string",
+                                  "description": "Prompt text for this shot, a maximum of 500 characters per shot. Each @element will occupy 37 characters.",
+                                  "examples": [
+                                    "a happy dog in running@element_cat"
+                                  ],
+                                  "maxLength": 500
+                                },
+                                "duration": {
+                                  "type": "integer",
+                                  "description": "Duration of this shot in seconds. Range: 1-12.",
+                                  "minimum": 1,
+                                  "maximum": 12,
+                                  "examples": [
+                                    3
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "prompt",
+                                "duration"
+                              ]
+                            },
+                            "examples": [
+                              [
+                                {
+                                  "prompt": "a happy dog in running@element_cat",
+                                  "duration": 3
+                                },
+                                {
+                                  "prompt": "a happy dog play with a cat@element_dog",
+                                  "duration": 3
+                                }
+                              ]
+                            ]
+                          },
+                          "kling_elements": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "description": "Element name, used in prompt with @ prefix (e.g., @element_dog)",
+                                  "examples": [
+                                    "element_dog"
+                                  ]
+                                },
+                                "description": {
+                                  "type": "string",
+                                  "description": "Element description",
+                                  "examples": [
+                                    "dog"
+                                  ]
+                                },
+                                "element_input_urls": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  "description": "Either 2–4 images (JPG/PNG, up to 10 MB each) or 1 video (MP4/MOV).",
+                                  "examples": [
+                                    [
+                                      "https://example.com/your-image.png",
+                                      "https://example.com/your-image.png"
+                                    ]
+                                  ]
+                                },
+                                "element_input_audio_urls": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  "description": "Optional. List of audio material URLs for characters. The audio duration must be between 5 and 30 seconds."
+                                },
+                                "start_time": {
+                                  "type": "integer",
+                                  "description": "Start time for video character material capture (in milliseconds). Only effective when uploading videos through element_input_urls. If not uploaded, it defaults to 0."
+                                },
+                                "end_time": {
+                                  "type": "integer",
+                                  "description": "End time for video character material capture (in milliseconds). Only effective when uploading videos through element_input_urls. Must be greater than start_time, and the difference between end_time and start_time must be within 3000 to 8000 milliseconds."
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "description",
+                                "element_input_urls"
+                              ]
+                            },
+                            "description": "Referenced elements. Detailed information about elements referenced in the prompt. A single task can reference a maximum of three elements.",
+                            "examples": [
+                              [
+                                {
+                                  "name": "element_dog",
+                                  "description": "dog",
+                                  "element_input_urls": [
+                                    "https://example.com/your-image.png",
+                                    "https://example.com/your-image.png"
+                                  ]
+                                }
+                              ]
+                            ],
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "sound",
+                          "duration",
+                          "mode",
+                          "multi_shots"
+                        ]
+                      }
+                    }
+                  },
+                  "example": {
+                    "model": "kling-3.0/video",
+                    "callBackUrl": "https://your-domain.com/api/callback",
+                    "input": {
+                      "prompt": "In a bright rehearsal room, sunlight streams through the window @element_dog",
+                      "image_urls": [
+                        "https://static.aiquickdraw.com/tools/example/1764851002741_i0lEiI8I.png"
+                      ],
+                      "sound": true,
+                      "duration": "5",
+                      "aspect_ratio": "16:9",
+                      "mode": "pro",
+                      "multi_shots": false,
+                      "multi_prompt": [
+                        {
+                          "prompt": "a happy dog in running @element_cat",
+                          "duration": 3
+                        },
+                        {
+                          "prompt": "a happy dog play with a cat @element_dog",
+                          "duration": 2
+                        }
+                      ],
+                      "kling_elements": [
+                        {
+                          "name": "element_dog",
+                          "description": "dog",
+                          "element_input_urls": [
+                            "https://example.com/your-image.png",
+                            "https://example.com/your-image.png"
+                          ],
+                          "element_input_audio_urls": [
+                            "https://your-cdn.com/wjeoiajfosijfoi.mp3"
+                          ]
+                        },
+                        {
+                          "name": "element_cat",
+                          "description": "cat",
+                          "element_input_urls": [
+                            "https://your-cdn.com/element_image.mp4"
+                          ],
+                          "element_input_audio_urls": [
+                            "https://your-cdn.com/wjeoiajfosijfoi.mp3"
+                          ],
+                          "start_time": 0,
+                          "end_time": 8000
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "required": true
+            },
+            "responses": {
+              "200": {
+                "description": "Request successful",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "allOf": [
+                        {},
+                        {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "description": "Response status code\n\n- **200**: Success - Request has been processed successfully\n- **401**: Unauthorized - Authentication credentials are missing or invalid\n- **402**: Insufficient Credits - Account does not have enough credits to perform the operation\n- **404**: Not Found - The requested resource or endpoint does not exist\n- **422**: Validation Error - The request parameters failed validation checks\n- **429**: Rate Limited - Request limit has been exceeded for this resource\n- **433**: Request Limit - Sub-key Usage Exceeds Limit\n- **455**: Service Unavailable - System is currently undergoing maintenance\n- **500**: Server Error - An unexpected error occurred while processing the request\n- **501**: Generation Failed - Content generation task failed\n- **505**: Feature Disabled - The requested feature is currently disabled"
+                                },
+                                "msg": {
+                                  "type": "string",
+                                  "description": "Response message, error description when failed"
+                                },
+                                "taskId": {
+                                  "type": "string",
+                                  "description": "Task ID, can be used with Get Task Details endpoint to query task status",
+                                  "examples": [
+                                    "task_kling-3.0_1765187774173"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "code",
+                                "msg"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "example": {
+                      "code": 200,
+                      "msg": "success",
+                      "data": {
+                        "taskId": "task_kling-3.0_1765187774173"
+                      }
+                    }
+                  }
+                },
+                "headers": {}
+              }
+            },
+            "security": [
+              {
+                "BearerAuth": []
+              }
+            ],
+            "callbacks": {
+              "videoTaskCompleted": {
+                "{request.body#/callBackUrl}": {
+                  "post": {
+                    "description": "The system sends this callback when the `kling-3.0/video` task succeeds or fails.",
+                    "requestBody": {
+                      "required": true,
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "required": [
+                              "code",
+                              "msg",
+                              "data"
+                            ],
+                            "properties": {
+                              "code": {
+                                "type": "integer",
+                                "description": "Unified callback code: 200 for success, 501 for failure.",
+                                "enum": [
+                                  200,
+                                  501
+                                ]
+                              },
+                              "msg": {
+                                "type": "string",
+                                "description": "Unified callback message.",
+                                "enum": [
+                                  "Playground task completed successfully.",
+                                  "Playground task failed."
+                                ]
+                              },
+                              "data": {
+                                "type": "object",
+                                "required": [
+                                  "taskId",
+                                  "model",
+                                  "state",
+                                  "param"
+                                ],
+                                "properties": {
+                                  "taskId": {
+                                    "type": "string",
+                                    "description": "The unique task identifier."
+                                  },
+                                  "model": {
+                                    "type": "string",
+                                    "description": "The model used for the task.",
+                                    "enum": [
+                                      "kling-3.0/video"
+                                    ]
+                                  },
+                                  "state": {
+                                    "type": "string",
+                                    "description": "Terminal task state.",
+                                    "enum": [
+                                      "success",
+                                      "fail"
+                                    ]
+                                  },
+                                  "param": {
+                                    "type": "string",
+                                    "description": "JSON string containing the submitted task parameters."
+                                  },
+                                  "resultJson": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "JSON string containing resultUrls, firstFrameUrl, lastFrameUrl, or resultObject when successful. Present only when state is success."
+                                  },
+                                  "failCode": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "Failure code, a numeric string such as \"400\" or \"500\". Present only when state is fail."
+                                  },
+                                  "failMsg": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "Failure reason. Present only when state is fail."
+                                  },
+                                  "costTime": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "Processing time in seconds. Present on both success and failure callbacks."
+                                  },
+                                  "completeTime": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "Task completion timestamp."
+                                  },
+                                  "createTime": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "Task creation timestamp."
+                                  },
+                                  "updateTime": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "Use completeTime as the completion time; updateTime may equal createTime."
+                                  },
+                                  "creditsConsumed": {
+                                    "type": "number",
+                                    "description": "Credits consumed by the task; 0 for failed tasks."
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "examples": {
+                            "success": {
+                              "summary": "Task completed successfully",
+                              "value": {
+                                "code": 200,
+                                "msg": "Playground task completed successfully.",
+                                "data": {
+                                  "taskId": "task_example_video_webhook_001",
+                                  "model": "kling-3.0/video",
+                                  "state": "success",
+                                  "param": "{\"input\":\"{\\\"prompt\\\":\\\"In a bright rehearsal room, sunlight streams through the window @element_dog\\\",\\\"image_urls\\\":[\\\"https://example.com/input-image.jpg\\\"],\\\"sound\\\":true,\\\"duration\\\":\\\"5\\\",\\\"aspect_ratio\\\":\\\"16:9\\\",\\\"mode\\\":\\\"pro\\\",\\\"multi_shots\\\":false,\\\"multi_prompt\\\":[{\\\"prompt\\\":\\\"a happy dog in running @element_cat\\\",\\\"duration\\\":3}],\\\"kling_elements\\\":[{\\\"name\\\":\\\"element_dog\\\",\\\"description\\\":\\\"dog\\\",\\\"element_input_urls\\\":[\\\"https://example.com/input-image.jpg\\\"],\\\"element_input_audio_urls\\\":[\\\"https://example.com/input-audio.mp3\\\"]}]}\",\"callBackUrl\":\"https://example.com/callback\",\"model\":\"kling-3.0/video\"}",
+                                  "resultJson": "{\"resultUrls\":[\"https://example.com/generated-video.mp4\"]}",
+                                  "costTime": 12,
+                                  "completeTime": 1234567890,
+                                  "createTime": 1234560000,
+                                  "updateTime": 1234567890,
+                                  "creditsConsumed": 1.23
+                                }
+                              }
+                            },
+                            "failure": {
+                              "summary": "Task failed",
+                              "value": {
+                                "code": 501,
+                                "msg": "Playground task failed.",
+                                "data": {
+                                  "taskId": "task_example_video_webhook_001",
+                                  "model": "kling-3.0/video",
+                                  "state": "fail",
+                                  "param": "{\"input\":\"{\\\"prompt\\\":\\\"In a bright rehearsal room, sunlight streams through the window @element_dog\\\",\\\"image_urls\\\":[\\\"https://example.com/input-image.jpg\\\"],\\\"sound\\\":true,\\\"duration\\\":\\\"5\\\",\\\"aspect_ratio\\\":\\\"16:9\\\",\\\"mode\\\":\\\"pro\\\",\\\"multi_shots\\\":false,\\\"multi_prompt\\\":[{\\\"prompt\\\":\\\"a happy dog in running @element_cat\\\",\\\"duration\\\":3}],\\\"kling_elements\\\":[{\\\"name\\\":\\\"element_dog\\\",\\\"description\\\":\\\"dog\\\",\\\"element_input_urls\\\":[\\\"https://example.com/input-image.jpg\\\"],\\\"element_input_audio_urls\\\":[\\\"https://example.com/input-audio.mp3\\\"]}]}\",\"callBackUrl\":\"https://example.com/callback\",\"model\":\"kling-3.0/video\"}",
+                                  "failCode": "400",
+                                  "failMsg": "<error detail>",
+                                  "costTime": 12,
+                                  "creditsConsumed": 0
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "responses": {
+                      "200": {
+                        "description": "Callback received successfully.",
+                        "content": {
+                          "application/json": {
+                            "schema": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "integer",
+                                  "example": 200
+                                },
+                                "msg": {
+                                  "type": "string",
+                                  "example": "success"
+                                }
+                              }
+                            },
+                            "example": {
+                              "code": 200,
+                              "msg": "success"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "webhooks": {},
+      "components": {
+        "schemas": {},
+        "responses": {},
+        "securitySchemes": {
+          "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "API Key",
+            "description": "All API requests require a Bearer Token. Add the header `Authorization: Bearer YOUR_API_KEY` to authenticate requests."
+          }
+        }
+      },
+      "servers": [
+        {
+          "url": "https://api.kie.ai",
+          "description": "正式环境"
+        }
+      ],
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ]
+    }
+  }
+}

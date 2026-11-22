@@ -1,5 +1,5 @@
 import { GenerationSettings, GenerationUsage, UploadedImage } from '../types';
-import { getModelCapability, validateModelInput, kling26InputSchema } from '../shared/modelContracts';
+import { getModelCapability, validateModelInput, kling26InputSchema, kling30InputSchema } from '../shared/modelContracts';
 import { logGeminiEvent } from './geminiService';
 import { MACRO_TEXTURE_LABEL } from './macroTexture';
 import { generateSpanId, generateTraceId } from '../utils/tracing';
@@ -340,6 +340,11 @@ async function resolveVideoFrameUrl(kieKey: string, imageInput: string): Promise
   return frameUrl;
 }
 
+export interface KieVideoOptions {
+  modelId?: 'kling-2.6/image-to-video' | 'kling-3.0/video';
+  mode?: 'std' | 'pro';
+}
+
 export async function generateKieVideo(
   kieKey: string,
   imageDataUrl: string,
@@ -347,18 +352,27 @@ export async function generateKieVideo(
   durationSeconds: number = 5,
   onProgress?: (progress: number) => void,
   traceId?: string,
+  options: KieVideoOptions = {},
 ): Promise<string> {
   if (!kieKey) throw new Error('KIE API Key is required in the header.');
   const tid = traceId || generateTraceId();
   const spanId = generateSpanId();
   const startTime = Date.now();
-  const modelId = 'kling-2.6/image-to-video';
-  const durationStr = durationSeconds >= 10 ? '10' : '5';
-  const cost = durationStr === '10' ? 0.63 : 0.315;
+  const modelId = options.modelId ?? 'kling-2.6/image-to-video';
+  const isKling3 = modelId === 'kling-3.0/video';
+  const kling3Mode = options.mode ?? 'std';
+  const durationNum = isKling3 ? Math.max(3, Math.min(15, Math.round(durationSeconds))) : (durationSeconds >= 10 ? 10 : 5);
+  const durationStr = String(durationNum);
+  const estimatedCredits = isKling3
+    ? Number(((kling3Mode === 'pro' ? 20.2 : 15.1) * durationNum).toFixed(1))
+    : (durationStr === '10' ? 126 : 63);
+  const cost = Number((estimatedCredits * KIE_USD_PER_CREDIT).toFixed(4));
+  const logResolution = isKling3 && kling3Mode === 'pro' ? '1080p' : '720p';
 
   const validation = validateModelInput({
     modelId,
     prompt,
+    resolution: logResolution,
     refCount: 1,
   });
   if (!validation.ok) {
@@ -366,7 +380,8 @@ export async function generateKieVideo(
   }
 
   logGeminiEvent(modelId, prompt, 0, 0, 'started', null, tid, undefined, {
-    durationSeconds: Number(durationStr),
+    durationSeconds: durationNum,
+    resolution: logResolution,
     provider: 'kie',
     spanId,
   });
@@ -376,21 +391,37 @@ export async function generateKieVideo(
     const frameUrl = await resolveVideoFrameUrl(kieKey, imageDataUrl);
 
     onProgress?.(25);
-    const klingInput = {
-      prompt,
-      image_urls: [frameUrl],
-      sound: false,
-      duration: durationStr as '5' | '10',
-    };
-    const parsedKling = kling26InputSchema.safeParse(klingInput);
-    if (!parsedKling.success) {
-      throw new Error(`Invalid Kling 2.6 payload: ${parsedKling.error.issues.map(i => i.message).join('; ')}`);
+    let validatedInput: Record<string, unknown>;
+    if (isKling3) {
+      const parsed3 = kling30InputSchema.safeParse({
+        prompt,
+        image_urls: [frameUrl],
+        sound: false,
+        duration: durationStr,
+        mode: kling3Mode,
+        multi_shots: false,
+      });
+      if (!parsed3.success) {
+        throw new Error(`Invalid Kling 3.0 payload: ${parsed3.error.issues.map(i => i.message).join('; ')}`);
+      }
+      validatedInput = parsed3.data;
+    } else {
+      const parsedKling = kling26InputSchema.safeParse({
+        prompt,
+        image_urls: [frameUrl],
+        sound: false,
+        duration: durationStr as '5' | '10',
+      });
+      if (!parsedKling.success) {
+        throw new Error(`Invalid Kling 2.6 payload: ${parsedKling.error.issues.map(i => i.message).join('; ')}`);
+      }
+      validatedInput = parsedKling.data;
     }
 
     const created = await callKieProxy<{ data?: { taskId?: string } }>(kieKey, {
       action: 'createTask',
       model: modelId,
-      input: parsedKling.data,
+      input: validatedInput,
     });
     const taskId = created?.data?.taskId;
     if (!taskId) throw new Error('KIE Kling createTask returned no taskId');
@@ -412,11 +443,11 @@ export async function generateKieVideo(
         if (!url) throw new Error('KIE Kling task succeeded but returned no video URL');
         const duration = (Date.now() - startTime) / 1000;
         const tel = parseKieRecordTelemetry(res.data);
-        const estimatedCredits = durationStr === '10' ? 126 : 63;
         const credits = tel.creditsConsumed ?? estimatedCredits;
         const finalCost = tel.creditsConsumed ? tel.creditsConsumed * KIE_USD_PER_CREDIT : cost;
         logGeminiEvent(modelId, prompt, finalCost, duration, 'success', null, tid, undefined, {
-          durationSeconds: Number(durationStr),
+          durationSeconds: durationNum,
+          resolution: logResolution,
           provider: 'kie',
           spanId,
           kieTaskId: taskId,
@@ -435,7 +466,8 @@ export async function generateKieVideo(
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
     logGeminiEvent(modelId, prompt, 0, duration, 'error', err?.message || 'KIE Kling error', tid, undefined, {
-      durationSeconds: Number(durationStr),
+      durationSeconds: durationNum,
+      resolution: logResolution,
       provider: 'kie',
       spanId,
     });
