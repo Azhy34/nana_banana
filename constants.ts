@@ -10,7 +10,8 @@ export const MODEL_PRICING: Record<ModelType, { inputPer1M: number; outputPerIma
   [ModelType.GptImage2]:    { inputPer1M: 0,    outputPerImage: 0.05   },
   [ModelType.GrokImagine]:  { inputPer1M: 0,    outputPerImage: 0.04   },
   [ModelType.QwenImage2]:   { inputPer1M: 0,    outputPerImage: 0.035  },
-  [ModelType.ABTest]:       { inputPer1M: 0,    outputPerImage: 0      },
+  [ModelType.ABTest]:          { inputPer1M: 0, outputPerImage: 0 },
+  [ModelType.ABTestFlashGrok]: { inputPer1M: 0, outputPerImage: 0 },
 };
 
 export const ASPECT_RATIOS: AspectRatio[] = ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'];

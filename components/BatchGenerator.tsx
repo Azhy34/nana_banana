@@ -264,6 +264,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
             {(() => {
               const cap = getModelCapability(model);
               if (model === ModelType.ABTest) return <span className="text-xs text-slate-400">~${((0.0672 + 0.134) / 2 * formatTotal).toFixed(2)} est.</span>;
+              if (model === ModelType.ABTestFlashGrok) return <span className="text-xs text-slate-400">~${((0.0672 + 0.04) / 2 * formatTotal).toFixed(2)} est.</span>;
               if (!cap) return null;
               return (
                 <span className="text-xs text-slate-400">
@@ -286,6 +287,11 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               className={`py-3 px-2.5 rounded-xl transition-all text-center ${model === ModelType.ABTest ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
               <div className="font-bold text-xs leading-tight">50/50 Split</div>
               <div className="text-[11px] opacity-75 mt-1">Pro & Flash A/B</div>
+            </button>
+            <button onClick={() => setModel(ModelType.ABTestFlashGrok)}
+              className={`py-3 px-2.5 rounded-xl transition-all text-center ${model === ModelType.ABTestFlashGrok ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
+              <div className="font-bold text-xs leading-tight">50/50 Split</div>
+              <div className="text-[11px] opacity-75 mt-1">Flash & Grok A/B</div>
             </button>
           </div>
         </div>

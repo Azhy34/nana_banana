@@ -65,6 +65,7 @@ export enum ModelType {
   GrokImagine = 'grok-imagine-image-2-0/image-edit',
   QwenImage2 = 'qwen/qwen-image-2',
   ABTest = 'ab-test',
+  ABTestFlashGrok = 'ab-test-flash-grok',
 }
 
 export type AspectRatio = '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9' | '21:9';

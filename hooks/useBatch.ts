@@ -198,6 +198,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       const ar = tags.aspectRatio;
       const cardModel = model === ModelType.ABTest
         ? (idx < formats.length / 2 ? ModelType.Pro : ModelType.Flash31)
+        : model === ModelType.ABTestFlashGrok
+        ? (idx < formats.length / 2 || !['2:3', '9:16'].includes(ar) ? ModelType.Flash31 : ModelType.GrokImagine)
         : model;
 
       const cardId = `card_${String(idx + 1).padStart(2, '0')}_${ar.replace(':', 'x')}_${Math.random().toString(36).substring(2, 7)}`;
@@ -255,7 +257,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const addCard = () => {
     const lockedAge = targetAge === 'all_kids' ? (['baby', 'vorschul', 'schulkind'] as AgeGroupKey[])[cards.length % 3] : targetAge;
     const tags = generateRandomTags('9:16', lockedAge, { audience, promptMode });
-    const cardModel = model === ModelType.ABTest ? ModelType.Pro : model;
+    const cardModel = model === ModelType.ABTest ? ModelType.Pro : model === ModelType.ABTestFlashGrok ? ModelType.GrokImagine : model;
     const cardId = `card_${String(cards.length + 1).padStart(2, '0')}_9x16_${Math.random().toString(36).substring(2, 7)}`;
     setCards(prev => [...prev, { id: cardId, tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel }]);
   };
