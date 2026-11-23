@@ -867,6 +867,11 @@
     "note": "Applies to every prompt the builder makes (the product is a wall mural). Owner 10.11: a furnished room; it replaces the 'almost empty room' rule of 06.11, which made every frame the same empty box. What stays from the owner's complaints: too many things hide the mural, a blanket lying about and a basket are junk. A tall frame (tallRatios) shows a SECTION of the wall floor to ceiling (framingTall), because a wide mural shown whole in a tall frame is squeezed and half the frame is floor and ceiling; a wide frame shows the whole wall (cameraDistances). Numbers and positive wording on purpose; the Avoid list is only the last guard."
   },
   "people": {
+    "mother": {
+      "standing_sage": "a young mother with neat brunette hair in a relaxed muted sage linen dress",
+      "standing_oat": "a young mother barefoot in a natural oatmeal linen dress",
+      "sitting_cream": "a young mother in a soft cream linen shirt and beige trousers"
+    },
     "childByAudience": {
       "boy": {
         "baby": "a toddler boy of about 18 months with soft short hair, dressed in a cream organic cotton top and warm oat knit overalls",
@@ -879,13 +884,11 @@
         "vorschul": "a young girl of about 4 years with soft braided hair, dressed in a chunky oat knit cardigan over a muted linen dress",
         "schulkind": "a schoolgirl of about 7 years with a neat ponytail, dressed in a soft cream cable-knit sweater and warm linen trousers",
         "teenager": "a teenage girl of about 12 years with braided hair in a soft oat knit sweater and linen trousers"
-      },
-      "neutral": {
-        "baby": "a toddler of about 18 months with soft hair, dressed in a cream organic cotton top and warm oat knit overalls",
-        "vorschul": "a young child of about 4 years dressed in a chunky beige cable-knit sweater and light linen trousers",
-        "schulkind": "a child of about 7 years dressed in a soft oat knit sweater and light linen trousers",
-        "teenager": "a youth of about 12 years in a soft beige knit sweater and light linen trousers"
       }
+    },
+    "video9x16Archetypes": {
+      "doorway_reveal": "Photographed through an open white wooden doorway from the adjacent hallway, with a softly out-of-focus white wooden doorframe edge on one side of the close foreground framing the entrance into the children's room toward the mural wall",
+      "sunbeam_curtain": "Beside the side wall window hangs a sheer white linen curtain catching bright morning sunbeams that cast distinct dappled leafy tree-branch shadows across the oak parquet floor and woven rug"
     },
     "scenes": [
       {

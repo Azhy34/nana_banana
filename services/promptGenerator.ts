@@ -208,12 +208,20 @@ export function generateBatchDeck(
     const isMacro = idx === macroIdx;
 
     let personMode: BatchPersonMode = 'none';
+    let cardLighting = lightDeck[idx % lightDeck.length];
+    let cardAngle = angleDeck[idx % angleDeck.length];
+
     if (!isHero && !isMacro && ageGroup !== 'teenager') {
       const agePeoplePool = getPeopleScenesForAge(ageGroup);
       if (ar === '9:16') {
-        // Put people on 2 out of every 3 viral 9:16 video masters (always including the first 9:16)
-        if (videoEligibleSeen % 3 !== 2 && agePeoplePool.length > 0) {
-          personMode = agePeoplePool[videoEligibleSeen % agePeoplePool.length].id;
+        // 9:16 video masters alternate: 50% with people (child / mother+child), 25% doorway walk-in reveal, 25% sunbeam & curtain breeze
+        if (videoEligibleSeen % 2 === 0 && agePeoplePool.length > 0) {
+          personMode = agePeoplePool[(videoEligibleSeen / 2) % agePeoplePool.length].id;
+        } else if (videoEligibleSeen % 4 === 1) {
+          const doorwayAngle = (trendsData as any).people?.video9x16Archetypes?.doorway_reveal;
+          if (doorwayAngle) cardAngle = doorwayAngle;
+        } else {
+          cardLighting = 'warm morning sunbeams';
         }
         videoEligibleSeen++;
       } else {
@@ -230,16 +238,22 @@ export function generateBatchDeck(
       personMode !== 'none' || (cleanRoomToggle++ % 2 === 0)
     );
 
+    // When audience is 'neutral', alternate explicit 'boy' and 'girl' on people cards so the child is always clearly defined
+    const effectiveAudience: AudienceKey =
+      (options.audience ?? 'neutral') === 'neutral' && personMode !== 'none'
+        ? (idx % 2 === 0 ? 'boy' : 'girl')
+        : (options.audience ?? 'neutral');
+
     return generateRandomTags(ar, ageGroup, {
-      audience: options.audience ?? 'neutral',
+      audience: effectiveAudience,
       heroRoom: isHero,
       macroTexture: isMacro,
       cleanFloor,
       personMode,
       promptMode: options.promptMode ?? 'full',
       style: styleDeck[idx % styleDeck.length],
-      lighting: lightDeck[idx % lightDeck.length],
-      cameraAngle: angleDeck[idx % angleDeck.length],
+      lighting: cardLighting,
+      cameraAngle: cardAngle,
       keyObject: keyDeck[ageIdx % keyDeck.length],
     });
   });
@@ -390,14 +404,13 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
       scenes?: PeopleSceneOption[];
     } | undefined;
     const aud: AudienceKey = tags.audience ?? 'neutral';
+    const resolvedGender: 'boy' | 'girl' =
+      aud === 'boy' ? 'boy' : aud === 'girl' ? 'girl' : (tags.style.length % 2 === 0 ? 'boy' : 'girl');
     const childDesc =
-      peopleData?.childByAudience?.[aud]?.[tags.ageGroup] ??
-      peopleData?.childByAudience?.neutral?.[tags.ageGroup] ??
-      (aud === 'boy'
+      peopleData?.childByAudience?.[resolvedGender]?.[tags.ageGroup] ??
+      (resolvedGender === 'boy'
         ? 'a young boy of about 4 years in a beige knit sweater and light linen trousers'
-        : aud === 'girl'
-          ? 'a young girl of about 4 years in a soft oat knit cardigan and linen dress'
-          : 'a young child of about 4 years in a beige knit sweater and light linen trousers');
+        : 'a young girl of about 4 years in a soft oat knit cardigan and linen dress');
     const sceneEntry = peopleData?.scenes?.find(s => s.id === normalizedMode);
     if (sceneEntry) {
       return ` ${sceneEntry.template.replace('{child}', childDesc)}`;

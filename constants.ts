@@ -153,22 +153,22 @@ export const OMNI_PRESETS = {
     prompt: 'The camera moves forward and drifts a few centimetres to the right at a calm pace, so the nearer objects shift more than the farther ones. Fine dust drifts slowly through the sunbeam and the warm sunlight patches on the floor shift gently.'
   },
   omni_walk_in: {
-    label: "🚶 Вход в комнату шагом (Walk-In)",
-    description: "Камера входит в комнату спокойным шагом, ближние предметы смещаются сильнее дальних. Проверено на Kling 2.6, на Omni 1.2 ещё нет.",
+    label: "🚪 Вход из дверного проёма (Doorway Walk-In)",
+    description: "Камера плавно входит в комнату мимо косяка двери / переднего плана: ближние предметы смещаются сильнее дальних, давая настоящий 3D-параллакс (не заменить зумом в CapCut).",
     status: 'test',
-    prompt: 'The camera advances straight forward into the room at a clearly visible calm walking pace, as if a person is entering, and the nearer objects shift more than the farther ones, giving a natural depth parallax.'
+    prompt: 'The camera advances straight forward into the room at a steady constant walking pace with zero handheld shake, passing the close foreground edge so the nearer objects shift more than the farther ones in a natural 3D depth parallax.'
   },
   omni_light_only: {
-    label: "✨ Живой свет, камера стоит (Light Only)",
-    description: "Камера неподвижна: по полу и комнате плывёт тёплый солнечный свет с тенями листвы, слегка шевелится штора у окна и летит пыль в луче.",
+    label: "☀️ Живой свет, камера стоит (Window Breeze)",
+    description: "Камера неподвижна (0 риска для обоев): от ветерка у окна колышется лёгкая штора, по полу и мебели качаются тени листвы и летит пыль в солнечном луче.",
     status: 'test',
-    prompt: 'Locked static camera, no camera movement. Warm golden sunlight from the window visibly brightens and sweeps across the floor, rug and lower room while distinct dappled shadows of leafy branches sway clearly in a gentle breeze. Fine dust motes drift visibly through the sunbeam and sheer window fabric stirs softly.'
+    prompt: 'Locked static camera, zero camera movement, zero handheld shake. Warm golden sunlight from the window visibly brightens and sweeps across the floor, rug and lower room while distinct dappled shadows of leafy branches sway clearly in a gentle breeze. Fine dust motes drift visibly through the sunbeam and sheer window fabric stirs softly.'
   },
   omni_locked_person: {
-    label: "👶 Человек со спины, камера стоит (Human Hook)",
-    description: "Камера неподвижна, ребёнок или мама со спины делает заметное спокойное действие (играет на ковре или поправляет одеяло). Виральный хук для Reels/TikTok.",
+    label: "👶 Живой ребёнок / мама, камера стоит (Human Hook)",
+    description: "Камера неподвижна (0 риска для обоев): ребёнок или мама делает естественное движение (тянет руку и указывает пальчиком на обои или играет с кубиками на ковре).",
     status: 'test',
-    prompt: 'Locked static camera, no camera movement. The person seen from behind performs a clear calm natural movement, leaning gently toward the floor rug or bedding while keeping their head turned toward the room and away from the lens, with only the back of their head and clothes visible.'
+    prompt: 'Locked static camera, zero camera movement, zero handheld shake. The person in the room performs a clear calm natural movement, gently raising a hand to point toward the wall illustration or moving a wooden toy on the floor rug while keeping their head turned toward the mural wall and away from the lens.'
   },
   omni_pull_back: {
     label: "↩ Отъезд-раскрытие (Pull-Back Reveal)",
