@@ -394,7 +394,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   const downloadCard = async (card: BatchCard, idx: number) => {
     if (!card.resultImage) return;
-    await exportCardImage(card.resultImage, idx + 1, card.tags.aspectRatio, exportPreset);
+    await exportCardImage(card.resultImage, idx + 1, card.tags.aspectRatio, exportPreset, card.model);
   };
 
   const downloadSelected = async () => {
@@ -409,6 +409,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
           sourceUrl: card.resultImage!,
           cardIndex,
           cardRatio: card.tags.aspectRatio,
+          model: card.model,
         })),
         exportPreset,
       );

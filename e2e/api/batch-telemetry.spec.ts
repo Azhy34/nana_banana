@@ -375,6 +375,12 @@ test.describe('Zod Telemetry Contract Shield', () => {
     ]);
     expect(resolveTargetsForCard('9:16', 'pack_all').map((t) => t.suffix)).toEqual(['reels-9x16']);
     expect(buildExportFilename(1, 'meta-1x1', 1080, 1080)).toBe('wallpaper-01_meta-1x1_1080x1080.jpg');
+    expect(buildExportFilename(1, 'site-meta-4x5', 1440, 1800, 'jpg', 'grok-imagine-image-2-0/image-edit')).toBe(
+      'wallpaper-01_grok_site-meta-4x5_1440x1800.jpg',
+    );
+    expect(buildExportFilename(2, 'site-meta-4x5', 1440, 1800, 'jpg', 'google/gemini-3.1-flash-image')).toBe(
+      'wallpaper-02_flash31_site-meta-4x5_1440x1800.jpg',
+    );
 
     const zip = buildZipBlob([{ path: 'meta-1x1_1080x1080/wallpaper-01_meta-1x1_1080x1080.jpg', data: new Uint8Array([1, 2, 3, 4]) }]);
     const bytes = new Uint8Array(await zip.arrayBuffer());

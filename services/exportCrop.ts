@@ -176,15 +176,30 @@ function triggerBlobDownload(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 150);
 }
 
+export function getModelShortTag(model?: string): string {
+  if (!model) return '';
+  if (model.includes('gemini-3.1-flash')) return 'flash31';
+  if (model.includes('gemini-3-pro')) return 'pro';
+  if (model.includes('nano-banana')) return 'nb21';
+  if (model.includes('gpt-image-2')) return 'gpt2';
+  if (model.includes('grok')) return 'grok';
+  if (model.includes('qwen')) return 'qwen2';
+  return model.replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+}
+
 export function buildExportFilename(
   cardIndex: number,
   suffix: string,
   width: number,
   height: number,
   ext: string = 'jpg',
+  model?: string,
 ): string {
   const num = String(cardIndex).padStart(2, '0');
-  return `wallpaper-${num}_${suffix}_${width}x${height}.${ext}`;
+  const modelTag = getModelShortTag(model);
+  return modelTag
+    ? `wallpaper-${num}_${modelTag}_${suffix}_${width}x${height}.${ext}`
+    : `wallpaper-${num}_${suffix}_${width}x${height}.${ext}`;
 }
 
 async function renderCroppedBlob(
@@ -233,6 +248,7 @@ export async function renderCardExports(
   cardIndex: number,
   cardRatio: BatchAspectRatio,
   preset: ExportPresetId,
+  model?: string,
 ): Promise<RenderedExportFile[]> {
   const targets = resolveTargetsForCard(cardRatio, preset);
   const blob = await fetchImageBlob(sourceUrl);
@@ -244,7 +260,7 @@ export async function renderCardExports(
     const ext = blob.type.includes('jpeg') ? 'jpg' : blob.type.includes('webp') ? 'webp' : 'png';
     return [{
       folder: `original_${cardRatio.replace(':', 'x')}`,
-      filename: buildExportFilename(cardIndex, 'original', srcW, srcH, ext),
+      filename: buildExportFilename(cardIndex, 'original', srcW, srcH, ext, model),
       blob,
     }];
   }
@@ -254,7 +270,7 @@ export async function renderCardExports(
     const rendered = await renderCroppedBlob(img, target);
     files.push({
       folder: `${target.suffix}_${rendered.width}x${rendered.height}`,
-      filename: buildExportFilename(cardIndex, target.suffix, rendered.width, rendered.height, 'jpg'),
+      filename: buildExportFilename(cardIndex, target.suffix, rendered.width, rendered.height, 'jpg', model),
       blob: rendered.blob,
     });
   }
@@ -338,8 +354,9 @@ export async function exportCardImage(
   cardIndex: number,
   cardRatio: BatchAspectRatio,
   preset: ExportPresetId,
+  model?: string,
 ): Promise<void> {
-  const files = await renderCardExports(sourceUrl, cardIndex, cardRatio, preset);
+  const files = await renderCardExports(sourceUrl, cardIndex, cardRatio, preset, model);
   for (let i = 0; i < files.length; i++) {
     triggerBlobDownload(files[i].blob, files[i].filename);
     if (i < files.length - 1) {
@@ -352,13 +369,13 @@ export async function exportCardImage(
  * Exports multiple cards in one click as a structured ZIP archive grouped by format/dimension folders.
  */
 export async function exportCardsAsZip(
-  cards: Array<{ sourceUrl: string; cardIndex: number; cardRatio: BatchAspectRatio }>,
+  cards: Array<{ sourceUrl: string; cardIndex: number; cardRatio: BatchAspectRatio; model?: string }>,
   preset: ExportPresetId,
   zipFilename: string = `moonbloom-export-${preset}.zip`,
 ): Promise<number> {
   const entries: Array<{ path: string; data: Uint8Array }> = [];
   for (const card of cards) {
-    const files = await renderCardExports(card.sourceUrl, card.cardIndex, card.cardRatio, preset);
+    const files = await renderCardExports(card.sourceUrl, card.cardIndex, card.cardRatio, preset, card.model);
     for (const file of files) {
       const buf = await file.blob.arrayBuffer();
       entries.push({
