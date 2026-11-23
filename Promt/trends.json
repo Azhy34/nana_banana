@@ -297,8 +297,9 @@
       "room": "A nursery: the bed is a slatted cot of 120 by 60 cm, every piece of furniture is low, small and soft-cornered, and the play space is a quilted mat on the floor; the proportions are those of a baby's room.",
       "theme": "Biophilic Sanctuary & Soft Organic Nursery (PANTONE Cloud Dancer aesthetic)",
       "beds": [
-        "Minimalist slatted solid birch crib with natural wood grain and organic cotton mattress",
-        "Leander Classic rounded baby crib in solid beech with soft organic linen bedding"
+        "Minimalist slatted solid birch crib",
+        "Rectangular solid beech slatted baby crib",
+        "Clean matte white rectangular baby crib with drawer"
       ],
       "toys": [
         "wooden stacking rings and a soft knitted rabbit comforter lying together on the quilted play mat on the floor",
@@ -306,7 +307,6 @@
         "a wooden push-along walker cart with a few wooden blocks standing on the floor beside the cot"
       ],
       "accessories": [
-        "playful cluster bubble chandelier with frosted glass globes",
         "plush textured cream dot floor rug",
         "solid light oak wooden toy chest with smooth rounded corners",
         "delicate neutral linen blackout curtains",
@@ -329,7 +329,6 @@
       "room": "A children's bedroom: the bed is a child's bed of 140 by 70 cm, no higher than 40 cm, and every piece of furniture stands at the height of a small child, with the proportions of a playroom.",
       "accessories": [
         "whimsical mid-century cobalt blue mushroom table lamp",
-        "playful cluster bubble chandelier with frosted glass globes",
         "wavy scalloped picture frames with retro graphic art prints",
         "flower-shaped plush velvet bolster pillow",
         "low fluted birch bedside table",
@@ -354,9 +353,9 @@
       ],
       "theme": "Playful Montessori & Creative Nook (Faraway Forest & Open-Ended Play)",
       "beds": [
-        "Low Scandinavian birch toddler daybed with checkered and striped bolster pillows",
-        "Flower-shaped craft table in pale lacquered wood with round bouclé poufs",
-        "Montessori low wooden floor bed in solid birch, keeping the entire wall mural unobstructed"
+        "Low Scandinavian birch toddler daybed",
+        "Child-sized birch toddler bed with side safety rails",
+        "Upholstered daybed with a wavy striped headboard"
       ],
       "toys": [
         "open-ended wooden toy train on the woven rug",
@@ -373,7 +372,6 @@
       "room": "A school child's room: the bed is a single bed of 90 by 200 cm in a low frame, furniture is slim and sized for a schoolchild, and books and learning things stand at child height.",
       "accessories": [
         "whimsical mid-century cobalt blue mushroom table lamp",
-        "playful cluster bubble chandelier with frosted glass globes",
         "wavy scalloped picture frames with retro graphic art prints",
         "potted trailing ivy plant on a natural wooden shelf",
         "flower-shaped plush velvet bolster pillow",
@@ -449,7 +447,17 @@
   "keyObjects": [
     {
       "name": "Minimalist slatted solid birch crib",
-      "description": "natural light birch crib (a cot of 120 by 60 cm) with slender vertical slats and crisp organic cotton bedding, placed against the wallpaper wall",
+      "description": "rectangular natural light birch baby crib (a standard nursery cot of 120 by 60 cm, placed along the side wall) with slender vertical wooden spindles on all four sides and crisp organic cotton bedding",
+      "ageGroup": "baby"
+    },
+    {
+      "name": "Rectangular solid beech slatted baby crib",
+      "description": "classic rectangular solid beech baby crib (120 by 60 cm nursery cot, placed along the side wall) with open thin vertical wooden spindles on all four sides, crisp white cotton mattress sheet, and a cream waffle-knit blanket draped neatly over the front rail",
+      "ageGroup": "baby"
+    },
+    {
+      "name": "Clean matte white rectangular baby crib with drawer",
+      "description": "rectangular matte white wooden baby crib (120 by 60 cm nursery cot, placed along the side wall) with softly arched plain solid end panels, open vertical front spindles, and a neat closed under-crib storage drawer with zero painted graphics on the furniture",
       "ageGroup": "baby"
     },
     {
@@ -459,12 +467,17 @@
     },
     {
       "name": "Flower-shaped wooden craft table",
-      "description": "charming flower-shaped craft table in pale lacquered birch, accompanied by a stack of round bouclé poufs in warm ochre and barberry red",
+      "description": "charming child-sized flower-shaped craft table (50 cm tall) in pale lacquered birch, accompanied by two small round bouclé poufs in warm ochre and barberry red",
       "ageGroup": "vorschul"
     },
     {
       "name": "Low Scandinavian birch toddler daybed",
-      "description": "low natural birch toddler daybed (a child's bed of 140 by 70 cm, under 40 cm high) with checkered and striped bolster pillows, keeping the wallpaper wall fully visible",
+      "description": "compact child-sized natural birch toddler bed (strictly 140 by 70 cm, under 40 cm high, with a low wooden side safety guardrail — never an adult bed) with checkered and striped bolster pillows, placed along the side wall keeping the wallpaper wall fully visible",
+      "ageGroup": "vorschul"
+    },
+    {
+      "name": "Child-sized birch toddler bed with side safety rails",
+      "description": "small child-sized toddler bed (strictly 140 by 70 cm, 35 cm high, with low slatted wooden side safety guardrails for a 3-to-5-year-old child — never an adult platform bed) in solid birch with soft cotton child bedding, placed along the side wall",
       "ageGroup": "vorschul"
     },
     {

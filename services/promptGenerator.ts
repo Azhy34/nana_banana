@@ -49,22 +49,19 @@ export const TAG_OPTIONS = {
   accessories: trendsData.accessories,
 };
 
+export type TargetAgeFilter = 'all_kids' | AgeGroupKey;
+
 export const AGE_GROUP_LABELS: Record<AgeGroupKey, string> = {
   baby: 'Baby (0–3)',
   vorschul: 'Preschool (3–6)',
-  schulkind: 'School (6–10)',
+  schulkind: 'School (6–9)',
   teenager: 'Teenager (10–16)',
 };
 
 export function getKeyObjectsForAge(ageGroup: AgeGroupKey): string[] {
-  const ageData = (trendsData.ageGroups as any)?.[ageGroup];
-  const trendingBeds = ageData?.beds as string[] | undefined;
   const filtered = (trendsData.keyObjects as Array<{ name: string; ageGroup?: string }>)
     .filter(k => k.ageGroup === ageGroup)
     .map(k => k.name);
-  if (trendingBeds && trendingBeds.length > 0) {
-    return [...filtered, ...trendingBeds];
-  }
   return filtered.length > 0 ? filtered : trendsData.keyObjects.map(k => k.name);
 }
 
@@ -95,7 +92,8 @@ export function ageLine(ageGroup: string): string {
 
 export function accessoriesOfAge(ageGroup: string): string[] {
   const list = (trendsData.ageGroups as any)?.[ageGroup]?.accessories as string[] | undefined;
-  return list && list.length > 0 ? list : trendsData.accessories;
+  const base = list && list.length > 0 ? list : trendsData.accessories;
+  return base.filter(a => !/chandelier|pendant/i.test(a));
 }
 
 export interface RandomTagOptions {
@@ -153,9 +151,11 @@ export function generateRandomTags(
  */
 export function generateBatchDeck(
   formats: BatchAspectRatio[],
-  options: { audience?: AudienceKey; includeHero?: boolean; includeMacro?: boolean; promptMode?: PromptMode } = {},
+  options: { audience?: AudienceKey; targetAge?: TargetAgeFilter; includeHero?: boolean; includeMacro?: boolean; promptMode?: PromptMode } = {},
 ): BatchPromptTags[] {
-  const ageGroupCycle: AgeGroupKey[] = ['baby', 'vorschul', 'schulkind', 'teenager'];
+  const targetAge = options.targetAge ?? 'all_kids';
+  const ageGroupCycle: AgeGroupKey[] =
+    targetAge === 'all_kids' ? ['baby', 'vorschul', 'schulkind'] : [targetAge];
   const styleDeck = shuffled(TAG_OPTIONS.styles);
   const lightDeck = shuffled(TAG_OPTIONS.lighting);
   const angleDeck = shuffled(TAG_OPTIONS.cameraAngles);

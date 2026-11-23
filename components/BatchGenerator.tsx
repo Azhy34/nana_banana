@@ -1,7 +1,7 @@
 import React from 'react';
 import { useBatch } from '../hooks/useBatch';
 import { AudienceKey, BatchCard, BatchAspectRatio, BatchPersonMode, BatchPromptTags, AgeGroupKey, ViewMode, ModelType, AIProvider, PromptMode } from '../types';
-import { TAG_OPTIONS, AGE_GROUP_LABELS, getColorsForStyle, muralSafeKeyObjects } from '../services/promptGenerator';
+import { TAG_OPTIONS, AGE_GROUP_LABELS, getColorsForStyle, muralSafeKeyObjects, TargetAgeFilter } from '../services/promptGenerator';
 import { getUiImageModels, getModelCapability, validateModelInput } from '../shared/modelContracts';
 import { EXPORT_PRESET_OPTIONS, ExportPresetId } from '../services/exportCrop';
 import { BATCH_COUNT_OPTIONS } from '../constants';
@@ -58,10 +58,10 @@ const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs
 
 export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, kieApiKey = '', onViewModeChange, onSendToTool }) => {
   const { state, actions } = useBatch(provider, apiKey, replicateToken, kieApiKey);
-  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, includeHero, promptMode, exportPreset, isExporting } = state;
+  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, targetAge, includeHero, promptMode, exportPreset, isExporting } = state;
   const {
     setBatchStep, setWallpaper, setModel, setExpandedCard, setIncludeMacro,
-    setAudience, setIncludeHero, setPromptMode, setExportPreset,
+    setAudience, setTargetAge, setIncludeHero, setPromptMode, setExportPreset,
     handleWallpaperUpload, updateFormat, selectCount, generateCards,
     updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
     updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadCard, downloadSelected
@@ -221,6 +221,24 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               ] as const).map(opt => (
                 <button key={opt.value} type="button" onClick={() => setAudience(opt.value as AudienceKey)}
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${audience === opt.value ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-700">
+            <h3 className="text-white font-semibold mb-2 text-sm">Room Age Group</h3>
+            <div className="flex flex-wrap gap-2">
+              {([
+                { value: 'all_kids', label: 'All Kids (0–9 mix)' },
+                { value: 'baby', label: 'Baby (0–3)' },
+                { value: 'vorschul', label: 'Preschool (3–6)' },
+                { value: 'schulkind', label: 'School (6–9)' },
+                { value: 'teenager', label: 'Teen (10–16)' },
+              ] as const).map(opt => (
+                <button key={opt.value} type="button" onClick={() => setTargetAge(opt.value as TargetAgeFilter)}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${targetAge === opt.value ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
                   {opt.label}
                 </button>
               ))}
