@@ -358,6 +358,7 @@ export async function generateKieVideo(
   const tid = traceId || generateTraceId();
   const spanId = generateSpanId();
   const startTime = Date.now();
+  let taskId: string | undefined;
   const modelId = options.modelId ?? 'kling-2.6/image-to-video';
   const isKling3 = modelId === 'kling-3.0/video';
   const kling3Mode = options.mode ?? 'std';
@@ -423,13 +424,14 @@ export async function generateKieVideo(
       model: modelId,
       input: validatedInput,
     });
-    const taskId = created?.data?.taskId;
+    taskId = created?.data?.taskId;
     if (!taskId) throw new Error('KIE Kling createTask returned no taskId');
 
+    const pollTimeoutMs = isKling3 && kling3Mode === 'pro' ? 600_000 : 480_000;
     const startedPoll = Date.now();
-    while (Date.now() - startedPoll < 300_000) {
+    while (Date.now() - startedPoll < pollTimeoutMs) {
       await new Promise(r => setTimeout(r, 4000));
-      const elapsedRatio = Math.min(0.65, (Date.now() - startedPoll) / 180_000);
+      const elapsedRatio = Math.min(0.65, (Date.now() - startedPoll) / (pollTimeoutMs * 0.75));
       onProgress?.(Math.round(25 + elapsedRatio * 100));
 
       const res = await callKieProxy<{ data?: KieRecordData }>(kieKey, {
@@ -462,7 +464,7 @@ export async function generateKieVideo(
         throw new Error(res?.data?.failMsg || 'KIE Kling video generation failed');
       }
     }
-    throw new Error('KIE Kling video generation timed out');
+    throw new Error(`KIE Kling video generation timed out after ${Math.round(pollTimeoutMs / 60_000)}m (taskId: ${taskId}). Check kie.ai Logs.`);
   } catch (err: any) {
     const duration = (Date.now() - startTime) / 1000;
     logGeminiEvent(modelId, prompt, 0, duration, 'error', err?.message || 'KIE Kling error', tid, undefined, {
@@ -470,6 +472,7 @@ export async function generateKieVideo(
       resolution: logResolution,
       provider: 'kie',
       spanId,
+      ...(taskId ? { kieTaskId: taskId } : {}),
     });
     throw err;
   }
