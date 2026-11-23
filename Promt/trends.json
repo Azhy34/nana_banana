@@ -865,5 +865,59 @@
     "maxAccessories": 2,
     "maxHeightCm": 90,
     "note": "Applies to every prompt the builder makes (the product is a wall mural). Owner 10.11: a furnished room; it replaces the 'almost empty room' rule of 06.11, which made every frame the same empty box. What stays from the owner's complaints: too many things hide the mural, a blanket lying about and a basket are junk. A tall frame (tallRatios) shows a SECTION of the wall floor to ceiling (framingTall), because a wide mural shown whole in a tall frame is squeezed and half the frame is floor and ceiling; a wide frame shows the whole wall (cameraDistances). Numbers and positive wording on purpose; the Avoid list is only the last guard."
+  },
+  "people": {
+    "childByAudience": {
+      "boy": {
+        "baby": "a toddler boy of about 18 months with soft short hair, dressed in a cream organic cotton top and warm oat knit overalls",
+        "vorschul": "a young boy of about 4 years with short neat hair, dressed in a chunky beige cable-knit sweater and light linen trousers",
+        "schulkind": "a schoolboy of about 7 years with short hair, dressed in a relaxed sage linen shirt and beige cotton chinos",
+        "teenager": "a teenage boy of about 12 years in a clean beige knit sweater and relaxed cotton trousers"
+      },
+      "girl": {
+        "baby": "a toddler girl of about 18 months with soft fine hair, dressed in a warm cream knitted cardigan and soft linen overalls",
+        "vorschul": "a young girl of about 4 years with soft braided hair, dressed in a chunky oat knit cardigan over a muted linen dress",
+        "schulkind": "a schoolgirl of about 7 years with a neat ponytail, dressed in a soft cream cable-knit sweater and warm linen trousers",
+        "teenager": "a teenage girl of about 12 years with braided hair in a soft oat knit sweater and linen trousers"
+      },
+      "neutral": {
+        "baby": "a toddler of about 18 months with soft hair, dressed in a cream organic cotton top and warm oat knit overalls",
+        "vorschul": "a young child of about 4 years dressed in a chunky beige cable-knit sweater and light linen trousers",
+        "schulkind": "a child of about 7 years dressed in a soft oat knit sweater and light linen trousers",
+        "teenager": "a youth of about 12 years in a soft beige knit sweater and light linen trousers"
+      }
+    },
+    "scenes": [
+      {
+        "id": "child_pointing",
+        "label": "Child pointing up at mural (from behind)",
+        "ageGroups": ["baby", "vorschul", "schulkind"],
+        "template": "Standing barefoot on the woven rug about 1.2 metres in front of the mural wall with their back to the camera, {child} reaches one hand up and points a finger enthusiastically toward the illustration on the wallpaper mural, head tilted slightly up admiring the wall, face turned away from the camera."
+      },
+      {
+        "id": "mother_child_pointing",
+        "label": "Mother holding child's hand & pointing at mural",
+        "ageGroups": ["baby", "vorschul", "schulkind"],
+        "template": "Standing together near the woven rug in front of the mural wall, a young mother in a relaxed muted sage linen dress gently holds {child} by the hand and points her other hand toward a detail on the wallpaper mural; both look toward the mural wall in a warm candid moment, turned away from the camera."
+      },
+      {
+        "id": "mother_holding_baby",
+        "label": "Mother holding toddler in arms & pointing at mural",
+        "ageGroups": ["baby", "vorschul"],
+        "template": "Standing barefoot on the soft floor rug in front of the mural wall with her back to the camera, a young mother in a natural oatmeal linen dress holds {child} on her left hip and points her right hand up toward the illustration on the wallpaper mural while both gaze at the wall."
+      },
+      {
+        "id": "mother_child_rug",
+        "label": "Mother & child playing with wooden blocks on rug",
+        "ageGroups": ["baby", "vorschul", "schulkind"],
+        "template": "Sitting together on the round woven jute rug in front of the mural wall, a young mother in a soft cream linen shirt and beige trousers and {child} calmly build a small tower from natural wooden blocks on the rug, absorbed in quiet play without looking at the camera."
+      },
+      {
+        "id": "child_rug",
+        "label": "Child playing with wooden toys on rug (from behind)",
+        "ageGroups": ["baby", "vorschul", "schulkind"],
+        "template": "Sitting on the woven rug in the middle of the floor facing the mural wall with their back to the camera, {child} plays calmly with natural wooden toys on the rug, face turned away from the camera."
+      }
+    ]
   }
 }

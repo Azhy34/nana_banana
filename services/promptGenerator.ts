@@ -93,13 +93,14 @@ export function ageLine(ageGroup: string): string {
 export function accessoriesOfAge(ageGroup: string): string[] {
   const list = (trendsData.ageGroups as any)?.[ageGroup]?.accessories as string[] | undefined;
   const base = list && list.length > 0 ? list : trendsData.accessories;
-  return base.filter(a => !/chandelier|pendant/i.test(a));
+  return base.filter(a => !/chandelier|pendant|picture frames|art print|wax crayons/i.test(a));
 }
 
 export interface RandomTagOptions {
   audience?: AudienceKey;
   heroRoom?: boolean;
   macroTexture?: boolean;
+  cleanFloor?: boolean;
   personMode?: BatchPersonMode;
   promptMode?: PromptMode;
   style?: string;
@@ -140,9 +141,25 @@ export function generateRandomTags(
     audience,
     heroRoom: options.heroRoom ?? false,
     macroTexture: options.macroTexture ?? false,
+    cleanFloor: options.cleanFloor ?? false,
     personMode: options.personMode ?? 'none',
     promptMode: options.promptMode ?? 'full',
   };
+}
+
+export interface PeopleSceneOption {
+  id: Exclude<BatchPersonMode, 'none' | 'child_gaze'>;
+  label: string;
+  ageGroups: AgeGroupKey[];
+  template: string;
+}
+
+export const PEOPLE_SCENE_OPTIONS: readonly PeopleSceneOption[] =
+  ((trendsData as any).people?.scenes as PeopleSceneOption[] | undefined) ?? [];
+
+export function getPeopleScenesForAge(ageGroup: AgeGroupKey): PeopleSceneOption[] {
+  const matching = PEOPLE_SCENE_OPTIONS.filter(s => s.ageGroups.includes(ageGroup));
+  return matching.length > 0 ? matching : [...PEOPLE_SCENE_OPTIONS];
 }
 
 /**
@@ -178,15 +195,47 @@ export function generateBatchDeck(
   // Place 1 Macro Texture in Interior shot on a non-Hero listing slot if requested.
   const macroIdx = options.includeMacro ? pickMacroSlotIndex(formats, heroIdx) : -1;
 
+  // Assign human storytelling scenes to viral 9:16 cards and ~1/3 of photo cards (never on Hero or Macro cards)
+  let videoEligibleSeen = 0;
+  let photoEligibleSeen = 0;
+  let cleanRoomToggle = 0;
+
   return formats.map((ar, idx) => {
     const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
     const ageIdx = ageCounters[ageGroup]++;
     const keyDeck = keyObjDecks[ageGroup];
+    const isHero = idx === heroIdx;
+    const isMacro = idx === macroIdx;
+
+    let personMode: BatchPersonMode = 'none';
+    if (!isHero && !isMacro && ageGroup !== 'teenager') {
+      const agePeoplePool = getPeopleScenesForAge(ageGroup);
+      if (ar === '9:16') {
+        // Put people on 2 out of every 3 viral 9:16 video masters (always including the first 9:16)
+        if (videoEligibleSeen % 3 !== 2 && agePeoplePool.length > 0) {
+          personMode = agePeoplePool[videoEligibleSeen % agePeoplePool.length].id;
+        }
+        videoEligibleSeen++;
+      } else {
+        // Put people on ~1 out of every 3 photo cards (starting from the 2nd eligible photo card so card #1 stays furniture-focused)
+        if (photoEligibleSeen % 3 === 1 && agePeoplePool.length > 0) {
+          personMode = agePeoplePool[(photoEligibleSeen + 1) % agePeoplePool.length].id;
+        }
+        photoEligibleSeen++;
+      }
+    }
+
+    const isPlayingOnFloor = personMode === 'child_rug' || personMode === 'mother_child_rug';
+    const cleanFloor = !isHero && !isMacro && !isPlayingOnFloor && (
+      personMode !== 'none' || (cleanRoomToggle++ % 2 === 0)
+    );
+
     return generateRandomTags(ar, ageGroup, {
       audience: options.audience ?? 'neutral',
-      heroRoom: idx === heroIdx,
-      macroTexture: idx === macroIdx,
-      personMode: 'none',
+      heroRoom: isHero,
+      macroTexture: isMacro,
+      cleanFloor,
+      personMode,
       promptMode: options.promptMode ?? 'full',
       style: styleDeck[idx % styleDeck.length],
       lighting: lightDeck[idx % lightDeck.length],
@@ -224,7 +273,13 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   // The mural is the hero in every prompt: a furnished room of a real size, the hero piece along a side wall with at most two small
   // accessories, everything near the mural wall low (Promt/trends.json "staging"). The tag `compositionStrategy` is kept for old cards;
   // it no longer changes this.
-  const compositionText = trendsData.staging.text;
+  const isCleanFloor = Boolean(tags.cleanFloor) && !tags.heroRoom && tags.personMode !== 'child_rug' && tags.personMode !== 'mother_child_rug';
+  const compositionText = isCleanFloor
+    ? trendsData.staging.text.replace(
+        "and the child's own toys lie on a rug.",
+        'the woven rug and parquet floor are completely clean, open, and uncluttered, with zero toys, books, or loose items on the floor.',
+      )
+    : trendsData.staging.text;
 
   const insights = (trendsData as any).latestMarketInsights as {
     colors?: Array<{ name: string; description: string }>;
@@ -254,9 +309,11 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     }
   }
 
-  // Age-specific toys (low things on the floor); random decor is gone: every extra object hides the mural
+  // Age-specific toys (skipped when cleanFloor is active so half of rooms stay completely uncluttered)
   const ageData = (trendsData.ageGroups as any)?.[tags.ageGroup];
-  const trendingToy = ageData?.toys && ageData.toys.length > 0 ? pick(ageData.toys as string[]) : '';
+  const trendingToy = isCleanFloor
+    ? ''
+    : (ageData?.toys && ageData.toys.length > 0 ? pick(ageData.toys as string[]) : '');
 
   // The chosen style (its card in trends.json) is the ONLY source of the style words: the age group gives the scale of the furniture and
   // the toys, never a style of its own.
@@ -266,19 +323,31 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   let lifestyleTouch = '';
   if (tags.ageGroup === 'baby') {
     sceneSetting = `An authentic, serene nursery for a baby in a warm home${styleLabel}. The room feels gentle, joyful, and spacious, with tactile natural wood and breathable organic cotton.`;
-    lifestyleTouch = `Authentic lived-in nursery details: soft organic cotton bedding and ${trendingToy || 'curated wooden sensory blocks catching the light'}.`;
+    lifestyleTouch = isCleanFloor
+      ? 'Clean, uncluttered nursery styling with crisp organic cotton bedding and a bare woven floor rug.'
+      : `Authentic lived-in nursery details: soft organic cotton bedding and ${trendingToy || 'curated wooden sensory blocks catching the light'}.`;
   } else if (tags.ageGroup === 'vorschul') {
     sceneSetting = `A delightful, joyful children's bedroom${styleLabel}. Designed with playful child-scale furniture, natural wood, and cheerful accents that foster creativity, warmth, and restful sleep.`;
-    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'} and a plush cream dot rug.`;
+    lifestyleTouch = isCleanFloor
+      ? 'Clean, uncluttered room styling with neat bedding and an open, empty woven floor rug.'
+      : `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'} and a plush cream dot rug.`;
   } else if (tags.ageGroup === 'schulkind') {
     sceneSetting = `A stylish, cozy children's bedroom and creative study sanctuary${styleLabel}. Warm natural wood surfaces, curated design touches and an uncluttered layout create an inspiring space.`;
-    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'} and a comfortable floor reading cushion.`;
+    lifestyleTouch = isCleanFloor
+      ? 'Clean, uncluttered study-bedroom styling with neat bedding and an open, empty floor rug.'
+      : `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'} and a comfortable floor reading cushion.`;
   } else {
     sceneSetting = `A contemporary youth bedroom${styleLabel} with clean lines, natural solid oak and birch, and a calm, stylish layout for studying and relaxing.`;
-    lifestyleTouch = `Authentic lived-in details: ${trendingToy || 'a small potted plant in a ceramic pot'} and clean task lighting.`;
+    lifestyleTouch = isCleanFloor
+      ? 'Clean, uncluttered youth room styling with neat linen bedding and an open, empty floor rug.'
+      : `Authentic lived-in details: ${trendingToy || 'a small potted plant in a ceramic pot'} and clean task lighting.`;
   }
 
-  sceneSetting = `${sceneSetting} ${ageLine(tags.ageGroup)}`.trim();
+  const rawAgeLine = ageLine(tags.ageGroup);
+  const effectiveAgeLine = isCleanFloor
+    ? rawAgeLine.replace(/,?\s*and the play space is a quilted mat on the floor/i, '')
+    : rawAgeLine;
+  sceneSetting = `${sceneSetting} ${effectiveAgeLine}`.trim();
 
   const isScallop = tags.wallArchitecture === 'scallop-trim';
   const wallpaperRule = isScallop
@@ -313,18 +382,27 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     : `${angle}, at ${elevation}. Framing: ${distance}${distanceNote}`;
 
   const personSentence = (() => {
-    const mode = tags.personMode ?? 'none';
-    if (mode === 'none') return '';
+    const rawMode = tags.personMode ?? 'none';
+    if (rawMode === 'none') return '';
+    const normalizedMode = rawMode === 'child_gaze' ? 'child_pointing' : rawMode;
+    const peopleData = (trendsData as any).people as {
+      childByAudience?: Record<AudienceKey, Record<AgeGroupKey, string>>;
+      scenes?: PeopleSceneOption[];
+    } | undefined;
+    const aud: AudienceKey = tags.audience ?? 'neutral';
     const childDesc =
-      tags.ageGroup === 'baby'
-        ? 'a young mother in a soft oat knit cardigan and light linen trousers'
-        : tags.audience === 'boy'
-          ? 'a small boy of about four in a navy knit sweater and light grey trousers'
-          : 'a small child of about four in a soft oat knit sweater and cream linen trousers';
-    if (mode === 'child_gaze') {
-      return ` In the middle of the room about two metres from the mural wall, ${childDesc} stands with their back to the camera, head tilted slightly up looking at the mural, face turned completely away from the camera so no facial detail or profile is visible.`;
+      peopleData?.childByAudience?.[aud]?.[tags.ageGroup] ??
+      peopleData?.childByAudience?.neutral?.[tags.ageGroup] ??
+      (aud === 'boy'
+        ? 'a young boy of about 4 years in a beige knit sweater and light linen trousers'
+        : aud === 'girl'
+          ? 'a young girl of about 4 years in a soft oat knit cardigan and linen dress'
+          : 'a young child of about 4 years in a beige knit sweater and light linen trousers');
+    const sceneEntry = peopleData?.scenes?.find(s => s.id === normalizedMode);
+    if (sceneEntry) {
+      return ` ${sceneEntry.template.replace('{child}', childDesc)}`;
     }
-    return ` On the rug in the middle of the floor about two metres from the mural wall, ${childDesc} sits facing the mural with their back to the camera, playing calmly with the toys, face turned completely away from the camera so no facial detail or profile is visible.`;
+    return ` On the rug in the middle of the floor in front of the mural wall, ${childDesc} sits facing the mural with their back to the camera, playing calmly with natural wooden toys.`;
   })();
 
   if (tags.promptMode === 'brief') {

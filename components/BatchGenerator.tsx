@@ -1,7 +1,7 @@
 import React from 'react';
 import { useBatch } from '../hooks/useBatch';
 import { AudienceKey, BatchCard, BatchAspectRatio, BatchPersonMode, BatchPromptTags, AgeGroupKey, ViewMode, ModelType, AIProvider, PromptMode } from '../types';
-import { TAG_OPTIONS, AGE_GROUP_LABELS, getColorsForStyle, muralSafeKeyObjects, TargetAgeFilter } from '../services/promptGenerator';
+import { TAG_OPTIONS, AGE_GROUP_LABELS, getColorsForStyle, muralSafeKeyObjects, TargetAgeFilter, PEOPLE_SCENE_OPTIONS } from '../services/promptGenerator';
 import { getUiImageModels, getModelCapability, validateModelInput } from '../shared/modelContracts';
 import { EXPORT_PRESET_OPTIONS, ExportPresetId } from '../services/exportCrop';
 import { BATCH_COUNT_OPTIONS } from '../constants';
@@ -359,18 +359,28 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
 
               {/* People & Hero + Schema Check */}
               <div className="px-4 pb-3 flex flex-wrap items-center gap-3">
-                <div className="min-w-[180px]">
-                  <label className="text-slate-500 text-xs block mb-1">People (from behind)</label>
+                <div className="min-w-[220px]">
+                  <label className="text-slate-500 text-xs block mb-1">People (Storytelling & Reels)</label>
                   <select
-                    value={card.tags.personMode || 'none'}
+                    value={card.tags.personMode === 'child_gaze' ? 'child_pointing' : (card.tags.personMode || 'none')}
                     onChange={e => updateTag(card.id, 'personMode', e.target.value as BatchPersonMode)}
                     className={selectClass}
                   >
-                    <option value="none">No people</option>
-                    <option value="child_rug">Child on rug (from behind)</option>
-                    <option value="child_gaze">Child gazing at mural (from behind)</option>
+                    <option value="none">No people (room only)</option>
+                    {PEOPLE_SCENE_OPTIONS.map(opt => (
+                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                    ))}
                   </select>
                 </div>
+                <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer mt-4">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(card.tags.cleanFloor)}
+                    onChange={e => updateTag(card.id, 'cleanFloor', e.target.checked)}
+                    className="rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-indigo-500"
+                  />
+                  Clean floor (no toys)
+                </label>
                 <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer mt-4">
                   <input
                     type="checkbox"

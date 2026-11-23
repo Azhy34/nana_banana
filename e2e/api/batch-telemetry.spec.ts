@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { buildGeminiPrompt, generateRandomTags } from '../../services/promptGenerator';
+import { buildGeminiPrompt, generateBatchDeck, generateRandomTags } from '../../services/promptGenerator';
 import { buildExportFilename, buildZipBlob, computeCenterCoverRect, resolveTargetsForCard } from '../../services/exportCrop';
 import { getModelCapability, kling30InputSchema } from '../../shared/modelContracts';
 import { getKling3CostUsd } from '../../constants';
@@ -127,6 +127,41 @@ test.describe('Batch Prompt Generation & Realism Rules', () => {
     expect(prompt).toContain('Interior colourway: Sage');
     expect(prompt).toContain('Aspect ratio: 4:3');
     expect(prompt).toContain('Avoid: peeling wallpaper');
+  });
+
+  test('Batch deck deals people scenes and enforces gender-accurate children for boy/girl audience', () => {
+    const deck = generateBatchDeck(['2:3', '2:3', '2:3', '9:16', '9:16'], {
+      audience: 'boy',
+      targetAge: 'vorschul',
+      includeHero: false,
+      includeMacro: false,
+    });
+    const withPeople = deck.filter((t) => t.personMode && t.personMode !== 'none');
+    expect(withPeople.length).toBeGreaterThanOrEqual(2);
+    for (const tags of withPeople) {
+      const prompt = buildGeminiPrompt(tags);
+      expect(prompt).toContain('young boy of about 4 years');
+    }
+
+    const girlTags = generateRandomTags('9:16', 'vorschul', {
+      audience: 'girl',
+      personMode: 'mother_child_pointing',
+    });
+    const girlPrompt = buildGeminiPrompt(girlTags);
+    expect(girlPrompt).toContain('young girl of about 4 years');
+    expect(girlPrompt).toContain('young mother in a relaxed muted sage linen dress');
+
+    const roomDeck = generateBatchDeck(['2:3', '2:3', '2:3', '2:3'], {
+      audience: 'neutral',
+      targetAge: 'baby',
+      includeHero: false,
+      includeMacro: false,
+    });
+    const cleanCards = roomDeck.filter((t) => t.cleanFloor);
+    expect(cleanCards.length).toBeGreaterThanOrEqual(1);
+    const cleanPrompt = buildGeminiPrompt(cleanCards[0]);
+    expect(cleanPrompt).toContain('zero toys, books, or loose items on the floor');
+    expect(cleanPrompt).not.toMatch(/picture frames|art print|wax crayons/i);
   });
 });
 

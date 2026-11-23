@@ -10,7 +10,14 @@ export type AIProvider = 'openrouter' | 'gemini';
 export type AgeGroupKey = 'baby' | 'vorschul' | 'schulkind' | 'teenager';
 export type BatchAspectRatio = '9:16' | '4:5' | '3:4' | '2:3' | '4:3';
 export type AudienceKey = 'neutral' | 'boy' | 'girl';
-export type BatchPersonMode = 'none' | 'child_rug' | 'child_gaze';
+export type BatchPersonMode =
+  | 'none'
+  | 'child_pointing'
+  | 'mother_child_pointing'
+  | 'mother_holding_baby'
+  | 'mother_child_rug'
+  | 'child_rug'
+  | 'child_gaze';
 export type PromptMode = 'full' | 'brief';
 
 export type OverlayPosition = 'bottom left' | 'bottom right' | 'top left' | 'top right';
@@ -40,6 +47,7 @@ export interface BatchPromptTags {
   audience?: AudienceKey;
   heroRoom?: boolean;
   macroTexture?: boolean;
+  cleanFloor?: boolean;
   personMode?: BatchPersonMode;
   promptMode?: PromptMode;
 }
