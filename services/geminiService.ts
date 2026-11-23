@@ -283,8 +283,7 @@ const generateImageCompositionWithGemini = async (
       imageConfig: {
         aspectRatio,
         ...(model === ModelType.Pro || model === ModelType.Flash31 ? { imageSize } : {}),
-        negativePrompt: GEMINI_NEGATIVE_PROMPT,
-      } as any,
+      },
     },
   });
 
@@ -412,7 +411,7 @@ const generateBatchWithGemini = async (
     parts.push({ inlineData: { data: textureImage.data, mimeType: textureImage.mimeType } });
     parts.push({ text: prompt });
   } else {
-    parts.push({ text: "WALLPAPER_PATTERN: The following image is the wallpaper product to place on the wall. Apply it exactly as instructed." });
+    parts.push({ text: "REFERENCE_IMAGE_1 (Wallpaper Graphic Artwork): This is the exact wallpaper graphic design to display on the accent wall. Preserve all colors, illustrations, lines, and composition 1:1 without alteration." });
     parts.push({ inlineData: { data: wallpaper.data, mimeType: wallpaper.mimeType } });
     parts.push({ text: prompt });
   }
@@ -426,8 +425,7 @@ const generateBatchWithGemini = async (
       imageConfig: {
         aspectRatio: aspectRatio as any,
         imageSize: "2K",
-        negativePrompt: GEMINI_NEGATIVE_PROMPT,
-      } as any,
+      },
     },
   });
 

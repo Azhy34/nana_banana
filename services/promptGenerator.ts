@@ -285,16 +285,16 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     ? "This is a commercial interior photograph showcasing a designer wallpaper in a European children's interior. WALL ARCHITECTURE (RETRO SCALLOPED WAVE TRIM): The reference wallpaper covers the lower two-thirds of the feature wall, crowned by an eye-catching decorative scalloped wave trim moulding in warm barberry red or terracotta. Above the wavy scalloped trim, the upper wall is painted in warm chalky cream with a charming gallery of art prints in scalloped and checkered frames. Retain the exact pattern, colors, and stripe/art scale from the reference image 1:1 on the wallpaper section. The wallpaper is the hero of the interior."
     : "This is a commercial interior photograph showcasing a wall mural wallpaper. The reference image is a single full-scale mural (not a repeating tile pattern). FULL-HEIGHT 100% WALL COVERAGE: This entire reference image must be mapped and stretched across the feature wall edge-to-edge as a single, continuous, seamless mural covering 100% of the wall surface from the floor baseboard up to the ceiling line, running cleanly behind the furniture without any horizontal cuts, splits, wainscoting, or unpapered lower section. Retain the exact illustration, colors, and scale from the reference image 1:1. The wallpaper is the hero of the interior.";
 
-  const furnitureSection = `The focal furniture piece is a ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material}. Layout: ${keyObjData?.description ?? ''}. Floor and architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}. Styling: ${styleData?.name ?? tags.style} (${styleData?.description ?? ''}). ${compositionText}`;
+  const furnitureSection = `Focal furniture: ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material} (${keyObjData?.description ?? 'low child-scale proportions'}). Architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}; all items near the mural wall stay under 90 cm so the mural remains open. ${compositionText}`;
 
-  let colorAccentText = `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried by the bedding, textiles, rug and small furniture so the room reads clearly in this colour family, and accessories including ${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(', ')}.`;
+  let colorAccentText = `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried by the bedding, rug, and accessories (${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(', ')}).`;
   if (trendingColorName) {
-    colorAccentText += ` Subtle accents of ${trendingColorName} harmonize across the textiles.`;
+    colorAccentText += ` Subtle ${trendingColorName} accents harmonize across the textiles.`;
   }
 
-  const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch} The styling is warm, cheerful, and tactile, featuring rich natural wood grain, soft matte ceramics, and crisp organic cotton without any artificial gloss or sterile CGI look.`;
+  const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch}`;
 
-  const lightingSection = `Grazing natural morning daylight from an adjacent window streams across the room, illuminating the tactile ultra-matte non-woven fleece paper wallpaper with subtle fine sand-grain finish and creating authentic grounding ambient shadows where furniture meets the floor and wall. Light setting: ${lightingData?.description ?? tags.lighting}. ${tags.cinematicDetail}`;
+  const lightingSection = `Grazing natural morning daylight from an adjacent window illuminates the ultra-matte non-woven fleece paper wallpaper with subtle fine sand-grain finish and casts soft grounding shadows. Light setting: ${lightingData?.description ?? tags.lighting}.`;
 
   const angle = tags.cameraAngle || TAG_OPTIONS.cameraAngles[0];
   const elevation = tags.cameraElevation || TAG_OPTIONS.cameraElevations[0];
@@ -393,9 +393,9 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     promptText += " Any computer monitor or screen is strictly turned off, appearing as a clean, blank matte dark display with zero reflections.";
   }
 
-  // The Avoid list is data (Promt/trends.json "negatives"), not code. The chosen style adds what does not suit it.
-  const neg = trendsData.negatives;
-  const baseNegative = [neg.head, ...(isScallop ? [] : [neg.fullWall]), neg.base].join(', ');
+  // Compact guardrails (no synonym spam) from Promt/trends.json
+  const neg = trendsData.negatives as { head: string; fullWall: string; compact?: string; base: string; text: string; textWithOverlay: string };
+  const baseNegative = [neg.head, ...(isScallop ? [] : [neg.fullWall]), neg.compact ?? neg.base].join(', ');
   const styleAvoid = (styleData as { avoid?: string } | undefined)?.avoid;
   const textNegative = (tags.overlayText && tags.overlayPosition) ? neg.textWithOverlay : neg.text;
 

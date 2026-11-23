@@ -209,7 +209,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           </div>
         </div>
 
-        {/* Audience, Hero & Prompt Mode */}
+        {/* Audience & Hero */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-4 space-y-4">
           <div>
             <h3 className="text-white font-semibold mb-2 text-sm">Wallpaper Audience</h3>
@@ -236,21 +236,6 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${includeHero ? 'bg-indigo-600' : 'bg-slate-700'}`}>
               <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${includeHero ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
-          </div>
-
-          <div className="pt-2 border-t border-slate-700">
-            <h3 className="text-white font-semibold mb-2 text-sm">Prompt Mode</h3>
-            <div className="flex gap-2">
-              {([
-                { value: 'full', label: 'Full (~6200 chars)' },
-                { value: 'brief', label: 'Brief (~1800 chars, positive)' },
-              ] as const).map(opt => (
-                <button key={opt.value} type="button" onClick={() => setPromptMode(opt.value as PromptMode)}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${promptMode === opt.value ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
-                  {opt.label}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 

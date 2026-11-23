@@ -62,9 +62,10 @@ test.describe('Batch Prompt Generation & Realism Rules', () => {
       expect(prompt).not.toContain('Eichenparkett');
       expect(prompt).not.toContain('Kinderbett mit Gitterstäben');
 
-      // 8. No raw SEO search query noise
+      // 8. No raw SEO search query noise & compact prompt size (down from ~6200-char bloat)
       expect(prompt).not.toContain('searches, highlighting a desire');
       expect(prompt).not.toContain('search volume');
+      expect(prompt.length).toBeLessThan(4500);
     });
   }
 
