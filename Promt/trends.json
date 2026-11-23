@@ -185,7 +185,7 @@
         "Pepper White",
         "Soft Sand"
       ],
-      "avoid": "stripes or dots on the wallpaper wall, rugs or curtains next to the mural, hanging balloons or lamps in front of the mural"
+      "avoid": "stripes or dots on the wallpaper wall, loud busy curtains next to the mural, hanging balloons or lamps in front of the mural"
     },
     {
       "name": "Boho",
@@ -317,7 +317,8 @@
         "low open shelf with picture books facing front",
         "one large calm art print in a slim oak frame",
         "checkerboard wooden storage box",
-        "cream waffle-knit blanket folded on the bed"
+        "cream waffle-knit blanket folded on the bed",
+        "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif"
       ],
       "furniture": "classic wooden baby crib with slatted sides, premium wooden changing table dresser with a soft cream changing mat (Wickelkommode), cozy fabric nursing glider chair",
       "storage": "low open wooden shelves, canvas storage bins in linen fabric, solid wood toy chest",
@@ -326,9 +327,12 @@
     "vorschul": {
       "label": "Preschool (3–6 years)",
       "child": "a child of 2 to 5 years",
-      "room": "A children's bedroom: the bed is a child's bed of 140 by 70 cm, no higher than 40 cm, and every piece of furniture stands at the height of a small child, with the proportions of a playroom.",
+      "room": "A children's bedroom: the bed is a realistic European junior bed (160 by 80 cm) with a standard knee-height mattress frame, and the furniture has natural real-world proportions relative to the room and skirting boards (never miniature or doll-sized).",
       "accessories": [
-        "whimsical mid-century cobalt blue mushroom table lamp",
+        "mid-century bright cobalt blue mushroom table lamp resting on the bedside table",
+        "mid-century sunny yellow mushroom table lamp resting on the bedside table",
+        "mid-century sky blue mushroom table lamp resting on the bedside table",
+        "mid-century pastel pink mushroom table lamp resting on the bedside table",
         "wavy scalloped picture frames with retro graphic art prints",
         "flower-shaped plush velvet bolster pillow",
         "low fluted birch bedside table",
@@ -349,7 +353,12 @@
         "red-and-white striped bolster cushions",
         "checkerboard wooden storage box",
         "cream waffle-knit blanket folded on the bed",
-        "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)"
+        "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
+        "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
+        "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
+        "bold sculpted high-low relief rug with sweeping curved geometric lines in coral orange and cream",
+        "bold sculpted high-low relief rug with sweeping curved geometric lines in mint green and lilac",
+        "bold sculpted high-low relief rug with sweeping curved geometric lines in cobalt blue and butter yellow"
       ],
       "theme": "Playful Montessori & Creative Nook (Faraway Forest & Open-Ended Play)",
       "beds": [
@@ -371,7 +380,10 @@
       "child": "a schoolchild of 6 to 10 years",
       "room": "A school child's room: the bed is a single bed of 90 by 200 cm in a low frame, furniture is slim and sized for a schoolchild, and books and learning things stand at child height.",
       "accessories": [
-        "whimsical mid-century cobalt blue mushroom table lamp",
+        "mid-century bright cobalt blue mushroom table lamp resting on the bedside table",
+        "mid-century sunny yellow mushroom table lamp resting on the bedside table",
+        "mid-century sky blue mushroom table lamp resting on the bedside table",
+        "mid-century pastel pink mushroom table lamp resting on the bedside table",
         "wavy scalloped picture frames with retro graphic art prints",
         "potted trailing ivy plant on a natural wooden shelf",
         "flower-shaped plush velvet bolster pillow",
@@ -392,7 +404,12 @@
         "ribbed cobalt blue side table with a few books",
         "checkerboard wooden storage box",
         "cream waffle-knit blanket folded on the bed",
-        "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)"
+        "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
+        "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
+        "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
+        "bold sculpted high-low relief rug with sweeping curved geometric lines in coral orange and cream",
+        "bold sculpted high-low relief rug with sweeping curved geometric lines in mint green and lilac",
+        "bold sculpted high-low relief rug with sweeping curved geometric lines in cobalt blue and butter yellow"
       ],
       "theme": "Scandi Study & Cozy Reading Haven (Multifunctional & Ergonomic Growth)",
       "beds": [
@@ -426,7 +443,12 @@
         "one large calm art print in a slim oak frame",
         "ribbed cobalt blue side table with a few books",
         "cream waffle-knit blanket folded on the bed",
-        "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)"
+        "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
+        "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
+        "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
+        "bold sculpted high-low relief rug with sweeping curved geometric lines in coral orange and cream",
+        "bold sculpted high-low relief rug with sweeping curved geometric lines in mint green and lilac",
+        "bold sculpted high-low relief rug with sweeping curved geometric lines in cobalt blue and butter yellow"
       ],
       "theme": "Japandi Minimalist Workspace & Lounge (Urban Warmth & Uncluttered Lines)",
       "beds": [
@@ -472,12 +494,12 @@
     },
     {
       "name": "Low Scandinavian birch toddler daybed",
-      "description": "compact child-sized natural birch toddler bed (strictly 140 by 70 cm, under 40 cm high, with a low wooden side safety guardrail — never an adult bed) with checkered and striped bolster pillows, placed along the side wall keeping the wallpaper wall fully visible",
+      "description": "realistic full-proportion Scandinavian birch junior daybed (160 by 80 cm, standard knee-height mattress and low wooden side safety rail, never miniature or doll-sized) with checkered and striped bolster pillows, placed along the side wall keeping the wallpaper wall fully visible",
       "ageGroup": "vorschul"
     },
     {
       "name": "Child-sized birch toddler bed with side safety rails",
-      "description": "small child-sized toddler bed (strictly 140 by 70 cm, 35 cm high, with low slatted wooden side safety guardrails for a 3-to-5-year-old child — never an adult platform bed) in solid birch with soft cotton child bedding, placed along the side wall",
+      "description": "realistic full-proportion solid birch junior bed (160 by 80 cm, standard knee-height mattress with slatted wooden side safety rails, never miniature or doll-sized) with soft cotton child bedding, placed along the side wall",
       "ageGroup": "vorschul"
     },
     {
@@ -504,7 +526,7 @@
     },
     {
       "name": "Low birch modular daybed with fluted nightstand",
-      "description": "full-size single daybed (200 by 90 cm) with crisp cotton bedding, flanked by a fluted birch nightstand and a mid-century cobalt mushroom lamp",
+      "description": "full-size single daybed (200 by 90 cm) with crisp cotton bedding, flanked by a fluted birch nightstand and a mid-century mushroom table lamp resting on the nightstand",
       "ageGroup": "schulkind"
     },
     {
@@ -520,7 +542,7 @@
     {
       "name": "Upholstered daybed with a wavy striped headboard",
       "ageGroup": "vorschul",
-      "description": "a low child-size upholstered daybed (140 by 70 cm) placed along a side wall with only its low end touching the mural wall, a wavy scalloped headboard in caramel-and-cream stripes at that end, red-and-white striped bolster cushions and a cream waffle-knit blanket"
+      "description": "realistic full-proportion upholstered junior daybed (160 by 80 cm, standard knee-height mattress) placed along a side wall with only its low end touching the mural wall, a wavy scalloped headboard in caramel-and-cream stripes at that end, red-and-white striped bolster cushions and a cream waffle-knit blanket"
     }
   ],
   "roomZones": [
@@ -614,7 +636,10 @@
     }
   ],
   "accessories": [
-    "whimsical mid-century cobalt blue mushroom table lamp",
+    "mid-century bright cobalt blue mushroom table lamp resting on the bedside table",
+    "mid-century sunny yellow mushroom table lamp resting on the bedside table",
+    "mid-century sky blue mushroom table lamp resting on the bedside table",
+    "mid-century pastel pink mushroom table lamp resting on the bedside table",
     "playful cluster bubble chandelier with frosted glass globes",
     "wavy scalloped picture frames with retro graphic art prints",
     "potted trailing ivy plant on a natural wooden shelf",
@@ -638,7 +663,12 @@
     "ribbed cobalt blue side table with a few books",
     "checkerboard wooden storage box",
     "cream waffle-knit blanket folded on the bed",
-    "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)"
+    "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
+    "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
+    "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
+    "bold sculpted high-low relief rug with sweeping curved geometric lines in coral orange and cream",
+    "bold sculpted high-low relief rug with sweeping curved geometric lines in mint green and lilac",
+    "bold sculpted high-low relief rug with sweeping curved geometric lines in cobalt blue and butter yellow"
   ],
   "materials": [
     "solid birch",
@@ -852,8 +882,8 @@
   "negatives": {
     "head": "peeling wallpaper, wallpaper peeling off wall, corner curl",
     "fullWall": "half-wall wallpaper, split wall, wainscoting, dado rail, lower wall unpapered",
-    "compact": "pendant lamp, ceiling chandelier, crib mobile, bed canopy, house-frame bed, metal bed frame, recessed spotlights, mounted animal heads, wicker or rattan baskets, plastic furniture or toys, bunk beds, messy clutter, seams, repeating wallpaper patterns, CGI 3D render look, glossy surfaces, adult double bed",
-    "base": "pendant lamp, hanging lamp, hanging pendant light, low ceiling lamp, ceiling chandelier, hanging chandelier, dangling light fixture, hanging lamp blocking wallpaper, ceiling lamp in foreground, ceiling fixture blocking mural, crib mobile, baby mobile, hanging mobile, hanging mobile toy, ceiling mobile, cot mobile, felt mobile, wooden mobile, dangling hanging toys, dangling ceiling decor, bed canopy, hanging baldachin, fabric curtains over bed, house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, tall bed frame obstructing wall, metal bed, iron spindle bed, iron bed frame, ceiling downlights, recessed spotlights, harsh office lighting, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look, blurry muddy textures, flat soap textures, oversaturated neon, glossy plastic-looking surfaces, over-smoothed airbrushed textures, HDR halo, full themed room, foam poufs, stripes or dots on rugs and curtains next to the mural, wardrobe or tall furniture against the mural wall, table and chairs in the foreground, crowded room, straight-on frontal view, furniture hiding the lower part of the mural, adult double bed, queen-size bed, adult sofa",
+    "compact": "pendant lamp, ceiling chandelier, crib mobile, bed canopy, house-frame bed, playhouse, dollhouse, toy house, metal bed frame, recessed spotlights, mounted animal heads, wicker or rattan baskets, plastic furniture or toys, bunk beds, messy clutter, seams, repeating wallpaper patterns, CGI 3D render look, glossy surfaces, adult double bed",
+    "base": "pendant lamp, hanging lamp, hanging pendant light, low ceiling lamp, ceiling chandelier, hanging chandelier, dangling light fixture, hanging lamp blocking wallpaper, ceiling lamp in foreground, ceiling fixture blocking mural, crib mobile, baby mobile, hanging mobile, hanging mobile toy, ceiling mobile, cot mobile, felt mobile, wooden mobile, dangling hanging toys, dangling ceiling decor, bed canopy, hanging baldachin, fabric curtains over bed, house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, playhouse, dollhouse, toy house, miniature wooden house, tall bed frame obstructing wall, metal bed, iron spindle bed, iron bed frame, ceiling downlights, recessed spotlights, harsh office lighting, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look, blurry muddy textures, flat soap textures, oversaturated neon, glossy plastic-looking surfaces, over-smoothed airbrushed textures, HDR halo, full themed room, foam poufs, stripes or dots on curtains next to the mural, wardrobe or tall furniture against the mural wall, table and chairs in the foreground, crowded room, straight-on frontal view, furniture hiding the lower part of the mural, adult double bed, queen-size bed, adult sofa",
     "text": "text overlay, watermark, advertising badge, corner stamp, typography",
     "textWithOverlay": "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, digital watermark"
   },
@@ -861,7 +891,12 @@
     "text": "STAGING (the mural is the hero): a furnished, lived-in children's room of about 4.5 by 3.5 metres under a 2.8 m ceiling. The hero piece stands along a side wall with at most two small accessories beside it, and the child's own toys lie on a rug. Everything near the mural wall is lower than 90 cm, so the drawing of the mural stays open and clear.",
     "brief": "Only the items named in this scene are in the room, and the walls carry only the pictures named here.",
     "framingTall": "a floor-to-ceiling section of the mural wall around the main motif of the mural, with the ceiling line at the top of the frame and the skirting board and a strip of floor at the bottom; the mural continues beyond the frame edges at its true scale",
-    "tallRatios": ["9:16", "2:3", "4:5", "3:4"],
+    "tallRatios": [
+      "9:16",
+      "2:3",
+      "4:5",
+      "3:4"
+    ],
     "maxAccessories": 2,
     "maxHeightCm": 90,
     "note": "Applies to every prompt the builder makes (the product is a wall mural). Owner 10.11: a furnished room; it replaces the 'almost empty room' rule of 06.11, which made every frame the same empty box. What stays from the owner's complaints: too many things hide the mural, a blanket lying about and a basket are junk. A tall frame (tallRatios) shows a SECTION of the wall floor to ceiling (framingTall), because a wide mural shown whole in a tall frame is squeezed and half the frame is floor and ceiling; a wide frame shows the whole wall (cameraDistances). Numbers and positive wording on purpose; the Avoid list is only the last guard."
@@ -894,31 +929,50 @@
       {
         "id": "child_pointing",
         "label": "Child pointing up at mural (from behind)",
-        "ageGroups": ["baby", "vorschul", "schulkind"],
+        "ageGroups": [
+          "baby",
+          "vorschul",
+          "schulkind"
+        ],
         "template": "Standing barefoot on the woven rug about 1.2 metres in front of the mural wall with their back to the camera, {child} reaches one hand up and points a finger enthusiastically toward the illustration on the wallpaper mural, head tilted slightly up admiring the wall, face turned away from the camera."
       },
       {
         "id": "mother_child_pointing",
         "label": "Mother holding child's hand & pointing at mural",
-        "ageGroups": ["baby", "vorschul", "schulkind"],
+        "ageGroups": [
+          "baby",
+          "vorschul",
+          "schulkind"
+        ],
         "template": "Standing together near the woven rug in front of the mural wall, a young mother in a relaxed muted sage linen dress gently holds {child} by the hand and points her other hand toward a detail on the wallpaper mural; both look toward the mural wall in a warm candid moment, turned away from the camera."
       },
       {
         "id": "mother_holding_baby",
         "label": "Mother holding toddler in arms & pointing at mural",
-        "ageGroups": ["baby", "vorschul"],
+        "ageGroups": [
+          "baby",
+          "vorschul"
+        ],
         "template": "Standing barefoot on the soft floor rug in front of the mural wall with her back to the camera, a young mother in a natural oatmeal linen dress holds {child} on her left hip and points her right hand up toward the illustration on the wallpaper mural while both gaze at the wall."
       },
       {
         "id": "mother_child_rug",
         "label": "Mother & child playing with wooden blocks on rug",
-        "ageGroups": ["baby", "vorschul", "schulkind"],
+        "ageGroups": [
+          "baby",
+          "vorschul",
+          "schulkind"
+        ],
         "template": "Sitting together on the round woven jute rug in front of the mural wall, a young mother in a soft cream linen shirt and beige trousers and {child} calmly build a small tower from natural wooden blocks on the rug, absorbed in quiet play without looking at the camera."
       },
       {
         "id": "child_rug",
         "label": "Child playing with wooden toys on rug (from behind)",
-        "ageGroups": ["baby", "vorschul", "schulkind"],
+        "ageGroups": [
+          "baby",
+          "vorschul",
+          "schulkind"
+        ],
         "template": "Sitting on the woven rug in the middle of the floor facing the mural wall with their back to the camera, {child} plays calmly with natural wooden toys on the rug, face turned away from the camera."
       }
     ]

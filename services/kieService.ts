@@ -1,5 +1,14 @@
 import { GenerationSettings, GenerationUsage, UploadedImage } from '../types';
-import { getModelCapability, validateModelInput, kling26InputSchema, kling30InputSchema } from '../shared/modelContracts';
+import {
+  getModelCapability,
+  validateModelInput,
+  kling26InputSchema,
+  kling30InputSchema,
+  videoUpscaleInputSchema,
+  getVideoUpscaleEstimate,
+  KIE_USD_PER_CREDIT,
+  VideoUpscaleResolution,
+} from '../shared/modelContracts';
 import { logGeminiEvent } from './geminiService';
 import { MACRO_TEXTURE_LABEL } from './macroTexture';
 import { generateSpanId, generateTraceId } from '../utils/tracing';
@@ -53,8 +62,6 @@ async function uploadReference(kieKey: string, image: UploadedImage, fileName: s
   return url;
 }
 
-const KIE_USD_PER_CREDIT = 0.005;
-
 interface KieRecordData {
   state?: string;
   resultJson?: string;
@@ -82,10 +89,19 @@ function parseKieRecordTelemetry(data?: KieRecordData): { serverTimeSeconds?: nu
   return { serverTimeSeconds, creditsConsumed };
 }
 
-async function pollKieTask(kieKey: string, taskId: string, timeoutMs = 240_000): Promise<KieTaskResult> {
+async function pollKieTask(
+  kieKey: string,
+  taskId: string,
+  timeoutMs = 240_000,
+  onProgress?: (progress: number) => void,
+): Promise<KieTaskResult> {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
     await new Promise(r => setTimeout(r, 3500));
+    if (onProgress) {
+      const elapsedRatio = Math.min(0.85, (Date.now() - started) / (timeoutMs * 0.5));
+      onProgress(Math.round(10 + elapsedRatio * 100));
+    }
     const res = await callKieProxy<{ data?: KieRecordData }>(kieKey, {
       action: 'recordInfo',
       taskId,
@@ -93,15 +109,15 @@ async function pollKieTask(kieKey: string, taskId: string, timeoutMs = 240_000):
     const state = res?.data?.state;
     if (state === 'success') {
       const parsed = JSON.parse(res.data?.resultJson || '{}');
-      const url = parsed?.resultUrls?.[0] || parsed?.images?.[0]?.url || parsed?.url;
-      if (!url) throw new Error('KIE task succeeded but returned no image URL');
+      const url = parsed?.resultUrls?.[0] || parsed?.video?.url || parsed?.images?.[0]?.url || parsed?.url;
+      if (!url) throw new Error('KIE task succeeded but returned no result URL');
       return { url, ...parseKieRecordTelemetry(res.data) };
     }
     if (state === 'fail' || state === 'failed') {
       throw new Error(res?.data?.failMsg || 'KIE generation task failed');
     }
   }
-  throw new Error('KIE generation timed out');
+  throw new Error(`KIE task timed out (taskId: ${taskId})`);
 }
 
 function buildKieInput(
@@ -472,6 +488,89 @@ export async function generateKieVideo(
       resolution: logResolution,
       provider: 'kie',
       spanId,
+      ...(taskId ? { kieTaskId: taskId } : {}),
+    });
+    throw err;
+  }
+}
+
+export interface KieVideoUpscaleResult {
+  url: string;
+  costUsd: number;
+  creditsConsumed: number;
+  costFromUsage: boolean;
+  serverTimeSeconds?: number;
+}
+
+export async function upscaleKieVideo(
+  kieKey: string,
+  videoUrl: string,
+  resolution: VideoUpscaleResolution = '2K',
+  durationSeconds: number = 5,
+  onProgress?: (progress: number) => void,
+  traceId?: string,
+  inputDims?: { w: number; h: number } | null,
+): Promise<KieVideoUpscaleResult> {
+  if (!kieKey) throw new Error('KIE API Key is required in the header.');
+  const parsedInput = videoUpscaleInputSchema.safeParse({ video_url: videoUrl, resolution });
+  if (!parsedInput.success) {
+    throw new Error(`Invalid video/upscale payload: ${parsedInput.error.issues.map(i => i.message).join('; ')}`);
+  }
+
+  const tid = traceId || generateTraceId();
+  const spanId = generateSpanId();
+  const startTime = Date.now();
+  let taskId: string | undefined;
+  const { credits: estimatedCredits, usd: estimatedCost } = getVideoUpscaleEstimate(resolution, durationSeconds);
+
+  const baseTelemetry = {
+    stage: 'upscale' as const,
+    upscaleModel: 'video/upscale',
+    provider: 'kie',
+    resolution,
+    durationSeconds,
+    spanId,
+    ...(inputDims ? { inputWidth: inputDims.w, inputHeight: inputDims.h } : {}),
+  };
+
+  logGeminiEvent('video/upscale', '', 0, 0, 'started', null, tid, undefined, baseTelemetry);
+
+  try {
+    onProgress?.(10);
+    const created = await callKieProxy<{ data?: { taskId?: string } }>(kieKey, {
+      action: 'createTask',
+      model: 'video/upscale',
+      input: parsedInput.data,
+    });
+    taskId = created?.data?.taskId;
+    if (!taskId) throw new Error('KIE video/upscale createTask returned no taskId');
+
+    const taskResult = await pollKieTask(kieKey, taskId, 300_000, onProgress);
+    const duration = (Date.now() - startTime) / 1000;
+    const creditsConsumed = taskResult.creditsConsumed ?? estimatedCredits;
+    const finalCost = taskResult.creditsConsumed
+      ? Number((taskResult.creditsConsumed * KIE_USD_PER_CREDIT).toFixed(4))
+      : estimatedCost;
+
+    logGeminiEvent('video/upscale', '', finalCost, duration, 'success', null, tid, undefined, {
+      ...baseTelemetry,
+      kieTaskId: taskId,
+      kieCredits: creditsConsumed,
+      serverTimeSeconds: taskResult.serverTimeSeconds,
+      costSource: taskResult.creditsConsumed ? 'credits' : 'estimate',
+    });
+    onProgress?.(100);
+    return {
+      url: taskResult.url,
+      costUsd: finalCost,
+      creditsConsumed,
+      costFromUsage: Boolean(taskResult.creditsConsumed),
+      serverTimeSeconds: taskResult.serverTimeSeconds,
+    };
+  } catch (err: any) {
+    const duration = (Date.now() - startTime) / 1000;
+    logGeminiEvent('video/upscale', '', 0, duration, 'error', err?.message || 'KIE video/upscale error', tid, undefined, {
+      ...baseTelemetry,
       ...(taskId ? { kieTaskId: taskId } : {}),
     });
     throw err;

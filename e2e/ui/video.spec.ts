@@ -286,4 +286,82 @@ test.describe('Video — Kling 3.0 (KIE)', () => {
       resolution: '1080p',
     });
   });
+
+  test('upscales generated KIE video to 4K and emits correlated OpenTelemetry trace', async ({ page, apis }) => {
+    await page.addInitScript(() => localStorage.setItem('kie_api_key', 'kie_test_key_12345'));
+    const kieCalls: any[] = [];
+    await page.route('/api/kie', async (route) => {
+      const body = route.request().postDataJSON();
+      kieCalls.push(body);
+      if (body.action === 'upload') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ code: 200, data: { downloadUrl: 'https://tempfile.aiquickdraw.com/test_frame.jpg' } }) });
+      }
+      if (body.action === 'createTask') {
+        const taskId = body.model === 'video/upscale' ? 'task_upscale_001' : 'task_kling3_001';
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ code: 200, data: { taskId } }) });
+      }
+      if (body.action === 'recordInfo') {
+        const isUpscale = body.taskId === 'task_upscale_001';
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            code: 200,
+            data: {
+              state: 'success',
+              costTime: isUpscale ? 35 : 18,
+              consumeCredits: isUpscale ? 30 : 75.5,
+              resultJson: JSON.stringify({
+                resultUrls: [
+                  isUpscale
+                    ? 'https://tempfile.aiquickdraw.com/kling3_upscaled_4k.mp4'
+                    : 'https://tempfile.aiquickdraw.com/kling3_out.mp4',
+                ],
+              }),
+            },
+          }),
+        });
+      }
+      return route.fallback();
+    });
+
+    await openVideoWithImage(page);
+    const tab = activeTab(page);
+    await tab.getByRole('button', { name: /Kling 3\.0 \(KIE\)/ }).click();
+    await tab.getByRole('button', { name: /Запустить анимацию обоев \(Kling 3\.0\)/ }).click();
+    await expect(tab.locator('video')).toHaveAttribute('src', 'https://tempfile.aiquickdraw.com/kling3_out.mp4', { timeout: 15_000 });
+
+    await tab.getByRole('button', { name: /^4K/ }).click();
+    await tab.getByRole('button', { name: /Апскейл до 4K/ }).click();
+    await expect(tab.locator('video')).toHaveAttribute('src', 'https://tempfile.aiquickdraw.com/kling3_upscaled_4k.mp4', { timeout: 15_000 });
+
+    const upscaleCall = kieCalls.find((c) => c.action === 'createTask' && c.model === 'video/upscale');
+    expect(upscaleCall).toEqual({
+      action: 'createTask',
+      model: 'video/upscale',
+      input: {
+        video_url: 'https://tempfile.aiquickdraw.com/kling3_out.mp4',
+        resolution: '4K',
+      },
+    });
+
+    await expect.poll(() => apis.logEvents.map((e) => e.status)).toEqual(['started', 'success', 'started', 'success']);
+    const genSuccess = apis.logEvents[1];
+    const upscaleSuccess = apis.logEvents[3];
+    expect(upscaleSuccess).toMatchObject({
+      model: 'video/upscale',
+      stage: 'upscale',
+      upscaleModel: 'video/upscale',
+      provider: 'kie',
+      resolution: '4K',
+      durationSeconds: 5,
+      kieTaskId: 'task_upscale_001',
+      kieCredits: 30,
+      serverTimeSeconds: 35,
+      costSource: 'credits',
+    });
+    expect(upscaleSuccess.traceId).toBe(genSuccess.traceId);
+    expect(upscaleSuccess.spanId).toBeTruthy();
+    expect(upscaleSuccess.spanId).not.toBe(genSuccess.spanId);
+  });
 });

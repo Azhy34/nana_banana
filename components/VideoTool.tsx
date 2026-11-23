@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { generateVeoVideoOnClient } from '../services/veoService';
 import { generateOmniVideoOnClient } from '../services/omniService';
-import { generateKieVideo } from '../services/kieService';
+import { generateKieVideo, upscaleKieVideo } from '../services/kieService';
 import {
   VEO_PRESETS,
   OMNI_PRESETS,
@@ -22,7 +22,12 @@ import {
   composeKlingPrompt,
 } from '../constants';
 import { VideoJobSettings, VideoGenerationState, VideoEngine, OmniResolution } from '../types';
-import { getModelCapability } from '../shared/modelContracts';
+import {
+  getModelCapability,
+  VIDEO_UPSCALE_RESOLUTIONS,
+  getVideoUpscaleEstimate,
+  VideoUpscaleResolution,
+} from '../shared/modelContracts';
 import { downloadImage } from '../services/downloadService';
 import { generateTraceId } from '../utils/tracing';
 
@@ -71,6 +76,12 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       setSourceImage(initialImage);
       // Reset previous animation results so they don't show on a new card
       setVideoDims(null);
+      setOriginalVideoDims(null);
+      setLastTraceId(undefined);
+      setUpscaleError(null);
+      setOriginalVideoUrl(null);
+      setUpscaledVideoUrl(null);
+      setUpscaleCostInfo(null);
       setState({
         isLoading: false,
         progress: 0,
@@ -79,6 +90,8 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       });
     }
   }, [initialImage]);
+
+  const clipDuration = engine === 'veo' ? VEO_FIXED_DURATION_SECONDS : OMNI_DEFAULT_DURATION_SECONDS;
 
   const estimatedCost = engine === 'omni'
     ? getOmniCostUsd(resolution, OMNI_DEFAULT_DURATION_SECONDS)
@@ -89,6 +102,19 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         : getVeoCostUsd(VEO_FIXED_DURATION_SECONDS);
 
   const [isDownloading, setIsDownloading] = useState(false);
+  const [lastTraceId, setLastTraceId] = useState<string | undefined>(undefined);
+  const [upscaleResolution, setUpscaleResolution] = useState<VideoUpscaleResolution>('2K');
+  const [isUpscaling, setIsUpscaling] = useState(false);
+  const [upscaleProgress, setUpscaleProgress] = useState(0);
+  const [upscaleError, setUpscaleError] = useState<string | null>(null);
+  const [originalVideoUrl, setOriginalVideoUrl] = useState<string | null>(null);
+  const [originalVideoDims, setOriginalVideoDims] = useState<{ w: number; h: number } | null>(null);
+  const [upscaledVideoUrl, setUpscaledVideoUrl] = useState<string | null>(null);
+  const [upscaleCostInfo, setUpscaleCostInfo] = useState<{
+    credits: number;
+    costUsd: number;
+    resolution: VideoUpscaleResolution;
+  } | null>(null);
 
   // Etsy validates the shortest side of the uploaded file: below 500px it rejects the
   // video outright ("Sie muss mindestens 500 Pixel mal 500 Pixel betragen").
@@ -221,6 +247,11 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     }
 
     setVideoDims(null);
+    setOriginalVideoDims(null);
+    setUpscaleError(null);
+    setOriginalVideoUrl(null);
+    setUpscaledVideoUrl(null);
+    setUpscaleCostInfo(null);
     setState({
       isLoading: true,
       progress: 0,
@@ -230,6 +261,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
 
     try {
       const traceId = generateTraceId();
+      setLastTraceId(traceId);
       let videoUrl: string;
       let runCost = estimatedCost;
       let costFromUsage = false;
@@ -287,12 +319,50 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     }
   };
 
+  const handleUpscale = async () => {
+    const sourceUrl = originalVideoUrl || state.resultVideoUrl;
+    if (!sourceUrl || !kieApiKey) return;
+    const sourceDims = originalVideoDims ?? videoDims;
+    setIsUpscaling(true);
+    setUpscaleProgress(0);
+    setUpscaleError(null);
+    try {
+      const result = await upscaleKieVideo(
+        kieApiKey,
+        sourceUrl,
+        upscaleResolution,
+        clipDuration,
+        (p) => setUpscaleProgress(p),
+        lastTraceId,
+        sourceDims,
+      );
+      setOriginalVideoUrl(sourceUrl);
+      if (!originalVideoDims && videoDims) setOriginalVideoDims(videoDims);
+      setUpscaledVideoUrl(result.url);
+      setUpscaleCostInfo({
+        credits: result.creditsConsumed,
+        costUsd: result.costUsd,
+        resolution: upscaleResolution,
+      });
+      setVideoDims(null);
+      setState(prev => ({
+        ...prev,
+        resultVideoUrl: result.url,
+      }));
+    } catch (err: any) {
+      setUpscaleError(err?.message || 'Ошибка апскейла видео');
+    } finally {
+      setIsUpscaling(false);
+    }
+  };
+
   const handleDownload = async () => {
     if (!state.resultVideoUrl) return;
     setIsDownloading(true);
     try {
       const prefix = engine === 'omni' ? `omni-${resolution}-${OMNI_DEFAULT_DURATION_SECONDS}s` : engine === 'kling3' ? `kling3-${kling3Mode}-5s` : engine === 'kling' ? 'kling-26-5s' : 'veo';
-      await downloadImage(state.resultVideoUrl, `${prefix}-${settings.promptPreset}-${settings.seed}.mp4`);
+      const upscaleTag = upscaleCostInfo && state.resultVideoUrl === upscaledVideoUrl ? `-${upscaleCostInfo.resolution}` : '';
+      await downloadImage(state.resultVideoUrl, `${prefix}${upscaleTag}-${settings.promptPreset}-${settings.seed}.mp4`);
     } finally {
       setIsDownloading(false);
     }
@@ -718,6 +788,108 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                 >
                   {isDownloading ? 'Загрузка...' : '⬇ Скачать готовый видео-пин'}
                 </button>
+
+                {/* KIE Video Upscale */}
+                <div className="w-full max-w-[320px] bg-slate-900/70 border border-slate-700/80 rounded-xl p-3 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-200">✨ Улучшить качество (KIE Upscale)</span>
+                    {upscaleCostInfo && (
+                      <span className="text-[11px] font-mono text-emerald-400">
+                        ✓ {upscaleCostInfo.resolution} ({upscaleCostInfo.credits} кр.)
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {VIDEO_UPSCALE_RESOLUTIONS.map((resOpt) => {
+                      const { credits: cr } = getVideoUpscaleEstimate(resOpt, clipDuration);
+                      const active = upscaleResolution === resOpt;
+                      return (
+                        <button
+                          key={resOpt}
+                          type="button"
+                          onClick={() => setUpscaleResolution(resOpt)}
+                          disabled={isUpscaling}
+                          className={`py-1.5 px-2 rounded-lg border text-center transition-all ${
+                            active
+                              ? 'bg-indigo-600/30 border-indigo-400 text-white'
+                              : 'bg-slate-800/70 border-slate-700 text-slate-400 hover:text-slate-200'
+                          }`}
+                        >
+                          <div className="text-xs font-bold">{resOpt}</div>
+                          <div className="text-[10px] font-mono opacity-80">{cr} кр.</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {(() => {
+                    const baseUrl = originalVideoUrl || state.resultVideoUrl || '';
+                    const isPublicHttp = /^https?:\/\//i.test(baseUrl);
+                    const { credits: estCredits, usd: estUsd } = getVideoUpscaleEstimate(upscaleResolution, clipDuration);
+                    return (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleUpscale}
+                          disabled={isUpscaling || !kieApiKey || !isPublicHttp}
+                          className="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg text-xs transition-all flex items-center justify-center gap-2"
+                        >
+                          {isUpscaling
+                            ? `Апскейл в ${upscaleResolution}... ${upscaleProgress}%`
+                            : `Апскейл до ${upscaleResolution} (~${estCredits} кр. / $${estUsd.toFixed(3)})`}
+                        </button>
+                        {!isPublicHttp && (
+                          <p className="text-[11px] text-amber-300/90 leading-snug">
+                            Для локальных blob-видео (Omni/Veo) прямой апскейл KIE недоступен — работает для Kling 2.6 / 3.0.
+                          </p>
+                        )}
+                        {isPublicHttp && !kieApiKey && (
+                          <p className="text-[11px] text-amber-300/90 leading-snug">
+                            Укажите KIE API Key в шапке для запуска апскейла.
+                          </p>
+                        )}
+                      </>
+                    );
+                  })()}
+
+                  {upscaledVideoUrl && originalVideoUrl && (
+                    <div className="flex gap-1.5 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVideoDims(null);
+                          setState(prev => ({ ...prev, resultVideoUrl: originalVideoUrl }));
+                        }}
+                        className={`flex-1 py-1 rounded text-[11px] border ${
+                          state.resultVideoUrl === originalVideoUrl
+                            ? 'bg-slate-700 border-slate-500 text-white'
+                            : 'bg-slate-800/50 border-slate-700 text-slate-400'
+                        }`}
+                      >
+                        Оригинал
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVideoDims(null);
+                          setState(prev => ({ ...prev, resultVideoUrl: upscaledVideoUrl }));
+                        }}
+                        className={`flex-1 py-1 rounded text-[11px] border ${
+                          state.resultVideoUrl === upscaledVideoUrl
+                            ? 'bg-emerald-600/30 border-emerald-500 text-emerald-200'
+                            : 'bg-slate-800/50 border-slate-700 text-slate-400'
+                        }`}
+                      >
+                        Апскейл ({upscaleCostInfo?.resolution})
+                      </button>
+                    </div>
+                  )}
+
+                  {upscaleError && (
+                    <p className="text-[11px] text-red-300 leading-snug">⚠ {upscaleError}</p>
+                  )}
+                </div>
               </div>
             ) : sourceImage ? (
               <div className="w-full flex flex-col items-center gap-4">

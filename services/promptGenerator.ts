@@ -21,6 +21,8 @@ function shuffled<T>(arr: readonly T[]): T[] {
 
 const BOY_EXCLUDED_COLORS = new Set(['Dusty Rose', 'Strawberry Milk', 'Lilac Mist']);
 
+const MUSHROOM_LAMP_COLORS = ['bright cobalt blue', 'sunny yellow', 'sky blue', 'pastel pink'] as const;
+
 export function getColorsForStyle(styleName: string, audience: AudienceKey = 'neutral'): string[] {
   const allowed = (trendsData.styles.find(s => s.name === styleName) as { colors?: string[] } | undefined)?.colors;
   const base = allowed && allowed.length > 0 ? allowed : trendsData.colors.map(c => c.name);
@@ -96,6 +98,14 @@ export function accessoriesOfAge(ageGroup: string): string[] {
   return base.filter(a => !/chandelier|pendant|picture frames|art print|wax crayons/i.test(a));
 }
 
+export function rugsOfAge(ageGroup: string): string[] {
+  return accessoriesOfAge(ageGroup).filter(a => /\brug\b/i.test(a));
+}
+
+export function nonRugAccessoriesOfAge(ageGroup: string): string[] {
+  return accessoriesOfAge(ageGroup).filter(a => !/\brug\b/i.test(a));
+}
+
 export interface RandomTagOptions {
   audience?: AudienceKey;
   heroRoom?: boolean;
@@ -133,7 +143,13 @@ export function generateRandomTags(
     lens: pick(TAG_OPTIONS.lenses.filter(l => !l.startsWith('24mm'))),
     aperture: pick(TAG_OPTIONS.apertures),
     cameraBody: pick(TAG_OPTIONS.cameraBodies),
-    accessories: pickN(accessoriesOfAge(resolvedAgeGroup), 1 + Math.floor(Math.random() * trendsData.staging.maxAccessories)),
+    accessories: (() => {
+      const rugs = rugsOfAge(resolvedAgeGroup);
+      const others = nonRugAccessoriesOfAge(resolvedAgeGroup);
+      const pickedRug = rugs.length > 0 ? [pick(rugs)] : [];
+      const extraCount = Math.random() < 0.7 && others.length > 0 ? 1 : 0;
+      return [...pickedRug, ...pickN(others, extraCount)].slice(0, trendsData.staging.maxAccessories);
+    })(),
     aspectRatio,
     compositionStrategy: Math.random() < 0.4 ? 'unobstructed' : 'natural',
     cinematicDetail: pick(CINEMATIC_DETAILS),
@@ -289,10 +305,12 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   // it no longer changes this.
   const isCleanFloor = Boolean(tags.cleanFloor) && !tags.heroRoom && tags.personMode !== 'child_rug' && tags.personMode !== 'mother_child_rug';
   const compositionText = isCleanFloor
-    ? trendsData.staging.text.replace(
-        "and the child's own toys lie on a rug.",
-        'the woven rug and parquet floor are completely clean, open, and uncluttered, with zero toys, books, or loose items on the floor.',
-      )
+    ? trendsData.staging.text
+        .replace('with at most two small accessories beside it, ', '')
+        .replace(
+          "and the child's own toys lie on a rug.",
+          'the floor rug, room corners, and parquet floor are completely bare, open, and uncluttered, with only the focal furniture piece and zero toys, playhouses, or loose items on the floor.',
+        )
     : trendsData.staging.text;
 
   const insights = (trendsData as any).latestMarketInsights as {
@@ -338,13 +356,13 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   if (tags.ageGroup === 'baby') {
     sceneSetting = `An authentic, serene nursery for a baby in a warm home${styleLabel}. The room feels gentle, joyful, and spacious, with tactile natural wood and breathable organic cotton.`;
     lifestyleTouch = isCleanFloor
-      ? 'Clean, uncluttered nursery styling with crisp organic cotton bedding and a bare woven floor rug.'
+      ? 'Clean, uncluttered nursery styling with crisp organic cotton bedding and a bare floor rug.'
       : `Authentic lived-in nursery details: soft organic cotton bedding and ${trendingToy || 'curated wooden sensory blocks catching the light'}.`;
   } else if (tags.ageGroup === 'vorschul') {
     sceneSetting = `A delightful, joyful children's bedroom${styleLabel}. Designed with playful child-scale furniture, natural wood, and cheerful accents that foster creativity, warmth, and restful sleep.`;
     lifestyleTouch = isCleanFloor
-      ? 'Clean, uncluttered room styling with neat bedding and an open, empty woven floor rug.'
-      : `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'} and a plush cream dot rug.`;
+      ? 'Clean, uncluttered room styling with neat bedding and an open, empty floor rug.'
+      : `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'} on the floor rug.`;
   } else if (tags.ageGroup === 'schulkind') {
     sceneSetting = `A stylish, cozy children's bedroom and creative study sanctuary${styleLabel}. Warm natural wood surfaces, curated design touches and an uncluttered layout create an inspiring space.`;
     lifestyleTouch = isCleanFloor
@@ -368,7 +386,12 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     ? "This is a commercial interior photograph showcasing a designer wallpaper in a European children's interior. WALL ARCHITECTURE (RETRO SCALLOPED WAVE TRIM): The reference wallpaper covers the lower two-thirds of the feature wall, crowned by an eye-catching decorative scalloped wave trim moulding in warm barberry red or terracotta. Above the wavy scalloped trim, the upper wall is painted in warm chalky cream with a charming gallery of art prints in scalloped and checkered frames. Retain the exact pattern, colors, and stripe/art scale from the reference image 1:1 on the wallpaper section. The wallpaper is the hero of the interior."
     : "This is a commercial interior photograph showcasing a wall mural wallpaper. The reference image is a single full-scale mural (not a repeating tile pattern). FULL-HEIGHT 100% WALL COVERAGE: This entire reference image must be mapped and stretched across the feature wall edge-to-edge as a single, continuous, seamless mural covering 100% of the wall surface from the floor baseboard up to the ceiling line, running cleanly behind the furniture without any horizontal cuts, splits, wainscoting, or unpapered lower section. Retain the exact illustration, colors, and scale from the reference image 1:1. The wallpaper is the hero of the interior.";
 
-  const furnitureSection = `Focal furniture: ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material} (${keyObjData?.description ?? 'low child-scale proportions'}). Architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}; all items near the mural wall stay under 90 cm so the mural remains open. ${compositionText}`;
+  const rawKeyDesc = keyObjData?.description ?? 'realistic European child-bedroom proportions';
+  const keyDescWithLampColor = rawKeyDesc.replace(
+    'a mid-century mushroom table lamp',
+    () => `a mid-century ${pick([...MUSHROOM_LAMP_COLORS])} mushroom table lamp`,
+  );
+  const furnitureSection = `Focal furniture: ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material} (${keyDescWithLampColor}). Architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}; all items near the mural wall stay under 90 cm so the mural remains open. ${compositionText}`;
 
   let colorAccentText = `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried by the bedding, rug, and accessories (${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(', ')}).`;
   if (trendingColorName) {

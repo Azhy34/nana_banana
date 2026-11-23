@@ -193,7 +193,50 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapability> = {
     kieCredits2K: 75.5,
     notes: '720p std 15.1 cr/s ($0.38/5s) or 1080p pro 20.2 cr/s ($0.51/5s); supports start/end frame + elements.',
   },
+  'video/upscale': {
+    id: 'video/upscale',
+    label: 'KIE Video Upscale',
+    provider: 'kie',
+    kind: 'video',
+    aspectRatios: ['9:16', '1:1', '16:9'],
+    resolutions: ['1080P', '2K', '4K'],
+    maxRefs: 0,
+    maxPromptChars: 0,
+    negativePromptMode: 'positive_only',
+    recommendedPromptMode: 'brief',
+    supportsTextureRef: false,
+    costUsd2K: 0.075,
+    kieCredits2K: 15,
+    notes: 'Upscale/enhance video to 1080P (1.5 cr/s), 2K (3 cr/s), or 4K (6 cr/s). Max 50 MB / 60s.',
+  },
 };
+
+export const VIDEO_UPSCALE_RESOLUTIONS = ['1080P', '2K', '4K'] as const;
+export type VideoUpscaleResolution = (typeof VIDEO_UPSCALE_RESOLUTIONS)[number];
+
+export const KIE_USD_PER_CREDIT = 0.005;
+
+export const VIDEO_UPSCALE_CREDITS_PER_SEC: Record<VideoUpscaleResolution, number> = {
+  '1080P': 1.5,
+  '2K': 3,
+  '4K': 6,
+};
+
+export function getVideoUpscaleEstimate(resolution: VideoUpscaleResolution, durationSeconds: number) {
+  const credits = Number((VIDEO_UPSCALE_CREDITS_PER_SEC[resolution] * durationSeconds).toFixed(2));
+  const usd = Number((credits * KIE_USD_PER_CREDIT).toFixed(4));
+  return { credits, usd };
+}
+
+export const videoUpscaleInputSchema = z.object({
+  video_url: z
+    .string()
+    .url('Video URL must be a valid URI')
+    .refine(v => /^https?:\/\//i.test(v), 'video_url must be a publicly downloadable HTTP(S) URL'),
+  resolution: z.enum(VIDEO_UPSCALE_RESOLUTIONS).default('2K'),
+});
+
+export type VideoUpscaleInput = z.infer<typeof videoUpscaleInputSchema>;
 
 export const kling26InputSchema = z.object({
   prompt: z.string().min(1, 'Prompt cannot be empty').max(2500, 'Kling 2.6 prompt max length is 2500 characters'),
