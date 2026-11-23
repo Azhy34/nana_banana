@@ -1,7 +1,7 @@
 import React from 'react';
 import { useBatch } from '../hooks/useBatch';
 import { AudienceKey, BatchCard, BatchAspectRatio, BatchPersonMode, BatchPromptTags, AgeGroupKey, ViewMode, ModelType, AIProvider, PromptMode } from '../types';
-import { TAG_OPTIONS, AGE_GROUP_LABELS, getColorsForStyle, muralSafeKeyObjects, TargetAgeFilter, PEOPLE_SCENE_OPTIONS } from '../services/promptGenerator';
+import { TAG_OPTIONS, AGE_GROUP_LABELS, getColorsForStyle, muralSafeKeyObjects, TargetAgeFilter, resolveAgePool, PEOPLE_SCENE_OPTIONS } from '../services/promptGenerator';
 import { getUiImageModels, getModelCapability, validateModelInput } from '../shared/modelContracts';
 import { EXPORT_PRESET_OPTIONS, ExportPresetId } from '../services/exportCrop';
 import { BATCH_COUNT_OPTIONS } from '../constants';
@@ -228,21 +228,51 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           </div>
 
           <div className="pt-2 border-t border-slate-700">
-            <h3 className="text-white font-semibold mb-2 text-sm">Room Age Group</h3>
-            <div className="flex flex-wrap gap-2">
-              {([
-                { value: 'all_kids', label: 'All Kids (0–9 mix)' },
-                { value: 'baby', label: 'Baby (0–3)' },
-                { value: 'vorschul', label: 'Preschool (3–6)' },
-                { value: 'schulkind', label: 'School (6–9)' },
-                { value: 'teenager', label: 'Teen (10–16)' },
-              ] as const).map(opt => (
-                <button key={opt.value} type="button" onClick={() => setTargetAge(opt.value as TargetAgeFilter)}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${targetAge === opt.value ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
-                  {opt.label}
-                </button>
-              ))}
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-white font-semibold text-sm">Room Age Group</h3>
+              <span className="text-[11px] text-slate-400">Можно выбрать несколько</span>
             </div>
+            {(() => {
+              const selectedAges = resolveAgePool(targetAge);
+              const isAllKids = selectedAges.length === 3 && ['baby', 'vorschul', 'schulkind'].every(a => selectedAges.includes(a as AgeGroupKey));
+              const toggleAge = (age: AgeGroupKey) => {
+                if (selectedAges.includes(age)) {
+                  if (selectedAges.length === 1) return; // keep at least 1 active
+                  setTargetAge(selectedAges.filter(a => a !== age));
+                } else {
+                  setTargetAge([...selectedAges, age]);
+                }
+              };
+              return (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTargetAge(['baby', 'vorschul', 'schulkind'])}
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${isAllKids ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:text-white'}`}
+                  >
+                    All Kids (0–9 mix)
+                  </button>
+                  {([
+                    { value: 'baby', label: 'Baby (0–3)' },
+                    { value: 'vorschul', label: 'Preschool (3–6)' },
+                    { value: 'schulkind', label: 'School (6–9)' },
+                    { value: 'teenager', label: 'Teen (10–16)' },
+                  ] as const).map(opt => {
+                    const active = selectedAges.includes(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => toggleAge(opt.value)}
+                        className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${active ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:text-white'}`}
+                      >
+                        {active ? '✓ ' : ''}{opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
 
           <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-700">

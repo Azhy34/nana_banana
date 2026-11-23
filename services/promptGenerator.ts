@@ -49,9 +49,16 @@ export const TAG_OPTIONS = {
   cameraDistances: trendsData.cameraDistances.map(d => d.name),
   depthOfField: trendsData.depthOfField.map(d => d.name),
   accessories: trendsData.accessories,
+  plants: (trendsData as { plants?: string[] }).plants ?? [],
 };
 
-export type TargetAgeFilter = 'all_kids' | AgeGroupKey;
+export type TargetAgeFilter = 'all_kids' | AgeGroupKey | AgeGroupKey[];
+
+export function resolveAgePool(targetAge?: TargetAgeFilter): AgeGroupKey[] {
+  if (!targetAge || targetAge === 'all_kids') return ['baby', 'vorschul', 'schulkind'];
+  if (Array.isArray(targetAge)) return targetAge.length > 0 ? targetAge : ['baby', 'vorschul', 'schulkind'];
+  return [targetAge];
+}
 
 export const AGE_GROUP_LABELS: Record<AgeGroupKey, string> = {
   baby: 'Baby (0–3)',
@@ -106,6 +113,14 @@ export function nonRugAccessoriesOfAge(ageGroup: string): string[] {
   return accessoriesOfAge(ageGroup).filter(a => !/\brug\b/i.test(a));
 }
 
+export function pickAccessoriesForAge(ageGroup: string): string[] {
+  const rugs = rugsOfAge(ageGroup);
+  const others = nonRugAccessoriesOfAge(ageGroup);
+  const pickedRug = rugs.length > 0 ? [pick(rugs)] : [];
+  const pickedOther = others.length > 0 ? [pick(others)] : [];
+  return [...pickedRug, ...pickedOther].slice(0, trendsData.staging.maxAccessories);
+}
+
 export interface RandomTagOptions {
   audience?: AudienceKey;
   heroRoom?: boolean;
@@ -117,6 +132,8 @@ export interface RandomTagOptions {
   lighting?: string;
   cameraAngle?: string;
   keyObject?: string;
+  accessories?: string[];
+  plant?: string | null;
 }
 
 export function generateRandomTags(
@@ -143,13 +160,13 @@ export function generateRandomTags(
     lens: pick(TAG_OPTIONS.lenses.filter(l => !l.startsWith('24mm'))),
     aperture: pick(TAG_OPTIONS.apertures),
     cameraBody: pick(TAG_OPTIONS.cameraBodies),
-    accessories: (() => {
-      const rugs = rugsOfAge(resolvedAgeGroup);
-      const others = nonRugAccessoriesOfAge(resolvedAgeGroup);
-      const pickedRug = rugs.length > 0 ? [pick(rugs)] : [];
-      const extraCount = Math.random() < 0.7 && others.length > 0 ? 1 : 0;
-      return [...pickedRug, ...pickN(others, extraCount)].slice(0, trendsData.staging.maxAccessories);
-    })(),
+    accessories: options.accessories ?? pickAccessoriesForAge(resolvedAgeGroup),
+    plant:
+      options.plant !== undefined
+        ? (options.plant ?? undefined)
+        : (!options.heroRoom && !options.macroTexture && TAG_OPTIONS.plants.length > 0 && Math.random() < 0.35
+            ? pick(TAG_OPTIONS.plants)
+            : undefined),
     aspectRatio,
     compositionStrategy: Math.random() < 0.4 ? 'unobstructed' : 'natural',
     cinematicDetail: pick(CINEMATIC_DETAILS),
@@ -186,9 +203,7 @@ export function generateBatchDeck(
   formats: BatchAspectRatio[],
   options: { audience?: AudienceKey; targetAge?: TargetAgeFilter; includeHero?: boolean; includeMacro?: boolean; promptMode?: PromptMode } = {},
 ): BatchPromptTags[] {
-  const targetAge = options.targetAge ?? 'all_kids';
-  const ageGroupCycle: AgeGroupKey[] =
-    targetAge === 'all_kids' ? ['baby', 'vorschul', 'schulkind'] : [targetAge];
+  const ageGroupCycle = resolveAgePool(options.targetAge);
   const styleDeck = shuffled(TAG_OPTIONS.styles);
   const lightDeck = shuffled(TAG_OPTIONS.lighting);
   const angleDeck = shuffled(TAG_OPTIONS.cameraAngles);
@@ -198,6 +213,20 @@ export function generateBatchDeck(
     schulkind: shuffled(muralSafeKeyObjects('schulkind')),
     teenager: shuffled(muralSafeKeyObjects('teenager')),
   };
+  const rugDecks: Record<AgeGroupKey, string[]> = {
+    baby: shuffled(rugsOfAge('baby')),
+    vorschul: shuffled(rugsOfAge('vorschul')),
+    schulkind: shuffled(rugsOfAge('schulkind')),
+    teenager: shuffled(rugsOfAge('teenager')),
+  };
+  const accDecks: Record<AgeGroupKey, string[]> = {
+    baby: shuffled(nonRugAccessoriesOfAge('baby')),
+    vorschul: shuffled(nonRugAccessoriesOfAge('vorschul')),
+    schulkind: shuffled(nonRugAccessoriesOfAge('schulkind')),
+    teenager: shuffled(nonRugAccessoriesOfAge('teenager')),
+  };
+  const plantDeck = shuffled(TAG_OPTIONS.plants);
+  let plantGiveCounter = 0;
   const ageCounters: Record<AgeGroupKey, number> = { baby: 0, vorschul: 0, schulkind: 0, teenager: 0 };
 
   // Place Hero shot on the first photo master card (prefer 2:3, 4:5, 4:3, or 3:4) if requested.
@@ -260,6 +289,17 @@ export function generateBatchDeck(
         ? (idx % 2 === 0 ? 'boy' : 'girl')
         : (options.audience ?? 'neutral');
 
+    const rugDeck = rugDecks[ageGroup];
+    const accDeck = accDecks[ageGroup];
+    const dealtAccessories = [
+      ...(rugDeck.length > 0 ? [rugDeck[ageIdx % rugDeck.length]] : []),
+      ...(accDeck.length > 0 ? [accDeck[ageIdx % accDeck.length]] : []),
+    ].slice(0, trendsData.staging.maxAccessories);
+    const dealtPlant =
+      !isHero && !isMacro && plantDeck.length > 0 && (plantGiveCounter++ % 3 === 1)
+        ? plantDeck[Math.floor(plantGiveCounter / 3) % plantDeck.length]
+        : null;
+
     return generateRandomTags(ar, ageGroup, {
       audience: effectiveAudience,
       heroRoom: isHero,
@@ -271,6 +311,8 @@ export function generateBatchDeck(
       lighting: cardLighting,
       cameraAngle: cardAngle,
       keyObject: keyDeck[ageIdx % keyDeck.length],
+      accessories: dealtAccessories,
+      plant: dealtPlant,
     });
   });
 }
@@ -320,20 +362,18 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     materials?: string[];
   } | undefined;
   let trendingColorName = '';
-  let activeAccessories = [...tags.accessories];
+  const colorizeMushroomLamp = (text: string) =>
+    text.replace(
+      /\b(?:a )?mid-century mushroom table lamp\b/gi,
+      () => `mid-century ${pick([...MUSHROOM_LAMP_COLORS])} mushroom table lamp`,
+    );
+  let activeAccessories = tags.accessories.map(colorizeMushroomLamp);
   let activeMaterials = naturalMaterials;
 
   if (insights) {
     if (Math.random() < 0.5 && insights.colors && insights.colors.length > 0) {
       const trendingColor = pick(insights.colors);
       trendingColorName = trendingColor.name;
-    }
-    const trendingForAge = (insights.accessories ?? []).filter(a => accessoriesOfAge(tags.ageGroup).includes(a));
-    if (Math.random() < 0.5 && trendingForAge.length > 0) {
-      const trendingAcc = pick(trendingForAge);
-      if (!activeAccessories.includes(trendingAcc)) {
-        activeAccessories.push(trendingAcc);
-      }
     }
     if (Math.random() < 0.5 && insights.materials && insights.materials.length > 0) {
       const trendingMat = pick(insights.materials);
@@ -398,7 +438,8 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     colorAccentText += ` Subtle ${trendingColorName} accents harmonize across the textiles.`;
   }
 
-  const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch}`;
+  const plantLine = tags.plant && !tags.heroRoom && !tags.macroTexture ? ` Statement greenery: ${tags.plant}.` : '';
+  const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch}${plantLine}`;
 
   const lightingSection = `Grazing natural morning daylight from an adjacent window illuminates the ultra-matte non-woven fleece paper wallpaper with subtle fine sand-grain finish and casts soft grounding shadows. Light setting: ${lightingData?.description ?? tags.lighting}.`;
 
@@ -452,9 +493,10 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     const subjectText = tags.heroRoom
       ? `a bright, uncluttered children's room for a child aged 3 to 6 with a flat-weave rug and wooden toys`
       : `a ${tags.ageGroup === 'baby' ? 'serene nursery' : tags.ageGroup === 'teenager' ? 'contemporary youth bedroom' : "children's bedroom"} with ${keyObjData?.name ?? tags.keyObject}`;
+    const briefPlant = tags.plant && !tags.heroRoom && !tags.macroTexture ? ` ${tags.plant}.` : '';
     const sceneText = tags.heroRoom
       ? `A bright airy room with ${trendsData.germanApartmentContext.floorType} and white skirting boards. No bed, no nightstand, and no shelves. On a flat-weave natural wool rug in the middle of the floor lie ${toyLine}.${personSentence}`
-      : `A bright airy room with ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}, with realistic true-to-life furniture proportions. Along the side wall, away from the mural: ${keyObjData?.name ?? tags.keyObject}${keyDesc} in ${material}, with ${briefAccessories.join(' and ')}. On the floor rug: ${toyLine}.${personSentence}`;
+      : `A bright airy room with ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}, with realistic true-to-life furniture proportions. Along the side wall, away from the mural: ${keyObjData?.name ?? tags.keyObject}${keyDesc} in ${material}, with ${briefAccessories.join(' and ')}. On the floor rug: ${toyLine}.${briefPlant}${personSentence}`;
     return buildBriefPrompt({
       subject: subjectText,
       scene: sceneText,

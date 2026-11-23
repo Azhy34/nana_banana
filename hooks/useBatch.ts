@@ -7,7 +7,9 @@ import {
   muralSafeKeyObjects,
   getColorsForStyle,
   accessoriesOfAge,
+  pickAccessoriesForAge,
   TargetAgeFilter,
+  resolveAgePool,
 } from '../services/promptGenerator';
 import { generateBatchImage, isQwenModel, isKieModel } from '../services/generationRouter';
 import { compressImageFile } from '../services/imageCompressor';
@@ -54,7 +56,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const [exportPreset, setExportPreset] = useState<ExportPresetId>('pack_4x5_2x3');
   const [isExporting, setIsExporting] = useState(false);
   const [audience, setAudience] = useState<AudienceKey>('neutral');
-  const [targetAge, setTargetAge] = useState<TargetAgeFilter>('all_kids');
+  const [targetAge, setTargetAge] = useState<TargetAgeFilter>(['baby', 'vorschul', 'schulkind']);
   const [includeHero, setIncludeHero] = useState<boolean>(false);
   const [promptMode, setPromptMode] = useState<PromptMode>('full');
   const [includeMacro, setIncludeMacro] = useState<boolean>(() => {
@@ -220,8 +222,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         const nextAge = value as AgeGroupKey;
         const ageOptions = muralSafeKeyObjects(nextAge);
         newTags.keyObject = ageOptions[Math.floor(Math.random() * ageOptions.length)];
-        const pool = accessoriesOfAge(nextAge);
-        newTags.accessories = [...pool].sort(() => Math.random() - 0.5).slice(0, 2);
+        newTags.accessories = pickAccessoriesForAge(nextAge);
       }
       if (key === 'style') {
         const allowedColors = getColorsForStyle(value as string, c.tags.audience);
@@ -236,7 +237,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const rerandomize = (cardId: string) => {
     setCards(prev => prev.map(c => {
       if (c.id !== cardId) return c;
-      const lockedAge = targetAge === 'all_kids' ? c.tags.ageGroup : targetAge;
+      const pool = resolveAgePool(targetAge);
+      const lockedAge = pool.includes(c.tags.ageGroup) ? c.tags.ageGroup : pool[0];
       const tags = generateRandomTags(c.tags.aspectRatio, lockedAge, { audience, promptMode });
       return { ...c, tags, promptText: buildGeminiPrompt(tags) };
     }));
@@ -245,8 +247,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const rerandomizeAccessories = (cardId: string) => {
     setCards(prev => prev.map(c => {
       if (c.id !== cardId) return c;
-      const pool = accessoriesOfAge(c.tags.ageGroup);
-      const acc = [...pool].sort(() => Math.random() - 0.5).slice(0, 2);
+      const acc = pickAccessoriesForAge(c.tags.ageGroup);
       const newTags = { ...c.tags, accessories: acc };
       return { ...c, tags: newTags, promptText: buildGeminiPrompt(newTags) };
     }));
@@ -255,7 +256,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const deleteCard = (cardId: string) => setCards(prev => prev.filter(c => c.id !== cardId));
 
   const addCard = () => {
-    const lockedAge = targetAge === 'all_kids' ? (['baby', 'vorschul', 'schulkind'] as AgeGroupKey[])[cards.length % 3] : targetAge;
+    const pool = resolveAgePool(targetAge);
+    const lockedAge = pool[cards.length % pool.length];
     const tags = generateRandomTags('9:16', lockedAge, { audience, promptMode });
     const cardModel = model === ModelType.ABTest ? ModelType.Pro : model === ModelType.ABTestFlashGrok ? ModelType.GrokImagine : model;
     const cardId = `card_${String(cards.length + 1).padStart(2, '0')}_9x16_${Math.random().toString(36).substring(2, 7)}`;

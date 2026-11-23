@@ -38,6 +38,7 @@ export interface BatchPromptTags {
   aperture?: string;
   cameraBody?: string;
   accessories: string[];
+  plant?: string;
   aspectRatio: BatchAspectRatio;
   compositionStrategy: 'unobstructed' | 'natural';
   cinematicDetail: string;
