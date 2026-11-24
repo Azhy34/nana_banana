@@ -294,7 +294,7 @@
     "baby": {
       "label": "Baby (0–3 years)",
       "child": "a baby under 2 years old",
-      "room": "A nursery for a baby: the bed is a standard waist-height European slatted wooden baby crib (120 by 60 cm) with realistic real-world proportions relative to the room and skirting boards.",
+      "room": "A nursery: the bed is a standard waist-height European slatted wooden baby crib (120 by 60 cm) scaled naturally to the room.",
       "theme": "Biophilic Sanctuary & Soft Organic Nursery (PANTONE Cloud Dancer aesthetic)",
       "beds": [
         "Minimalist slatted solid birch crib",
@@ -315,7 +315,6 @@
         "wall sconce with a soft warm glow",
         "one large calm art print in a slim oak frame",
         "checkerboard wooden storage box",
-        "cream waffle-knit blanket folded on the bed",
         "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif"
       ],
       "furniture": "classic wooden baby crib with slatted sides, premium wooden changing table dresser with a soft cream changing mat (Wickelkommode), cozy fabric nursing glider chair",
@@ -325,7 +324,7 @@
     "vorschul": {
       "label": "Preschool (3–6 years)",
       "child": "a child of 2 to 5 years",
-      "room": "A children's bedroom for a 3-to-6-year-old: the bed is a realistic European junior single bed (160 by 80 cm) with a proper headboard, thick mattress, pillow, and duvet, scaled naturally to the room and skirting boards (never miniature, never a bench or doll-sized bed).",
+      "room": "A children's bedroom: the bed is a realistic European junior single bed (160 by 80 cm) with a headboard, mattress, pillow, and duvet, scaled naturally to the room.",
       "accessories": [
         "mid-century mushroom table lamp resting on the bedside table",
         "wavy scalloped picture frames with retro graphic art prints",
@@ -343,7 +342,6 @@
         "framed vintage circus art prints (a striped tent, a rocking horse) in small wavy frames",
         "red-and-white striped bolster cushions",
         "checkerboard wooden storage box",
-        "cream waffle-knit blanket folded on the bed",
         "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
         "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
         "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
@@ -388,7 +386,6 @@
         "red-and-white striped bolster cushions",
         "ribbed cobalt blue side table with a few books",
         "checkerboard wooden storage box",
-        "cream waffle-knit blanket folded on the bed",
         "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
         "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
         "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
@@ -426,7 +423,6 @@
         "wall sconce with a soft warm glow",
         "one large calm art print in a slim oak frame",
         "ribbed cobalt blue side table with a few books",
-        "cream waffle-knit blanket folded on the bed",
         "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
         "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
         "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
@@ -458,7 +454,7 @@
     },
     {
       "name": "Rectangular solid beech slatted baby crib",
-      "description": "classic waist-height rectangular solid beech baby crib (120 by 60 cm, realistic real-world nursery scale, placed along the side wall) with open thin vertical wooden spindles on all four sides, crisp white cotton mattress sheet, and a cream waffle-knit blanket draped neatly over the front rail",
+      "description": "classic waist-height rectangular solid beech baby crib (120 by 60 cm, realistic real-world nursery scale, placed along the side wall) with open thin vertical wooden spindles on all four sides, crisp white cotton mattress sheet",
       "ageGroup": "baby"
     },
     {
@@ -526,7 +522,7 @@
     {
       "name": "Upholstered daybed with a wavy striped headboard",
       "ageGroup": "vorschul",
-      "description": "realistic full-proportion upholstered junior single bed (160 by 80 cm) with a wavy scalloped headboard in caramel-and-cream stripes, thick real mattress, standard pillow, and a cream waffle-knit duvet, placed along the side wall"
+      "description": "realistic full-proportion upholstered junior single bed (160 by 80 cm) with a wavy scalloped headboard in caramel-and-cream stripes, thick real mattress, standard pillow, and a crisp washed linen duvet, placed along the side wall"
     }
   ],
   "roomZones": [
@@ -640,7 +636,6 @@
     "red-and-white striped bolster cushions",
     "ribbed cobalt blue side table with a few books",
     "checkerboard wooden storage box",
-    "cream waffle-knit blanket folded on the bed",
     "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
     "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
     "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
@@ -852,7 +847,7 @@
     ]
   },
   "realism": {
-    "photo": "A real editorial interior photograph for a German home magazine: natural window light with soft falloff, true-to-life materials (visible wood grain, natural linen, matte painted surfaces with small signs of daily use), natural colour and gentle contrast.",
+    "photo": "A real editorial interior photograph for a German home magazine: single-source directional window daylight with soft falloff and grounded contact shadows under furniture legs and rug edges, true-to-life materials (visible wood grain, natural lived-in creases in washed linen, matte painted surfaces with small signs of daily use), smooth filmic highlight roll-off, subtle natural sensor grain, and gentle optical micro-contrast.",
     "note": "Positive wording on purpose: Google's image guide says describe what you want, not what you don't; OpenAI's says ask for a real photograph and name materials and light. Camera body, lens and aperture are cues for the look, not a simulation."
   },
   "negatives": {
@@ -864,11 +859,11 @@
     "textWithOverlay": "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, digital watermark"
   },
   "plants": [
-    "an indoor olive tree in a textured raw clay planter standing in the bright corner away from the mural wall",
-    "a sculptural fiddle-leaf fig (Ficus lyrata) in a ribbed matte stoneware pot standing on the floor beside the side wall",
-    "a lush Monstera deliciosa in a warm aged terracotta pot standing near the window away from the mural",
-    "a tall rubber plant (Ficus elastica) with deep glossy leaves in a matte sand-colored ceramic planter in the corner",
-    "an airy parlor palm in a rounded cream ceramic pot beside the reading nook, keeping the mural wall open"
+    "an indoor olive tree in a raw clay planter in the corner",
+    "a sculptural fiddle-leaf fig in a ribbed stoneware pot beside the side wall",
+    "a lush Monstera deliciosa in a warm terracotta pot near the window",
+    "a tall rubber plant in a matte sand ceramic planter in the corner",
+    "an airy parlor palm in a rounded cream ceramic pot beside the side wall"
   ],
   "staging": {
     "text": "STAGING (the mural is the hero): a furnished, lived-in children's room of about 4.5 by 3.5 metres under a 2.8 m ceiling. The hero piece stands along a side wall with at most two small accessories beside it, and the child's own toys lie on the single floor rug. Everything near the mural wall is lower than 90 cm, so the drawing of the mural stays open and clear.",
