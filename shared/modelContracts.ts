@@ -165,7 +165,7 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapability> = {
     provider: 'kie',
     kind: 'video',
     aspectRatios: ['9:16', '4:5', '3:4', '1:1', '4:3', '16:9'],
-    resolutions: ['720p'],
+    resolutions: ['1080p'],
     maxRefs: 1,
     refField: 'image_urls',
     maxPromptChars: 2500,

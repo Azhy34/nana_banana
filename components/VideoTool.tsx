@@ -412,59 +412,59 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
                 <>
                   <button
                     onClick={() => handleEngineChange('omni')}
-                    className={`p-3 rounded-xl text-left border transition-all ${
+                    className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between gap-1.5 ${
                       engine === 'omni'
                         ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-500/20'
                         : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-sm">✨ Gemini Omni 1.2 Flash</span>
-                      <span className="text-xs font-mono font-bold text-emerald-300">~${omniCost.toFixed(2)}</span>
+                      <span className="font-bold text-sm leading-tight">✨ Omni 1.2 Flash</span>
+                      <span className="text-xs font-mono font-bold text-emerald-300 shrink-0">~${omniCost.toFixed(2)}</span>
                     </div>
-                    <div className="text-[11px] opacity-80 mt-0.5">5 с · {resolution} · Google API</div>
+                    <div className="text-[11px] opacity-80">5 с · {resolution} · Google API</div>
                   </button>
                   <button
                     onClick={() => handleEngineChange('kling')}
-                    className={`p-3 rounded-xl text-left border transition-all ${
+                    className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between gap-1.5 ${
                       engine === 'kling'
                         ? 'bg-emerald-600/20 border-emerald-500 text-white shadow-md shadow-emerald-500/20'
                         : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-sm">🎬 Kling 2.6 (KIE)</span>
-                      <span className="text-xs font-mono font-bold text-emerald-300">{klingCredits} cr · ${klingCost.toFixed(2)}</span>
+                      <span className="font-bold text-sm leading-tight">🎬 Kling 2.6 (KIE)</span>
+                      <span className="text-xs font-mono font-bold text-emerald-300 shrink-0">${klingCost.toFixed(2)}</span>
                     </div>
-                    <div className="text-[11px] opacity-80 mt-0.5">5 с · 720p · KIE API</div>
+                    <div className="text-[11px] opacity-80">5 с · 1080p · {klingCredits} cr</div>
                   </button>
                   <button
                     onClick={() => handleEngineChange('kling3')}
-                    className={`p-3 rounded-xl text-left border transition-all ${
+                    className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between gap-1.5 ${
                       engine === 'kling3'
                         ? 'bg-amber-600/20 border-amber-500 text-white shadow-md shadow-amber-500/20'
                         : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-sm">⚡ Kling 3.0 (KIE)</span>
-                      <span className="text-xs font-mono font-bold text-amber-300">{kling3Credits} cr · ${kling3Cost.toFixed(2)}</span>
+                      <span className="font-bold text-sm leading-tight">⚡ Kling 3.0 (KIE)</span>
+                      <span className="text-xs font-mono font-bold text-amber-300 shrink-0">${kling3Cost.toFixed(2)}</span>
                     </div>
-                    <div className="text-[11px] opacity-80 mt-0.5">5 с · {kling3Mode === 'pro' ? '1080p Pro' : '720p Std'} · KIE API</div>
+                    <div className="text-[11px] opacity-80">5 с · {kling3Mode === 'pro' ? '1080p Pro' : '720p Std'} · {kling3Credits} cr</div>
                   </button>
                   <button
                     onClick={() => handleEngineChange('veo')}
-                    className={`p-3 rounded-xl text-left border transition-all ${
+                    className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between gap-1.5 ${
                       engine === 'veo'
                         ? 'bg-purple-600/20 border-purple-500 text-white shadow-md shadow-purple-500/20'
                         : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-sm">🚀 Veo 3.1 Fast</span>
-                      <span className="text-xs font-mono font-bold text-emerald-300">${veoCost.toFixed(2)}</span>
+                      <span className="font-bold text-sm leading-tight">🚀 Veo 3.1 Fast</span>
+                      <span className="text-xs font-mono font-bold text-emerald-300 shrink-0">${veoCost.toFixed(2)}</span>
                     </div>
-                    <div className="text-[11px] opacity-80 mt-0.5">6 с · 720p · Google API</div>
+                    <div className="text-[11px] opacity-80">6 с · 720p · Google API</div>
                   </button>
                 </>
               );
@@ -473,35 +473,30 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         </div>
 
         {engine === 'kling3' && (
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-700/60">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-slate-400 font-medium">Качество Kling 3.0:</span>
-              <div className="inline-flex flex-wrap bg-slate-900/60 p-1 rounded-xl border border-slate-700 gap-1">
-                <button
-                  onClick={() => setKling3Mode('std')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    kling3Mode === 'std'
-                      ? 'bg-amber-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {`720p Standard · ${getKling3Credits(5, 'std')} cr · $${getKling3CostUsd(5, 'std').toFixed(2)}`}
-                </button>
-                <button
-                  onClick={() => setKling3Mode('pro')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    kling3Mode === 'pro'
-                      ? 'bg-amber-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {`1080p Pro · ${getKling3Credits(5, 'pro')} cr · $${getKling3CostUsd(5, 'pro').toFixed(2)}`}
-                </button>
-              </div>
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-700/60">
+            <span className="text-xs text-slate-400 font-medium">Качество Kling 3.0:</span>
+            <div className="inline-flex flex-wrap bg-slate-900/60 p-1 rounded-xl border border-slate-700 gap-1">
+              <button
+                onClick={() => setKling3Mode('std')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  kling3Mode === 'std'
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {`720p Standard · ${getKling3Credits(5, 'std')} cr · $${getKling3CostUsd(5, 'std').toFixed(2)}`}
+              </button>
+              <button
+                onClick={() => setKling3Mode('pro')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  kling3Mode === 'pro'
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {`1080p Pro · ${getKling3Credits(5, 'pro')} cr · $${getKling3CostUsd(5, 'pro').toFixed(2)}`}
+              </button>
             </div>
-            <span className="text-xs font-mono text-amber-300">
-              {getKling3Credits(5, kling3Mode)} cr · ${getKling3CostUsd(5, kling3Mode).toFixed(2)} за 5 с
-            </span>
           </div>
         )}
 

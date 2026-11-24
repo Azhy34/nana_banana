@@ -384,7 +384,7 @@ export async function generateKieVideo(
     ? Number(((kling3Mode === 'pro' ? 20.2 : 15.1) * durationNum).toFixed(1))
     : (durationStr === '10' ? 126 : 63);
   const cost = Number((estimatedCredits * KIE_USD_PER_CREDIT).toFixed(4));
-  const logResolution = isKling3 && kling3Mode === 'pro' ? '1080p' : '720p';
+  const logResolution = isKling3 ? (kling3Mode === 'pro' ? '1080p' : '720p') : '1080p';
 
   const validation = validateModelInput({
     modelId,
