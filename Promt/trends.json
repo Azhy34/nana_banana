@@ -403,12 +403,12 @@
         "Minimalist single platform bed in light ash wood"
       ],
       "toys": [
-        "an open illustrated atlas with a school notebook and colored pencils lying on a floor reading cushion",
+        "an open illustrated atlas with a school notebook and colored pencils lying neatly on the single floor rug",
         "a few chapter books and a wooden pencil cup standing on a low shelf beside the bed"
       ],
       "furniture": "low single wooden bed, children's study desk with matching chair and desk lamp, study bookshelf",
       "storage": "modular wooden wall shelves, closed wooden drawers, desk organizer",
-      "extras": "desk lamp, school backpack hook, cozy reading corner with a large fabric bean bag cushion"
+      "extras": "desk lamp, school backpack hook, cozy reading corner with a structured wooden armchair"
     },
     "teenager": {
       "label": "Teenager (10–16 years)",
@@ -504,8 +504,8 @@
       "ageGroup": "schulkind"
     },
     {
-      "name": "Cozy reading nook with oversized floor cushion",
-      "description": "inviting corner with a plush corduroy floor cushion, a low solid oak side table with a neat stack of books, and warm accent lighting",
+      "name": "Cozy reading nook with solid oak armchair",
+      "description": "inviting corner with a structured Scandinavian solid oak armchair with natural linen cushions, a low solid oak side table with a neat stack of books, and warm accent lighting",
       "ageGroup": "schulkind"
     },
     {

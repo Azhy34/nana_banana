@@ -57,7 +57,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   const [isExporting, setIsExporting] = useState(false);
   const [audience, setAudience] = useState<AudienceKey>('neutral');
   const [targetAge, setTargetAge] = useState<TargetAgeFilter>(['baby', 'vorschul', 'schulkind']);
-  const [includeHero, setIncludeHero] = useState<boolean>(false);
+  const [includeHero, setIncludeHero] = useState<boolean>(true);
   const [promptMode, setPromptMode] = useState<PromptMode>('full');
   const [includeMacro, setIncludeMacro] = useState<boolean>(() => {
     try {

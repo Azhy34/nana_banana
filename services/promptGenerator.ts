@@ -296,9 +296,11 @@ export function generateBatchDeck(
       ...(accDeck.length > 0 ? [accDeck[ageIdx % accDeck.length]] : []),
     ].slice(0, trendsData.staging.maxAccessories);
     const dealtPlant =
-      !isHero && !isMacro && plantDeck.length > 0 && (plantGiveCounter++ % 3 === 1)
-        ? plantDeck[Math.floor(plantGiveCounter / 3) % plantDeck.length]
-        : null;
+      isHero && plantDeck.length > 0
+        ? plantDeck[0]
+        : !isHero && !isMacro && plantDeck.length > 0 && (plantGiveCounter++ % 3 === 1)
+          ? plantDeck[Math.floor(plantGiveCounter / 3) % plantDeck.length]
+          : null;
 
     return generateRandomTags(ar, ageGroup, {
       audience: effectiveAudience,
@@ -407,7 +409,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     sceneSetting = `A stylish, cozy children's bedroom and creative study sanctuary${styleLabel}. Warm natural wood surfaces, curated design touches and an uncluttered layout create an inspiring space.`;
     lifestyleTouch = isCleanFloor
       ? 'Clean, uncluttered study-bedroom styling with neat bedding and an open, empty floor rug.'
-      : `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'} and a comfortable floor reading cushion.`;
+      : `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'}.`;
   } else {
     sceneSetting = `A contemporary youth bedroom${styleLabel} with clean lines, natural solid oak and birch, and a calm, stylish layout for studying and relaxing.`;
     lifestyleTouch = isCleanFloor
@@ -490,12 +492,14 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
       .slice(0, trendsData.staging.maxAccessories)
       .map(a => (isBedHero ? a : a.replace(/\bon the bed\b/gi, 'neatly folded on the rug')));
     const keyDesc = keyObjData?.description ? ` (${keyObjData.description})` : '';
+    const heroRug = activeAccessories.find(a => /\b(?:rug|mat)\b/i.test(a)) || 'a single clean woven floor rug';
+    const heroPlant = tags.plant || TAG_OPTIONS.plants[0] || 'a sculptural potted indoor plant in a matte ceramic planter in the corner';
     const subjectText = tags.heroRoom
-      ? `a bright, uncluttered children's room for a child aged 3 to 6 with a flat-weave rug and wooden toys`
+      ? `a minimalist, bright empty-wall room showcasing the full wallpaper mural with only ${heroRug} and ${heroPlant}`
       : `a ${tags.ageGroup === 'baby' ? 'serene nursery' : tags.ageGroup === 'teenager' ? 'contemporary youth bedroom' : "children's bedroom"} with ${keyObjData?.name ?? tags.keyObject}`;
     const briefPlant = tags.plant && !tags.heroRoom && !tags.macroTexture ? ` ${tags.plant}.` : '';
     const sceneText = tags.heroRoom
-      ? `A bright airy room with ${trendsData.germanApartmentContext.floorType} and white skirting boards. No bed, no nightstand, and no shelves. On a flat-weave natural wool rug in the middle of the floor lie ${toyLine}.${personSentence}`
+      ? `A bright airy room with ${trendsData.germanApartmentContext.floorType} and white skirting boards. Minimalist showcase: NO bed, NO nightstand, NO shelves, NO cabinets, NO toys on the floor — only ${heroRug} on the parquet floor and ${heroPlant} standing neatly to the side, leaving 100% of the wallpaper mural completely open and unobstructed from floor to ceiling.`
       : `A bright airy room with ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}, with realistic true-to-life furniture proportions. Along the side wall, away from the mural: ${keyObjData?.name ?? tags.keyObject}${keyDesc} in ${material}, with ${briefAccessories.join(' and ')}. On the floor rug: ${toyLine}.${briefPlant}${personSentence}`;
     return buildBriefPrompt({
       subject: subjectText,
@@ -518,8 +522,10 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     });
   }
 
+  const heroRugFull = activeAccessories.find(a => /\b(?:rug|mat)\b/i.test(a)) || 'a single clean woven floor rug';
+  const heroPlantFull = tags.plant || TAG_OPTIONS.plants[0] || 'a sculptural potted indoor plant in a matte ceramic planter standing in the corner';
   const effectiveFurnitureSection = tags.heroRoom
-    ? `Open hero room layout: NO bed, NO nightstand, NO shelves, NO cabinets. Floor and architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}, leaving 100% of the feature wall completely open and unobstructed from skirting board to ceiling. On a flat-weave natural wool rug in the foreground/middle of the floor rest ${trendingToy || 'two small carved wooden toys and an open illustrated picture book'}. Styling: ${styleData?.name ?? tags.style} (${styleData?.description ?? ''}).${personSentence}`
+    ? `Minimalist open hero room layout: NO bed, NO nightstand, NO shelves, NO cabinets, NO chairs, NO toys on the floor. Floor and architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}, leaving 100% of the feature wall completely open and unobstructed from skirting board to ceiling so the wallpaper mural is shown in full view. The only interior elements are ${heroRugFull} lying flat on the parquet floor and ${heroPlantFull} standing neatly to the side. Styling: ${styleData?.name ?? tags.style} (${styleData?.description ?? ''}).`
     : `${furnitureSection}${personSentence}`;
 
   const cameraSection = `Photographed ${view}. Shot on ${cameraBody}, ${lens}, ${aperture}, sharp mural focus across the entire wall, natural optical depth. ${trendsData.realism.photo} Aspect ratio: ${tags.aspectRatio}.`;

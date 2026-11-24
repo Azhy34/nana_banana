@@ -278,7 +278,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-700">
             <div>
               <h3 className="text-white font-semibold text-sm">Include 1 Hero Shot (no bed)</h3>
-              <p className="text-slate-400 text-xs">Open floor + rug + toys, 100% unobstructed mural for #1 listing photo</p>
+              <p className="text-slate-400 text-xs">Минимализм: только ковёр + растение в кашпо, 100% открытые обои без мебели</p>
             </div>
             <button type="button" onClick={() => setIncludeHero(!includeHero)}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${includeHero ? 'bg-indigo-600' : 'bg-slate-700'}`}>
