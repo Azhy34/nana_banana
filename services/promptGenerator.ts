@@ -20,14 +20,42 @@ function shuffled<T>(arr: readonly T[]): T[] {
 }
 
 const BOY_EXCLUDED_COLORS = new Set(['Dusty Rose', 'Strawberry Milk', 'Lilac Mist']);
+const GIRL_EXCLUDED_COLORS = new Set(['Cool Grey, Mustard & Charcoal', 'Petrol', 'Cool Blue', 'Powder Blue']);
 
 const MUSHROOM_LAMP_COLORS = ['bright cobalt blue', 'sunny yellow', 'sky blue', 'pastel pink'] as const;
 
-export function getColorsForStyle(styleName: string, audience: AudienceKey = 'neutral'): string[] {
+interface ColorTriadEntry {
+  name: string;
+  description: string;
+  lampColor?: string;
+  audiences?: AudienceKey[];
+  ageGroups?: AgeGroupKey[];
+}
+
+export function getColorsForStyle(
+  styleName: string,
+  audience: AudienceKey = 'neutral',
+  ageGroup?: AgeGroupKey,
+): string[] {
+  const allColors = trendsData.colors as ColorTriadEntry[];
+  const byName = new Map<string, ColorTriadEntry>(allColors.map(c => [c.name, c]));
   const allowed = (trendsData.styles.find(s => s.name === styleName) as { colors?: string[] } | undefined)?.colors;
-  const base = allowed && allowed.length > 0 ? allowed : trendsData.colors.map(c => c.name);
-  if (audience !== 'boy') return base;
-  const filtered = base.filter(c => !BOY_EXCLUDED_COLORS.has(c));
+  const base = allowed && allowed.length > 0 ? allowed : allColors.map(c => c.name);
+
+  const filtered = base.filter(name => {
+    const entry = byName.get(name);
+    if (audience === 'boy' && (BOY_EXCLUDED_COLORS.has(name) || (entry?.audiences && !entry.audiences.includes('boy')))) {
+      return false;
+    }
+    if (audience === 'girl' && (GIRL_EXCLUDED_COLORS.has(name) || (entry?.audiences && !entry.audiences.includes('girl')))) {
+      return false;
+    }
+    if (ageGroup && entry?.ageGroups && !entry.ageGroups.includes(ageGroup)) {
+      return false;
+    }
+    return true;
+  });
+
   return filtered.length > 0 ? filtered : base;
 }
 
@@ -129,6 +157,7 @@ export interface RandomTagOptions {
   personMode?: BatchPersonMode;
   promptMode?: PromptMode;
   style?: string;
+  color?: string;
   lighting?: string;
   cameraAngle?: string;
   keyObject?: string;
@@ -144,9 +173,9 @@ export function generateRandomTags(
   const resolvedAgeGroup = ageGroup ?? pick(TAG_OPTIONS.ageGroups);
   const audience = options.audience ?? 'neutral';
   const style = options.style ?? pick(TAG_OPTIONS.styles);
-  const allowedColors = getColorsForStyle(style, audience);
+  const allowedColors = getColorsForStyle(style, audience, resolvedAgeGroup);
   return {
-    color: pick(allowedColors),
+    color: options.color ?? pick(allowedColors),
     style,
     brand: pick(TAG_OPTIONS.brands),
     ageGroup: resolvedAgeGroup,
@@ -314,6 +343,9 @@ export function generateBatchDeck(
         : !isHero && !isMacro && plantDeck.length > 0 && (plantGiveCounter++ % 3 === 1)
           ? plantDeck[plantCursor++ % plantDeck.length]
           : null;
+    const cardStyle = styleDeck[idx % styleDeck.length];
+    const styleColors = getColorsForStyle(cardStyle, effectiveAudience, ageGroup);
+    const dealtColor = styleColors[idx % styleColors.length];
 
     return generateRandomTags(ar, ageGroup, {
       audience: effectiveAudience,
@@ -322,7 +354,8 @@ export function generateBatchDeck(
       cleanFloor,
       personMode,
       promptMode: options.promptMode ?? 'full',
-      style: styleDeck[idx % styleDeck.length],
+      style: cardStyle,
+      color: dealtColor,
       lighting: cardLighting,
       cameraAngle: cardAngle,
       keyObject: keyDeck[ageIdx % keyDeck.length],
@@ -382,24 +415,18 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     accessories?: string[];
     materials?: string[];
   } | undefined;
-  let trendingColorName = '';
+  const triadLampColor = (colorData as ColorTriadEntry | undefined)?.lampColor;
   const colorizeMushroomLamp = (text: string) =>
     text.replace(
       /\b(?:a )?mid-century mushroom table lamp\b/gi,
-      () => `mid-century ${pick([...MUSHROOM_LAMP_COLORS])} mushroom table lamp`,
+      () => `mid-century ${triadLampColor || pick([...MUSHROOM_LAMP_COLORS])} mushroom table lamp`,
     );
   let activeAccessories = tags.accessories.map(colorizeMushroomLamp);
   let activeMaterials = naturalMaterials;
 
-  if (insights) {
-    if (Math.random() < 0.5 && insights.colors && insights.colors.length > 0) {
-      const trendingColor = pick(insights.colors);
-      trendingColorName = trendingColor.name;
-    }
-    if (Math.random() < 0.5 && insights.materials && insights.materials.length > 0) {
-      const trendingMat = pick(insights.materials);
-      activeMaterials += `, ${trendingMat.toLowerCase()}`;
-    }
+  if (insights && Math.random() < 0.5 && insights.materials && insights.materials.length > 0) {
+    const trendingMat = pick(insights.materials);
+    activeMaterials += `, ${trendingMat.toLowerCase()}`;
   }
 
   // Age-specific toys (skipped when cleanFloor is active so half of rooms stay completely uncluttered)
@@ -453,14 +480,11 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const rawKeyDesc = keyObjData?.description ?? 'realistic European child-bedroom proportions';
   const keyDescWithLampColor = rawKeyDesc.replace(
     'a mid-century mushroom table lamp',
-    () => `a mid-century ${pick([...MUSHROOM_LAMP_COLORS])} mushroom table lamp`,
+    () => `a mid-century ${triadLampColor || pick([...MUSHROOM_LAMP_COLORS])} mushroom table lamp`,
   );
   const furnitureSection = `Focal furniture: ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material} (${keyDescWithLampColor}). Architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}; all items near the mural wall stay under 90 cm so the mural remains open. ${compositionText}`;
 
-  let colorAccentText = `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried by the bedding, rug, and accessories (${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(', ')}).`;
-  if (trendingColorName) {
-    colorAccentText += ` Subtle ${trendingColorName} accents harmonize across the textiles.`;
-  }
+  const colorAccentText = `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried harmoniously across the bedding, rug, and accessories (${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(', ')}).`;
 
   const plantLine = tags.plant && !tags.heroRoom && !tags.macroTexture ? ` Statement greenery: ${tags.plant}.` : '';
   const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch}${plantLine}`;

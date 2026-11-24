@@ -230,9 +230,13 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         const ageOptions = muralSafeKeyObjects(nextAge);
         newTags.keyObject = ageOptions[Math.floor(Math.random() * ageOptions.length)];
         newTags.accessories = pickAccessoriesForAge(nextAge);
+        const allowedColors = getColorsForStyle(newTags.style, c.tags.audience, nextAge);
+        if (!allowedColors.includes(newTags.color)) {
+          newTags.color = allowedColors[0];
+        }
       }
       if (key === 'style') {
-        const allowedColors = getColorsForStyle(value as string, c.tags.audience);
+        const allowedColors = getColorsForStyle(value as string, c.tags.audience, newTags.ageGroup);
         if (!allowedColors.includes(newTags.color)) {
           newTags.color = allowedColors[0];
         }

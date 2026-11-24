@@ -40,7 +40,7 @@ const TAG_KEYS: Array<{ key: keyof Omit<BatchPromptTags, 'accessories' | 'aspect
 
 function getOptionsForKey(key: keyof Omit<BatchPromptTags, 'accessories' | 'aspectRatio'>, card: BatchCard): string[] {
   switch (key) {
-    case 'color': return getColorsForStyle(card.tags.style, card.tags.audience);
+    case 'color': return getColorsForStyle(card.tags.style, card.tags.audience, card.tags.ageGroup);
     case 'style': return TAG_OPTIONS.styles;
     case 'brand': return TAG_OPTIONS.brands;
     case 'ageGroup': return TAG_OPTIONS.ageGroups;
