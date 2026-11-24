@@ -227,6 +227,14 @@ export function generateBatchDeck(
   };
   const plantDeck = shuffled(TAG_OPTIONS.plants);
   let plantGiveCounter = 0;
+  let plantCursor = 0;
+  const peopleDecks: Record<AgeGroupKey, PeopleSceneOption[]> = {
+    baby: shuffled(getPeopleScenesForAge('baby')),
+    vorschul: shuffled(getPeopleScenesForAge('vorschul')),
+    schulkind: shuffled(getPeopleScenesForAge('schulkind')),
+    teenager: shuffled(getPeopleScenesForAge('teenager')),
+  };
+  let peopleCursor = 0;
   const ageCounters: Record<AgeGroupKey, number> = { baby: 0, vorschul: 0, schulkind: 0, teenager: 0 };
 
   // Place Hero shot on the first photo master card (prefer 2:3, 4:5, 4:3, or 3:4) if requested.
@@ -257,11 +265,11 @@ export function generateBatchDeck(
     let cardAngle = angleDeck[idx % angleDeck.length];
 
     if (!isHero && !isMacro && ageGroup !== 'teenager') {
-      const agePeoplePool = getPeopleScenesForAge(ageGroup);
+      const agePeoplePool = peopleDecks[ageGroup];
       if (ar === '9:16') {
-        // 9:16 video masters alternate: 50% with people (child / mother+child), 25% doorway walk-in reveal, 25% sunbeam & curtain breeze
+        // 9:16 video masters alternate: 50% with people (shuffled candid scenes), 25% doorway walk-in reveal, 25% sunbeam & curtain breeze
         if (videoEligibleSeen % 2 === 0 && agePeoplePool.length > 0) {
-          personMode = agePeoplePool[(videoEligibleSeen / 2) % agePeoplePool.length].id;
+          personMode = agePeoplePool[peopleCursor++ % agePeoplePool.length].id;
         } else if (videoEligibleSeen % 4 === 1) {
           const doorwayAngle = (trendsData as any).people?.video9x16Archetypes?.doorway_reveal;
           if (doorwayAngle) cardAngle = doorwayAngle;
@@ -272,13 +280,18 @@ export function generateBatchDeck(
       } else {
         // Put people on ~1 out of every 3 photo cards (starting from the 2nd eligible photo card so card #1 stays furniture-focused)
         if (photoEligibleSeen % 3 === 1 && agePeoplePool.length > 0) {
-          personMode = agePeoplePool[(photoEligibleSeen + 1) % agePeoplePool.length].id;
+          personMode = agePeoplePool[peopleCursor++ % agePeoplePool.length].id;
         }
         photoEligibleSeen++;
       }
     }
 
-    const isPlayingOnFloor = personMode === 'child_rug' || personMode === 'mother_child_rug';
+    const isPlayingOnFloor =
+      personMode === 'child_rug' ||
+      personMode === 'mother_child_rug' ||
+      personMode === 'child_reading_rug' ||
+      personMode === 'child_building_blocks' ||
+      personMode === 'mother_reading_child';
     const cleanFloor = !isHero && !isMacro && !isPlayingOnFloor && (
       personMode !== 'none' || (cleanRoomToggle++ % 2 === 0)
     );
@@ -297,9 +310,9 @@ export function generateBatchDeck(
     ].slice(0, trendsData.staging.maxAccessories);
     const dealtPlant =
       isHero && plantDeck.length > 0
-        ? plantDeck[0]
+        ? plantDeck[plantCursor++ % plantDeck.length]
         : !isHero && !isMacro && plantDeck.length > 0 && (plantGiveCounter++ % 3 === 1)
-          ? plantDeck[Math.floor(plantGiveCounter / 3) % plantDeck.length]
+          ? plantDeck[plantCursor++ % plantDeck.length]
           : null;
 
     return generateRandomTags(ar, ageGroup, {
@@ -347,7 +360,13 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   // The mural is the hero in every prompt: a furnished room of a real size, the hero piece along a side wall with at most two small
   // accessories, everything near the mural wall low (Promt/trends.json "staging"). The tag `compositionStrategy` is kept for old cards;
   // it no longer changes this.
-  const isCleanFloor = Boolean(tags.cleanFloor) && !tags.heroRoom && tags.personMode !== 'child_rug' && tags.personMode !== 'mother_child_rug';
+  const isFloorActivityScene =
+    tags.personMode === 'child_rug' ||
+    tags.personMode === 'mother_child_rug' ||
+    tags.personMode === 'child_reading_rug' ||
+    tags.personMode === 'child_building_blocks' ||
+    tags.personMode === 'mother_reading_child';
+  const isCleanFloor = Boolean(tags.cleanFloor) && !tags.heroRoom && !isFloorActivityScene;
   const compositionText = isCleanFloor
     ? trendsData.staging.text
         .replace('with at most two small accessories beside it, ', '')

@@ -17,6 +17,12 @@ export type BatchPersonMode =
   | 'mother_holding_baby'
   | 'mother_child_rug'
   | 'child_rug'
+  | 'child_walking_to_wall'
+  | 'child_reading_rug'
+  | 'child_building_blocks'
+  | 'child_cuddling_plush'
+  | 'child_drawing_desk'
+  | 'mother_reading_child'
   | 'child_gaze';
 export type PromptMode = 'full' | 'brief';
 

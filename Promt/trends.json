@@ -859,11 +859,16 @@
     "textWithOverlay": "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, digital watermark"
   },
   "plants": [
-    "an indoor olive tree in a raw clay planter in the corner",
-    "a sculptural fiddle-leaf fig in a ribbed stoneware pot beside the side wall",
-    "a lush Monstera deliciosa in a warm terracotta pot near the window",
-    "a tall rubber plant in a matte sand ceramic planter in the corner",
-    "an airy parlor palm in a rounded cream ceramic pot beside the side wall"
+    "an indoor olive tree with silvery-green leaves in a textured terracotta pot in the corner",
+    "an airy golden cane palm (Areca palm) with soft feathery fronds in a woven seagrass floor planter beside the side wall",
+    "a lush green Boston fern with cascading fronds in a fluted warm beige stoneware pot on a low oak plant stand",
+    "a bushy Calathea orbifolia with broad striped matte leaves in a rounded matte cream ceramic pot in the corner",
+    "a Chinese money plant (Pilea peperomioides) with round coin-shaped leaves in a matte sage ceramic pot on a low wooden stool",
+    "a sculptural dwarf banana plant (Musa) with broad matte tropical green leaves in a raw clay floor planter near the window",
+    "a braided money tree (Pachira aquatica) with palmate green leaves in a matte oat ceramic cylinder pot beside the side wall",
+    "a fresh green parlor palm (Chamaedorea) in a warm sand-colored ribbed terracotta planter in the corner",
+    "a tall minimalist arrangement of dried and fresh eucalyptus stems in a matte chalk-white ceramic floor vase beside the side wall",
+    "a compact spider plant (Chlorophytum) with arching green-and-cream leaves in a speckled stoneware pot on a low wooden stool"
   ],
   "staging": {
     "text": "STAGING (the mural is the hero): a furnished, lived-in children's room of about 4.5 by 3.5 metres under a 2.8 m ceiling. The hero piece stands along a side wall with at most two small accessories beside it, and the child's own toys lie on the single floor rug. Everything near the mural wall is lower than 90 cm, so the drawing of the mural stays open and clear.",
@@ -952,6 +957,62 @@
           "schulkind"
         ],
         "template": "Sitting on the woven rug in the middle of the floor facing the mural wall with their back to the camera, {child} plays calmly with natural wooden toys on the rug, face turned away from the camera."
+      },
+      {
+        "id": "child_walking_to_wall",
+        "label": "Child walking toward mural wall (from behind)",
+        "ageGroups": [
+          "baby",
+          "vorschul",
+          "schulkind"
+        ],
+        "template": "Captured mid-stride from behind, {child} walks barefoot across the floor rug toward the mural wall in a candid curious moment, arms relaxed at their sides, looking straight ahead at the wallpaper illustration with face turned away from the camera."
+      },
+      {
+        "id": "child_reading_rug",
+        "label": "Child sitting on rug reading picture book (from behind)",
+        "ageGroups": [
+          "vorschul",
+          "schulkind"
+        ],
+        "template": "Sitting cross-legged on the floor rug in front of the mural wall with their back to the camera, {child} leans gently over an open illustrated picture book resting in their lap, absorbed in quiet reading with face turned away from the camera."
+      },
+      {
+        "id": "child_building_blocks",
+        "label": "Child kneeling on rug stacking wooden blocks (from behind)",
+        "ageGroups": [
+          "baby",
+          "vorschul"
+        ],
+        "template": "Kneeling calmly on the woven rug in front of the mural wall with their back to the camera, {child} stacks a small tower of natural wooden rainbow arches and blocks with both hands, absorbed in quiet play with face turned away from the camera."
+      },
+      {
+        "id": "child_cuddling_plush",
+        "label": "Child standing quietly hugging plush toy looking at mural",
+        "ageGroups": [
+          "baby",
+          "vorschul"
+        ],
+        "template": "Standing barefoot on the floor rug about 1.5 metres in front of the mural wall with their back to the camera, {child} hugs a small soft linen plush toy with both arms and gazes calmly at the wallpaper mural, hands down, face turned away from the camera."
+      },
+      {
+        "id": "child_drawing_desk",
+        "label": "Child sitting at desk drawing in sketchbook (from behind)",
+        "ageGroups": [
+          "vorschul",
+          "schulkind"
+        ],
+        "template": "Sitting on a natural wooden chair at the child-sized table along the side wall with their back to the camera, {child} leans gently over a paper sketchbook drawing with a wooden colored pencil, face turned away from the camera."
+      },
+      {
+        "id": "mother_reading_child",
+        "label": "Mother & child sitting on rug reading a book together",
+        "ageGroups": [
+          "baby",
+          "vorschul",
+          "schulkind"
+        ],
+        "template": "Sitting side by side on the floor rug in front of the mural wall with their backs to the camera, a young mother in a soft cream linen shirt and beige trousers holds an open illustrated storybook together with {child}, sharing a calm cozy reading moment without looking at the camera."
       }
     ]
   },
