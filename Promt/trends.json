@@ -367,7 +367,7 @@
     "schulkind": {
       "label": "School age (6–10 years)",
       "child": "a schoolchild of 6 to 10 years",
-      "room": "A schoolchild's bedroom (6 to 10 years): the bed is a full-size European single bed (90 by 200 cm) with a proper headboard, thick mattress, pillow, and neatly made duvet, scaled naturally to the room.",
+      "room": "A schoolchild's room: the bed is a full-size single bed (90 by 200 cm) with a headboard, mattress, pillow, and duvet, scaled naturally to the room.",
       "accessories": [
         "mid-century mushroom table lamp resting on the bedside table",
         "wavy scalloped picture frames with retro graphic art prints",
@@ -501,12 +501,12 @@
     },
     {
       "name": "Cozy reading nook with solid oak armchair",
-      "description": "inviting corner with a structured Scandinavian solid oak armchair with natural linen cushions, a low solid oak side table with a neat stack of books, and warm accent lighting",
+      "description": "inviting corner with a structured solid oak armchair with linen cushions, a low oak side table with books, and warm accent lighting",
       "ageGroup": "schulkind"
     },
     {
       "name": "Low birch modular daybed with fluted nightstand",
-      "description": "full-size European single wooden bed (90 by 200 cm) in light birch with a clean headboard, thick mattress, pillow, and crisp cotton duvet, flanked by a fluted birch nightstand and a mid-century mushroom table lamp resting on the nightstand",
+      "description": "full-size single wooden bed (90 by 200 cm) in light birch with a headboard, mattress, pillow, and cotton duvet, flanked by a fluted nightstand and a mid-century mushroom table lamp",
       "ageGroup": "schulkind"
     },
     {
@@ -954,5 +954,10 @@
         "template": "Sitting on the woven rug in the middle of the floor facing the mural wall with their back to the camera, {child} plays calmly with natural wooden toys on the rug, face turned away from the camera."
       }
     ]
+  },
+  "videoPromptAdapter": {
+    "model": "gemini-3.1-flash-lite",
+    "thinkingLevel": "minimal",
+    "systemPrompt": "You are the motion director for 5-second commercial interior videos of Moonbloom children's wall murals. You receive the SOURCE PHOTO PROMPT (and/or the reference frame) plus the user's SELECTED MOTION PRESET. Rewrite the motion prompt in English (2 to 3 sentences, max 450 characters) so it matches the exact scene on the photo. Strict rules:\n1. ONLY reference people, furniture, rugs, and items that actually exist in the SOURCE PHOTO PROMPT or frame. If the floor or rug is bare/clean ('zero toys'), NEVER mention toys or books on the floor.\n2. NEVER write 'A or B' alternatives. Pick ONE clear, calm, physically natural action.\n3. Continue directly from the person's existing pose (e.g. if a child's hand is already raised pointing at the wall, smoothly move the raised hand to a neighboring detail and shift weight gently — do not raise it again from scratch).\n4. Any person in the frame must keep their face turned away from the camera toward the mural wall at all times.\n5. Whenever a person is in the frame, start with: 'Locked static camera, zero camera movement, zero handheld shake.'\n6. NEVER use zoom, push-in, orbit, pan, or the words 'very slowly' / 'slow motion'.\n7. Do NOT include the boilerplate wallpaper freeze paragraph at the end (the caller appends it automatically), EXCEPT if a hand is close to the wall, add one short clause: 'no flowers or illustrations move or morph under the hand.'\nReturn ONLY the plain English motion prompt text, no quotes, no markdown."
   }
 }

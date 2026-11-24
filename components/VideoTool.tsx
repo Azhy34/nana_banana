@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { generateVeoVideoOnClient } from '../services/veoService';
-import { generateOmniVideoOnClient } from '../services/omniService';
+import { generateOmniVideoOnClient, adaptVideoPromptToContext } from '../services/omniService';
 import { generateKieVideo, upscaleKieVideo } from '../services/kieService';
 import {
   VEO_PRESETS,
@@ -33,12 +33,13 @@ import { generateTraceId } from '../utils/tracing';
 
 interface VideoToolProps {
   initialImage?: string | null;
+  initialSourcePrompt?: string | null;
   onBack?: () => void;
   geminiApiKey?: string;
   kieApiKey?: string;
 }
 
-export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, geminiApiKey, kieApiKey }) => {
+export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, initialSourcePrompt, onBack, geminiApiKey, kieApiKey }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Model engine selector: 'omni' by default for cheaper & more stable nursery videos
@@ -50,6 +51,15 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
 
   // Settings
   const [sourceImage, setSourceImage] = useState<string | null>(initialImage || null);
+  const [sourcePrompt, setSourcePrompt] = useState<string | null>(initialSourcePrompt || null);
+  const [isAdaptingPrompt, setIsAdaptingPrompt] = useState(false);
+  const [adaptError, setAdaptError] = useState<string | null>(null);
+  const [adaptTelemetry, setAdaptTelemetry] = useState<{
+    durationSeconds: number;
+    thoughts?: string;
+    thoughtsTokens?: number;
+    totalTokens?: number;
+  } | null>(null);
   const [settings, setSettings] = useState<VideoJobSettings>({
     engine: 'omni',
     promptPreset: OMNI_DEFAULT_PRESET,
@@ -70,8 +80,11 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
   // Etsy validates the actual file, so this is what we check against.
   const [videoDims, setVideoDims] = useState<{ w: number; h: number } | null>(null);
 
-  // Sync prop initialImage to sourceImage state when it changes
+  // Sync prop initialImage/initialSourcePrompt to local state when they change
   useEffect(() => {
+    setSourcePrompt(initialSourcePrompt || null);
+    setAdaptError(null);
+    setAdaptTelemetry(null);
     if (initialImage) {
       setSourceImage(initialImage);
       // Reset previous animation results so they don't show on a new card
@@ -89,7 +102,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         resultVideoUrl: null
       });
     }
-  }, [initialImage]);
+  }, [initialImage, initialSourcePrompt]);
 
   const clipDuration = engine === 'veo' ? VEO_FIXED_DURATION_SECONDS : OMNI_DEFAULT_DURATION_SECONDS;
 
@@ -196,6 +209,9 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
       const reader = new FileReader();
       reader.onload = (e) => {
         setSourceImage(e.target?.result as string);
+        setSourcePrompt(null);
+        setAdaptError(null);
+        setAdaptTelemetry(null);
         setVideoDims(null);
         setState({ isLoading: false, progress: 0, error: null, resultVideoUrl: null });
       };
@@ -260,7 +276,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
     });
 
     try {
-      const traceId = generateTraceId();
+      const traceId = lastTraceId || generateTraceId();
       setLastTraceId(traceId);
       let videoUrl: string;
       let runCost = estimatedCost;
@@ -316,6 +332,44 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
         error: err.message || 'Ошибка генерации видео',
         resultVideoUrl: null,
       });
+    }
+  };
+
+  const handleAdaptPrompt = async () => {
+    if (!geminiApiKey) {
+      setAdaptError('Введите Gemini API Key в верхней панели для адаптации промпта.');
+      return;
+    }
+    setIsAdaptingPrompt(true);
+    setAdaptError(null);
+    try {
+      const presetObj = (engine === 'omni' || engine === 'kling' || engine === 'kling3')
+        ? OMNI_PRESETS[settings.promptPreset as keyof typeof OMNI_PRESETS]
+        : VEO_PRESETS[settings.promptPreset as keyof typeof VEO_PRESETS];
+      const presetLabel = presetObj?.label ?? settings.promptPreset;
+      const presetBase = presetObj?.prompt ?? settings.customPrompt;
+      const tid = lastTraceId || generateTraceId();
+      setLastTraceId(tid);
+      const res = await adaptVideoPromptToContext({
+        geminiApiKey,
+        presetLabel,
+        presetPrompt: presetBase,
+        engine,
+        sourcePrompt,
+        sourceImage,
+        traceId: tid,
+      });
+      setSettings(prev => ({ ...prev, customPrompt: res.prompt }));
+      setAdaptTelemetry({
+        durationSeconds: res.durationSeconds,
+        thoughts: res.thoughts,
+        thoughtsTokens: res.thoughtsTokens,
+        totalTokens: res.totalTokens,
+      });
+    } catch (err: any) {
+      setAdaptError(err?.message || 'Ошибка адаптации промпта');
+    } finally {
+      setIsAdaptingPrompt(false);
     }
   };
 
@@ -602,15 +656,51 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, onBack, gemi
 
           {/* Prompt Text Editor */}
           <div className="bg-slate-800/50 backdrop-blur rounded-2xl border border-slate-700 p-6">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
               <label className="text-white font-semibold text-sm">Промпт движения камеры (Инструкция)</label>
-              <button 
-                onClick={() => handlePresetChange(settings.promptPreset)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-              >
-                ↺ Сбросить к пресету
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleAdaptPrompt}
+                  disabled={isAdaptingPrompt || (!sourcePrompt && !sourceImage)}
+                  className="text-xs bg-indigo-600/30 hover:bg-indigo-600/50 disabled:opacity-40 text-indigo-200 border border-indigo-500/40 px-2.5 py-1 rounded-lg transition-all font-medium"
+                  title={sourcePrompt ? 'Адаптировать выбранный пресет под промпт этой карточки (gemini-3.1-flash-lite)' : 'Адаптировать пресет под загруженный кадр (gemini-3.1-flash-lite)'}
+                >
+                  {isAdaptingPrompt ? '✨ Адаптация...' : '✨ Адаптировать под фото'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePresetChange(settings.promptPreset)}
+                  className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                >
+                  ↺ Сбросить к пресету
+                </button>
+              </div>
             </div>
+            {sourcePrompt && (
+              <p className="text-[11px] text-emerald-400/90 mb-2">
+                ✓ Контекст промпта фотографии привязан из Batch — агент учтёт позу, мебель и чистоту пола
+              </p>
+            )}
+            {adaptTelemetry && (
+              <div className="mb-2 bg-slate-900/70 border border-indigo-500/30 rounded-lg px-3 py-2 text-[11px] space-y-1">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-indigo-300 font-mono">
+                  <span>⚡ gemini-3.1-flash-lite · {adaptTelemetry.durationSeconds}s</span>
+                  <span>
+                    {adaptTelemetry.totalTokens ? `${adaptTelemetry.totalTokens} tok` : ''}
+                    {adaptTelemetry.thoughtsTokens ? ` (мысли: ${adaptTelemetry.thoughtsTokens} tok)` : ''}
+                  </span>
+                </div>
+                {adaptTelemetry.thoughts && (
+                  <p className="text-slate-400 leading-snug italic">
+                    💭 Мысли агента: {adaptTelemetry.thoughts}
+                  </p>
+                )}
+              </div>
+            )}
+            {adaptError && (
+              <p className="text-[11px] text-red-300 mb-2">⚠ {adaptError}</p>
+            )}
             <textarea
               rows={5}
               value={settings.customPrompt}

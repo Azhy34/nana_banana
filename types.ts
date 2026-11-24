@@ -209,8 +209,10 @@ export interface GeminiLogDetails {
   // Provider usage, tokens & billing metadata
   promptTokens?: number;
   candidateTokens?: number;
+  thoughtsTokens?: number;
   totalTokens?: number;
   videoTokens?: number;
+  agentThoughts?: string;
   costSource?: 'usage' | 'credits' | 'estimate';
   kieCredits?: number;
   kieTaskId?: string;

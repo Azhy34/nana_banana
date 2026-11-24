@@ -22,7 +22,7 @@ interface Props {
   replicateToken: string;
   kieApiKey?: string;
   onViewModeChange: (mode: ViewMode) => void;
-  onSendToTool: (mode: ViewMode, image: string) => void;
+  onSendToTool: (mode: ViewMode, image: string, sourcePrompt?: string) => void;
 }
 
 const TAG_KEYS: Array<{ key: keyof Omit<BatchPromptTags, 'accessories' | 'aspectRatio'>; label: string }> = [
@@ -649,7 +649,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                       const canAnimate = ['9:16', '4:5', '3:4'].includes(card.tags.aspectRatio);
                       return (
                         <button
-                          onClick={() => canAnimate ? onSendToTool('video', card.resultImage!) : null}
+                          onClick={() => canAnimate ? onSendToTool('video', card.resultImage!, card.promptText) : null}
                           disabled={!canAnimate}
                           className={`px-2 py-1 text-xs rounded transition-colors font-medium ${
                             canAnimate

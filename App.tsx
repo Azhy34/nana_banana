@@ -98,8 +98,9 @@ function App() {
     resultImage: null,
   });
 
-  // Image sent from Batch to Upscaler/Cropper
+  // Image & prompt sent from Batch to Upscaler/VideoTool
   const [batchToolImage, setBatchToolImage] = useState<string | null>(null);
+  const [batchToolPrompt, setBatchToolPrompt] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -123,9 +124,10 @@ function App() {
     writeSecret('kie_api_key', kieApiKey);
   }, [kieApiKey]);
 
-  const handleSendToTool = (mode: ViewMode, image: string) => {
+  const handleSendToTool = (mode: ViewMode, image: string, sourcePrompt?: string) => {
     setLastViewMode(viewMode);
     setBatchToolImage(image);
+    setBatchToolPrompt(sourcePrompt ?? null);
     setViewMode(mode);
   };
 
@@ -135,6 +137,7 @@ function App() {
       setStep(Step.Prompt);
     }
     setBatchToolImage(null);
+    setBatchToolPrompt(null);
   };
 
   const handleUpload = async (file: File) => {
@@ -245,6 +248,7 @@ function App() {
   const switchTab = (mode: ViewMode) => {
     if (mode === 'generator' || mode === 'batch') {
       setBatchToolImage(null);
+      setBatchToolPrompt(null);
     }
     setViewMode(mode);
   };
@@ -339,6 +343,7 @@ function App() {
         <div style={{ display: viewMode === 'video' ? 'block' : 'none' }}>
           <VideoTool
             initialImage={batchToolImage}
+            initialSourcePrompt={batchToolPrompt}
             onBack={handleGoHome}
             geminiApiKey={geminiApiKey}
             kieApiKey={kieApiKey}

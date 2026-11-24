@@ -365,3 +365,66 @@ test.describe('Video — Kling 3.0 (KIE)', () => {
     expect(upscaleSuccess.spanId).not.toBe(genSuccess.spanId);
   });
 });
+
+test.describe('Video — On-demand Prompt Adapter (gemini-3.1-flash-lite)', () => {
+  test('adapts motion preset for the current frame with thinkingLevel minimal and emits telemetry', async ({ page, apis }) => {
+    const adaptRequests: any[] = [];
+    await page.route('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent*', async (route) => {
+      adaptRequests.push(route.request().postDataJSON());
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    thought: true,
+                    text: 'Child has right hand already raised toward a flower; rug is bare.',
+                  },
+                  {
+                    text: 'Locked static camera, zero camera movement, zero handheld shake. The barefoot toddler smoothly shifts their already raised right hand toward the neighboring flower while warm daylight glides softly across the oak floor; no flowers or illustrations move or morph under the hand.',
+                  },
+                ],
+              },
+            },
+          ],
+          usageMetadata: {
+            promptTokenCount: 410,
+            candidatesTokenCount: 55,
+            thoughtsTokenCount: 42,
+            totalTokenCount: 507,
+          },
+        }),
+      });
+    });
+
+    await openVideoWithImage(page);
+    const tab = activeTab(page);
+    await tab.getByRole('button', { name: '✨ Адаптировать под фото' }).click();
+
+    await expect(tab.locator('textarea')).toHaveValue(/barefoot toddler smoothly shifts/, { timeout: 10_000 });
+    await expect(tab.locator('textarea')).not.toHaveValue(/Child has right hand already raised/);
+    await expect(tab.getByText(/Мысли агента: Child has right hand already raised/)).toBeVisible();
+    expect(adaptRequests).toHaveLength(1);
+    expect(adaptRequests[0].generationConfig.thinkingConfig).toEqual({
+      thinkingLevel: 'minimal',
+      includeThoughts: true,
+    });
+    expect(adaptRequests[0].systemInstruction.parts[0].text).toContain('Moonbloom');
+
+    await expect.poll(() => apis.logEvents.map((e) => e.status)).toEqual(['started', 'success']);
+    expect(apis.logEvents[1]).toMatchObject({
+      model: 'gemini-3.1-flash-lite',
+      stage: 'video_prompt_adapt',
+      provider: 'gemini',
+      promptTokens: 410,
+      candidateTokens: 55,
+      thoughtsTokens: 42,
+      totalTokens: 507,
+      agentThoughts: 'Child has right hand already raised toward a flower; rug is bare.',
+      costSource: 'usage',
+    });
+  });
+});

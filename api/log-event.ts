@@ -15,7 +15,7 @@ const DETAIL_FIELDS = [
   // OpenTelemetry & Prompt Analytics
   'spanId', 'provider', 'promptMode', 'style', 'audience', 'macroTexture',
   // Provider usage, tokens & billing metadata
-  'promptTokens', 'candidateTokens', 'totalTokens', 'videoTokens',
+  'promptTokens', 'candidateTokens', 'thoughtsTokens', 'totalTokens', 'videoTokens', 'agentThoughts',
   'costSource', 'kieCredits', 'kieTaskId', 'serverTimeSeconds', 'apiResponseId',
 ] as const;
 
@@ -78,8 +78,10 @@ export const logEventSchema = z.object({
   // Provider usage, tokens & billing metadata
   promptTokens: z.coerce.number().optional(),
   candidateTokens: z.coerce.number().optional(),
+  thoughtsTokens: z.coerce.number().optional(),
   totalTokens: z.coerce.number().optional(),
   videoTokens: z.coerce.number().optional(),
+  agentThoughts: z.string().optional(),
   costSource: z.enum(['usage', 'credits', 'estimate']).optional(),
   kieCredits: z.coerce.number().optional(),
   kieTaskId: z.string().optional(),

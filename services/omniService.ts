@@ -1,6 +1,7 @@
 import { VideoJobSettings, GeminiLogDetails } from '../types';
 import { logGeminiEvent } from './geminiService';
 import { generateSpanId, generateTraceId } from '../utils/tracing';
+import trendsData from '../Promt/trends.json' with { type: 'json' };
 import {
   OMNI_MODEL_ID,
   OMNI_DEFAULT_DURATION_SECONDS,
@@ -320,5 +321,170 @@ export async function generateOmniVideoOnClient(
       }
     );
     throw error;
+  }
+}
+
+export interface AdaptVideoPromptInput {
+  geminiApiKey: string;
+  presetLabel: string;
+  presetPrompt: string;
+  engine: string;
+  sourcePrompt?: string | null;
+  sourceImage?: string | null;
+  traceId?: string;
+}
+
+export interface AdaptVideoPromptResult {
+  prompt: string;
+  traceId: string;
+  durationSeconds: number;
+  thoughts?: string;
+  thoughtsTokens?: number;
+  totalTokens?: number;
+}
+
+async function resolveVisionImagePart(sourceImage?: string | null): Promise<{ inlineData: { mimeType: OmniImageMime; data: string } } | null> {
+  if (!sourceImage) return null;
+  let dataUrl = sourceImage;
+  if (/^https?:\/\//i.test(sourceImage)) {
+    try {
+      const proxied = await fetch('/api/kie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'fetchImage', url: sourceImage }),
+      });
+      if (!proxied.ok) return null;
+      const blob = await proxied.blob();
+      dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error('Failed to encode frame'));
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return null;
+    }
+  }
+  if (!dataUrl.startsWith('data:image/')) return null;
+  const parsed = parseOmniImage(dataUrl);
+  return { inlineData: { mimeType: parsed.mimeType, data: parsed.data } };
+}
+
+export async function adaptVideoPromptToContext(input: AdaptVideoPromptInput): Promise<AdaptVideoPromptResult> {
+  const { geminiApiKey, presetLabel, presetPrompt, engine, sourcePrompt, sourceImage } = input;
+  if (!geminiApiKey) {
+    throw new Error('Введите Gemini API Key в верхней панели для адаптации промпта.');
+  }
+  if (geminiApiKey.startsWith('sk-or-')) {
+    throw new Error('Ключ OpenRouter (sk-or-...) не подходит для Gemini API. Введите ключ AIzaSy... в поле Gemini.');
+  }
+  const adapterCfg = (trendsData as any).videoPromptAdapter as {
+    model: string;
+    thinkingLevel: string;
+    systemPrompt: string;
+  };
+  const modelId = adapterCfg?.model || 'gemini-3.1-flash-lite';
+  const tid = input.traceId || generateTraceId();
+  const spanId = generateSpanId();
+  const startTime = Date.now();
+
+  logGeminiEvent(modelId, presetPrompt, 0, 0, 'started', null, tid, undefined, {
+    stage: 'video_prompt_adapt',
+    provider: 'gemini',
+    promptPreset: presetLabel,
+    spanId,
+  });
+
+  try {
+    const parts: any[] = [];
+    if (!sourcePrompt) {
+      const visionPart = await resolveVisionImagePart(sourceImage);
+      if (visionPart) parts.push(visionPart);
+    }
+    const userText = [
+      sourcePrompt
+        ? `SOURCE PHOTO PROMPT (ground truth of what is in the room and the person's pose):\n${sourcePrompt}`
+        : 'SOURCE PHOTO: Inspect the attached reference frame carefully.',
+      `TARGET VIDEO ENGINE: ${engine}`,
+      `SELECTED MOTION PRESET (${presetLabel}):\n${presetPrompt}`,
+      'Write the adapted English motion prompt now:',
+    ].join('\n\n');
+    parts.push({ text: userText });
+
+    const url = `${API_ROOT}/models/${modelId}:generateContent?key=${encodeURIComponent(geminiApiKey)}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: adapterCfg.systemPrompt }] },
+        contents: [{ role: 'user', parts }],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 300,
+          thinkingConfig: {
+            thinkingLevel: adapterCfg.thinkingLevel || 'minimal',
+            includeThoughts: true,
+          },
+        },
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data?.error?.message || `Gemini ${modelId} error (${res.status})`);
+    }
+    const rawParts: any[] = data?.candidates?.[0]?.content?.parts || [];
+    const agentThoughts = rawParts
+      .filter((p: any) => p?.thought === true)
+      .map((p: any) => p?.text || '')
+      .join(' ')
+      .trim();
+    const rawText = rawParts
+      .filter((p: any) => !p?.thought)
+      .map((p: any) => p?.text || '')
+      .join('')
+      .trim();
+    const cleaned = rawText.replace(/^["'`]+|["'`]+$/g, '').trim();
+    if (!cleaned) {
+      throw new Error('Модель вернула пустой ответ при адаптации промпта.');
+    }
+
+    const duration = (Date.now() - startTime) / 1000;
+    const durationSeconds = Number(duration.toFixed(2));
+    const promptTokens = Number(data?.usageMetadata?.promptTokenCount) || undefined;
+    const candidateTokens = Number(data?.usageMetadata?.candidatesTokenCount) || undefined;
+    const thoughtsTokens = Number(data?.usageMetadata?.thoughtsTokenCount) || undefined;
+    const totalTokens = Number(data?.usageMetadata?.totalTokenCount) || undefined;
+    const costUsd = totalTokens ? Number(((totalTokens * 0.10) / 1_000_000).toFixed(6)) : 0;
+
+    logGeminiEvent(modelId, cleaned, costUsd, duration, 'success', null, tid, undefined, {
+      stage: 'video_prompt_adapt',
+      provider: 'gemini',
+      promptPreset: presetLabel,
+      spanId,
+      promptTokens,
+      candidateTokens,
+      thoughtsTokens,
+      totalTokens,
+      ...(agentThoughts ? { agentThoughts: agentThoughts.slice(0, 500) } : {}),
+      costSource: totalTokens ? 'usage' : 'estimate',
+    });
+
+    return {
+      prompt: cleaned,
+      traceId: tid,
+      durationSeconds,
+      thoughts: agentThoughts || undefined,
+      thoughtsTokens,
+      totalTokens,
+    };
+  } catch (err: any) {
+    const duration = (Date.now() - startTime) / 1000;
+    logGeminiEvent(modelId, presetPrompt, 0, duration, 'error', err?.message || 'Adapt error', tid, undefined, {
+      stage: 'video_prompt_adapt',
+      provider: 'gemini',
+      promptPreset: presetLabel,
+      spanId,
+    });
+    throw err;
   }
 }
