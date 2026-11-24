@@ -847,7 +847,7 @@
     ]
   },
   "realism": {
-    "photo": "A real editorial interior photograph for a German home magazine: single-source directional window light with soft falloff and contact shadows under furniture legs, true-to-life materials (visible wood grain, lived-in linen creases, matte painted surfaces with small signs of daily use), smooth filmic highlight roll-off, subtle sensor grain, and gentle micro-contrast.",
+    "photo": "A real editorial interior photograph for a German home magazine: natural window light with soft falloff, true-to-life materials (visible wood grain, natural linen, matte painted surfaces with small signs of daily use), natural colour and gentle contrast.",
     "note": "Positive wording on purpose: Google's image guide says describe what you want, not what you don't; OpenAI's says ask for a real photograph and name materials and light. Camera body, lens and aperture are cues for the look, not a simulation."
   },
   "negatives": {

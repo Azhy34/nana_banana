@@ -417,7 +417,10 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
       : `Authentic lived-in details: ${trendingToy || 'a small potted plant in a ceramic pot'} and clean task lighting.`;
   }
 
-  const rawAgeLine = ageLine(tags.ageGroup);
+  const isBedKeyObject = /bed|crib|cot|daybed/i.test(keyObjData?.name ?? tags.keyObject);
+  const rawAgeLine = tags.heroRoom || !isBedKeyObject
+    ? (ageData?.child ? `This is the room of ${ageData.child}.` : '')
+    : ageLine(tags.ageGroup);
   const effectiveAgeLine = isCleanFloor
     ? rawAgeLine.replace(/,?\s*and the play space is a quilted mat on the floor/i, '')
     : rawAgeLine;
