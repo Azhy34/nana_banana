@@ -449,17 +449,17 @@
   "keyObjects": [
     {
       "name": "Minimalist slatted solid birch crib",
-      "description": "standard waist-height rectangular natural light birch baby crib (120 by 60 cm, realistic real-world nursery scale, placed along the side wall) with slender vertical wooden spindles on all four sides and crisp organic cotton bedding",
+      "description": "standard waist-height natural light birch baby crib (120 by 60 cm, along the side wall) with slender vertical spindles and crisp organic cotton bedding",
       "ageGroup": "baby"
     },
     {
       "name": "Rectangular solid beech slatted baby crib",
-      "description": "classic waist-height rectangular solid beech baby crib (120 by 60 cm, realistic real-world nursery scale, placed along the side wall) with open thin vertical wooden spindles on all four sides, crisp white cotton mattress sheet",
+      "description": "classic waist-height solid beech baby crib (120 by 60 cm, along the side wall) with open vertical spindles and a crisp white cotton mattress sheet",
       "ageGroup": "baby"
     },
     {
       "name": "Clean matte white rectangular baby crib with drawer",
-      "description": "standard waist-height rectangular matte white wooden baby crib (120 by 60 cm, realistic real-world nursery scale, placed along the side wall) with softly arched plain solid end panels, open vertical front spindles, and a neat closed under-crib storage drawer with zero painted graphics on the furniture",
+      "description": "standard waist-height matte white wooden baby crib (120 by 60 cm, along the side wall) with plain solid end panels, vertical front spindles, and a closed under-crib drawer",
       "ageGroup": "baby"
     },
     {
@@ -847,7 +847,7 @@
     ]
   },
   "realism": {
-    "photo": "A real editorial interior photograph for a German home magazine: single-source directional window daylight with soft falloff and grounded contact shadows under furniture legs and rug edges, true-to-life materials (visible wood grain, natural lived-in creases in washed linen, matte painted surfaces with small signs of daily use), smooth filmic highlight roll-off, subtle natural sensor grain, and gentle optical micro-contrast.",
+    "photo": "A real editorial interior photograph for a German home magazine: single-source directional window light with soft falloff and contact shadows under furniture legs, true-to-life materials (visible wood grain, lived-in linen creases, matte painted surfaces with small signs of daily use), smooth filmic highlight roll-off, subtle sensor grain, and gentle micro-contrast.",
     "note": "Positive wording on purpose: Google's image guide says describe what you want, not what you don't; OpenAI's says ask for a real photograph and name materials and light. Camera body, lens and aperture are cues for the look, not a simulation."
   },
   "negatives": {

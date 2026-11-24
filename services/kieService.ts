@@ -16,10 +16,13 @@ import { generateSpanId, generateTraceId } from '../utils/tracing';
 const WALLPAPER_LABEL =
   'REFERENCE_IMAGE_1 (Wallpaper Graphic Artwork): This is the exact wallpaper graphic design to display on the accent wall. Preserve all colors, illustrations, lines, and composition 1:1 without alteration.';
 
+const POSITIVE_KIE_GUARDRAIL =
+  'The ceiling is a clean uninterrupted matte white plaster surface, the single floor rug lies flat on the oak parquet, the wallpaper covers 100% of the feature wall smoothly edge-to-edge from skirting board to ceiling, and only the named furniture stands in the room.';
+
 /**
- * KIE models accept references as a flat URL array (no per-image text parts),
- * so the prompt must explicitly bind index 1 -> wallpaper (1:1 unchanged) and index 2 -> texture.
- * In `brief` mode buildBriefPrompt() already embeds "References: image 1 is ...".
+ * KIE models accept references as a flat URL array (no per-image text parts) and use
+ * `negativePromptMode: 'positive_only'` (Google Nano Banana & OpenAI GPT Image guides:
+ * describe what is in the room positively; trailing `Avoid:` lists act as pink-elephant triggers).
  */
 function withKieReferenceLabels(
   prompt: string,
@@ -27,10 +30,13 @@ function withKieReferenceLabels(
   withTexture: boolean,
   promptMode?: string,
 ): string {
-  if (refCount === 0 || promptMode === 'brief') return prompt;
-  if (prompt.includes('REFERENCE_IMAGE_1')) return prompt;
+  const positiveBody = prompt.includes(' Avoid:')
+    ? `${prompt.slice(0, prompt.indexOf(' Avoid:')).trim()} ${POSITIVE_KIE_GUARDRAIL}`
+    : prompt;
+  if (refCount === 0 || promptMode === 'brief') return positiveBody;
+  if (positiveBody.includes('REFERENCE_IMAGE_1')) return positiveBody;
   const labels = [WALLPAPER_LABEL, ...(withTexture && refCount > 1 ? [MACRO_TEXTURE_LABEL] : [])];
-  return `${labels.join('\n')}\n\n${prompt}`;
+  return `${labels.join('\n')}\n\n${positiveBody}`;
 }
 
 async function callKieProxy<T = any>(kieKey: string, body: Record<string, unknown>): Promise<T> {
