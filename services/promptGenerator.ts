@@ -106,11 +106,11 @@ export function accessoriesOfAge(ageGroup: string): string[] {
 }
 
 export function rugsOfAge(ageGroup: string): string[] {
-  return accessoriesOfAge(ageGroup).filter(a => /\brug\b/i.test(a));
+  return accessoriesOfAge(ageGroup).filter(a => /\b(?:rug|mat)\b/i.test(a));
 }
 
 export function nonRugAccessoriesOfAge(ageGroup: string): string[] {
-  return accessoriesOfAge(ageGroup).filter(a => !/\brug\b/i.test(a));
+  return accessoriesOfAge(ageGroup).filter(a => !/\b(?:rug|mat)\b/i.test(a));
 }
 
 export function pickAccessoriesForAge(ageGroup: string): string[] {
@@ -350,8 +350,8 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     ? trendsData.staging.text
         .replace('with at most two small accessories beside it, ', '')
         .replace(
-          "and the child's own toys lie on a rug.",
-          'the floor rug, room corners, and parquet floor are completely bare, open, and uncluttered, with only the focal furniture piece and zero toys, playhouses, or loose items on the floor.',
+          "and the child's own toys lie on the single floor rug.",
+          'the single floor rug, room corners, and parquet floor are completely bare, open, and uncluttered, with only the focal furniture piece and zero toys, playhouses, or loose items on the floor.',
         )
     : trendsData.staging.text;
 
