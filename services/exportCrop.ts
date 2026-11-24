@@ -180,6 +180,7 @@ export function getModelShortTag(model?: string): string {
   if (!model) return '';
   if (model.includes('gemini-3.1-flash')) return 'flash31';
   if (model.includes('gemini-3-pro')) return 'pro';
+  if (model.includes('nano-banana-pro')) return 'nbpro';
   if (model.includes('nano-banana')) return 'nb21';
   if (model.includes('gpt-image-2')) return 'gpt2';
   if (model.includes('grok')) return 'grok';

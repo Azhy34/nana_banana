@@ -353,7 +353,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
         .replace('with at most two small accessories beside it, ', '')
         .replace(
           "and the child's own toys lie on the single floor rug.",
-          'the single floor rug, room corners, and parquet floor are completely bare, open, and uncluttered, with only the focal furniture piece and zero toys, playhouses, or loose items on the floor.',
+          'the single floor rug, room corners, and parquet floor are completely bare, open, and uncluttered, with only the focal furniture piece and zero toys, books, or loose items on the floor.',
         )
     : trendsData.staging.text;
 

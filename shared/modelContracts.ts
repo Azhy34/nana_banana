@@ -95,12 +95,29 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapability> = {
     kieCredits2K: 6,
     notes: 'KIE default: 6 credits ($0.03) at 2K, supports 4:5 and 3:4 natively.',
   },
-  'gpt-image-2-image-to-image': {
-    id: 'gpt-image-2-image-to-image',
-    label: 'GPT Image 2 (KIE)',
+  'nano-banana-pro': {
+    id: 'nano-banana-pro',
+    label: 'Nano Banana Pro (KIE)',
     provider: 'kie',
     kind: 'image',
-    aspectRatios: ['auto', '1:1', '3:2', '2:3', '4:3', '3:4', '5:4', '4:5', '16:9', '9:16', '21:9'],
+    aspectRatios: ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9', 'auto'],
+    resolutions: ['1K', '2K', '4K'],
+    maxRefs: 8,
+    refField: 'image_input',
+    maxPromptChars: 20000,
+    negativePromptMode: 'positive_only',
+    recommendedPromptMode: 'brief',
+    supportsTextureRef: true,
+    costUsd2K: 0.09,
+    kieCredits2K: 18,
+    notes: 'Gemini Pro quality via KIE: 18 credits ($0.09) at 2K, supports all aspect ratios natively.',
+  },
+  'gpt-image-2-5-flare-image-to-image': {
+    id: 'gpt-image-2-5-flare-image-to-image',
+    label: 'GPT Image 2.5 Flare (KIE)',
+    provider: 'kie',
+    kind: 'image',
+    aspectRatios: ['auto', '1:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16', '21:9'],
     resolutions: ['1K', '2K', '4K'],
     maxRefs: 16,
     refField: 'input_urls',
@@ -110,8 +127,8 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapability> = {
     supportsTextureRef: true,
     costUsd2K: 0.05,
     kieCredits2K: 10,
-    unsupportedAt2K: ['4:5', '5:4', '3:1', '1:3', '9:21'],
-    notes: 'Strong photorealism; 2K on KIE does not support 4:5 or 5:4 (use 3:4 or 4K).',
+    unsupportedAt2K: ['27:16', '16:27', '9:8', '8:9'],
+    notes: 'GPT Image 2.5 Flare on KIE: 10 credits ($0.05) at 2K; supports 2:3, 9:16, 3:4, 4:3, 1:1 at 2K (no 4:5).',
   },
   'grok-imagine-image-2-0/image-edit': {
     id: 'grok-imagine-image-2-0/image-edit',
@@ -126,8 +143,9 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapability> = {
     negativePromptMode: 'positive_only',
     recommendedPromptMode: 'brief',
     supportsTextureRef: true,
-    costUsd2K: 0.04,
-    notes: 'No resolution parameter; 4:5 and 3:4 are not supported.',
+    costUsd2K: 0.02,
+    kieCredits2K: 4,
+    notes: '4 credits ($0.02); no resolution parameter; 4:5 and 3:4 are not supported.',
   },
   'gemini-omni-1.2-flash': {
     id: 'gemini-omni-1.2-flash',
@@ -281,10 +299,17 @@ export function isKieModelId(modelId: string): boolean {
   return getModelCapability(modelId)?.provider === 'kie';
 }
 
-/** Active image models exposed in Generator and Batch UI (legacy Qwen excluded). */
+/** Active image models exposed in Generator UI (legacy Qwen excluded). */
 export function getUiImageModels(): ModelCapability[] {
   return Object.values(MODEL_CAPABILITIES).filter(
     m => m.kind === 'image' && m.id !== 'qwen/qwen-image-2',
+  );
+}
+
+/** KIE-only image models for Batch Generator (cheaper than direct Google API, mixable). */
+export function getKieImageModels(): ModelCapability[] {
+  return Object.values(MODEL_CAPABILITIES).filter(
+    m => m.kind === 'image' && m.provider === 'kie' && m.id !== 'qwen/qwen-image-2',
   );
 }
 

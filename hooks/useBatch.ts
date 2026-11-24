@@ -12,6 +12,7 @@ import {
   resolveAgePool,
 } from '../services/promptGenerator';
 import { generateBatchImage, isQwenModel, isKieModel } from '../services/generationRouter';
+import { getModelCapability } from '../shared/modelContracts';
 import { compressImageFile } from '../services/imageCompressor';
 import { resolveCardTexture } from '../services/macroTexture';
 import { exportCardImage, exportCardsAsZip, ExportPresetId } from '../services/exportCrop';
@@ -50,7 +51,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     }
   });
   const [count, setCount] = useState(12);
-  const [model, setModel] = useState<ModelType>(ModelType.Flash31);
+  const [selectedModels, setSelectedModels] = useState<ModelType[]>([ModelType.NanoBanana21]);
   // Master strategy: 2:3 photo master (cropped free in browser to 4:5 Site/Meta + 2:3 Pinterest) + 9:16 video master
   const [formatDist, setFormatDist] = useState<Record<BatchAspectRatio, number>>({ '2:3': 8, '9:16': 4, '4:5': 0, '3:4': 0, '4:3': 0 });
   const [exportPreset, setExportPreset] = useState<ExportPresetId>('pack_4x5_2x3');
@@ -182,6 +183,16 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     });
   };
 
+  const pickCardModel = (idx: number, ar: BatchAspectRatio): ModelType => {
+    const pool = selectedModels.length > 0 ? selectedModels : [ModelType.NanoBanana21];
+    const chosen = pool[idx % pool.length];
+    const cap = getModelCapability(chosen);
+    if (cap && (!cap.aspectRatios.includes(ar) || cap.unsupportedAt2K?.includes(ar))) {
+      return ModelType.NanoBanana21;
+    }
+    return chosen;
+  };
+
   const generateCards = () => {
     if (!wallpaper || formatTotal === 0) return;
     const formats: BatchAspectRatio[] = [
@@ -198,11 +209,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
     setCards(dealtTags.map((tags, idx) => {
       const ar = tags.aspectRatio;
-      const cardModel = model === ModelType.ABTest
-        ? (idx < formats.length / 2 ? ModelType.Pro : ModelType.Flash31)
-        : model === ModelType.ABTestFlashGrok
-        ? (idx < formats.length / 2 || !['2:3', '9:16'].includes(ar) ? ModelType.Flash31 : ModelType.GrokImagine)
-        : model;
+      const cardModel = pickCardModel(idx, ar);
 
       const cardId = `card_${String(idx + 1).padStart(2, '0')}_${ar.replace(':', 'x')}_${Math.random().toString(36).substring(2, 7)}`;
       return { id: cardId, tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel };
@@ -259,7 +266,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     const pool = resolveAgePool(targetAge);
     const lockedAge = pool[cards.length % pool.length];
     const tags = generateRandomTags('9:16', lockedAge, { audience, promptMode });
-    const cardModel = model === ModelType.ABTest ? ModelType.Pro : model === ModelType.ABTestFlashGrok ? ModelType.GrokImagine : model;
+    const cardModel = pickCardModel(cards.length, '9:16');
     const cardId = `card_${String(cards.length + 1).padStart(2, '0')}_9x16_${Math.random().toString(36).substring(2, 7)}`;
     setCards(prev => [...prev, { id: cardId, tags, promptText: buildGeminiPrompt(tags), status: 'idle', resultImage: null, error: null, selected: true, model: cardModel }]);
   };
@@ -362,7 +369,11 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   };
 
   const refineInPro = async (cardId: string) => {
-    if (!apiKey || !wallpaper) return;
+    if (!kieApiKey) {
+      alert('Please enter your KIE API Key in the header first.');
+      return;
+    }
+    if (!wallpaper) return;
     const card = cards.find(c => c.id === cardId);
     if (!card || !card.resultImage) return;
 
@@ -376,15 +387,22 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         wallpaper,
         card.promptText,
         card.tags.aspectRatio,
-        ModelType.Pro,
+        ModelType.NanoBananaPro,
         provider,
         card.resultImage,
         cardTraceId,
         texture,
-        card.id
+        card.id,
+        kieApiKey,
+        {
+          promptMode: card.tags.promptMode,
+          style: card.tags.style,
+          audience: card.tags.audience,
+          macroTexture: card.tags.macroTexture,
+        },
       );
       if (img.startsWith('data:')) void saveCardImage(cardId, img);
-      setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img, model: ModelType.Pro } : c));
+      setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'done', resultImage: img, model: ModelType.NanoBananaPro } : c));
     } catch (err: any) {
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, status: 'error', error: err.message || 'Refinement failed' } : c));
     }
@@ -421,9 +439,9 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   };
 
   return {
-    state: { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, targetAge, includeHero, promptMode, exportPreset, isExporting },
+    state: { batchStep, wallpaper, count, selectedModels, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, targetAge, includeHero, promptMode, exportPreset, isExporting },
     actions: {
-      setBatchStep, setWallpaper, setModel, setExpandedCard, setIncludeMacro,
+      setBatchStep, setWallpaper, setSelectedModels, setExpandedCard, setIncludeMacro,
       setAudience, setTargetAge, setIncludeHero, setPromptMode, setExportPreset,
       handleWallpaperUpload, updateFormat, selectCount, generateCards,
       updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,

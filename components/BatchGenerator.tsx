@@ -2,7 +2,7 @@ import React from 'react';
 import { useBatch } from '../hooks/useBatch';
 import { AudienceKey, BatchCard, BatchAspectRatio, BatchPersonMode, BatchPromptTags, AgeGroupKey, ViewMode, ModelType, AIProvider, PromptMode } from '../types';
 import { TAG_OPTIONS, AGE_GROUP_LABELS, getColorsForStyle, muralSafeKeyObjects, TargetAgeFilter, resolveAgePool, PEOPLE_SCENE_OPTIONS } from '../services/promptGenerator';
-import { getUiImageModels, getModelCapability, validateModelInput } from '../shared/modelContracts';
+import { getKieImageModels, getModelCapability, validateModelInput } from '../shared/modelContracts';
 import { EXPORT_PRESET_OPTIONS, ExportPresetId } from '../services/exportCrop';
 import { BATCH_COUNT_OPTIONS } from '../constants';
 
@@ -58,9 +58,9 @@ const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs
 
 export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, kieApiKey = '', onViewModeChange, onSendToTool }) => {
   const { state, actions } = useBatch(provider, apiKey, replicateToken, kieApiKey);
-  const { batchStep, wallpaper, count, model, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, targetAge, includeHero, promptMode, exportPreset, isExporting } = state;
+  const { batchStep, wallpaper, count, selectedModels, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, targetAge, includeHero, promptMode, exportPreset, isExporting } = state;
   const {
-    setBatchStep, setWallpaper, setModel, setExpandedCard, setIncludeMacro,
+    setBatchStep, setWallpaper, setSelectedModels, setExpandedCard, setIncludeMacro,
     setAudience, setTargetAge, setIncludeHero, setPromptMode, setExportPreset,
     handleWallpaperUpload, updateFormat, selectCount, generateCards,
     updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
@@ -287,43 +287,89 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
           </div>
         </div>
 
-        {/* Model (driven by shared/modelContracts.ts) */}
+        {/* Model (KIE-only multi-select mix, driven by shared/modelContracts.ts) */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-white font-semibold">Model</h3>
-            {(() => {
-              const cap = getModelCapability(model);
-              if (model === ModelType.ABTest) return <span className="text-xs text-slate-400">~${((0.0672 + 0.134) / 2 * formatTotal).toFixed(2)} est.</span>;
-              if (model === ModelType.ABTestFlashGrok) return <span className="text-xs text-slate-400">~${((0.0672 + 0.04) / 2 * formatTotal).toFixed(2)} est.</span>;
-              if (!cap) return null;
-              return (
-                <span className="text-xs text-slate-400">
-                  {cap.kieCredits2K ? `${cap.kieCredits2K * formatTotal} KIE credits ($${(cap.costUsd2K * formatTotal).toFixed(2)})` : `~$${(cap.costUsd2K * formatTotal).toFixed(2)} est.`}
-                </span>
-              );
-            })()}
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            {getUiImageModels().map((m) => (
-              <button key={m.id} onClick={() => setModel(m.id as ModelType)}
-                className={`py-3 px-2.5 rounded-xl transition-all text-center ${model === m.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
-                <div className="font-bold text-xs leading-tight">{m.label}</div>
-                <div className="text-[11px] opacity-75 mt-1">
-                  {m.kieCredits2K ? `${m.kieCredits2K} cr · $${m.costUsd2K}` : `$${m.costUsd2K.toFixed(3)} / 2K`}
+          {(() => {
+            const kieModels = getKieImageModels();
+            const activePool = selectedModels.length > 0 ? selectedModels : [ModelType.NanoBanana21];
+            const avgCredits = activePool.reduce((sum, id) => sum + (getModelCapability(id)?.kieCredits2K ?? 6), 0) / activePool.length;
+            const avgUsd = activePool.reduce((sum, id) => sum + (getModelCapability(id)?.costUsd2K ?? 0.03), 0) / activePool.length;
+            const totalCredits = Math.round(avgCredits * formatTotal);
+            const totalUsd = (avgUsd * formatTotal).toFixed(2);
+            const isExactMix = (ids: ModelType[]) =>
+              activePool.length === ids.length && ids.every(id => activePool.includes(id));
+            const splitPresets: { label: string; models: ModelType[] }[] = [
+              { label: 'Gemini (Flash + Pro)', models: [ModelType.NanoBanana21, ModelType.NanoBananaPro] },
+              { label: 'Flash + GPT', models: [ModelType.NanoBanana21, ModelType.GptImage2] },
+              { label: 'Grok + GPT', models: [ModelType.GrokImagine, ModelType.GptImage2] },
+              { label: 'Микс всех 4', models: kieModels.map(m => m.id as ModelType) },
+            ];
+            const toggleModel = (id: ModelType) => {
+              if (activePool.includes(id)) {
+                if (activePool.length === 1) return;
+                setSelectedModels(activePool.filter(m => m !== id));
+              } else {
+                setSelectedModels([...activePool, id]);
+              }
+            };
+            return (
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-white font-semibold">Models (KIE API)</h3>
+                    <span className="text-[11px] text-slate-400">Все через KIE · можно миксовать</span>
+                  </div>
+                  <span className="text-xs font-mono text-emerald-300">
+                    ~{totalCredits} KIE cr (${totalUsd})
+                  </span>
                 </div>
-              </button>
-            ))}
-            <button onClick={() => setModel(ModelType.ABTest)}
-              className={`py-3 px-2.5 rounded-xl transition-all text-center ${model === ModelType.ABTest ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
-              <div className="font-bold text-xs leading-tight">50/50 Split</div>
-              <div className="text-[11px] opacity-75 mt-1">Pro & Flash A/B</div>
-            </button>
-            <button onClick={() => setModel(ModelType.ABTestFlashGrok)}
-              className={`py-3 px-2.5 rounded-xl transition-all text-center ${model === ModelType.ABTestFlashGrok ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-700 text-slate-400 hover:text-white'}`}>
-              <div className="font-bold text-xs leading-tight">50/50 Split</div>
-              <div className="text-[11px] opacity-75 mt-1">Flash & Grok A/B</div>
-            </button>
-          </div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {kieModels.map((m) => {
+                    const active = activePool.includes(m.id as ModelType);
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => toggleModel(m.id as ModelType)}
+                        className={`py-3 px-3 rounded-xl transition-all text-center border ${
+                          active
+                            ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/30'
+                            : 'bg-slate-700/70 border-slate-600/60 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <div className="font-bold text-xs leading-tight">
+                          {active ? '✓ ' : ''}{m.label}
+                        </div>
+                        <div className="text-[11px] opacity-80 mt-1 font-mono">
+                          {m.kieCredits2K} cr · ${m.costUsd2K.toFixed(2)}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-700/70">
+                  <span className="text-[11px] text-slate-400 mr-1">Сплит:</span>
+                  {splitPresets.map((preset) => {
+                    const active = isExactMix(preset.models);
+                    return (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => setSelectedModels(preset.models)}
+                        className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all ${
+                          active
+                            ? 'bg-indigo-600/30 border-indigo-400 text-indigo-200'
+                            : 'bg-slate-700/60 border-slate-600 text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         <button onClick={generateCards} disabled={!wallpaper || formatTotal === 0}
@@ -578,7 +624,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
             <div className="p-2.5 flex items-center justify-between gap-1.5 flex-wrap">
               <div className="flex items-center gap-2">
                 <span className="text-slate-500 text-xs font-mono shrink-0">{card.tags.aspectRatio}</span>
-                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${card.model === ModelType.Pro ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-teal-500/20 text-teal-400 border-teal-500/30'}`}>
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${card.model === ModelType.NanoBananaPro || card.model === ModelType.Pro ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-teal-500/20 text-teal-400 border-teal-500/30'}`}>
                   {(() => {
                     const cap = getModelCapability(card.model);
                     if (!cap) return card.model;
@@ -589,10 +635,10 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               <div className="flex gap-1">
                 {card.status === 'done' && card.resultImage && (
                   <>
-                    {card.model === ModelType.Flash31 && (
+                    {(card.model === ModelType.NanoBanana21 || card.model === ModelType.Flash31) && (
                       <button onClick={() => refineInPro(card.id)}
                         className="px-2 py-1 bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 text-xs rounded border border-amber-500/20 transition-colors font-medium" 
-                        title="Generate high-detail 2K version in Pro model (ideal for Etsy)">✨ Refine (2K)</button>
+                        title="Перегенерировать карточку в Nano Banana Pro (KIE, 18 cr · $0.09)">✨ Refine (2K)</button>
                     )}
                     <button onClick={() => downloadCard(card, idx)}
                       className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded transition-colors"

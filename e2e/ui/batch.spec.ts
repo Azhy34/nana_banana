@@ -17,7 +17,52 @@ import {
 /** A distinct colour per generated card, so each result can be traced. */
 const cardImage = (n: number) => pngDataUrl([40 + n * 30, 120, 200 - n * 20]);
 
-async function runBatch(page: Page, apis: MockedApis, count = 6) {
+async function mockKieBatch(
+  page: Page,
+  imageFactory: (n: number) => string = cardImage,
+  onCreate?: (body: any) => Promise<void> | void,
+) {
+  await page.addInitScript(() => localStorage.setItem('kie_api_key', 'kie_test_key_12345'));
+  let seq = 0;
+  const taskImages = new Map<string, string>();
+  const kieCreates: any[] = [];
+  await page.route('/api/kie', async (route) => {
+    const body = route.request().postDataJSON();
+    if (body.action === 'upload') {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ code: 200, data: { downloadUrl: 'https://tempfile.aiquickdraw.com/ref.jpg' } }) });
+    }
+    if (body.action === 'createTask') {
+      kieCreates.push(body);
+      if (onCreate) await onCreate(body);
+      const n = ++seq;
+      const taskId = `kie_batch_task_${n}`;
+      taskImages.set(taskId, imageFactory(n));
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ code: 200, data: { taskId } }) });
+    }
+    if (body.action === 'recordInfo') {
+      const img = taskImages.get(body.taskId) ?? imageFactory(1);
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 200,
+          data: { state: 'success', costTime: 5, consumeCredits: 6, resultJson: JSON.stringify({ resultUrls: [img] }) },
+        }),
+      });
+    }
+    return route.fallback();
+  });
+  return kieCreates;
+}
+
+async function runBatch(
+  page: Page,
+  _apis: MockedApis,
+  count = 6,
+  imageFactory: (n: number) => string = cardImage,
+  onCreate?: (body: any) => Promise<void> | void,
+) {
+  const kieCreates = await mockKieBatch(page, imageFactory, onCreate);
   await openApp(page);
   await switchTab(page, 'Batch');
   const tab = activeTab(page);
@@ -33,32 +78,26 @@ async function runBatch(page: Page, apis: MockedApis, count = 6) {
   await expect(tab.getByRole('heading', { name: 'Results' })).toBeVisible();
   await expect(tab.getByText(`${count} of ${count} generated`)).toBeVisible({ timeout: 30_000 });
   await expect(tab.getByLabel('Формат выгрузки')).toHaveValue('pack_4x5_2x3');
-  return tab;
+  return { tab, kieCreates };
 }
 
 test.describe('Batch generator', () => {
   test('wallpaper → prompts → parallel generation with the documented request', async ({ page, apis }) => {
     let inFlight = 0;
     let maxInFlight = 0;
-    await page.route('https://openrouter.ai/api/v1/chat/completions', async (route) => {
-      if (route.request().method() === 'OPTIONS') return route.fallback();
+    const { tab, kieCreates } = await runBatch(page, apis, 6, cardImage, async () => {
       inFlight++;
       maxInFlight = Math.max(maxInFlight, inFlight);
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 150));
       inFlight--;
-      return route.fallback(); // hand over to the fixture mock, which records the call
     });
-    apis.imageFor = cardImage;
 
-    const tab = await runBatch(page, apis, 6);
-
-    expect(apis.openrouter).toHaveLength(6);
+    expect(kieCreates).toHaveLength(6);
     expect(maxInFlight, 'batch must not exceed its concurrency limit of 2').toBeLessThanOrEqual(2);
-    const aspectRatios = apis.openrouter.map((call) => call.body.image_config.aspect_ratio);
-    for (const call of apis.openrouter) {
-      expect(call.body).toMatchObject({ model: 'google/gemini-3.1-flash-image', image_config: { image_size: '2K' } });
-      const parts = call.body.messages[0].content as Array<{ type: string; image_url?: { url: string } }>;
-      expect(parts.filter((p) => p.type === 'image_url')).toHaveLength(1);
+    const aspectRatios = kieCreates.map((call) => call.input.aspect_ratio);
+    for (const call of kieCreates) {
+      expect(call.model).toBe('nano-banana-2-1');
+      expect(call.input.resolution).toBe('2K');
     }
     expect(aspectRatios.every((ar: string) => ['2:3', '9:16'].includes(ar))).toBe(true);
 
@@ -67,18 +106,16 @@ test.describe('Batch generator', () => {
   });
 
   test('3 photos: 2x 2:3 photo masters + 1x 9:16 video master, three requests', async ({ page, apis }) => {
-    apis.imageFor = cardImage;
-    const tab = await runBatch(page, apis, 3);
+    const { tab, kieCreates } = await runBatch(page, apis, 3);
 
-    expect(apis.openrouter).toHaveLength(3);
-    expect(apis.openrouter.map((call) => call.body.image_config.aspect_ratio).sort()).toEqual(['2:3', '2:3', '9:16']);
+    expect(kieCreates).toHaveLength(3);
+    expect(kieCreates.map((call) => call.input.aspect_ratio).sort()).toEqual(['2:3', '2:3', '9:16']);
     for (let i = 0; i < 3; i++) await expect(tab.getByAltText(`Result ${i + 1}`)).toBeVisible();
     await expect.poll(() => apis.logEvents.filter((e) => e.status === 'success').length).toBe(3);
   });
 
   test('"↑ Scale" sends that card\'s image to the Upscaler', async ({ page, apis }) => {
-    apis.imageFor = cardImage;
-    const tab = await runBatch(page, apis, 6);
+    const { tab } = await runBatch(page, apis, 6);
 
     const firstResult = await tab.getByAltText('Result 1').getAttribute('src');
     await tab.getByTitle('Send to Upscaler').first().click();
@@ -87,8 +124,7 @@ test.describe('Batch generator', () => {
   });
 
   test('9:16 card is sent to the Video animator', async ({ page, apis }) => {
-    apis.imageFor = cardImage;
-    const tab = await runBatch(page, apis, 6);
+    const { tab } = await runBatch(page, apis, 6);
 
     const verticalCard = tab.getByTitle('Анимировать кадр (Video Animator)').first();
     const cardRoot = verticalCard.locator('xpath=ancestor::div[.//img[starts-with(@alt, "Result ")]][1]');
@@ -103,8 +139,7 @@ test.describe('Batch generator', () => {
     // Real 2K outputs are several MB of base64 each — the size that matters for localStorage.
     const realistic = (n: number) =>
       `data:image/png;base64,${Buffer.concat([makePng(64, 48, [40 + n * 30, 90, 160]), randomBytes(1_900_000)]).toString('base64')}`;
-    apis.imageFor = realistic;
-    await runBatch(page, apis, 6);
+    await runBatch(page, apis, 6, realistic);
 
     await page.reload();
     await switchTab(page, 'Batch');
@@ -114,7 +149,7 @@ test.describe('Batch generator', () => {
   });
 
   test('downloads all formats as a single ZIP when "pack_all" is selected', async ({ page, apis }) => {
-    const tab = await runBatch(page, apis, 3);
+    const { tab } = await runBatch(page, apis, 3);
     await tab.getByLabel('Формат выгрузки').selectOption('pack_all');
     const downloadPromise = page.waitForEvent('download');
     await tab.getByRole('button', { name: /⬇ Скачать ZIP/ }).click();
