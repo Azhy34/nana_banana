@@ -708,28 +708,6 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, initialSourc
               className="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 text-slate-200 text-xs rounded-xl p-3 focus:outline-none transition-colors leading-relaxed resize-none"
               placeholder="Введите или скорректируйте промпт анимации..."
             />
-            {engine === 'omni' ? (
-              <div className="mt-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3" data-testid="omni-base-prompt">
-                <p className="text-[11px] text-emerald-300 font-semibold mb-1">
-                  🔒 Всегда добавляется к запросу (стереть нельзя):
-                </p>
-                <p className="text-[10px] text-slate-400 leading-relaxed">{OMNI_PROMPT_BASE.join(' ')}</p>
-                <p className="text-[10px] text-slate-500 mt-1.5">
-                  В поле выше пишите только движение камеры и света. Комнату не описывайте: всё названное модель может дорисовать.
-                </p>
-              </div>
-            ) : (engine === 'kling' || engine === 'kling3') ? (
-              <div className="mt-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
-                <p className="text-[11px] text-emerald-300 font-semibold mb-1">
-                  🔒 Защита обоев {engine === 'kling3' ? 'Kling 3.0' : 'Kling 2.6'} (Zod schema · 5 с · sound=false · {composeKlingPrompt(settings.customPrompt).length}/2500 симв.):
-                </p>
-                <p className="text-[10px] text-slate-400 leading-relaxed">{KLING_WALL_FREEZE}</p>
-              </div>
-            ) : (
-              <span className="text-[10px] text-slate-500 mt-1.5 block">
-                Veo 3.1: использует автоматический негативный промпт для предотвращения сворачивания обоев.
-              </span>
-            )}
           </div>
 
           {/* Seed Input */}

@@ -93,7 +93,7 @@ test.describe('Batch generator', () => {
     });
 
     expect(kieCreates).toHaveLength(6);
-    expect(maxInFlight, 'batch must not exceed its concurrency limit of 2').toBeLessThanOrEqual(2);
+    expect(maxInFlight, 'batch must not exceed its concurrency limit of 4').toBeLessThanOrEqual(4);
     const aspectRatios = kieCreates.map((call) => call.input.aspect_ratio);
     for (const call of kieCreates) {
       expect(call.model).toBe('nano-banana-2-1');

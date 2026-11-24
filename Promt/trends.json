@@ -2,154 +2,154 @@
   "colors": [
     {
       "name": "Mint, Sand & Burgundy",
-      "description": "60/30/10 designer triad: 60% warm sandy beige (#DCD8B1) on natural linen bedding and light wood, 30% fresh muted mint-sage (#86E8B7) on the floor rug and soft throws, and 10% deep rich burgundy (#4D1212) as a bold editorial accent on a cushion, piping, or table lamp",
+      "description": "60% warm sand (#DCD8B1) base, 30% fresh mint-sage (#86E8B7) on rug/throws, 10% deep burgundy (#4D1212) accent",
       "lampColor": "deep burgundy",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Milk, Moss Green & Graphite",
-      "description": "60/30/10 designer triad: 60% warm creamy milk (#F9F7D5) on bedding and calm surfaces, 30% earthy moss-olive green (#4D6042) on the woven rug and textile throws, and 10% matte graphite (#191919) on sleek lamp details, cushion piping, and small decor accents",
+      "description": "60% creamy milk (#F9F7D5) base, 30% moss-olive green (#4D6042) on rug/throws, 10% matte graphite (#191919) accent",
       "lampColor": "matte graphite",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["schulkind", "teenager"]
     },
     {
       "name": "Cool Grey, Mustard & Charcoal",
-      "description": "60/30/10 designer triad: 60% soft French light grey (#D7DCDB) and pale oak base, 30% warm ochre mustard yellow (#EBA000) on the statement rug and throw blanket, and 10% matte charcoal (#232323) on small sculptural accents and task lighting",
+      "description": "60% light grey (#D7DCDB) & oak base, 30% ochre mustard (#EBA000) on rug/throw, 10% matte charcoal (#232323) accent",
       "lampColor": "warm mustard yellow",
       "audiences": ["neutral", "boy"],
       "ageGroups": ["schulkind", "teenager"]
     },
     {
       "name": "Sunny Mustard",
-      "description": "60/30/10 triad: 60% warm oat cream base on bedding, 30% golden mustard yellow on the rug and knit throw, and 10% warm terracotta and natural oak accents",
+      "description": "60% warm oat cream base, 30% golden mustard yellow on rug/throw, 10% warm terracotta accent",
       "lampColor": "warm mustard yellow",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind"]
     },
     {
       "name": "Muted Sage",
-      "description": "60/30/10 triad: 60% soft cloud cream and light birch base, 30% calming botanical sage green on the rug and linen textiles, and 10% warm honey amber and terracotta accents",
+      "description": "60% cloud cream & birch base, 30% botanical sage green on rug/textiles, 10% honey amber & terracotta accent",
       "lampColor": "warm terracotta",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Warm Terracotta",
-      "description": "60/30/10 triad: 60% warm sandy linen base, 30% earthy baked terracotta on the floor rug and throws, and 10% muted sage green on a small cushion or ceramic lamp",
+      "description": "60% warm sandy linen base, 30% earthy terracotta on rug/throws, 10% muted sage green accent",
       "lampColor": "warm terracotta",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Dusty Rose",
-      "description": "60/30/10 triad: 60% cashmere cream and pale oak base, 30% soft vintage dusty rose on the rug and linen duvet, and 10% grounded olive green and warmberry accents",
+      "description": "60% cashmere cream & oak base, 30% vintage dusty rose on rug/duvet, 10% olive green & berry accent",
       "lampColor": "dusty rose",
       "audiences": ["neutral", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Honey Amber",
-      "description": "60/30/10 triad: 60% warm oatmeal linen base, 30% glowing honey amber and caramel tones on textiles, and 10% muted slate blue accent details",
+      "description": "60% oatmeal linen base, 30% glowing honey amber & caramel textiles, 10% muted slate blue accent",
       "lampColor": "warm honey amber",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind"]
     },
     {
       "name": "Strawberry Milk",
-      "description": "60/30/10 triad: 60% warm milk-white and birch base, 30% gentle pastel strawberry blush on the rug and bedding, and 10% fresh pistachio sage accent touches",
+      "description": "60% milk-white & birch base, 30% pastel strawberry blush on rug/bedding, 10% pistachio sage accent",
       "lampColor": "pastel pink",
       "audiences": ["neutral", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind"]
     },
     {
       "name": "Eucalyptus",
-      "description": "60/30/10 triad: 60% warm alabaster and natural ash wood base, 30% organic eucalyptus green on the rug and throw, and 10% warm ochre and raw clay accents",
+      "description": "60% warm alabaster & ash base, 30% organic eucalyptus green on rug/throw, 10% ochre & clay accent",
       "lampColor": "warm ochre yellow",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Olive",
-      "description": "60/30/10 triad: 60% warm sand and oat linen base, 30% calm earthy olive green on the rug and textiles, and 10% warm berry red or terracotta accent details",
+      "description": "60% warm sand & oat linen base, 30% earthy olive green on rug/textiles, 10% deep berry red accent",
       "lampColor": "deep burgundy",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Warm Greige",
-      "description": "60/30/10 triad: 60% quiet warm grey-beige and light oak base, 30% soft ocean blue or sage on the rug, and 10% warm mustard yellow accent on a cushion or lamp",
+      "description": "60% warm grey-beige & oak base, 30% soft ocean blue or sage on rug, 10% warm mustard yellow accent",
       "lampColor": "warm mustard yellow",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Soft Sand",
-      "description": "60/30/10 triad: 60% soft sandy beige and pale birch base, 30% muted slate blue or sage on the floor rug, and 10% warm caramel terracotta accent details",
+      "description": "60% sandy beige & birch base, 30% muted slate blue or sage on rug, 10% caramel terracotta accent",
       "lampColor": "sky blue",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Lilac Mist",
-      "description": "60/30/10 triad: 60% warm cloud cream base, 30% dusty lilac mist with a hint of lavender on the rug and throw, and 10% buttery vanilla yellow and sage accents",
+      "description": "60% cloud cream base, 30% dusty lilac mist on rug/throw, 10% buttery vanilla yellow & sage accent",
       "lampColor": "pastel pink",
       "audiences": ["neutral", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Barberry",
-      "description": "60/30/10 triad: 60% warm cream and light oak base, 30% soft sandy oat and muted sage on the rug, and 10% sophisticated berry-red (Barberry) accent on cushions and lamp",
+      "description": "60% warm cream & oak base, 30% sandy oat & sage on rug, 10% berry-red Barberry accent on cushions/lamp",
       "lampColor": "deep berry red",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Cool Blue",
-      "description": "60/30/10 triad: 60% warm off-white and birch base, 30% calm Nordic sky blue on the rug and duvet, and 10% warm mustard yellow or terracotta accent",
+      "description": "60% off-white & birch base, 30% calm Nordic sky blue on rug/duvet, 10% warm mustard or terracotta accent",
       "lampColor": "bright cobalt blue",
       "audiences": ["neutral", "boy"],
       "ageGroups": ["baby", "vorschul", "schulkind"]
     },
     {
       "name": "Cocoa Brown",
-      "description": "60/30/10 Slow-Deco triad: 60% warm macchiato cream and oak base, 30% cosy cocoa taupe on the rug and throws, and 10% soft sage or dusty terracotta accent",
+      "description": "60% macchiato cream & oak base, 30% cosy cocoa taupe on rug/throws, 10% soft sage or terracotta accent",
       "lampColor": "warm terracotta",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Petrol",
-      "description": "60/30/10 triad: 60% warm greige and light oak base, 30% deep muted petrol teal on the rug and bedding, and 10% burnt orange and mustard yellow accent details",
+      "description": "60% warm greige & oak base, 30% deep muted petrol teal on rug/bedding, 10% burnt orange & mustard accent",
       "lampColor": "warm mustard yellow",
       "audiences": ["neutral", "boy"],
       "ageGroups": ["schulkind", "teenager"]
     },
     {
       "name": "Butter Yellow",
-      "description": "60/30/10 triad: 60% warm milk-white and pale wood base, 30% sunny creamy butter yellow on the rug and bedding, and 10% soft powder blue or sage green accent",
+      "description": "60% milk-white & pale wood base, 30% creamy butter yellow on rug/bedding, 10% powder blue or sage accent",
       "lampColor": "sunny yellow",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind"]
     },
     {
       "name": "Pepper White",
-      "description": "60/30/10 triad: 60% warm off-white and natural oak base, 30% soft oatmeal and sage on the floor rug, and 10% warm honey amber and terracotta accent touches",
+      "description": "60% warm off-white & oak base, 30% soft oatmeal & sage on rug, 10% honey amber & terracotta accent",
       "lampColor": "warm terracotta",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Brick Red",
-      "description": "60/30/10 Fun-Haus triad: 60% warm chalky cream and birch base, 30% soft powder blue and caramel stripes on textiles, and 10% punchy brick red accent on cushions and lamp",
+      "description": "60% chalky cream & birch base, 30% powder blue & caramel stripes, 10% punchy brick red accent",
       "lampColor": "warm brick red",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Powder Blue",
-      "description": "60/30/10 triad: 60% warm sandy cream and light birch base, 30% dusty powder blue on the rug and linen bedding, and 10% warm cocoa brown and honey wood accents",
+      "description": "60% sandy cream & birch base, 30% dusty powder blue on rug/bedding, 10% cocoa brown & honey wood accent",
       "lampColor": "sky blue",
       "audiences": ["neutral", "boy"],
       "ageGroups": ["baby", "vorschul", "schulkind"]

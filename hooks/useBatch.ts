@@ -306,11 +306,13 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     setCards(prev => prev.map(c => ({ ...c, status: 'loading', resultImage: null, error: null })));
     setBatchStep('results');
 
-    const concurrencyLimit = 2;
-    
-    for (let i = 0; i < selectedCards.length; i += concurrencyLimit) {
-      const chunk = selectedCards.slice(i, i + concurrencyLimit);
-      await Promise.allSettled(chunk.map(async (card) => {
+    const concurrencyLimit = 4;
+    let cursor = 0;
+
+    const runWorker = async () => {
+      while (cursor < selectedCards.length) {
+        const card = selectedCards[cursor++];
+        if (!card) break;
         try {
           const cardTraceId = generateTraceId();
           const texture = resolveCardTexture(card.tags);
@@ -334,8 +336,12 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         } catch (err: any) {
           setCards(prev => prev.map(c => c.id === card.id ? { ...c, status: 'error', error: err.message ?? 'Failed' } : c));
         }
-      }));
-    }
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length: Math.min(concurrencyLimit, selectedCards.length) }, () => runWorker())
+    );
 
     setIsGenerating(false);
   };

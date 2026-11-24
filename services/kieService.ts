@@ -49,17 +49,32 @@ async function callKieProxy<T = any>(kieKey: string, body: Record<string, unknow
   return json as T;
 }
 
+const referenceUploadCache = new Map<string, Promise<string>>();
+
 async function uploadReference(kieKey: string, image: UploadedImage, fileName: string): Promise<string> {
-  const dataUrl = `data:${image.mimeType || 'image/jpeg'};base64,${image.data}`;
-  const res = await callKieProxy<{ data?: { downloadUrl?: string; download_url?: string } }>(kieKey, {
-    action: 'upload',
-    base64Data: dataUrl,
-    fileName,
-    uploadPath: 'nana-banana/refs',
+  const raw = image.data || '';
+  const cacheKey = `${kieKey.slice(-6)}:${fileName}:${raw.length}:${raw.slice(0, 64)}:${raw.slice(-64)}`;
+  const cached = referenceUploadCache.get(cacheKey);
+  if (cached) return cached;
+
+  const uploadPromise = (async () => {
+    const dataUrl = `data:${image.mimeType || 'image/jpeg'};base64,${raw}`;
+    const res = await callKieProxy<{ data?: { downloadUrl?: string; download_url?: string } }>(kieKey, {
+      action: 'upload',
+      base64Data: dataUrl,
+      fileName,
+      uploadPath: 'nana-banana/refs',
+    });
+    const url = res?.data?.downloadUrl || res?.data?.download_url;
+    if (!url) throw new Error('KIE upload succeeded but returned no downloadUrl');
+    return url;
+  })().catch((err) => {
+    referenceUploadCache.delete(cacheKey);
+    throw err;
   });
-  const url = res?.data?.downloadUrl || res?.data?.download_url;
-  if (!url) throw new Error('KIE upload succeeded but returned no downloadUrl');
-  return url;
+
+  referenceUploadCache.set(cacheKey, uploadPromise);
+  return uploadPromise;
 }
 
 interface KieRecordData {

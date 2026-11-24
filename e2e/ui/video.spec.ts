@@ -126,7 +126,6 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
   test('the wallpaper freeze cannot be erased: it is added to whatever the user types', async ({ page, apis }) => {
     await openVideoWithImage(page);
     const tab = activeTab(page);
-    await expect(tab.getByTestId('omni-base-prompt')).toContainText(OMNI_PROMPT_FREEZE);   // the owner sees what is always sent
     await tab.getByPlaceholder('Введите или скорректируйте промпт анимации...').fill('The curtains sway in a light breeze.');
     await tab.getByRole('button', { name: OMNI_BUTTON }).click();
     await expect(tab.locator('video')).toBeVisible();

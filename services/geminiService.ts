@@ -69,7 +69,9 @@ const normalizeImageInput = (imageInput: string): string => {
 
 const toGeminiModel = (model: ModelType): string => model.replace(/^google\//, "");
 
-export const logGeminiEvent = async (
+let logEventQueue: Promise<void> = Promise.resolve();
+
+export const logGeminiEvent = (
   model: string,
   prompt: string,
   cost: number,
@@ -79,15 +81,16 @@ export const logGeminiEvent = async (
   traceId?: string,
   negativePrompt?: string,
   details?: GeminiLogDetails
-) => {
-  try {
-    const sessionId = getSessionId();
-    await fetch("/api/log-event", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+): Promise<void> => {
+  const next = logEventQueue.then(async () => {
+    try {
+      const sessionId = getSessionId();
+      await fetch("/api/log-event", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
         sessionId,
         model,
         prompt,
@@ -100,9 +103,12 @@ export const logGeminiEvent = async (
         ...details,
       }),
     });
-  } catch (err) {
-    console.error("Failed to send log event to backend:", err);
-  }
+    } catch (err) {
+      console.error("Failed to send log event to backend:", err);
+    }
+  });
+  logEventQueue = next.catch(() => {});
+  return next;
 };
 
 const getErrorMessage = (status: number, payload: any) => {
