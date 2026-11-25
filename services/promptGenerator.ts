@@ -442,10 +442,10 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   let sceneSetting = '';
   let lifestyleTouch = '';
   if (tags.ageGroup === 'baby') {
-    sceneSetting = `An authentic, serene nursery for a baby in a warm home${styleLabel}. The room feels gentle, joyful, and spacious, with tactile natural wood and breathable organic cotton.`;
+    sceneSetting = `A bright, airy, sunlit serene nursery for a baby filled with gentle warmth and joyful anticipation${styleLabel}. The room feels luminous, welcoming, and spacious, with tactile natural wood, clean bare wooden crib rails, and breathable organic cotton.`;
     lifestyleTouch = isCleanFloor
-      ? 'Clean, uncluttered nursery styling with crisp organic cotton bedding and a bare floor rug.'
-      : `Authentic lived-in nursery details: soft organic cotton bedding and ${trendingToy || 'curated wooden sensory blocks catching the light'}.`;
+      ? 'Clean, bright, uncluttered nursery styling with crisp organic cotton bedding, clean bare wooden crib rails, and an open floor rug.'
+      : `Sweet, joyful nursery details: crisp organic cotton bedding with clean bare wooden crib rails and ${trendingToy || 'a soft knitted bunny and wooden stacking rings on the rug'}.`;
   } else if (tags.ageGroup === 'vorschul') {
     sceneSetting = `A delightful, joyful children's bedroom${styleLabel}. Designed with playful child-scale furniture, natural wood, and cheerful accents that foster creativity, warmth, and restful sleep.`;
     lifestyleTouch = isCleanFloor
@@ -475,7 +475,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const isScallop = tags.wallArchitecture === 'scallop-trim';
   const wallpaperRule = isScallop
     ? "This is a commercial interior photograph showcasing a designer wallpaper in a European children's interior. WALL ARCHITECTURE (RETRO SCALLOPED WAVE TRIM): The reference wallpaper covers the lower two-thirds of the feature wall, crowned by an eye-catching decorative scalloped wave trim moulding in warm barberry red or terracotta. Above the wavy scalloped trim, the upper wall is painted in warm chalky cream with a charming gallery of art prints in scalloped and checkered frames. Retain the exact pattern, colors, and stripe/art scale from the reference image 1:1 on the wallpaper section. The wallpaper is the hero of the interior."
-    : "This is a commercial interior photograph showcasing a wall mural wallpaper. The reference image is a single full-scale mural (not a repeating tile pattern). FULL-HEIGHT 100% WALL COVERAGE: This entire reference image must be mapped and stretched across the feature wall edge-to-edge as a single, continuous, seamless mural covering 100% of the wall surface from the floor baseboard up to the ceiling line, running cleanly behind the furniture without any horizontal cuts, splits, wainscoting, or unpapered lower section. Retain the exact illustration, colors, and scale from the reference image 1:1. The wallpaper is the hero of the interior.";
+    : "Commercial interior photograph showcasing a single full-scale mural wallpaper (not a repeating tile). FULL-HEIGHT 100% WALL COVERAGE: map the entire reference image edge-to-edge as one seamless mural from baseboard to ceiling cleanly behind furniture without horizontal splits or unpapered lower sections. Retain the exact illustration, colors, and scale 1:1. The wallpaper is the hero of the interior.";
 
   const rawKeyDesc = keyObjData?.description ?? 'realistic European child-bedroom proportions';
   const keyDescWithLampColor = rawKeyDesc.replace(

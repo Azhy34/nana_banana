@@ -15,6 +15,7 @@ export type BatchPersonMode =
   | 'child_pointing'
   | 'mother_child_pointing'
   | 'mother_holding_baby'
+  | 'expectant_mother_nursery'
   | 'mother_child_rug'
   | 'child_rug'
   | 'child_walking_to_wall'

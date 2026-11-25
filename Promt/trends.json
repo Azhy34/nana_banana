@@ -388,19 +388,20 @@
         "Clean matte white rectangular baby crib with drawer"
       ],
       "toys": [
-        "wooden stacking rings and a soft knitted rabbit comforter lying together on the single floor rug",
-        "two cloth baby books and a wooden teething ring lying on the single floor rug",
-        "a wooden push-along walker cart with a few wooden blocks standing on the floor beside the cot"
+        "a natural wooden Montessori baby play gym (Spielbogen) with hanging pastel wooden beads standing neatly on the soft floor rug",
+        "wooden stacking rings, a wooden rolling sensory rattle, and a soft knitted bunny comforter lying together on the single floor rug",
+        "a pastel wooden rainbow stacker, a Montessori wooden object permanence box with a wooden ball, and a small knitted teddy bear on the floor rug",
+        "a cute natural solid wood rocking horse standing beside the soft floor rug",
+        "a wooden push-along baby walker with pastel wooden blocks standing neatly beside the crib"
       ],
       "accessories": [
         "plush textured cream dot floor rug",
         "solid light oak wooden toy chest with smooth rounded corners",
-        "delicate neutral linen blackout curtains",
-        "oval floor rug with a wavy edge and a short soft pile",
-        "dimmable table lamp with a paper shade and a warm 2700K glow",
-        "wall sconce with a soft warm glow",
-        "one large calm art print in a slim oak frame",
-        "checkerboard wooden storage box",
+        "delicate airy sheer white linen curtains catching bright morning light",
+        "oval floor rug with a wavy scalloped edge and a short soft pile",
+        "cozy cream bouclé nursing armchair with a soft pastel pillow",
+        "cute natural solid wood rocking horse",
+        "tiny knitted baby booties and a small wooden rattle resting neatly on the low wooden changing dresser",
         "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif"
       ],
       "furniture": "classic wooden baby crib with slatted sides, premium wooden changing table dresser with a soft cream changing mat (Wickelkommode), cozy fabric nursing glider chair",
@@ -648,11 +649,11 @@
     },
     {
       "name": "cozy dusk with warm ambient glow",
-      "description": "calm blue-hour twilight outside the window casting cool-neutral evening light across the room while a shaded bedside table lamp pools soft light strictly downward onto the nightstand and bedding, keeping the wallpaper wall true to its original hues"
+      "description": "calm blue-hour twilight outside the window with a shaded bedside lamp pooling soft light downward onto the nightstand, keeping true neutral wallpaper colors"
     },
     {
       "name": "layered warm lamplight at dusk",
-      "description": "quiet dimly lit evening atmosphere with cool-neutral twilight fill from the window and a localized pool of light from a shaded bedside lamp in the corner, camera white balance locked neutral so the wallpaper stays true to original color"
+      "description": "quiet evening twilight fill from the window and a localized pool of light from a shaded bedside lamp, neutral camera white balance on the wallpaper"
     }
   ],
   "cameraAngles": [
@@ -972,9 +973,9 @@
   },
   "people": {
     "mother": {
-      "standing_sage": "a young mother with neat brunette hair in a relaxed muted sage linen dress",
-      "standing_oat": "a young mother barefoot in a natural oatmeal linen dress",
-      "sitting_cream": "a young mother in a soft cream linen shirt and beige trousers"
+      "standing_sage": "a graceful well-groomed young mother with beautifully styled smooth soft-wavy brunette hair in a flattering muted sage linen dress",
+      "standing_oat": "a graceful well-groomed young mother with neatly styled glossy wavy hair in a chic natural cream knit dress",
+      "sitting_cream": "a graceful well-groomed young mother with an elegant neat low bun in a tailored cream linen shirt and beige trousers"
     },
     "childByAudience": {
       "boy": {
@@ -1013,7 +1014,7 @@
           "vorschul",
           "schulkind"
         ],
-        "template": "Standing together near the woven rug in front of the mural wall, a young mother in a relaxed muted sage linen dress gently holds {child} by the hand and points her other hand toward a detail on the wallpaper mural; both look toward the mural wall in a warm candid moment, turned away from the camera."
+        "template": "Standing together near the woven rug in front of the mural wall, a well-groomed young mother in a relaxed muted sage linen dress with neatly styled glossy wavy brunette hair gently holds {child} by the hand and points her other hand toward a detail on the wallpaper mural; both look toward the mural wall in a warm candid moment, turned away from the camera."
       },
       {
         "id": "mother_holding_baby",
@@ -1022,7 +1023,15 @@
           "baby",
           "vorschul"
         ],
-        "template": "Standing barefoot on the soft floor rug in front of the mural wall with her back to the camera, a young mother in a natural oatmeal linen dress holds {child} on her left hip and points her right hand up toward the illustration on the wallpaper mural while both gaze at the wall."
+        "template": "Standing barefoot on the soft floor rug in front of the mural wall with her back to the camera, a graceful well-groomed young mother with beautifully styled smooth wavy hair in a flattering cream knit dress holds {child} on her left hip and points her right hand up toward the illustration on the wallpaper mural while both gaze at the wall."
+      },
+      {
+        "id": "expectant_mother_nursery",
+        "label": "Expectant mother admiring baby nursery mural (0–1y)",
+        "ageGroups": [
+          "baby"
+        ],
+        "template": "Standing barefoot beside the wooden baby crib in the bright sunlit nursery, seen from a three-quarter rear angle with her face turned away toward the mural wall, a graceful well-groomed expectant mother with beautifully styled smooth soft-wavy hair wears a flattering soft cream ribbed-knit maternity dress showing her gentle baby bump; she rests one hand tenderly on her bump and the other on the wooden crib rail, admiring the wallpaper mural with joyful anticipation."
       },
       {
         "id": "mother_child_rug",
