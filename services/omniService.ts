@@ -343,6 +343,31 @@ export interface AdaptVideoPromptResult {
   totalTokens?: number;
 }
 
+async function downscaleToVisionJpeg(dataUrl: string, maxDim = 768): Promise<string> {
+  if (typeof document === 'undefined' || typeof Image === 'undefined') return dataUrl;
+  return new Promise<string>((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, maxDim / Math.max(img.width || 1, img.height || 1));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(dataUrl); return; }
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      } catch {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
 async function resolveVisionImagePart(sourceImage?: string | null): Promise<{ inlineData: { mimeType: OmniImageMime; data: string } } | null> {
   if (!sourceImage) return null;
   let dataUrl = sourceImage;
@@ -366,7 +391,8 @@ async function resolveVisionImagePart(sourceImage?: string | null): Promise<{ in
     }
   }
   if (!dataUrl.startsWith('data:image/')) return null;
-  const parsed = parseOmniImage(dataUrl);
+  const compactUrl = await downscaleToVisionJpeg(dataUrl);
+  const parsed = parseOmniImage(compactUrl);
   return { inlineData: { mimeType: parsed.mimeType, data: parsed.data } };
 }
 
@@ -397,24 +423,14 @@ export async function adaptVideoPromptToContext(input: AdaptVideoPromptInput): P
 
   try {
     const parts: any[] = [];
-    if (!sourcePrompt) {
-      const visionPart = await resolveVisionImagePart(sourceImage);
-      if (visionPart) parts.push(visionPart);
+    const visionPart = await resolveVisionImagePart(sourceImage);
+    if (visionPart) {
+      parts.push(visionPart);
     }
-    const hasPersonInPrompt = sourcePrompt
-      ? /\b(?:with their back to the camera|with her back to the camera|with their backs to the camera|young mother|standing barefoot|sitting together on|sitting on the woven rug|sitting cross-legged|kneeling calmly|captured mid-stride|sitting on a natural wooden chair)\b/i.test(sourcePrompt)
-      : null;
-    const peopleGroundTruth =
-      hasPersonInPrompt === false
-        ? 'PEOPLE IN FRAME: NONE — this is a 100% EMPTY room with ZERO people. NEVER mention any child, mother, or person. Follow the camera movement of the SELECTED MOTION PRESET.'
-        : hasPersonInPrompt === true
-          ? 'PEOPLE IN FRAME: YES — a person is present in the frame. Keep camera locked static and continue their existing pose with face turned away.'
-          : 'PEOPLE IN FRAME: Check the attached image carefully; only describe a person if actually visible.';
     const userText = [
-      peopleGroundTruth,
-      sourcePrompt
-        ? `SOURCE PHOTO PROMPT (describes the room interior, furniture, and framing):\n${sourcePrompt}`
-        : 'SOURCE PHOTO: Inspect the attached reference frame carefully.',
+      visionPart
+        ? 'ATTACHED LIVE PHOTO: Inspect this exact frame carefully (what furniture, doorway, rug, toys, or people are actually visible).'
+        : (sourcePrompt ? `SOURCE PHOTO PROMPT:\n${sourcePrompt}` : 'SOURCE PHOTO: Adapt the motion preset cleanly.'),
       `TARGET VIDEO ENGINE: ${engine}`,
       `SELECTED MOTION PRESET (${presetLabel}):\n${presetPrompt}`,
       'Write the adapted English motion prompt now:',

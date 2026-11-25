@@ -407,6 +407,7 @@ test.describe('Video — On-demand Prompt Adapter (gemini-3.1-flash-lite)', () =
     await expect(tab.locator('textarea')).not.toHaveValue(/Child has right hand already raised/);
     await expect(tab.getByText(/Мысли агента: Child has right hand already raised/)).toBeVisible();
     expect(adaptRequests).toHaveLength(1);
+    expect(adaptRequests[0].contents[0].parts.some((p: any) => Boolean(p.inlineData?.data))).toBe(true);
     expect(adaptRequests[0].generationConfig.thinkingConfig).toEqual({
       thinkingLevel: 'minimal',
       includeThoughts: true,
