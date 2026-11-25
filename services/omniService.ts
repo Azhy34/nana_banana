@@ -401,9 +401,19 @@ export async function adaptVideoPromptToContext(input: AdaptVideoPromptInput): P
       const visionPart = await resolveVisionImagePart(sourceImage);
       if (visionPart) parts.push(visionPart);
     }
+    const hasPersonInPrompt = sourcePrompt
+      ? /\b(?:with their back to the camera|with her back to the camera|with their backs to the camera|young mother|standing barefoot|sitting together on|sitting on the woven rug|sitting cross-legged|kneeling calmly|captured mid-stride|sitting on a natural wooden chair)\b/i.test(sourcePrompt)
+      : null;
+    const peopleGroundTruth =
+      hasPersonInPrompt === false
+        ? 'PEOPLE IN FRAME: NONE — this is a 100% EMPTY room with ZERO people. NEVER mention any child, mother, or person. Follow the camera movement of the SELECTED MOTION PRESET.'
+        : hasPersonInPrompt === true
+          ? 'PEOPLE IN FRAME: YES — a person is present in the frame. Keep camera locked static and continue their existing pose with face turned away.'
+          : 'PEOPLE IN FRAME: Check the attached image carefully; only describe a person if actually visible.';
     const userText = [
+      peopleGroundTruth,
       sourcePrompt
-        ? `SOURCE PHOTO PROMPT (ground truth of what is in the room and the person's pose):\n${sourcePrompt}`
+        ? `SOURCE PHOTO PROMPT (describes the room interior, furniture, and framing):\n${sourcePrompt}`
         : 'SOURCE PHOTO: Inspect the attached reference frame carefully.',
       `TARGET VIDEO ENGINE: ${engine}`,
       `SELECTED MOTION PRESET (${presetLabel}):\n${presetPrompt}`,
