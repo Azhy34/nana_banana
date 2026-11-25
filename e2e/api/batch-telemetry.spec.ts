@@ -36,9 +36,9 @@ test.describe('Batch Prompt Generation & Realism Rules', () => {
       expect(prompt).toContain('solid wood');
       expect(prompt).toContain('tactile natural materials');
 
-      // 4. Layer 4: Grazing Natural Daylight & Matte Sand-Grain Paper Texture (room shot uses 1 ref, no Craft Lambda brand noise)
-      expect(prompt).toContain('ultra-matte non-woven fleece paper wallpaper with subtle fine sand-grain finish');
-      expect(prompt).toContain('Grazing natural morning daylight from an adjacent window');
+      // 4. Layer 4: Neutral 5500K Daylight & Matte Non-Woven Wallpaper (pure positive wording, no pink-elephant yellow/sand triggers)
+      expect(prompt).toContain('ultra-matte non-woven wallpaper with crisp neutral 5500K camera white balance');
+      expect(prompt).toContain('Natural window light illuminates');
 
       // 5. Layer 5: Camera & Optics (Dynamically randomized variables)
       expect(prompt).toMatch(/f\/(4\.0|5\.6|8\.0|11) aperture/);

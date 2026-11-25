@@ -489,7 +489,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const plantLine = tags.plant && !tags.heroRoom && !tags.macroTexture ? ` Statement greenery: ${tags.plant}.` : '';
   const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch}${plantLine}`;
 
-  const lightingSection = `Grazing natural morning daylight from an adjacent window illuminates the ultra-matte non-woven fleece paper wallpaper with subtle fine sand-grain finish and casts soft grounding shadows. Light setting: ${lightingData?.description ?? tags.lighting}.`;
+  const lightingSection = `Natural window light illuminates the ultra-matte non-woven wallpaper with crisp neutral 5500K camera white balance, keeping the exact original background tone and hues of the reference wallpaper. Light setting: ${lightingData?.description ?? tags.lighting}.`;
 
   const angle = tags.cameraAngle || TAG_OPTIONS.cameraAngles[0];
   const elevation = tags.cameraElevation || TAG_OPTIONS.cameraElevations[0];

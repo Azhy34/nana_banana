@@ -501,7 +501,7 @@
         "potted trailing ivy plant on a natural wooden shelf",
         "low fluted birch bedside table",
         "plush textured cream dot floor rug",
-        "warm mushroom table lamp on bedside table with soft 3200K glow",
+        "mushroom table lamp resting on the bedside table with a subtle soft glow",
         "delicate neutral linen blackout curtains",
         "round bouclé floor pouf in cream",
         "oval floor rug with a wavy edge and a short soft pile",
@@ -632,27 +632,27 @@
   "lighting": [
     {
       "name": "warm morning sunbeams",
-      "description": "bright golden morning sunbeams streaming through tall windows, grazing the wallpaper surface, illuminating the ultra-matte sand-grain paper texture and casting soft defined shadows"
+      "description": "bright crisp morning sunbeams streaming through the tall window, casting long diagonal window-frame light and leafy shadows across the oak floor and rug while keeping neutral daylight white balance on the matte wallpaper"
     },
     {
       "name": "crisp morning window daylight",
-      "description": "fresh directional morning daylight streaming from the side window, creating natural contrast and clear ambient depth"
+      "description": "fresh directional morning daylight from the side window, creating crisp architectural depth, natural grounding shadows, and true neutral colors"
     },
     {
       "name": "warm golden hour sunlight",
-      "description": "low-angle golden 3200K sunlight flooding across the room, illuminating rich wood grain and the matte wallpaper micro-relief"
+      "description": "soft diffused overcast Nordic daylight filling the room evenly with zero harsh shadows and pure catalog-accurate colors across the wallpaper wall"
     },
     {
       "name": "soft afternoon window light",
-      "description": "warm natural window daylight gently grazing the room from the side, revealing paper texture and grounding furniture shadows"
+      "description": "clean slanted afternoon sunlight stretching across the parquet floor and edge of the bed with gentle shadow contrast and neutral daylight white balance"
     },
     {
       "name": "cozy dusk with warm ambient glow",
-      "description": "evening atmosphere with a warm amber ambient glow creating cozy Gemütlichkeit, with clean unobstructed upper wall"
+      "description": "calm blue-hour twilight outside the window casting cool-neutral evening light across the room while a shaded bedside table lamp pools soft light strictly downward onto the nightstand and bedding, keeping the wallpaper wall true to its original hues"
     },
     {
       "name": "layered warm lamplight at dusk",
-      "description": "soft layered evening light from dimmed warm 2700K table lamps and a wall sconce, a gentle glow across the wallpaper, no harsh overhead light"
+      "description": "quiet dimly lit evening atmosphere with cool-neutral twilight fill from the window and a localized pool of light from a shaded bedside lamp in the corner, camera white balance locked neutral so the wallpaper stays true to original color"
     }
   ],
   "cameraAngles": [
@@ -710,7 +710,7 @@
     "low fluted birch bedside table",
     "plush textured cream dot floor rug",
     "wooden pencil holder with colorful wax crayons and drawing paper",
-    "warm mushroom table lamp on bedside table with soft 3200K glow",
+    "mushroom table lamp resting on the bedside table with a subtle soft glow",
     "solid light oak wooden toy chest with smooth rounded corners",
     "delicate neutral linen blackout curtains",
     "round bouclé floor pouf in cream",
@@ -939,7 +939,7 @@
   "negatives": {
     "head": "peeling wallpaper, wallpaper peeling off wall, corner curl",
     "fullWall": "half-wall wallpaper, split wall, wainscoting, dado rail, lower wall unpapered",
-    "compact": "pendant lamp, ceiling chandelier, crib mobile, bed canopy, house-frame bed, playhouse, dollhouse, toy house, metal bed frame, recessed spotlights, mounted animal heads, wicker or rattan baskets, plastic furniture or toys, bunk beds, messy clutter, seams, repeating wallpaper patterns, CGI 3D render look, glossy surfaces, adult double bed, layered rugs, overlapping rugs",
+    "compact": "pendant lamp, ceiling chandelier, crib mobile, bed canopy, house-frame bed, playhouse, dollhouse, toy house, metal bed frame, recessed spotlights, mounted animal heads, plastic furniture or toys, bunk beds, messy clutter, seams, repeating wallpaper patterns, CGI 3D render look, glossy surfaces, adult double bed, layered rugs, overlapping rugs",
     "base": "pendant lamp, hanging lamp, hanging pendant light, low ceiling lamp, ceiling chandelier, hanging chandelier, dangling light fixture, hanging lamp blocking wallpaper, ceiling lamp in foreground, ceiling fixture blocking mural, crib mobile, baby mobile, hanging mobile, hanging mobile toy, ceiling mobile, cot mobile, felt mobile, wooden mobile, dangling hanging toys, dangling ceiling decor, bed canopy, hanging baldachin, fabric curtains over bed, house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, playhouse, dollhouse, toy house, miniature wooden house, tall bed frame obstructing wall, metal bed, iron spindle bed, iron bed frame, ceiling downlights, recessed spotlights, harsh office lighting, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look, blurry muddy textures, flat soap textures, oversaturated neon, glossy plastic-looking surfaces, over-smoothed airbrushed textures, HDR halo, full themed room, foam poufs, stripes or dots on curtains next to the mural, wardrobe or tall furniture against the mural wall, table and chairs in the foreground, crowded room, straight-on frontal view, furniture hiding the lower part of the mural, adult double bed, queen-size bed, adult sofa, layered rugs, overlapping rugs, two rugs on top of each other",
     "text": "text overlay, watermark, advertising badge, corner stamp, typography",
     "textWithOverlay": "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, digital watermark"

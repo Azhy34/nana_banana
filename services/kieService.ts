@@ -14,23 +14,29 @@ import { MACRO_TEXTURE_LABEL } from './macroTexture';
 import { generateSpanId, generateTraceId } from '../utils/tracing';
 
 const WALLPAPER_LABEL =
-  'REFERENCE_IMAGE_1 (Wallpaper Graphic Artwork): This is the exact wallpaper graphic design to display on the accent wall. Preserve all colors, illustrations, lines, and composition 1:1 without alteration.';
+  'REFERENCE_IMAGE_1 (Wallpaper Graphic Artwork): This is the exact wallpaper graphic design to display on the accent wall. Preserve all colors, exact neutral background tone, illustrations, lines, and composition 1:1 unchanged.';
 
 /**
  * KIE models accept references as a flat URL array (no per-image text parts),
  * so the prompt must explicitly bind index 1 -> wallpaper (1:1 unchanged) and index 2 -> texture.
- * In `brief` mode buildBriefPrompt() already embeds "References: image 1 is ...".
+ * OpenAI GPT Image & xAI Grok have no negative_prompt channel (trailing `Avoid:` lists act as
+ * pink-elephant triggers, e.g. summoning baskets), so we strip ` Avoid:` only for those models.
  */
 function withKieReferenceLabels(
   prompt: string,
   refCount: number,
   withTexture: boolean,
   promptMode?: string,
+  modelId?: string,
 ): string {
-  if (refCount === 0 || promptMode === 'brief') return prompt;
-  if (prompt.includes('REFERENCE_IMAGE_1')) return prompt;
+  const stripAvoid = Boolean(modelId && (modelId.startsWith('gpt-image') || modelId.startsWith('grok-')));
+  const cleanPrompt = stripAvoid && prompt.includes(' Avoid:')
+    ? prompt.slice(0, prompt.indexOf(' Avoid:')).trim()
+    : prompt;
+  if (refCount === 0 || promptMode === 'brief') return cleanPrompt;
+  if (cleanPrompt.includes('REFERENCE_IMAGE_1')) return cleanPrompt;
   const labels = [WALLPAPER_LABEL, ...(withTexture && refCount > 1 ? [MACRO_TEXTURE_LABEL] : [])];
-  return `${labels.join('\n')}\n\n${prompt}`;
+  return `${labels.join('\n')}\n\n${cleanPrompt}`;
 }
 
 async function callKieProxy<T = any>(kieKey: string, body: Record<string, unknown>): Promise<T> {
@@ -59,10 +65,17 @@ async function uploadReference(kieKey: string, image: UploadedImage, fileName: s
 
   const uploadPromise = (async () => {
     const dataUrl = `data:${image.mimeType || 'image/jpeg'};base64,${raw}`;
+    let hash = 0;
+    for (let i = 0; i < raw.length; i += Math.max(1, Math.floor(raw.length / 64))) {
+      hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
+    }
+    const ext = fileName.includes('.') ? fileName.slice(fileName.lastIndexOf('.')) : '.jpg';
+    const base = fileName.includes('.') ? fileName.slice(0, fileName.lastIndexOf('.')) : fileName;
+    const hashedName = `${base}_${Math.abs(hash).toString(36)}${ext}`;
     const res = await callKieProxy<{ data?: { downloadUrl?: string; download_url?: string } }>(kieKey, {
       action: 'upload',
       base64Data: dataUrl,
-      fileName,
+      fileName: hashedName,
       uploadPath: 'nana-banana/refs',
     });
     const url = res?.data?.downloadUrl || res?.data?.download_url;
@@ -197,7 +210,7 @@ export async function generateKieImage(
     const refUrls = await Promise.all(
       referenceImages.map((img, i) => uploadReference(kieKey, img, `ref_${i + 1}.jpg`)),
     );
-    const labeledPrompt = withKieReferenceLabels(settings.prompt, refUrls.length, false);
+    const labeledPrompt = withKieReferenceLabels(settings.prompt, refUrls.length, false, undefined, settings.model);
     const input = buildKieInput(settings.model, labeledPrompt, refUrls, settings.aspectRatio, settings.imageSize);
     const created = await callKieProxy<{ data?: { taskId?: string } }>(kieKey, {
       action: 'createTask',
@@ -284,7 +297,7 @@ export async function generateKieBatchImage(
       refUrls.push(await uploadReference(kieKey, textureImage, 'craft_lambda.jpg'));
     }
 
-    const labeledPrompt = withKieReferenceLabels(prompt, refUrls.length, Boolean(textureImage), analytics?.promptMode);
+    const labeledPrompt = withKieReferenceLabels(prompt, refUrls.length, Boolean(textureImage), analytics?.promptMode, modelId);
     const input = buildKieInput(modelId, labeledPrompt, refUrls, aspectRatio, '2K');
     const created = await callKieProxy<{ data?: { taskId?: string } }>(kieKey, {
       action: 'createTask',
