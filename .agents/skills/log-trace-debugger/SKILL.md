@@ -55,4 +55,22 @@ const logStructured = (message: string, severity = 'INFO', traceId?: string, ext
    ```query
    trace = "projects/pro-import-agent/traces/[ВАШ_TRACE_ID]"
    ```
-4. Вы увидите всю хронологическую цепочку событий, включая затраты (`cost`), продолжительность выполнения (`duration`) и возникшие ошибки.
+---
+
+## 4. Где реально лежат продовые логи сайта (Vercel Blob + KIE) — ЧИТАТЬ ПЕРВЫМ ДЕЛОМ!
+
+Сайт `nana_banana` задеплоен на **Vercel**. Когда владелец спрашивает *«почему так сгенерировалось / почему ошибка / почему агент выдал странный промпт»*, **НЕ гадай по памяти и НЕ читай только код — сразу выгрузи реальные логи последней сессии**:
+
+1. **Vercel Blob (`sessions/<sessionId>.json`)** — туда `/api/log-event` сохраняет каждое событие (`started` / `success` / `error`) со всеми полями: `model`, `stage`, `prompt`, `duration`, `serverTimeSeconds`, `kieTaskId`, `cost`, `promptTokens`, `candidateTokens`, `thoughtsTokens`, `agentThoughts`, `traceId`, `spanId`.
+   - Чтение из IDE через Node (`BLOB_READ_WRITE_TOKEN` уже лежит в `.env.local`, никогда не печатать сам токен!):
+     ```powershell
+     $env:NODE_PATH="c:/Users/Mikhail/OneDrive/nocode/nana_banana/node_modules"
+     node --env-file-if-exists=.env.local -e "const { list } = require('@vercel/blob'); (async () => { const { blobs } = await list({ prefix: 'sessions/', token: process.env.BLOB_READ_WRITE_TOKEN }); const latest = blobs.sort((a,b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))[0]; const d = await (await fetch(latest.url)).json(); console.log(latest.pathname, d.events.slice(-10)); })();"
+     ```
+2. **KIE `recordInfo`** — для любого `kieTaskId` из лога (или присланного владельцем) проверяй реальный отправленный промпт, референсы, `failCode`/`failMsg`, `creditsConsumed` и `resultUrls`:
+   - `GET https://api.kie.ai/api/v1/jobs/recordInfo?taskId=<TASK_ID>` с `Authorization: Bearer $KIE_API_KEY`.
+   - Живое здоровье модели на KIE: `GET https://api.kie.ai/api/v1/models/<model>/success-rate` (слэш в имени модели **не** URL-кодировать!).
+3. **Агент адаптации видео-промптов (`stage: 'video_prompt_adapt'`, `gemini-3.1-flash-lite`, `thinkingLevel: 'low'`)**:
+   - Фильтруй события по `e.stage === 'video_prompt_adapt'` — смотри `e.agentThoughts`, `e.thoughtsTokens`, `e.duration`, `e.promptPreset` и итоговый `e.prompt`.
+   - Всегда сопоставляй с исходным пресетом в `constants.ts` (`VEO_PRESETS`) и системным промптом в `Promt/trends.json` (`videoPromptAdapter`).
+4. **Vercel Dashboard → Logs:** те же события параллельно пишутся в `stdout` JSON (поиск по `video_prompt_adapt`, `traceId` или `kieTaskId`).
