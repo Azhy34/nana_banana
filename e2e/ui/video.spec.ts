@@ -409,7 +409,7 @@ test.describe('Video — On-demand Prompt Adapter (gemini-3.1-flash-lite)', () =
     expect(adaptRequests).toHaveLength(1);
     expect(adaptRequests[0].contents[0].parts.some((p: any) => Boolean(p.inlineData?.data))).toBe(true);
     expect(adaptRequests[0].generationConfig.thinkingConfig).toEqual({
-      thinkingLevel: 'minimal',
+      thinkingLevel: 'low',
       includeThoughts: true,
     });
     expect(adaptRequests[0].systemInstruction.parts[0].text).toContain('Moonbloom');

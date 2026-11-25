@@ -154,9 +154,9 @@ export const OMNI_PRESETS = {
   },
   omni_walk_in: {
     label: "🚪 Вход из дверного проёма (Doorway Walk-In)",
-    description: "Камера плавно входит в комнату мимо косяка двери / переднего плана: ближние предметы смещаются сильнее дальних, давая настоящий 3D-параллакс (не заменить зумом в CapCut).",
+    description: "Камера плавно входит в комнату мимо дверного косяка: рама уходит за край кадра, а комната естественно раскрывается в перспективе (мебель и обои стоят на месте).",
     status: 'test',
-    prompt: 'The camera advances straight forward into the room at a steady constant walking pace with zero handheld shake, passing the close foreground edge so the nearer objects shift more than the farther ones in a natural 3D depth parallax.'
+    prompt: 'The camera advances smoothly forward through the doorway into the room at a steady walking pace with zero handheld shake, passing the foreground doorframe edges as the room opens up in natural perspective while all furniture, rugs, and the wallpaper wall stay completely stationary.'
   },
   omni_light_only: {
     label: "☀️ Живой свет, камера стоит (Window Breeze)",
