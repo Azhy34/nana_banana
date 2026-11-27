@@ -553,20 +553,27 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     if (rawMode === 'none') return '';
     const normalizedMode = rawMode === 'child_gaze' ? 'child_pointing' : rawMode;
     const peopleData = (trendsData as any).people as {
-      childByAudience?: Record<AudienceKey, Record<AgeGroupKey, string>>;
+      motherVariants?: string[];
+      childByAudience?: Record<AudienceKey, Record<AgeGroupKey, string | string[]>>;
       scenes?: PeopleSceneOption[];
     } | undefined;
     const aud: AudienceKey = tags.audience ?? 'neutral';
     const resolvedGender: 'boy' | 'girl' =
       aud === 'boy' ? 'boy' : aud === 'girl' ? 'girl' : (tags.style.length % 2 === 0 ? 'boy' : 'girl');
-    const childDesc =
-      peopleData?.childByAudience?.[resolvedGender]?.[tags.ageGroup] ??
-      (resolvedGender === 'boy'
-        ? 'a young boy of about 4 years in a beige knit sweater and light linen trousers'
-        : 'a young girl of about 4 years in a soft oat knit cardigan and linen dress');
+    const rawChildEntry = peopleData?.childByAudience?.[resolvedGender]?.[tags.ageGroup];
+    const childDesc = Array.isArray(rawChildEntry)
+      ? pick(rawChildEntry)
+      : (rawChildEntry ??
+        (resolvedGender === 'boy'
+          ? 'a young boy of about 4 years with soft blond curls, dressed in a cream-and-navy striped cotton top and sand chinos'
+          : 'a young girl of about 4 years with blond wavy hair, dressed in a dusty-rose organic muslin dress'));
+    const motherDesc =
+      peopleData?.motherVariants && peopleData.motherVariants.length > 0
+        ? pick(peopleData.motherVariants)
+        : 'a graceful well-groomed young mother with beautifully styled wavy hair in a soft cream knit dress';
     const sceneEntry = peopleData?.scenes?.find(s => s.id === normalizedMode);
     if (sceneEntry) {
-      return ` ${sceneEntry.template.replace('{child}', childDesc)}`;
+      return ` ${sceneEntry.template.replace('{child}', childDesc).replace('{mother}', motherDesc)}`;
     }
     return ` On the rug in the middle of the floor in front of the mural wall, ${childDesc} sits facing the mural with their back to the camera, playing calmly with natural wooden toys.`;
   })();

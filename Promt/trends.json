@@ -984,18 +984,68 @@
       "standing_oat": "a graceful well-groomed young mother with neatly styled glossy wavy hair in a chic natural cream knit dress",
       "sitting_cream": "a graceful well-groomed young mother with an elegant neat low bun in a tailored cream linen shirt and beige trousers"
     },
+    "motherVariants": [
+      "a graceful well-groomed young mother with beautifully styled smooth soft-wavy brunette hair in a relaxed muted sage linen dress",
+      "a graceful well-groomed young mother with a neat soft blonde low bun in a cozy cream knit cardigan and light straight-leg jeans",
+      "a graceful well-groomed young mother with a chic light-brown shoulder-length bob in a classic cream-and-navy striped cotton top and sand linen trousers",
+      "a graceful well-groomed young mother with glossy dark-brown wavy hair in a flattering warm oat ribbed-knit dress"
+    ],
     "childByAudience": {
       "boy": {
-        "baby": "a toddler boy of about 18 months with soft short hair, dressed in a cream organic cotton top and warm oat knit overalls",
-        "vorschul": "a young boy of about 4 years with short neat hair, dressed in a chunky beige cable-knit sweater and light linen trousers",
-        "schulkind": "a schoolboy of about 7 years with short hair, dressed in a relaxed sage linen shirt and beige cotton chinos",
-        "teenager": "a teenage boy of about 12 years in a clean beige knit sweater and relaxed cotton trousers"
+        "baby": [
+          "a toddler boy of about 18 months with soft blond curls, dressed in a cream-and-dusty-blue striped organic cotton top and sand knit trousers",
+          "a toddler boy of about 18 months with wavy light-brown hair, dressed in a warm caramel waffle-knit sweatshirt and soft oatmeal cotton pants",
+          "a toddler boy of about 18 months with short chestnut hair, dressed in a dusty sky-blue linen shirt and light beige overalls",
+          "a toddler boy of about 18 months with tousled sandy-blond hair, dressed in a muted olive organic cotton romper and cream socks",
+          "a toddler boy of about 18 months with soft honey-auburn curls, dressed in a cream knit cardigan and slate-blue cotton trousers"
+        ],
+        "vorschul": [
+          "a young boy of about 4 years with soft blond curls, dressed in a cream-and-navy striped cotton long-sleeve tee and sand cotton chinos",
+          "a young boy of about 4 years with slightly longer wavy light-brown hair, dressed in a warm terracotta cotton sweatshirt and light beige linen trousers",
+          "a young boy of about 4 years with short chestnut hair, dressed in a dusty sky-blue linen button shirt and warm oat cotton trousers",
+          "a young boy of about 4 years with tousled sandy-blond hair, dressed in a muted olive waffle-knit long-sleeve top and relaxed cream joggers",
+          "a young boy of about 4 years with soft honey-auburn curls, dressed in a cream knitted cardigan over a white tee and muted slate-blue cotton pants"
+        ],
+        "schulkind": [
+          "a schoolboy of about 7 years with soft blond wavy hair, dressed in a cream-and-navy striped cotton sweatshirt and sand chinos",
+          "a schoolboy of about 7 years with slightly longer light-brown hair, dressed in a warm caramel crewneck knit and relaxed light-wash denim jeans",
+          "a schoolboy of about 7 years with short chestnut hair, dressed in a dusty blue linen shirt and warm beige cotton trousers",
+          "a schoolboy of about 7 years with tousled sandy-blond hair, dressed in an olive waffle-knit long-sleeve top and relaxed oat chinos",
+          "a schoolboy of about 7 years with wavy honey-auburn hair, dressed in a cream cotton knit sweater and muted slate-blue trousers"
+        ],
+        "teenager": [
+          "a teenage boy of about 12 years with wavy light-brown hair in a muted olive crewneck sweatshirt and light beige chinos",
+          "a teenage boy of about 12 years with short chestnut hair in a cream-and-navy striped knit sweater and relaxed denim jeans",
+          "a teenage boy of about 12 years with tousled blond hair in a dusty blue overshirt over a white tee and sand cotton trousers"
+        ]
       },
       "girl": {
-        "baby": "a toddler girl of about 18 months with soft fine hair, dressed in a warm cream knitted cardigan and soft linen overalls",
-        "vorschul": "a young girl of about 4 years with soft braided hair, dressed in a chunky oat knit cardigan over a muted linen dress",
-        "schulkind": "a schoolgirl of about 7 years with a neat ponytail, dressed in a soft cream cable-knit sweater and warm linen trousers",
-        "teenager": "a teenage girl of about 12 years with braided hair in a soft oat knit sweater and linen trousers"
+        "baby": [
+          "a toddler girl of about 18 months with soft blond hair in two tiny pigtails, dressed in a dusty-rose organic muslin dress and cream knit tights",
+          "a toddler girl of about 18 months with soft chestnut curls, dressed in a cream striped cotton top and warm terracotta linen pinafore",
+          "a toddler girl of about 18 months with fine light-brown bob hair, dressed in a soft butter-yellow knit cardigan and cream cotton leggings",
+          "a toddler girl of about 18 months with honey-blond hair and a small linen bow, dressed in a muted sage ribbed-knit top and soft oat pants",
+          "a toddler girl of about 18 months with dark-brown soft curls, dressed in a soft lavender-blush knitted romper"
+        ],
+        "vorschul": [
+          "a young girl of about 4 years with blond wavy hair in two soft pigtails, dressed in a dusty-rose organic muslin dress and cream cotton socks",
+          "a young girl of about 4 years with chestnut curly hair in a soft messy bun, dressed in a cream-and-caramel striped long-sleeve tee and terracotta linen pinafore",
+          "a young girl of about 4 years with a neat light-brown chin-length bob, dressed in a soft butter-yellow knit cardigan and relaxed cream linen trousers",
+          "a young girl of about 4 years with honey-blond hair tied back with a linen scrunchie, dressed in a muted sage ribbed-knit top and matching knit pants",
+          "a young girl of about 4 years with dark-brown soft curls, dressed in a powdery lilac-blush knit sweater and warm cream cotton skirt"
+        ],
+        "schulkind": [
+          "a schoolgirl of about 7 years with blond wavy hair in two loose braids, dressed in a dusty-rose organic cotton dress and light cardigan",
+          "a schoolgirl of about 7 years with chestnut curls in a neat low bun, dressed in a cream Breton striped top and warm terracotta wide-leg trousers",
+          "a schoolgirl of about 7 years with a light-brown shoulder-length bob, dressed in a butter-yellow crewneck knit and light-wash jeans",
+          "a schoolgirl of about 7 years with honey-blond hair in a half-up ribbon, dressed in a muted sage linen blouse and sand cotton trousers",
+          "a schoolgirl of about 7 years with dark-brown wavy hair, dressed in a soft lilac-blush knit sweater and cream corduroy pants"
+        ],
+        "teenager": [
+          "a teenage girl of about 12 years with wavy light-brown hair in a soft cream knit sweater and relaxed light denim jeans",
+          "a teenage girl of about 12 years with chestnut hair in a neat low bun in a muted sage linen shirt and wide cream trousers",
+          "a teenage girl of about 12 years with blond wavy hair in a striped cotton knit top and warm beige trousers"
+        ]
       }
     },
     "video9x16Archetypes": {
@@ -1009,7 +1059,7 @@
         "ageGroups": [
           "baby"
         ],
-        "template": "Standing barefoot beside the wooden baby crib in the bright sunlit nursery, seen from a three-quarter rear angle with her face turned away toward the mural wall, a graceful well-groomed young mother with beautifully styled smooth soft-wavy hair in a soft cream linen dress gently places a small knitted bunny onto the smooth fitted crib mattress sheet, preparing the nursery with quiet joy."
+        "template": "Standing barefoot beside the wooden baby crib in the bright sunlit nursery, seen from a three-quarter rear angle with her face turned away toward the mural wall, {mother} gently places a small knitted bunny onto the smooth fitted crib mattress sheet, preparing the nursery with quiet joy."
       },
       {
         "id": "mother_holding_baby",
@@ -1018,7 +1068,7 @@
           "baby",
           "vorschul"
         ],
-        "template": "Standing barefoot on the soft floor rug in front of the mural wall with her back to the camera, a graceful well-groomed young mother with beautifully styled smooth wavy hair in a flattering cream knit dress cradles {child} tenderly in both arms, both gazing calmly toward the wallpaper mural in a serene affectionate moment."
+        "template": "Standing barefoot on the soft floor rug in front of the mural wall with her back to the camera, {mother} cradles {child} tenderly in both arms, both gazing calmly toward the wallpaper mural in a serene affectionate moment."
       },
       {
         "id": "mother_armchair_baby",
@@ -1026,7 +1076,7 @@
         "ageGroups": [
           "baby"
         ],
-        "template": "Seated calmly in a cozy cream bouclé nursing armchair beside the side wall in three-quarter side profile so the wallpaper mural behind remains completely open, a graceful well-groomed young mother with neatly styled wavy hair in a soft oat knit dress cradles {child} tenderly in her arms in a peaceful sunlit moment."
+        "template": "Seated calmly in a cozy cream bouclé nursing armchair beside the side wall in three-quarter side profile so the wallpaper mural behind remains completely open, {mother} cradles {child} tenderly in her arms in a peaceful sunlit moment."
       },
       {
         "id": "baby_play_gym",
@@ -1078,7 +1128,7 @@
           "vorschul",
           "schulkind"
         ],
-        "template": "Sitting side by side on the edge of the wooden bed in three-quarter rear view with their faces turned away from the camera, a graceful well-groomed young mother in a soft cream linen shirt rests one arm warmly around {child} while they read an open illustrated storybook together."
+        "template": "Sitting side by side on the edge of the wooden bed in three-quarter rear view with their faces turned away from the camera, {mother} rests one arm warmly around {child} while they read an open illustrated storybook together."
       },
       {
         "id": "mother_child_rug",
@@ -1088,7 +1138,7 @@
           "vorschul",
           "schulkind"
         ],
-        "template": "Sitting together on the round woven jute rug in front of the mural wall, a graceful well-groomed young mother in a soft cream linen shirt and beige trousers and {child} calmly build a small tower from natural wooden blocks on the rug, absorbed in quiet play without looking at the camera."
+        "template": "Sitting together on the round woven jute rug in front of the mural wall, {mother} and {child} calmly build a small tower from natural wooden blocks on the rug, absorbed in quiet play without looking at the camera."
       },
       {
         "id": "child_rug",
@@ -1154,7 +1204,7 @@
           "vorschul",
           "schulkind"
         ],
-        "template": "Sitting side by side on the floor rug in front of the mural wall with their backs to the camera, a graceful well-groomed young mother in a soft cream linen shirt and beige trousers holds an open illustrated storybook together with {child}, sharing a calm cozy reading moment without looking at the camera."
+        "template": "Sitting side by side on the floor rug in front of the mural wall with their backs to the camera, {mother} holds an open illustrated storybook together with {child}, sharing a calm cozy reading moment without looking at the camera."
       },
       {
         "id": "mother_child_pointing",
@@ -1163,7 +1213,7 @@
           "vorschul",
           "schulkind"
         ],
-        "template": "Standing together near the woven rug in front of the mural wall, a well-groomed young mother in a relaxed muted sage linen dress with neatly styled glossy wavy brunette hair gently holds {child} by the hand and gestures softly toward a detail on the wallpaper mural; both look toward the mural wall in a warm candid moment, turned away from the camera."
+        "template": "Standing together near the woven rug in front of the mural wall, {mother} gently holds {child} by the hand and gestures softly toward a detail on the wallpaper mural; both look toward the mural wall in a warm candid moment, turned away from the camera."
       }
     ]
   },
