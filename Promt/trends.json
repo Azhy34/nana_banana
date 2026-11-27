@@ -412,7 +412,7 @@
     "vorschul": {
       "label": "Preschool (3–6 years)",
       "child": "a child of 2 to 5 years",
-      "room": "A children's bedroom: the bed is a realistic European junior single bed (160 by 80 cm) with a headboard, mattress, pillow, and duvet, scaled naturally to the room.",
+      "room": "A children's bedroom: the bed is a realistic full-length European single bed (190 by 90 cm) with a headboard, mattress, pillow, and duvet, scaled naturally to the room (never shrunk to crib size; if needed, the foot end extends naturally off-frame).",
       "accessories": [
         "mid-century mushroom table lamp resting on the bedside table",
         "wavy scalloped picture frames with retro graphic art prints",
@@ -429,7 +429,6 @@
         "one large calm art print in a slim oak frame",
         "framed vintage circus art prints (a striped tent, a rocking horse) in small wavy frames",
         "red-and-white striped bolster cushions",
-        "checkerboard wooden storage box",
         "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
         "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
         "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
@@ -439,9 +438,9 @@
       ],
       "theme": "Playful Montessori & Creative Nook (Faraway Forest & Open-Ended Play)",
       "beds": [
-        "Low Scandinavian birch toddler daybed",
-        "Child-sized birch toddler bed with side safety rails",
-        "Upholstered daybed with a wavy striped headboard"
+        "Full-length Scandinavian birch single daybed",
+        "Scandinavian birch single bed with low safety guardrail",
+        "Upholstered single bed with a wavy striped headboard"
       ],
       "toys": [
         "open-ended wooden toy train on the single floor rug",
@@ -473,7 +472,6 @@
         "framed vintage circus art prints (a striped tent, a rocking horse) in small wavy frames",
         "red-and-white striped bolster cushions",
         "ribbed cobalt blue side table with a few books",
-        "checkerboard wooden storage box",
         "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
         "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
         "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
@@ -561,13 +559,13 @@
       "ageGroup": "vorschul"
     },
     {
-      "name": "Low Scandinavian birch toddler daybed",
-      "description": "realistic full-proportion Scandinavian solid birch junior single bed (160 by 80 cm) with a clean wooden headboard, low side safety guardrail, thick real mattress, standard pillow, and neatly made cotton duvet, placed along the side wall",
+      "name": "Full-length Scandinavian birch single daybed",
+      "description": "realistic full-length Scandinavian solid birch single bed (190 by 90 cm, never shrunk to crib size) with a clean wooden headboard, thick real mattress, standard pillow, and neatly made cotton duvet, placed along the side wall",
       "ageGroup": "vorschul"
     },
     {
-      "name": "Child-sized birch toddler bed with side safety rails",
-      "description": "realistic full-proportion solid birch junior single bed (160 by 80 cm) with a clean headboard, slatted wooden side safety rail, thick real mattress, pillow, and neatly folded cotton duvet, placed along the side wall",
+      "name": "Scandinavian birch single bed with low safety guardrail",
+      "description": "realistic full-length solid birch single bed (190 by 90 cm, never shrunk to crib size) with a clean wooden headboard, a short low half-length side safety guardrail, thick real mattress, pillow, and neatly folded cotton duvet, placed along the side wall",
       "ageGroup": "vorschul"
     },
     {
@@ -608,9 +606,9 @@
       "ageGroup": "teenager"
     },
     {
-      "name": "Upholstered daybed with a wavy striped headboard",
+      "name": "Upholstered single bed with a wavy striped headboard",
       "ageGroup": "vorschul",
-      "description": "realistic full-proportion upholstered junior single bed (160 by 80 cm) with a wavy scalloped headboard in caramel-and-cream stripes, thick real mattress, standard pillow, and a crisp washed linen duvet, placed along the side wall"
+      "description": "realistic full-length upholstered single bed (190 by 90 cm, never shrunk to crib size) with a wavy scalloped headboard in caramel-and-cream stripes, thick real mattress, standard pillow, and a crisp washed linen duvet, placed along the side wall"
     }
   ],
   "roomZones": [
@@ -723,7 +721,6 @@
     "framed vintage circus art prints (a striped tent, a rocking horse) in small wavy frames",
     "red-and-white striped bolster cushions",
     "ribbed cobalt blue side table with a few books",
-    "checkerboard wooden storage box",
     "low cream sideboard with arch-shaped relief fronts and small red bead handles (under 70 cm)",
     "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif",
     "colorful retro-modern flat-weave rug with vibrant vintage motif in blush pink, terracotta, and cobalt blue",
