@@ -174,6 +174,7 @@ export function generateRandomTags(
   const audience = options.audience ?? 'neutral';
   const style = options.style ?? pick(TAG_OPTIONS.styles);
   const allowedColors = getColorsForStyle(style, audience, resolvedAgeGroup);
+  const babySafeLights = TAG_OPTIONS.lighting.filter(l => !/dusk|twilight|lamplight/i.test(l));
   return {
     color: options.color ?? pick(allowedColors),
     style,
@@ -181,7 +182,7 @@ export function generateRandomTags(
     ageGroup: resolvedAgeGroup,
     keyObject: options.keyObject ?? pick(muralSafeKeyObjects(resolvedAgeGroup)),
     roomZone: pick(TAG_OPTIONS.roomZones),
-    lighting: options.lighting ?? pick(TAG_OPTIONS.lighting),
+    lighting: options.lighting ?? pick(resolvedAgeGroup === 'baby' && babySafeLights.length > 0 ? babySafeLights : TAG_OPTIONS.lighting),
     cameraAngle: options.cameraAngle ?? pick(TAG_OPTIONS.cameraAngles),
     cameraElevation: pick(TAG_OPTIONS.cameraElevations),
     cameraDistance: pick(TAG_OPTIONS.cameraDistances),
@@ -193,7 +194,7 @@ export function generateRandomTags(
     plant:
       options.plant !== undefined
         ? (options.plant ?? undefined)
-        : (!options.heroRoom && !options.macroTexture && TAG_OPTIONS.plants.length > 0 && Math.random() < 0.35
+        : (resolvedAgeGroup !== 'baby' && !options.heroRoom && !options.macroTexture && TAG_OPTIONS.plants.length > 0 && Math.random() < 0.35
             ? pick(TAG_OPTIONS.plants)
             : undefined),
     aspectRatio,
@@ -233,6 +234,8 @@ export function generateBatchDeck(
   options: { audience?: AudienceKey; targetAge?: TargetAgeFilter; includeHero?: boolean; includeMacro?: boolean; promptMode?: PromptMode } = {},
 ): BatchPromptTags[] {
   const ageGroupCycle = resolveAgePool(options.targetAge);
+  const dayLights = TAG_OPTIONS.lighting.filter(l => !/dusk|twilight|lamplight/i.test(l));
+  const babyLightDeck = shuffled(dayLights.length > 0 ? dayLights : TAG_OPTIONS.lighting);
   const styleDeck = shuffled(TAG_OPTIONS.styles);
   const lightDeck = shuffled(TAG_OPTIONS.lighting);
   const angleDeck = shuffled(TAG_OPTIONS.cameraAngles);
@@ -290,7 +293,9 @@ export function generateBatchDeck(
     const isMacro = idx === macroIdx;
 
     let personMode: BatchPersonMode = 'none';
-    let cardLighting = lightDeck[idx % lightDeck.length];
+    let cardLighting = ageGroup === 'baby'
+      ? babyLightDeck[idx % babyLightDeck.length]
+      : lightDeck[idx % lightDeck.length];
     let cardAngle = angleDeck[idx % angleDeck.length];
 
     if (!isHero && !isMacro && ageGroup !== 'teenager') {
@@ -321,9 +326,11 @@ export function generateBatchDeck(
       personMode === 'child_reading_rug' ||
       personMode === 'child_building_blocks' ||
       personMode === 'mother_reading_child';
-    const cleanFloor = !isHero && !isMacro && !isPlayingOnFloor && (
-      personMode !== 'none' || (cleanRoomToggle++ % 2 === 0)
-    );
+    const cleanFloor = ageGroup === 'baby'
+      ? false
+      : !isHero && !isMacro && !isPlayingOnFloor && (
+          personMode !== 'none' || (cleanRoomToggle++ % 2 === 0)
+        );
 
     // When audience is 'neutral', alternate explicit 'boy' and 'girl' on people cards so the child is always clearly defined
     const effectiveAudience: AudienceKey =
@@ -340,7 +347,7 @@ export function generateBatchDeck(
     const dealtPlant =
       isHero && plantDeck.length > 0
         ? plantDeck[plantCursor++ % plantDeck.length]
-        : !isHero && !isMacro && plantDeck.length > 0 && (plantGiveCounter++ % 3 === 1)
+        : ageGroup !== 'baby' && !isHero && !isMacro && plantDeck.length > 0 && (plantGiveCounter++ % 3 === 1)
           ? plantDeck[plantCursor++ % plantDeck.length]
           : null;
     const cardStyle = styleDeck[idx % styleDeck.length];

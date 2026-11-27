@@ -385,7 +385,8 @@
       "beds": [
         "Minimalist slatted solid birch crib",
         "Rectangular solid beech slatted baby crib",
-        "Clean matte white rectangular baby crib with drawer"
+        "Clean matte white rectangular baby crib with drawer",
+        "Oval Scandinavian wooden baby crib"
       ],
       "toys": [
         "a natural wooden Montessori baby play gym (Spielbogen) with hanging pastel wooden beads standing neatly on the soft floor rug",
@@ -396,13 +397,13 @@
       ],
       "accessories": [
         "plush textured cream dot floor rug",
+        "oval floor rug with a wavy scalloped edge and a short soft pile",
+        "round quilted organic cotton baby play mat in soft cream",
         "solid light oak wooden toy chest with smooth rounded corners",
         "delicate airy sheer white linen curtains catching bright morning light",
-        "oval floor rug with a wavy scalloped edge and a short soft pile",
         "cozy cream bouclé nursing armchair with a soft pastel pillow",
         "cute natural solid wood rocking horse",
-        "tiny knitted baby booties and a small wooden rattle resting neatly on the low wooden changing dresser",
-        "colorful retro-modern flat-weave rug with warm terracotta, mustard, and soft blue vintage motif"
+        "tiny knitted baby booties and a small wooden rattle resting neatly on the low wooden changing dresser"
       ],
       "furniture": "classic wooden baby crib with slatted sides, premium wooden changing table dresser with a soft cream changing mat (Wickelkommode), cozy fabric nursing glider chair",
       "storage": "low open wooden shelves, canvas storage bins in linen fabric, solid wood toy chest",
@@ -536,22 +537,22 @@
   "keyObjects": [
     {
       "name": "Minimalist slatted solid birch crib",
-      "description": "standard waist-height natural light birch baby crib (120 by 60 cm, along the side wall) with slender vertical spindles, a fitted white cotton mattress sheet, and completely bare empty top rails with nothing hanging or draped over them",
+      "description": "standard waist-height natural light birch baby crib (120 by 60 cm, along the side wall) with slender vertical spindles, a fitted white cotton mattress sheet, completely bare empty top rails with nothing hanging or draped over them, and a matching low birch wooden changing dresser (Wickelkommode) with a soft cream changing pad beside it",
       "ageGroup": "baby"
     },
     {
       "name": "Rectangular solid beech slatted baby crib",
-      "description": "classic waist-height solid beech baby crib (120 by 60 cm, along the side wall) with open vertical spindles, a fitted white cotton mattress sheet, and completely bare empty top rails with nothing hanging or draped over them",
+      "description": "classic waist-height solid beech baby crib (120 by 60 cm, along the side wall) with open vertical spindles, a fitted white cotton mattress sheet, and completely bare empty top rails with nothing hanging or draped over them, beside a natural wooden Montessori baby play gym (Spielbogen) on the soft floor rug",
       "ageGroup": "baby"
     },
     {
       "name": "Clean matte white rectangular baby crib with drawer",
-      "description": "standard waist-height matte white wooden baby crib (120 by 60 cm, along the side wall) with plain solid end panels, vertical front spindles, a closed under-crib drawer, a fitted white cotton mattress sheet, and completely bare empty top rails with nothing hanging or draped over them",
+      "description": "standard waist-height matte white wooden baby crib (120 by 60 cm, along the side wall) with plain solid end panels, vertical front spindles, a closed under-crib drawer, a fitted white cotton mattress sheet, completely bare empty top rails with nothing hanging or draped over them, and a cozy cream bouclé nursing armchair nearby",
       "ageGroup": "baby"
     },
     {
-      "name": "Cozy nursery corner with circular quilted mat",
-      "description": "warm nursery corner with a soft upholstered cream nursing armchair and a small round solid birch side table",
+      "name": "Oval Scandinavian wooden baby crib",
+      "description": "rounded oval Scandinavian solid birch baby crib (120 by 60 cm, Leander/Stokke style, along the side wall) with slender vertical spindles, a smooth fitted white cotton mattress sheet, completely bare empty top rails with nothing hanging or draped over them, and a small solid wood baby rocking horse nearby",
       "ageGroup": "baby"
     },
     {
@@ -948,14 +949,14 @@
   "plants": [
     "an indoor olive tree with silvery-green leaves in a textured terracotta pot in the corner",
     "an airy golden cane palm (Areca palm) with soft feathery fronds in a woven seagrass floor planter beside the side wall",
-    "a lush green Boston fern with cascading fronds in a fluted warm beige stoneware pot on a low oak plant stand",
-    "a bushy Calathea orbifolia with broad striped matte leaves in a rounded matte cream ceramic pot in the corner",
-    "a Chinese money plant (Pilea peperomioides) with round coin-shaped leaves in a matte sage ceramic pot on a low wooden stool",
+    "a lush green Boston fern with cascading fronds in a fluted warm beige stoneware floor planter in the corner",
+    "a bushy Calathea orbifolia with broad striped matte leaves in a rounded matte cream ceramic floor planter in the corner",
+    "a Chinese money plant (Pilea peperomioides) with round coin-shaped leaves in a matte sage ceramic floor pot beside the window",
     "a sculptural dwarf banana plant (Musa) with broad matte tropical green leaves in a raw clay floor planter near the window",
     "a braided money tree (Pachira aquatica) with palmate green leaves in a matte oat ceramic cylinder pot beside the side wall",
     "a fresh green parlor palm (Chamaedorea) in a warm sand-colored ribbed terracotta planter in the corner",
     "a tall minimalist arrangement of dried and fresh eucalyptus stems in a matte chalk-white ceramic floor vase beside the side wall",
-    "a compact spider plant (Chlorophytum) with arching green-and-cream leaves in a speckled stoneware pot on a low wooden stool"
+    "a compact spider plant (Chlorophytum) with arching green-and-cream leaves in a speckled stoneware floor pot beside the window"
   ],
   "staging": {
     "text": "STAGING (the mural is the hero): a furnished, lived-in children's room of about 4.5 by 3.5 metres under a 2.8 m ceiling. The hero piece stands along a side wall with at most two small accessories beside it, and the child's own toys lie on the single floor rug. Everything near the mural wall is lower than 90 cm, so the drawing of the mural stays open and clear.",
