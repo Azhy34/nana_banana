@@ -494,10 +494,20 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     : rawAgeLine;
   sceneSetting = `${sceneSetting} ${effectiveAgeLine}`.trim();
 
+  // A tall frame cannot hold a wide mural whole without squeezing it (and half the frame becomes floor and ceiling): it shows a
+  // floor-to-ceiling SECTION of the wall. Which ratios are tall and the words of that framing are data (trends.json "staging").
+  const staging = trendsData.staging as { framingTall?: string; tallRatios?: string[] };
+  const isTall = !!staging.framingTall && (staging.tallRatios ?? []).includes(tags.aspectRatio as string);
+
+  const spatialLayoutLock =
+    "STRICT SPATIAL LAYOUT LOCK: preserve the exact left-to-right and top-to-bottom positions, orientations, sizes, shapes, and colors of every element in REFERENCE_IMAGE_1 — never move, mirror, flip, resize, add, or repaint any motif, cloud, moon, star, or illustration.";
+
   const isScallop = tags.wallArchitecture === 'scallop-trim';
   const wallpaperRule = isScallop
-    ? "This is a commercial interior photograph showcasing a designer wallpaper in a European children's interior. WALL ARCHITECTURE (RETRO SCALLOPED WAVE TRIM): The reference wallpaper covers the lower two-thirds of the feature wall, crowned by an eye-catching decorative scalloped wave trim moulding in warm barberry red or terracotta. Above the wavy scalloped trim, the upper wall is painted in warm chalky cream with a charming gallery of art prints in scalloped and checkered frames. Retain the exact pattern, colors, and stripe/art scale from the reference image 1:1 on the wallpaper section. The wallpaper is the hero of the interior."
-    : "Commercial interior photograph showcasing a single full-scale mural wallpaper (not a repeating tile). FULL-HEIGHT 100% WALL COVERAGE: map the entire reference image edge-to-edge as one seamless mural from baseboard to ceiling cleanly behind furniture without horizontal splits or unpapered lower sections. Retain the exact illustration, colors, and scale 1:1. The wallpaper is the hero of the interior.";
+    ? `This is a commercial interior photograph showcasing a designer wallpaper in a European children's interior. WALL ARCHITECTURE (RETRO SCALLOPED WAVE TRIM): The reference wallpaper covers the lower two-thirds of the feature wall, crowned by an eye-catching decorative scalloped wave trim moulding in warm barberry red or terracotta. Above the wavy scalloped trim, the upper wall is painted in warm chalky cream with a charming gallery of art prints in scalloped and checkered frames. Retain the exact pattern, colors, and stripe/art scale from the reference image 1:1 on the wallpaper section. ${spatialLayoutLock} The wallpaper is the hero of the interior.`
+    : isTall
+      ? `Commercial interior photograph showcasing a single full-scale mural wallpaper (not a repeating tile). FULL-HEIGHT 100% WALL COVERAGE: apply the exact reference mural artwork seamlessly from baseboard to ceiling cleanly behind furniture without horizontal splits or unpapered lower sections, cropping naturally to the visible wall section at its true 1:1 scale so the mural continues beyond the frame edges without squeezing or stretching. ${spatialLayoutLock} The wallpaper is the hero of the interior.`
+      : `Commercial interior photograph showcasing a single full-scale mural wallpaper (not a repeating tile). FULL-HEIGHT 100% WALL COVERAGE: map the entire reference image edge-to-edge as one seamless mural from baseboard to ceiling cleanly behind furniture without horizontal splits or unpapered lower sections. ${spatialLayoutLock} The wallpaper is the hero of the interior.`;
 
   const rawKeyDesc = keyObjData?.description ?? 'realistic European child-bedroom proportions';
   const keyDescWithLampColor = rawKeyDesc.replace(
@@ -523,10 +533,6 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const lens = tags.lens || '35mm prime lens';
   const aperture = tags.aperture || 'f/5.6 aperture';
 
-  // A tall frame cannot hold a wide mural whole without squeezing it (and half the frame becomes floor and ceiling): it shows a
-  // floor-to-ceiling SECTION of the wall. Which ratios are tall and the words of that framing are data (trends.json "staging").
-  const staging = trendsData.staging as { framingTall?: string; tallRatios?: string[] };
-  const isTall = !!staging.framingTall && (staging.tallRatios ?? []).includes(tags.aspectRatio as string);
   const view = isTall
     ? `${angle.replace(/ and pulled well back.*$/, '')}, at ${elevation}. Framing: ${staging.framingTall}`
     : `${angle}, at ${elevation}. Framing: ${distance}${distanceNote}`;
