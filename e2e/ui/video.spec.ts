@@ -8,6 +8,7 @@ import {
 import { test, expect, openApp, switchTab, activeTab, pngFile, COLORS, FAKE_KEYS } from '../support/fixtures';
 
 const OMNI_BUTTON = '✨ Запустить анимацию обоев (Omni Flash)';
+const KLING_BUTTON = /Запустить анимацию обоев \(Kling 2\.6\)/;
 const VEO_BUTTON = '🚀 Запустить анимацию обоев (Veo)';
 
 async function openVideoWithImage(page: Page) {
@@ -17,9 +18,14 @@ async function openVideoWithImage(page: Page) {
   await expect(activeTab(page).getByAltText('Reference Frame')).toBeVisible();
 }
 
-test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
+async function openOmniWithImage(page: Page) {
+  await openVideoWithImage(page);
+  await activeTab(page).getByRole('button', { name: /Omni 1\.2 Flash/ }).click();
+}
+
+test.describe('Video — Gemini Omni 1.2 Flash', () => {
   test('image-to-video request follows the Interactions API contract', async ({ page, apis }) => {
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
 
     await expect(activeTab(page).locator('video')).toHaveAttribute('src', /^blob:/);
@@ -51,7 +57,7 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
   });
 
   test('the request is exactly the one the Pydantic shield is tested with (site_payload.sample.json)', async ({ page, apis }) => {
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
     await expect(activeTab(page).locator('video')).toBeVisible();
 
@@ -64,21 +70,21 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
   });
 
   test('there is no 360p draft button: only 720p and 1080p are offered', async ({ page }) => {
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     await expect(activeTab(page).getByRole('button', { name: /360p/ })).toHaveCount(0);
     await expect(activeTab(page).getByRole('button', { name: /720p Финал Etsy/ })).toBeVisible();
     await expect(activeTab(page).getByRole('button', { name: /1080p Рекомендовано Etsy/ })).toBeVisible();
   });
 
   test('the quality buttons show their 5s price (Google token rates x $12 / 1M)', async ({ page }) => {
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     const tab = activeTab(page);
     await expect(tab.getByRole('button', { name: /720p Финал Etsy.*≈ \$0\.35$/ })).toBeVisible();          // 5 s x 5,792 tokens/s
     await expect(tab.getByRole('button', { name: /1080p Рекомендовано Etsy.*≈ \$0\.52$/ })).toBeVisible();  // 5 s x 8,688 tokens/s
   });
 
   test('the final cost is the real bill from Google usage', async ({ page }) => {
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
     const label = activeTab(page).getByText(/Итоговая стоимость/);
     await expect(label).toHaveText('Итоговая стоимость (по счёту Google):');
@@ -87,7 +93,7 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
 
   test('an answer without usage falls back to the price-list estimate and says so', async ({ page, apis }) => {
     apis.omniUsageTokens = null;
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
     const label = activeTab(page).getByText(/Итоговая стоимость/);
     await expect(label).toHaveText('Итоговая стоимость (расчёт по прайсу):');
@@ -97,6 +103,7 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
   test('an image type Omni does not take is refused before Google is called', async ({ page, apis }) => {
     await openApp(page);
     await switchTab(page, 'Video');
+    await activeTab(page).getByRole('button', { name: /Omni 1\.2 Flash/ }).click();
     await activeTab(page).locator('input[type="file"]').first().setInputFiles({ name: 'frame.gif', mimeType: 'image/gif', buffer: Buffer.from('GIF89a') });
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
     await expect(activeTab(page).getByText(/Omni принимает кадр в PNG, JPG или WebP/)).toBeVisible();
@@ -104,7 +111,7 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
   });
 
   test('fixed 5s duration is sent to Omni and priced accurately', async ({ page, apis }) => {
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     await expect(activeTab(page).getByText('5 секунд', { exact: true })).toBeVisible();
     await expect(activeTab(page).getByText('$0.35', { exact: true })).toBeVisible();
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
@@ -114,7 +121,7 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
   });
 
   test('1080p is delivered through the Files API (uri), not inline', async ({ page, apis }) => {
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     await activeTab(page).getByRole('button', { name: /1080p Рекомендовано Etsy/ }).click();
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
     await expect(activeTab(page).locator('video')).toHaveAttribute('src', /^blob:/);
@@ -124,7 +131,7 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
   });
 
   test('the wallpaper freeze cannot be erased: it is added to whatever the user types', async ({ page, apis }) => {
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     const tab = activeTab(page);
     await tab.getByPlaceholder('Введите или скорректируйте промпт анимации...').fill('The curtains sway in a light breeze.');
     await tab.getByRole('button', { name: OMNI_BUTTON }).click();
@@ -144,7 +151,7 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
   });
 
   test('choosing a preset puts its motion into the field and into the request', async ({ page, apis }) => {
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     const tab = activeTab(page);
     await tab.getByRole('button', { name: /Живой свет, камера стоит/ }).click();
     await expect(tab.getByPlaceholder('Введите или скорректируйте промпт анимации...')).toHaveValue(OMNI_PRESETS.omni_light_only.prompt);
@@ -187,14 +194,14 @@ test.describe('Video — Gemini Omni 1.2 Flash (default engine)', () => {
             body: JSON.stringify({ error: { code: 429, status: 'RESOURCE_EXHAUSTED', message: 'Quota exceeded for gemini-omni-1.2-flash' } }),
           }),
     );
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
     await expect(activeTab(page).getByText(/Omni Video generation failed: Quota exceeded/)).toBeVisible();
   });
 
   test('refuses an OpenRouter key in the Gemini slot before calling anything', async ({ page, apis }) => {
     await page.addInitScript(() => localStorage.setItem('gemini_api_key', 'sk-or-v1-wrong-provider'));
-    await openVideoWithImage(page);
+    await openOmniWithImage(page);
     await activeTab(page).getByRole('button', { name: OMNI_BUTTON }).click();
     await expect(activeTab(page).getByText(/Ключ не подходит!/)).toBeVisible();
     expect(apis.omni).toHaveLength(0);
@@ -426,5 +433,65 @@ test.describe('Video — On-demand Prompt Adapter (gemini-3.1-flash-lite)', () =
       agentThoughts: 'Child has right hand already raised toward a flower; rug is bare.',
       costSource: 'usage',
     });
+  });
+
+  test('defaults to Kling 2.6 and preserves adapted prompt when switching engines', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('kie_api_key', 'kie_test_key_12345'));
+    const kieCalls: any[] = [];
+    await page.route('/api/kie', async (route) => {
+      const body = route.request().postDataJSON();
+      kieCalls.push(body);
+      if (body.action === 'upload') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ code: 200, data: { downloadUrl: 'https://tempfile.aiquickdraw.com/test_frame.jpg' } }) });
+      }
+      if (body.action === 'createTask') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ code: 200, data: { taskId: 'task_kling26_001' } }) });
+      }
+      if (body.action === 'recordInfo') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            code: 200,
+            data: {
+              state: 'success',
+              costTime: 14,
+              consumeCredits: 63,
+              resultJson: JSON.stringify({ resultUrls: ['https://tempfile.aiquickdraw.com/kling26_out.mp4'] }),
+            },
+          }),
+        });
+      }
+      return route.fallback();
+    });
+
+    await openVideoWithImage(page);
+    const tab = activeTab(page);
+
+    // Kling 2.6 is selected by default
+    await expect(tab.getByRole('button', { name: KLING_BUTTON })).toBeVisible();
+
+    // Select Doorway Walk-In, edit prompt, then switch Omni -> Kling 3.0 -> Kling 2.6
+    await tab.getByRole('button', { name: /Вход из дверного проёма/ }).click();
+    const customMotion = 'The camera advances smoothly forward through the open doorway into the sunlit nursery.';
+    await tab.getByPlaceholder('Введите или скорректируйте промпт анимации...').fill(customMotion);
+
+    await tab.getByRole('button', { name: /Omni 1\.2 Flash/ }).click();
+    await expect(tab.getByPlaceholder('Введите или скорректируйте промпт анимации...')).toHaveValue(customMotion);
+
+    await tab.getByRole('button', { name: /Kling 3\.0 \(KIE\)/ }).click();
+    await expect(tab.getByPlaceholder('Введите или скорректируйте промпт анимации...')).toHaveValue(customMotion);
+
+    await tab.getByRole('button', { name: /Kling 2\.6 \(KIE\)/ }).click();
+    await expect(tab.getByPlaceholder('Введите или скорректируйте промпт анимации...')).toHaveValue(customMotion);
+
+    // Submit to Kling 2.6 and confirm the exact custom motion prompt reaches KIE (not omni_light_only)
+    await tab.getByRole('button', { name: KLING_BUTTON }).click();
+    await expect(tab.locator('video')).toHaveAttribute('src', 'https://tempfile.aiquickdraw.com/kling26_out.mp4', { timeout: 15_000 });
+
+    const createCall = kieCalls.find((c) => c.action === 'createTask');
+    expect(createCall.model).toBe('kling-2.6/image-to-video');
+    expect(createCall.input.prompt).toContain(customMotion);
+    expect(createCall.input.prompt).not.toContain('Locked static camera');
   });
 });

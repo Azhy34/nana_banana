@@ -42,8 +42,8 @@ interface VideoToolProps {
 export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, initialSourcePrompt, onBack, geminiApiKey, kieApiKey }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Model engine selector: 'omni' by default for cheaper & more stable nursery videos
-  const [engine, setEngine] = useState<VideoEngine>('omni');
+  // Model engine selector: 'kling' (Kling 2.6) by default
+  const [engine, setEngine] = useState<VideoEngine>('kling');
   const [resolution, setResolution] = useState<OmniResolution>('720p');
   const [kling3Mode, setKling3Mode] = useState<Kling3Mode>('std');
   // Omni clip length (3..15 s). Always sent to Google: without it the model makes 10 s.
@@ -61,7 +61,7 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, initialSourc
     totalTokens?: number;
   } | null>(null);
   const [settings, setSettings] = useState<VideoJobSettings>({
-    engine: 'omni',
+    engine: 'kling',
     promptPreset: OMNI_DEFAULT_PRESET,
     customPrompt: OMNI_PRESETS[OMNI_DEFAULT_PRESET].prompt,
     seed: 133466,
@@ -154,37 +154,56 @@ export const VideoTool: React.FC<VideoToolProps> = ({ initialImage, initialSourc
     };
   })();
 
-  // Handle engine switch
+  // Handle engine switch without wiping the user's selected preset or adapted prompt
   const handleEngineChange = (newEngine: VideoEngine) => {
     setEngine(newEngine);
-    if (newEngine === 'omni') {
-      setSettings(prev => ({
-        ...prev,
-        engine: 'omni',
-        promptPreset: OMNI_DEFAULT_PRESET,
-        customPrompt: OMNI_PRESETS[OMNI_DEFAULT_PRESET].prompt,
-        resolution
-      }));
-    } else if (newEngine === 'kling' || newEngine === 'kling3') {
+    if (newEngine === 'kling' || newEngine === 'kling3') {
       setDurationSeconds(5);
-      setSettings(prev => ({
-        ...prev,
-        engine: newEngine,
-        promptPreset: 'omni_light_only',
-        customPrompt: OMNI_PRESETS.omni_light_only.prompt,
-      }));
-    } else {
-      setSettings(prev => ({
+    }
+
+    setSettings(prev => {
+      const targetUsesOmniPresets = newEngine === 'omni' || newEngine === 'kling' || newEngine === 'kling3';
+      const currentIsOmniPreset = prev.promptPreset in OMNI_PRESETS;
+      const trimmedPrompt = prev.customPrompt.trim();
+
+      if (targetUsesOmniPresets) {
+        if (currentIsOmniPreset) {
+          // Omni, Kling 2.6 and Kling 3.0 share OMNI_PRESETS: preserve preset & adapted/edited prompt
+          return {
+            ...prev,
+            engine: newEngine,
+            ...(newEngine === 'omni' ? { resolution } : {}),
+          };
+        }
+        const isStockVeoPrompt = Object.values(VEO_PRESETS).some(p => p.prompt.trim() === trimmedPrompt);
+        return {
+          ...prev,
+          engine: newEngine,
+          promptPreset: OMNI_DEFAULT_PRESET,
+          customPrompt: (!trimmedPrompt || isStockVeoPrompt)
+            ? OMNI_PRESETS[OMNI_DEFAULT_PRESET].prompt
+            : prev.customPrompt,
+          ...(newEngine === 'omni' ? { resolution } : {}),
+        };
+      }
+
+      // Switching to Veo
+      const isStockOmniPrompt = Object.values(OMNI_PRESETS).some(p => p.prompt.trim() === trimmedPrompt);
+      return {
         ...prev,
         engine: 'veo',
         promptPreset: 'dolly_in',
-        customPrompt: VEO_PRESETS.dolly_in.prompt
-      }));
-    }
+        customPrompt: (!trimmedPrompt || isStockOmniPrompt)
+          ? VEO_PRESETS.dolly_in.prompt
+          : prev.customPrompt,
+      };
+    });
   };
 
   // Sync preset choice with prompt text
   const handlePresetChange = (presetKey: string) => {
+    setAdaptError(null);
+    setAdaptTelemetry(null);
     if ((engine === 'omni' || engine === 'kling' || engine === 'kling3') && presetKey in OMNI_PRESETS) {
       const key = presetKey as keyof typeof OMNI_PRESETS;
       setSettings(prev => ({
