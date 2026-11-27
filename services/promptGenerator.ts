@@ -445,14 +445,14 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   let lifestyleTouch = '';
   if (tags.ageGroup === 'baby') {
     sceneSetting = hasBedInRoom
-      ? `A bright, airy, sunlit serene nursery for a baby filled with gentle warmth and joyful anticipation${styleLabel}. The room feels luminous, welcoming, and spacious, with tactile natural wood, clean bare wooden crib rails, and breathable organic cotton.`
+      ? `A bright, airy, sunlit serene nursery for a baby filled with gentle warmth and joyful anticipation${styleLabel}. The room feels luminous, welcoming, and spacious, with tactile natural wood and breathable organic cotton.`
       : `A bright, airy, sunlit serene nursery for a baby filled with gentle warmth and joyful anticipation${styleLabel}. The room feels luminous, welcoming, and spacious, with tactile natural wood and breathable organic cotton textiles.`;
     lifestyleTouch = tags.heroRoom
       ? 'Minimalist open nursery styling with only the single floor rug and potted greenery, leaving the mural wall completely unobstructed.'
       : hasBedInRoom
         ? (isCleanFloor
-            ? 'Clean, bright, uncluttered nursery styling with crisp organic cotton bedding, clean bare wooden crib rails, and an open floor rug.'
-            : `Sweet, joyful nursery details: crisp organic cotton bedding with clean bare wooden crib rails and ${trendingToy || 'a soft knitted bunny and wooden stacking rings on the rug'}.`)
+            ? 'Clean, bright, uncluttered nursery styling with a smooth fitted mattress sheet, completely bare wooden crib top rails, and an open floor rug.'
+            : `Sweet, joyful nursery details: a smooth fitted mattress sheet, completely bare wooden crib top rails, and ${trendingToy || 'a soft knitted bunny and wooden stacking rings on the rug'}.`)
         : (isCleanFloor
             ? 'Clean, bright, uncluttered nursery styling with soft organic cotton cushions and an open floor rug.'
             : `Sweet, joyful nursery details: soft organic cotton textiles and ${trendingToy || 'a soft knitted bunny and wooden stacking rings on the rug'}.`);

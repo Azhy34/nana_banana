@@ -2,42 +2,42 @@
   "colors": [
     {
       "name": "Mint, Sand & Burgundy",
-      "description": "60% warm sand (#DCD8B1) base, 30% fresh mint-sage (#86E8B7) on rug/throws, 10% deep burgundy (#4D1212) accent",
+      "description": "60% warm sand (#DCD8B1) base, 30% fresh mint-sage (#86E8B7) on rug and textiles, 10% deep burgundy (#4D1212) accent",
       "lampColor": "deep burgundy",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Milk, Moss Green & Graphite",
-      "description": "60% creamy milk (#F9F7D5) base, 30% moss-olive green (#4D6042) on rug/throws, 10% matte graphite (#191919) accent",
+      "description": "60% creamy milk (#F9F7D5) base, 30% moss-olive green (#4D6042) on rug and textiles, 10% matte graphite (#191919) accent",
       "lampColor": "matte graphite",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["schulkind", "teenager"]
     },
     {
       "name": "Cool Grey, Mustard & Charcoal",
-      "description": "60% light grey (#D7DCDB) & oak base, 30% ochre mustard (#EBA000) on rug/throw, 10% matte charcoal (#232323) accent",
+      "description": "60% light grey (#D7DCDB) & oak base, 30% ochre mustard (#EBA000) on rug and textiles, 10% matte charcoal (#232323) accent",
       "lampColor": "warm mustard yellow",
       "audiences": ["neutral", "boy"],
       "ageGroups": ["schulkind", "teenager"]
     },
     {
       "name": "Sunny Mustard",
-      "description": "60% warm oat cream base, 30% golden mustard yellow on rug/throw, 10% warm terracotta accent",
+      "description": "60% warm oat cream base, 30% golden mustard yellow on rug and textiles, 10% warm terracotta accent",
       "lampColor": "warm mustard yellow",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind"]
     },
     {
       "name": "Muted Sage",
-      "description": "60% cloud cream & birch base, 30% botanical sage green on rug/textiles, 10% honey amber & terracotta accent",
+      "description": "60% cloud cream & birch base, 30% botanical sage green on rug and textiles, 10% honey amber & terracotta accent",
       "lampColor": "warm terracotta",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
     },
     {
       "name": "Warm Terracotta",
-      "description": "60% warm sandy linen base, 30% earthy terracotta on rug/throws, 10% muted sage green accent",
+      "description": "60% warm sandy linen base, 30% earthy terracotta on rug and textiles, 10% muted sage green accent",
       "lampColor": "warm terracotta",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
@@ -65,7 +65,7 @@
     },
     {
       "name": "Eucalyptus",
-      "description": "60% warm alabaster & ash base, 30% organic eucalyptus green on rug/throw, 10% ochre & clay accent",
+      "description": "60% warm alabaster & ash base, 30% organic eucalyptus green on rug and textiles, 10% ochre & clay accent",
       "lampColor": "warm ochre yellow",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
@@ -93,7 +93,7 @@
     },
     {
       "name": "Lilac Mist",
-      "description": "60% cloud cream base, 30% dusty lilac mist on rug/throw, 10% buttery vanilla yellow & sage accent",
+      "description": "60% cloud cream base, 30% dusty lilac mist on rug and textiles, 10% buttery vanilla yellow & sage accent",
       "lampColor": "pastel pink",
       "audiences": ["neutral", "girl"],
       "ageGroups": ["baby", "vorschul", "schulkind", "teenager"]
@@ -114,7 +114,7 @@
     },
     {
       "name": "Cocoa Brown",
-      "description": "60% macchiato cream & oak base, 30% cosy cocoa taupe on rug/throws, 10% soft sage or terracotta accent",
+      "description": "60% macchiato cream & oak base, 30% cosy cocoa taupe on rug and textiles, 10% soft sage or terracotta accent",
       "lampColor": "warm terracotta",
       "audiences": ["neutral", "boy", "girl"],
       "ageGroups": ["vorschul", "schulkind", "teenager"]
@@ -536,17 +536,17 @@
   "keyObjects": [
     {
       "name": "Minimalist slatted solid birch crib",
-      "description": "standard waist-height natural light birch baby crib (120 by 60 cm, along the side wall) with slender vertical spindles and crisp organic cotton bedding",
+      "description": "standard waist-height natural light birch baby crib (120 by 60 cm, along the side wall) with slender vertical spindles, a fitted white cotton mattress sheet, and completely bare empty top rails with nothing hanging or draped over them",
       "ageGroup": "baby"
     },
     {
       "name": "Rectangular solid beech slatted baby crib",
-      "description": "classic waist-height solid beech baby crib (120 by 60 cm, along the side wall) with open vertical spindles and a crisp white cotton mattress sheet",
+      "description": "classic waist-height solid beech baby crib (120 by 60 cm, along the side wall) with open vertical spindles, a fitted white cotton mattress sheet, and completely bare empty top rails with nothing hanging or draped over them",
       "ageGroup": "baby"
     },
     {
       "name": "Clean matte white rectangular baby crib with drawer",
-      "description": "standard waist-height matte white wooden baby crib (120 by 60 cm, along the side wall) with plain solid end panels, vertical front spindles, and a closed under-crib drawer",
+      "description": "standard waist-height matte white wooden baby crib (120 by 60 cm, along the side wall) with plain solid end panels, vertical front spindles, a closed under-crib drawer, a fitted white cotton mattress sheet, and completely bare empty top rails with nothing hanging or draped over them",
       "ageGroup": "baby"
     },
     {
@@ -940,7 +940,7 @@
   "negatives": {
     "head": "peeling wallpaper, wallpaper peeling off wall, corner curl",
     "fullWall": "half-wall wallpaper, split wall, wainscoting, dado rail, lower wall unpapered",
-    "compact": "pendant lamp, ceiling chandelier, crib mobile, bed canopy, house-frame bed, playhouse, dollhouse, toy house, metal bed frame, recessed spotlights, mounted animal heads, plastic furniture or toys, bunk beds, messy clutter, seams, repeating wallpaper patterns, CGI 3D render look, glossy surfaces, adult double bed, layered rugs, overlapping rugs",
+    "compact": "pendant lamp, ceiling chandelier, crib mobile, bed canopy, blanket or towel draped over crib rail, cloth hanging over crib side, house-frame bed, playhouse, dollhouse, toy house, metal bed frame, recessed spotlights, mounted animal heads, plastic furniture or toys, bunk beds, messy clutter, seams, repeating wallpaper patterns, CGI 3D render look, glossy surfaces, adult double bed, layered rugs, overlapping rugs",
     "base": "pendant lamp, hanging lamp, hanging pendant light, low ceiling lamp, ceiling chandelier, hanging chandelier, dangling light fixture, hanging lamp blocking wallpaper, ceiling lamp in foreground, ceiling fixture blocking mural, crib mobile, baby mobile, hanging mobile, hanging mobile toy, ceiling mobile, cot mobile, felt mobile, wooden mobile, dangling hanging toys, dangling ceiling decor, bed canopy, hanging baldachin, fabric curtains over bed, house bed, house-frame bed, house shaped bed frame, roof frame over bed, wooden gable frame, overhead frame beams, playhouse, dollhouse, toy house, miniature wooden house, tall bed frame obstructing wall, metal bed, iron spindle bed, iron bed frame, ceiling downlights, recessed spotlights, harsh office lighting, mounted animal heads, plush animal heads, fake taxidermy, animal trophies, wicker baskets, straw baskets, rattan furniture, plastic furniture, plastic toys, bunk beds, ladders, messy clutter, distorted geometry, CGI 3D render look, blurry muddy textures, flat soap textures, oversaturated neon, glossy plastic-looking surfaces, over-smoothed airbrushed textures, HDR halo, full themed room, foam poufs, stripes or dots on curtains next to the mural, wardrobe or tall furniture against the mural wall, table and chairs in the foreground, crowded room, straight-on frontal view, furniture hiding the lower part of the mural, adult double bed, queen-size bed, adult sofa, layered rugs, overlapping rugs, two rugs on top of each other",
     "text": "text overlay, watermark, advertising badge, corner stamp, typography",
     "textWithOverlay": "heavy oil paint, thick impasto smear, solid blue flag, yellow stars, geometric boxes, harsh stickers, digital watermark"
