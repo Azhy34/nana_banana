@@ -325,7 +325,10 @@ export function generateBatchDeck(
       personMode === 'mother_child_rug' ||
       personMode === 'child_reading_rug' ||
       personMode === 'child_building_blocks' ||
-      personMode === 'mother_reading_child';
+      personMode === 'mother_reading_child' ||
+      personMode === 'baby_play_gym' ||
+      personMode === 'child_drawing_on_rug' ||
+      personMode === 'child_wooden_train';
     const cleanFloor = ageGroup === 'baby'
       ? false
       : !isHero && !isMacro && !isPlayingOnFloor && (
@@ -405,7 +408,10 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     tags.personMode === 'mother_child_rug' ||
     tags.personMode === 'child_reading_rug' ||
     tags.personMode === 'child_building_blocks' ||
-    tags.personMode === 'mother_reading_child';
+    tags.personMode === 'mother_reading_child' ||
+    tags.personMode === 'baby_play_gym' ||
+    tags.personMode === 'child_drawing_on_rug' ||
+    tags.personMode === 'child_wooden_train';
   const isCleanFloor = Boolean(tags.cleanFloor) && !tags.heroRoom && !isFloorActivityScene;
   const compositionText = isCleanFloor
     ? trendsData.staging.text

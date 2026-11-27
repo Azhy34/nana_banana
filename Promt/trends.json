@@ -998,33 +998,37 @@
     },
     "scenes": [
       {
-        "id": "child_pointing",
-        "label": "Child pointing up at mural (from behind)",
+        "id": "mother_preparing_crib",
+        "label": "Mother preparing wooden baby crib (0–1y)",
         "ageGroups": [
-          "baby",
-          "vorschul",
-          "schulkind"
+          "baby"
         ],
-        "template": "Standing barefoot on the woven rug about 1.2 metres in front of the mural wall with their back to the camera, {child} reaches one hand up and points a finger enthusiastically toward the illustration on the wallpaper mural, head tilted slightly up admiring the wall, face turned away from the camera."
-      },
-      {
-        "id": "mother_child_pointing",
-        "label": "Mother holding child's hand & pointing at mural",
-        "ageGroups": [
-          "baby",
-          "vorschul",
-          "schulkind"
-        ],
-        "template": "Standing together near the woven rug in front of the mural wall, a well-groomed young mother in a relaxed muted sage linen dress with neatly styled glossy wavy brunette hair gently holds {child} by the hand and points her other hand toward a detail on the wallpaper mural; both look toward the mural wall in a warm candid moment, turned away from the camera."
+        "template": "Standing barefoot beside the wooden baby crib in the bright sunlit nursery, seen from a three-quarter rear angle with her face turned away toward the mural wall, a graceful well-groomed young mother with beautifully styled smooth soft-wavy hair in a soft cream linen dress gently places a small knitted bunny onto the smooth fitted crib mattress sheet, preparing the nursery with quiet joy."
       },
       {
         "id": "mother_holding_baby",
-        "label": "Mother holding toddler in arms & pointing at mural",
+        "label": "Mother holding baby warmly in arms (no pointing)",
         "ageGroups": [
           "baby",
           "vorschul"
         ],
-        "template": "Standing barefoot on the soft floor rug in front of the mural wall with her back to the camera, a graceful well-groomed young mother with beautifully styled smooth wavy hair in a flattering cream knit dress holds {child} on her left hip and points her right hand up toward the illustration on the wallpaper mural while both gaze at the wall."
+        "template": "Standing barefoot on the soft floor rug in front of the mural wall with her back to the camera, a graceful well-groomed young mother with beautifully styled smooth wavy hair in a flattering cream knit dress cradles {child} tenderly in both arms, both gazing calmly toward the wallpaper mural in a serene affectionate moment."
+      },
+      {
+        "id": "mother_armchair_baby",
+        "label": "Mother cradling baby in cream armchair (0–1y)",
+        "ageGroups": [
+          "baby"
+        ],
+        "template": "Seated calmly in a cozy cream bouclé nursing armchair beside the side wall in three-quarter side profile so the wallpaper mural behind remains completely open, a graceful well-groomed young mother with neatly styled wavy hair in a soft oat knit dress cradles {child} tenderly in her arms in a peaceful sunlit moment."
+      },
+      {
+        "id": "baby_play_gym",
+        "label": "Baby playing under wooden Spielbogen play gym (0–1y)",
+        "ageGroups": [
+          "baby"
+        ],
+        "template": "Sitting calmly on the soft floor rug beside a natural wooden Montessori baby play gym (Spielbogen) with hanging pastel wooden beads, seen from a three-quarter rear angle with face turned away from the camera, {child} reaches gently toward a wooden bead in curious everyday play."
       },
       {
         "id": "expectant_mother_nursery",
@@ -1032,7 +1036,43 @@
         "ageGroups": [
           "baby"
         ],
-        "template": "Standing barefoot beside the wooden baby crib in the bright sunlit nursery, seen from a three-quarter rear angle with her face turned away toward the mural wall, a graceful well-groomed expectant mother with beautifully styled smooth soft-wavy hair wears a flattering soft cream ribbed-knit maternity dress showing her gentle baby bump; she rests one hand tenderly on her bump and the other on the wooden crib rail, admiring the wallpaper mural with joyful anticipation."
+        "template": "Standing barefoot beside the wooden baby crib in the bright sunlit nursery, seen from a three-quarter rear angle with her face turned away toward the mural wall, a graceful well-groomed expectant mother with beautifully styled smooth soft-wavy hair wears a flattering soft cream ribbed-knit maternity dress showing her gentle baby bump; she rests one hand tenderly on her bump and the other on the bare wooden crib rail, admiring the wallpaper mural with joyful anticipation."
+      },
+      {
+        "id": "child_wooden_train",
+        "label": "Child rolling wooden train on floor rug",
+        "ageGroups": [
+          "baby",
+          "vorschul"
+        ],
+        "template": "Kneeling calmly on the soft floor rug in front of the mural wall with their back to the camera, {child} gently rolls a natural wooden toy train along the rug in relaxed everyday play, face turned away from the camera."
+      },
+      {
+        "id": "child_drawing_on_rug",
+        "label": "Child lying on stomach drawing on floor rug",
+        "ageGroups": [
+          "vorschul",
+          "schulkind"
+        ],
+        "template": "Lying comfortably on their stomach on the soft floor rug in front of the mural wall, seen from a three-quarter rear angle with face turned away from the camera, {child} draws calmly in an open paper sketchbook with wooden colored pencils beside a small wooden pencil cup."
+      },
+      {
+        "id": "child_on_bed_book",
+        "label": "Child sitting on bed edge reading picture book",
+        "ageGroups": [
+          "vorschul",
+          "schulkind"
+        ],
+        "template": "Sitting calmly on the edge of the wooden bed in a three-quarter rear view so the wallpaper mural stays open behind them, {child} holds an open illustrated storybook in their lap with a small soft linen plush friend resting beside them, absorbed in quiet reading."
+      },
+      {
+        "id": "mother_child_bed_story",
+        "label": "Mother & child reading story on bed edge",
+        "ageGroups": [
+          "vorschul",
+          "schulkind"
+        ],
+        "template": "Sitting side by side on the edge of the wooden bed in three-quarter rear view with their faces turned away from the camera, a graceful well-groomed young mother in a soft cream linen shirt rests one arm warmly around {child} while they read an open illustrated storybook together."
       },
       {
         "id": "mother_child_rug",
@@ -1042,7 +1082,7 @@
           "vorschul",
           "schulkind"
         ],
-        "template": "Sitting together on the round woven jute rug in front of the mural wall, a young mother in a soft cream linen shirt and beige trousers and {child} calmly build a small tower from natural wooden blocks on the rug, absorbed in quiet play without looking at the camera."
+        "template": "Sitting together on the round woven jute rug in front of the mural wall, a graceful well-groomed young mother in a soft cream linen shirt and beige trousers and {child} calmly build a small tower from natural wooden blocks on the rug, absorbed in quiet play without looking at the camera."
       },
       {
         "id": "child_rug",
@@ -1108,7 +1148,16 @@
           "vorschul",
           "schulkind"
         ],
-        "template": "Sitting side by side on the floor rug in front of the mural wall with their backs to the camera, a young mother in a soft cream linen shirt and beige trousers holds an open illustrated storybook together with {child}, sharing a calm cozy reading moment without looking at the camera."
+        "template": "Sitting side by side on the floor rug in front of the mural wall with their backs to the camera, a graceful well-groomed young mother in a soft cream linen shirt and beige trousers holds an open illustrated storybook together with {child}, sharing a calm cozy reading moment without looking at the camera."
+      },
+      {
+        "id": "mother_child_pointing",
+        "label": "Mother & child admiring mural (rare pointing variation)",
+        "ageGroups": [
+          "vorschul",
+          "schulkind"
+        ],
+        "template": "Standing together near the woven rug in front of the mural wall, a well-groomed young mother in a relaxed muted sage linen dress with neatly styled glossy wavy brunette hair gently holds {child} by the hand and gestures softly toward a detail on the wallpaper mural; both look toward the mural wall in a warm candid moment, turned away from the camera."
       }
     ]
   },

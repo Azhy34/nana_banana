@@ -16,6 +16,9 @@ export type BatchPersonMode =
   | 'mother_child_pointing'
   | 'mother_holding_baby'
   | 'expectant_mother_nursery'
+  | 'mother_preparing_crib'
+  | 'mother_armchair_baby'
+  | 'baby_play_gym'
   | 'mother_child_rug'
   | 'child_rug'
   | 'child_walking_to_wall'
@@ -23,6 +26,10 @@ export type BatchPersonMode =
   | 'child_building_blocks'
   | 'child_cuddling_plush'
   | 'child_drawing_desk'
+  | 'child_drawing_on_rug'
+  | 'child_wooden_train'
+  | 'child_on_bed_book'
+  | 'mother_child_bed_story'
   | 'mother_reading_child'
   | 'child_gaze';
 export type PromptMode = 'full' | 'brief';
