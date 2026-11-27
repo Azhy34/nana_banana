@@ -502,8 +502,14 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
 
   // A tall frame cannot hold a wide mural whole without squeezing it (and half the frame becomes floor and ceiling): it shows a
   // floor-to-ceiling SECTION of the wall. Which ratios are tall and the words of that framing are data (trends.json "staging").
+  // Exception: when the wide architectural full-room angle is chosen on 4:5 (or wider), keep the spacious full-room view.
+  const angle = tags.cameraAngle || TAG_OPTIONS.cameraAngles[0];
+  const isWideRoomAngle = /opposite end of the room|wide architectural view/i.test(angle);
   const staging = trendsData.staging as { framingTall?: string; tallRatios?: string[] };
-  const isTall = !!staging.framingTall && (staging.tallRatios ?? []).includes(tags.aspectRatio as string);
+  const isTall =
+    !!staging.framingTall &&
+    (staging.tallRatios ?? []).includes(tags.aspectRatio as string) &&
+    !(isWideRoomAngle && tags.aspectRatio === '4:5');
 
   const spatialLayoutLock =
     "STRICT SPATIAL LAYOUT LOCK: preserve the exact left-to-right and top-to-bottom positions, orientations, sizes, shapes, and colors of every element in REFERENCE_IMAGE_1 — never move, mirror, flip, resize, add, or repaint any motif, cloud, moon, star, or illustration.";
@@ -531,16 +537,15 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
 
   const lightingSection = `Natural window light illuminates the ultra-matte non-woven wallpaper with crisp neutral 5500K camera white balance, keeping the exact original background tone and hues of the reference wallpaper. Light setting: ${lightingData?.description ?? tags.lighting}.`;
 
-  const angle = tags.cameraAngle || TAG_OPTIONS.cameraAngles[0];
   const elevation = tags.cameraElevation || TAG_OPTIONS.cameraElevations[0];
   const distance = camDistData?.name ?? tags.cameraDistance ?? 'wide shot';
   const distanceNote = camDistData?.description ? `: ${camDistData.description}` : '';
   const cameraBody = tags.cameraBody || 'Sony A7R V';
-  const lens = tags.lens || '35mm prime lens';
+  const lens = isWideRoomAngle ? '28mm gentle wide lens' : (tags.lens || '35mm prime lens');
   const aperture = tags.aperture || 'f/5.6 aperture';
 
   const view = isTall
-    ? `${angle.replace(/ and pulled well back.*$/, '')}, at ${elevation}. Framing: ${staging.framingTall}`
+    ? `${isWideRoomAngle ? angle : angle.replace(/ and pulled well back.*$/, '')}, at ${elevation}. Framing: ${staging.framingTall}`
     : `${angle}, at ${elevation}. Framing: ${distance}${distanceNote}`;
 
   const personSentence = (() => {
