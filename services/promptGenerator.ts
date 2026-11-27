@@ -439,31 +439,46 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   // the toys, never a style of its own.
   const styleName = styleData?.name ?? tags.style;
   const styleLabel = styleName ? ` in ${styleName} style` : '';
+  const isBedKeyObject = /bed|crib|cot|daybed/i.test(keyObjData?.name ?? tags.keyObject);
+  const hasBedInRoom = !tags.heroRoom && isBedKeyObject;
   let sceneSetting = '';
   let lifestyleTouch = '';
   if (tags.ageGroup === 'baby') {
-    sceneSetting = `A bright, airy, sunlit serene nursery for a baby filled with gentle warmth and joyful anticipation${styleLabel}. The room feels luminous, welcoming, and spacious, with tactile natural wood, clean bare wooden crib rails, and breathable organic cotton.`;
-    lifestyleTouch = isCleanFloor
-      ? 'Clean, bright, uncluttered nursery styling with crisp organic cotton bedding, clean bare wooden crib rails, and an open floor rug.'
-      : `Sweet, joyful nursery details: crisp organic cotton bedding with clean bare wooden crib rails and ${trendingToy || 'a soft knitted bunny and wooden stacking rings on the rug'}.`;
+    sceneSetting = hasBedInRoom
+      ? `A bright, airy, sunlit serene nursery for a baby filled with gentle warmth and joyful anticipation${styleLabel}. The room feels luminous, welcoming, and spacious, with tactile natural wood, clean bare wooden crib rails, and breathable organic cotton.`
+      : `A bright, airy, sunlit serene nursery for a baby filled with gentle warmth and joyful anticipation${styleLabel}. The room feels luminous, welcoming, and spacious, with tactile natural wood and breathable organic cotton textiles.`;
+    lifestyleTouch = tags.heroRoom
+      ? 'Minimalist open nursery styling with only the single floor rug and potted greenery, leaving the mural wall completely unobstructed.'
+      : hasBedInRoom
+        ? (isCleanFloor
+            ? 'Clean, bright, uncluttered nursery styling with crisp organic cotton bedding, clean bare wooden crib rails, and an open floor rug.'
+            : `Sweet, joyful nursery details: crisp organic cotton bedding with clean bare wooden crib rails and ${trendingToy || 'a soft knitted bunny and wooden stacking rings on the rug'}.`)
+        : (isCleanFloor
+            ? 'Clean, bright, uncluttered nursery styling with soft organic cotton cushions and an open floor rug.'
+            : `Sweet, joyful nursery details: soft organic cotton textiles and ${trendingToy || 'a soft knitted bunny and wooden stacking rings on the rug'}.`);
   } else if (tags.ageGroup === 'vorschul') {
     sceneSetting = `A delightful, joyful children's bedroom${styleLabel}. Designed with playful child-scale furniture, natural wood, and cheerful accents that foster creativity, warmth, and restful sleep.`;
-    lifestyleTouch = isCleanFloor
-      ? 'Clean, uncluttered room styling with neat bedding and an open, empty floor rug.'
-      : `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'} on the floor rug.`;
+    lifestyleTouch = tags.heroRoom
+      ? 'Minimalist open styling with only the single floor rug and potted greenery, leaving the mural wall completely unobstructed.'
+      : isCleanFloor
+        ? 'Clean, uncluttered room styling with neat bedding and an open, empty floor rug.'
+        : `Authentic lived-in details: ${trendingToy || 'an open illustrated children\'s book'} on the floor rug.`;
   } else if (tags.ageGroup === 'schulkind') {
     sceneSetting = `A stylish, cozy children's bedroom and creative study sanctuary${styleLabel}. Warm natural wood surfaces, curated design touches and an uncluttered layout create an inspiring space.`;
-    lifestyleTouch = isCleanFloor
-      ? 'Clean, uncluttered study-bedroom styling with neat bedding and an open, empty floor rug.'
-      : `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'}.`;
+    lifestyleTouch = tags.heroRoom
+      ? 'Minimalist open styling with only the single floor rug and potted greenery, leaving the mural wall completely unobstructed.'
+      : isCleanFloor
+        ? 'Clean, uncluttered study-bedroom styling with neat bedding and an open, empty floor rug.'
+        : `Authentic lived-in details: ${trendingToy || 'an open notebook with a wooden pencil on the desk'}.`;
   } else {
     sceneSetting = `A contemporary youth bedroom${styleLabel} with clean lines, natural solid oak and birch, and a calm, stylish layout for studying and relaxing.`;
-    lifestyleTouch = isCleanFloor
-      ? 'Clean, uncluttered youth room styling with neat linen bedding and an open, empty floor rug.'
-      : `Authentic lived-in details: ${trendingToy || 'a small potted plant in a ceramic pot'} and clean task lighting.`;
+    lifestyleTouch = tags.heroRoom
+      ? 'Minimalist open styling with only the single floor rug and potted greenery, leaving the mural wall completely unobstructed.'
+      : isCleanFloor
+        ? 'Clean, uncluttered youth room styling with neat linen bedding and an open, empty floor rug.'
+        : `Authentic lived-in details: ${trendingToy || 'a small potted plant in a ceramic pot'} and clean task lighting.`;
   }
 
-  const isBedKeyObject = /bed|crib|cot|daybed/i.test(keyObjData?.name ?? tags.keyObject);
   const rawAgeLine = tags.heroRoom || !isBedKeyObject
     ? (ageData?.child ? `This is the room of ${ageData.child}.` : '')
     : ageLine(tags.ageGroup);
@@ -484,7 +499,9 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   );
   const furnitureSection = `Focal furniture: ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material} (${keyDescWithLampColor}). Architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}; all items near the mural wall stay under 90 cm so the mural remains open. ${compositionText}`;
 
-  const colorAccentText = `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried harmoniously across the bedding, rug, and accessories (${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(', ')}).`;
+  const colorAccentText = tags.heroRoom
+    ? `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried harmoniously across the floor rug and planter.`
+    : `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried harmoniously across the ${hasBedInRoom ? 'bedding' : 'textiles'}, rug, and accessories (${activeAccessories.slice(0, trendsData.staging.maxAccessories).join(', ')}).`;
 
   const plantLine = tags.plant && !tags.heroRoom && !tags.macroTexture ? ` Statement greenery: ${tags.plant}.` : '';
   const stylingSection = `The room uses tactile natural materials: ${activeMaterials}. ${colorAccentText} ${lifestyleTouch}${plantLine}`;
@@ -571,7 +588,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const heroRugFull = activeAccessories.find(a => /\b(?:rug|mat)\b/i.test(a)) || 'a single clean woven floor rug';
   const heroPlantFull = tags.plant || TAG_OPTIONS.plants[0] || 'a sculptural potted indoor plant in a matte ceramic planter standing in the corner';
   const effectiveFurnitureSection = tags.heroRoom
-    ? `Minimalist open hero room layout: NO bed, NO nightstand, NO shelves, NO cabinets, NO chairs, NO toys on the floor. Floor and architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}, leaving 100% of the feature wall completely open and unobstructed from skirting board to ceiling so the wallpaper mural is shown in full view. The only interior elements are ${heroRugFull} lying flat on the parquet floor and ${heroPlantFull} standing neatly to the side. Styling: ${styleData?.name ?? tags.style} (${styleData?.description ?? ''}).`
+    ? `Minimalist open hero room layout: NO bed, NO nightstand, NO shelves, NO cabinets, NO chairs, NO toys on the floor. Floor and architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}, leaving 100% of the feature wall completely open and unobstructed from skirting board to ceiling so the wallpaper mural is shown in full view. The only interior elements are ${heroRugFull} lying flat on the parquet floor and ${heroPlantFull} standing neatly to the side. Styling: ${styleData?.name ?? tags.style}.`
     : `${furnitureSection}${personSentence}`;
 
   const cameraSection = `Photographed ${view}. Shot on ${cameraBody}, ${lens}, ${aperture}, sharp mural focus across the entire wall, natural optical depth. ${trendsData.realism.photo} Aspect ratio: ${tags.aspectRatio}.`;
