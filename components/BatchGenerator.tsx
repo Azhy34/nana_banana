@@ -58,7 +58,7 @@ const selectClass = "bg-slate-700 border border-slate-600 text-slate-200 text-xs
 
 export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateToken, kieApiKey = '', onViewModeChange, onSendToTool }) => {
   const { state, actions } = useBatch(provider, apiKey, replicateToken, kieApiKey);
-  const { batchStep, wallpaper, count, selectedModels, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, targetAge, includeHero, promptMode, exportPreset, isExporting } = state;
+  const { batchStep, wallpaper, count, selectedModels, formatDist, cards, expandedCard, isGenerating, discoveringCardId, formatTotal, includeMacro, audience, targetAge, includeHero, promptMode, exportPreset, isExporting } = state;
   const {
     setBatchStep, setWallpaper, setSelectedModels, setExpandedCard, setIncludeMacro,
     setAudience, setTargetAge, setIncludeHero, setPromptMode, setExportPreset,
@@ -414,10 +414,11 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                   {card.tags.randomInterior && (
                     <button
                       onClick={() => discoverCardWithGoogleSearch(card.id)}
+                      disabled={discoveringCardId === card.id}
                       title="Найти свежую идею интерьера в Google Search под эти обои (gemini-3.1-flash-lite)"
-                      className="px-3 py-1.5 text-xs bg-fuchsia-700/40 hover:bg-fuchsia-700/60 text-fuchsia-200 border border-fuchsia-500/40 rounded-lg transition-colors"
+                      className="px-3 py-1.5 text-xs bg-fuchsia-700/40 hover:bg-fuchsia-700/60 disabled:opacity-50 text-fuchsia-200 border border-fuchsia-500/40 rounded-lg transition-colors"
                     >
-                      🔍 Google AI
+                      {discoveringCardId === card.id ? '⏳ Гуглим...' : '🔍 Google AI'}
                     </button>
                   )}
                   <button onClick={() => rerandomize(card.id)}
@@ -431,21 +432,53 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                 </div>
               </div>
 
-              {/* Tags Grid */}
-              <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                {TAG_KEYS.map(({ key, label }) => (
-                  <div key={key}>
-                    <label className="text-slate-500 text-xs block mb-1">{label}</label>
-                    <select value={card.tags[key] as string} onChange={e => updateTag(card.id, key, e.target.value)} className={selectClass}>
-                      {getOptionsForKey(key, card).map(opt => (
-                        <option key={opt} value={opt}>
-                          {key === 'ageGroup' ? AGE_GROUP_LABELS[opt as AgeGroupKey] : opt}
-                        </option>
+              {/* Tags Grid (or compact AI Random controls when randomInterior is active) */}
+              {card.tags.randomInterior ? (
+                <div className="p-4 bg-fuchsia-950/20 border-b border-slate-700/60 flex flex-wrap items-center gap-4">
+                  <div className="w-44">
+                    <label className="text-fuchsia-300 text-xs block mb-1 font-medium">Возраст ребёнка</label>
+                    <select
+                      value={card.tags.ageGroup}
+                      onChange={e => updateTag(card.id, 'ageGroup', e.target.value)}
+                      className={selectClass}
+                    >
+                      {TAG_OPTIONS.ageGroups.map(opt => (
+                        <option key={opt} value={opt}>{AGE_GROUP_LABELS[opt as AgeGroupKey]}</option>
                       ))}
                     </select>
                   </div>
-                ))}
-              </div>
+                  <div className="w-44">
+                    <label className="text-fuchsia-300 text-xs block mb-1 font-medium">Пол ребёнка</label>
+                    <select
+                      value={card.tags.audience || 'neutral'}
+                      onChange={e => updateTag(card.id, 'audience', e.target.value)}
+                      className={selectClass}
+                    >
+                      <option value="neutral">Neutral (Любой)</option>
+                      <option value="boy">Boy (Мальчик)</option>
+                      <option value="girl">Girl (Девочка)</option>
+                    </select>
+                  </div>
+                  <p className="text-xs text-slate-300 flex-1 min-w-[220px] leading-relaxed">
+                    🎲 <strong className="text-fuchsia-300">Свободный AI-рандом:</strong> заданы только возраст, пол и размер ({card.tags.aspectRatio}). Весь интерьер, мебель, цвета и ракурс модель подбирает сама под обои.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  {TAG_KEYS.map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="text-slate-500 text-xs block mb-1">{label}</label>
+                      <select value={card.tags[key] as string} onChange={e => updateTag(card.id, key, e.target.value)} className={selectClass}>
+                        {getOptionsForKey(key, card).map(opt => (
+                          <option key={opt} value={opt}>
+                            {key === 'ageGroup' ? AGE_GROUP_LABELS[opt as AgeGroupKey] : opt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* People & Hero + Schema Check */}
               <div className="px-4 pb-3 flex flex-wrap items-center gap-3">
@@ -514,18 +547,20 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                 })()}
               </div>
 
-              {/* Accessories */}
-              <div className="px-4 pb-3 flex items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <span className="text-slate-500 text-xs block mb-1">Accessories</span>
-                  <p className="text-slate-300 text-xs leading-relaxed">{card.tags.accessories.join(' · ')}</p>
+              {/* Accessories (hidden for Random cards) */}
+              {!card.tags.randomInterior && (
+                <div className="px-4 pb-3 flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <span className="text-slate-500 text-xs block mb-1">Accessories</span>
+                    <p className="text-slate-300 text-xs leading-relaxed">{card.tags.accessories.join(' · ')}</p>
+                  </div>
+                  <button onClick={() => rerandomizeAccessories(card.id)}
+                    title="Re-randomize accessories"
+                    className="shrink-0 mt-4 px-2 py-1 text-xs bg-slate-700 hover:bg-slate-600 text-slate-400 rounded transition-colors">
+                    🔄
+                  </button>
                 </div>
-                <button onClick={() => rerandomizeAccessories(card.id)}
-                  title="Re-randomize accessories"
-                  className="shrink-0 mt-4 px-2 py-1 text-xs bg-slate-700 hover:bg-slate-600 text-slate-400 rounded transition-colors">
-                  🔄
-                </button>
-              </div>
+              )}
 
               {/* Expand Prompt */}
               <div className="px-4 pb-4">

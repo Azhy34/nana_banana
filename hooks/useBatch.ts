@@ -83,6 +83,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   });
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [discoveringCardId, setDiscoveringCardId] = useState<string | null>(null);
 
   // Hydrate saved card images from IndexedDB on mount
   useEffect(() => {
@@ -278,6 +279,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       alert('Для поиска идей через Gemini + Google Search укажите Gemini API Key в шапке.');
       return;
     }
+    setDiscoveringCardId(cardId);
     try {
       const res = await discoverRandomInteriorWithSearch({
         geminiApiKey: geminiKey,
@@ -294,9 +296,12 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
               : c,
           ),
         );
+        setExpandedCard(cardId);
       }
     } catch (err: any) {
       alert(`Ошибка Google Search: ${err.message || 'Failed'}`);
+    } finally {
+      setDiscoveringCardId(null);
     }
   };
 
@@ -372,7 +377,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
             Boolean(card.tags.randomInterior) &&
             randomCardIds.indexOf(card.id) >= 1 &&
             Boolean(geminiKeyForSearch) &&
-            !geminiKeyForSearch.startsWith('sk-or-') &&
+            geminiKeyForSearch.startsWith('AIza') &&
             activePrompt === buildGeminiPrompt(card.tags);
 
           if (isSecondRandomSlot) {
@@ -527,7 +532,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
   };
 
   return {
-    state: { batchStep, wallpaper, count, selectedModels, formatDist, cards, expandedCard, isGenerating, formatTotal, includeMacro, audience, targetAge, includeHero, promptMode, exportPreset, isExporting },
+    state: { batchStep, wallpaper, count, selectedModels, formatDist, cards, expandedCard, isGenerating, discoveringCardId, formatTotal, includeMacro, audience, targetAge, includeHero, promptMode, exportPreset, isExporting },
     actions: {
       setBatchStep, setWallpaper, setSelectedModels, setExpandedCard, setIncludeMacro,
       setAudience, setTargetAge, setIncludeHero, setPromptMode, setExportPreset,

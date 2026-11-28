@@ -364,11 +364,11 @@ export function generateBatchDeck(
 
   return formats.map((ar, idx) => {
     const ageGroup = ageGroupCycle[idx % ageGroupCycle.length];
-    const ageIdx = ageCounters[ageGroup]++;
-    const keyDeck = keyObjDecks[ageGroup];
     const isHero = idx === heroIdx;
     const isMacro = idx === macroIdx;
     const isRandom = !isHero && !isMacro && randomIndices.has(idx);
+    const ageIdx = isMacro || isRandom ? ageCounters[ageGroup] : ageCounters[ageGroup]++;
+    const keyDeck = keyObjDecks[ageGroup];
 
     let personMode: BatchPersonMode = 'none';
     let cardLighting = ageGroup === 'baby'
@@ -425,10 +425,15 @@ export function generateBatchDeck(
 
     const rugDeck = rugDecks[ageGroup];
     const accDeck = accDecks[ageGroup];
-    const pickedRug = rugDeck.find(r => !usedRugs.has(r)) ?? rugDeck[ageIdx % Math.max(1, rugDeck.length)];
-    if (pickedRug) usedRugs.add(pickedRug);
-    const pickedAcc = accDeck.find(a => !usedAccs.has(a)) ?? accDeck[ageIdx % Math.max(1, accDeck.length)];
-    if (pickedAcc) usedAccs.add(pickedAcc);
+    const usesRoomTokens = !isMacro && !isRandom;
+    const pickedRug = usesRoomTokens
+      ? (rugDeck.find(r => !usedRugs.has(r)) ?? rugDeck[ageIdx % Math.max(1, rugDeck.length)])
+      : rugDeck[0];
+    if (usesRoomTokens && pickedRug) usedRugs.add(pickedRug);
+    const pickedAcc = (usesRoomTokens && !isHero)
+      ? (accDeck.find(a => !usedAccs.has(a)) ?? accDeck[ageIdx % Math.max(1, accDeck.length)])
+      : accDeck[0];
+    if (usesRoomTokens && !isHero && pickedAcc) usedAccs.add(pickedAcc);
     const dealtAccessories = [
       ...(pickedRug ? [pickedRug] : []),
       ...(pickedAcc ? [pickedAcc] : []),
@@ -436,13 +441,15 @@ export function generateBatchDeck(
     const dealtPlant =
       isHero && plantDeck.length > 0
         ? plantDeck[plantCursor++ % plantDeck.length]
-        : ageGroup !== 'baby' && !isHero && !isMacro && plantDeck.length > 0 && (plantGiveCounter++ % 3 === 1)
+        : ageGroup !== 'baby' && !isHero && !isMacro && !isRandom && plantDeck.length > 0 && (plantGiveCounter++ % 3 === 1)
           ? plantDeck[plantCursor++ % plantDeck.length]
           : null;
     const cardStyle = styleDeck[idx % styleDeck.length];
     const styleColors = shuffled(getColorsForStyle(cardStyle, effectiveAudience, ageGroup));
-    const dealtColor = styleColors.find(c => !usedColors.has(c)) ?? styleColors[idx % Math.max(1, styleColors.length)];
-    if (dealtColor) usedColors.add(dealtColor);
+    const dealtColor = usesRoomTokens
+      ? (styleColors.find(c => !usedColors.has(c)) ?? styleColors[idx % Math.max(1, styleColors.length)])
+      : styleColors[0];
+    if (usesRoomTokens && dealtColor) usedColors.add(dealtColor);
 
     return generateRandomTags(ar, ageGroup, {
       audience: effectiveAudience,

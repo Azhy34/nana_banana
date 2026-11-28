@@ -73,6 +73,8 @@ async function runBatch(
   await tab.getByRole('button', { name: `🎲 Generate Prompts (${count})` }).click();
 
   await expect(tab.getByRole('heading', { name: 'Review Prompts' })).toBeVisible();
+  const expectedRandomCount = count >= 6 ? 2 : count >= 2 ? 1 : 0;
+  await expect(tab.getByText('🎲 AI Рандом (под обои)', { exact: true })).toHaveCount(expectedRandomCount);
   await tab.getByRole('button', { name: `▶ Generate All ${count} Photos` }).click();
 
   await expect(tab.getByRole('heading', { name: 'Results' })).toBeVisible();
