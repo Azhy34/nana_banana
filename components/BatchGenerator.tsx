@@ -207,6 +207,16 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
             <span>Total: {formatTotal} photos</span>
             {formatTotal !== count && <span>⚠ Set to {count}</span>}
           </div>
+          {formatTotal >= 2 && (
+            <div className="mt-2.5 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-fuchsia-950/30 border border-fuchsia-500/30 text-xs">
+              <span className="text-fuchsia-200 font-medium">
+                🎲 AI Рандом (под обои, без пресетов)
+              </span>
+              <span className="text-fuchsia-300 font-bold shrink-0">
+                {formatTotal >= 6 ? '2 фото авто' : '1 фото авто'}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Audience & Hero */}
@@ -480,57 +490,52 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                 </div>
               )}
 
-              {/* People & Hero + Schema Check */}
+              {/* People & Hero + Schema Check (hidden preset controls on AI Random cards) */}
               <div className="px-4 pb-3 flex flex-wrap items-center gap-3">
-                <div className="min-w-[220px]">
-                  <label className="text-slate-500 text-xs block mb-1">People (Storytelling & Reels)</label>
-                  <select
-                    value={card.tags.personMode === 'child_gaze' ? 'child_pointing' : (card.tags.personMode || 'none')}
-                    onChange={e => updateTag(card.id, 'personMode', e.target.value as BatchPersonMode)}
-                    className={selectClass}
-                  >
-                    <option value="none">No people (room only)</option>
-                    {PEOPLE_SCENE_OPTIONS.map(opt => (
-                      <option key={opt.id} value={opt.id}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer mt-4">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(card.tags.cleanFloor)}
-                    onChange={e => updateTag(card.id, 'cleanFloor', e.target.checked)}
-                    className="rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-indigo-500"
-                  />
-                  Clean floor (no toys)
-                </label>
-                <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer mt-4">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(card.tags.heroRoom)}
-                    onChange={e => updateTag(card.id, 'heroRoom', e.target.checked)}
-                    className="rounded border-slate-600 bg-slate-700 text-indigo-500"
-                  />
-                  Hero room (no bed)
-                </label>
-                <label className="flex items-center gap-2 text-xs text-amber-300 cursor-pointer mt-4">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(card.tags.macroTexture)}
-                    onChange={e => updateTag(card.id, 'macroTexture', e.target.checked)}
-                    className="rounded border-slate-600 bg-slate-700 text-amber-500"
-                  />
-                  🔍 Macro texture
-                </label>
-                <label className="flex items-center gap-2 text-xs text-fuchsia-300 cursor-pointer mt-4">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(card.tags.randomInterior)}
-                    onChange={e => updateTag(card.id, 'randomInterior', e.target.checked)}
-                    className="rounded border-slate-600 bg-slate-700 text-fuchsia-500"
-                  />
-                  🎲 AI Рандом (только возраст/пол/размер)
-                </label>
+                {!card.tags.randomInterior && (
+                  <>
+                    <div className="min-w-[220px]">
+                      <label className="text-slate-500 text-xs block mb-1">People (Storytelling & Reels)</label>
+                      <select
+                        value={card.tags.personMode === 'child_gaze' ? 'child_pointing' : (card.tags.personMode || 'none')}
+                        onChange={e => updateTag(card.id, 'personMode', e.target.value as BatchPersonMode)}
+                        className={selectClass}
+                      >
+                        <option value="none">No people (room only)</option>
+                        {PEOPLE_SCENE_OPTIONS.map(opt => (
+                          <option key={opt.id} value={opt.id}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer mt-4">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(card.tags.cleanFloor)}
+                        onChange={e => updateTag(card.id, 'cleanFloor', e.target.checked)}
+                        className="rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-indigo-500"
+                      />
+                      Clean floor (no toys)
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer mt-4">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(card.tags.heroRoom)}
+                        onChange={e => updateTag(card.id, 'heroRoom', e.target.checked)}
+                        className="rounded border-slate-600 bg-slate-700 text-indigo-500"
+                      />
+                      Hero room (no bed)
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-amber-300 cursor-pointer mt-4">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(card.tags.macroTexture)}
+                        onChange={e => updateTag(card.id, 'macroTexture', e.target.checked)}
+                        className="rounded border-slate-600 bg-slate-700 text-amber-500"
+                      />
+                      🔍 Macro texture
+                    </label>
+                  </>
+                )}
                 {(() => {
                   const v = validateModelInput({
                     modelId: card.model,
@@ -540,7 +545,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                     refCount: card.tags.macroTexture ? 2 : 1,
                   });
                   return (
-                    <span className={`mt-4 ml-auto text-[11px] px-2 py-0.5 rounded border ${v.ok ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : 'bg-red-500/10 text-red-300 border-red-500/30'}`}>
+                    <span className={`${card.tags.randomInterior ? 'mt-2' : 'mt-4'} ml-auto text-[11px] px-2 py-0.5 rounded border ${v.ok ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : 'bg-red-500/10 text-red-300 border-red-500/30'}`}>
                       {v.ok ? `✓ ${card.promptText.length} chars · ${card.tags.macroTexture ? '2 refs' : '1 ref'}` : `⚠ ${v.errors[0]}`}
                     </span>
                   );
