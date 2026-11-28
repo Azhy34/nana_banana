@@ -15,6 +15,9 @@ import { BatchAspectRatio } from '../types';
 export type ExportPresetId =
   | 'pack_all'
   | 'pack_4x5_2x3'
+  | 'etsy_pack'
+  | 'etsy_cover_4x3'
+  | 'etsy_square_1x1'
   | 'site_meta_4x5'
   | 'pinterest_2x3'
   | 'meta_square_1x1'
@@ -46,7 +49,25 @@ export const EXPORT_PRESET_OPTIONS: readonly ExportPresetOption[] = [
     id: 'pack_4x5_2x3',
     label: 'Пак: Сайт/Meta 4:5 + Pinterest 2:3',
     shortLabel: '4:5 + 2:3',
-    hint: 'Из каждого 2:3 кадра качает 1440×1800 (4:5) и 1000×1500 (2:3); 9:16 кадры идут как 1080×1920',
+    hint: 'Из каждого 2:3 кадра качает 1440×1800 (4:5) и 1000×1500 (2:3); 4:3 идёт как 2700×2025; 9:16 как 1080×1920',
+  },
+  {
+    id: 'etsy_pack',
+    label: 'Пак Etsy (4:3 2700×2025 + 4:5 1600×2000)',
+    shortLabel: 'Etsy Пак',
+    hint: '4:3 обложка (Rank 1) → 2700×2025.jpg; 2:3/4:5 галерея (Rank 2–10) → 1600×2000.jpg (≥2000px); 9:16 → 1080×1920.jpg',
+  },
+  {
+    id: 'etsy_cover_4x3',
+    label: 'Etsy Обложка 4:3 (2700×2025)',
+    shortLabel: 'Etsy 4:3',
+    hint: 'Горизонтальная обложка Rank 1 для Etsy (2700×2025 .jpg, sRGB, без WARN и с зумом)',
+  },
+  {
+    id: 'etsy_square_1x1',
+    label: 'Etsy Квадрат 1:1 (2000×2000)',
+    shortLabel: 'Etsy 1:1',
+    hint: 'Универсальный квадрат 2000×2000 .jpg для мобильного и десктопного поиска Etsy',
   },
   {
     id: 'site_meta_4x5',
@@ -74,7 +95,13 @@ export const EXPORT_PRESET_OPTIONS: readonly ExportPresetOption[] = [
   },
 ];
 
-const TARGET_SPECS: Record<Exclude<ExportPresetId, 'pack_all' | 'pack_4x5_2x3' | 'original'> | 'video_9x16', ExportTargetSpec> = {
+const TARGET_SPECS: Record<
+  Exclude<ExportPresetId, 'pack_all' | 'pack_4x5_2x3' | 'etsy_pack' | 'original'> | 'etsy_gallery_4x5' | 'video_9x16',
+  ExportTargetSpec
+> = {
+  etsy_cover_4x3: { suffix: 'etsy-cover-4x3', width: 2700, height: 2025, mimeType: 'image/jpeg', quality: 0.9 },
+  etsy_square_1x1: { suffix: 'etsy-1x1', width: 2000, height: 2000, mimeType: 'image/jpeg', quality: 0.9 },
+  etsy_gallery_4x5: { suffix: 'etsy-4x5', width: 1600, height: 2000, mimeType: 'image/jpeg', quality: 0.9 },
   site_meta_4x5: { suffix: 'site-meta-4x5', width: 1440, height: 1800, mimeType: 'image/jpeg', quality: 0.92 },
   pinterest_2x3: { suffix: 'pinterest-2x3', width: 1000, height: 1500, mimeType: 'image/jpeg', quality: 0.92 },
   meta_square_1x1: { suffix: 'meta-1x1', width: 1080, height: 1080, mimeType: 'image/jpeg', quality: 0.92 },
@@ -112,16 +139,19 @@ export function resolveTargetsForCard(
   preset: ExportPresetId,
 ): ExportTargetSpec[] {
   if (preset === 'original') return [];
+  if (preset === 'etsy_pack') {
+    if (cardRatio === '4:3') return [TARGET_SPECS.etsy_cover_4x3];
+    if (cardRatio === '9:16') return [TARGET_SPECS.video_9x16];
+    return [TARGET_SPECS.etsy_gallery_4x5];
+  }
   if (preset === 'pack_all') {
-    if (cardRatio === '9:16') {
-      return [TARGET_SPECS.video_9x16];
-    }
+    if (cardRatio === '9:16') return [TARGET_SPECS.video_9x16];
+    if (cardRatio === '4:3') return [TARGET_SPECS.etsy_cover_4x3, TARGET_SPECS.etsy_square_1x1];
     return [TARGET_SPECS.site_meta_4x5, TARGET_SPECS.pinterest_2x3, TARGET_SPECS.meta_square_1x1];
   }
   if (preset === 'pack_4x5_2x3') {
-    if (cardRatio === '9:16') {
-      return [TARGET_SPECS.video_9x16];
-    }
+    if (cardRatio === '9:16') return [TARGET_SPECS.video_9x16];
+    if (cardRatio === '4:3') return [TARGET_SPECS.etsy_cover_4x3];
     return [TARGET_SPECS.site_meta_4x5, TARGET_SPECS.pinterest_2x3];
   }
   return [TARGET_SPECS[preset]];

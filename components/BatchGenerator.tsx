@@ -158,13 +158,15 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
               2:3 фото-мастер → Сайт/Meta 4:5 + Pinterest 2:3
             </span>
           </div>
-          {(['2:3', '9:16'] as BatchAspectRatio[]).map(ar => (
+          {(['2:3', '9:16', '4:3'] as BatchAspectRatio[]).map(ar => (
             <div key={ar} className="flex items-center gap-3 mb-3">
               <span className="text-slate-200 text-sm font-mono font-semibold w-10 shrink-0">{ar}</span>
               <span className="text-slate-400 text-xs flex-1 truncate">
                 {ar === '2:3'
-                  ? 'Photo Master — авто-кроп в 4:5 (Сайт, Google Shopping, Meta Feed/Carousel) + 2:3 (Pinterest)'
-                  : 'Video Master — Reels, Stories, Shorts и Video Animator (9:16)'}
+                  ? 'Photo Master — авто-кроп в 4:5 (Сайт/Meta/Etsy) + 2:3 (Pinterest)'
+                  : ar === '9:16'
+                  ? 'Video Master — Reels, Stories, Shorts и Video Animator (9:16)'
+                  : 'Etsy Cover (Rank 1) — горизонталь 2700×2025, широкий план всей комнаты'}
               </span>
               <div className="flex items-center gap-2 shrink-0">
                 <button onClick={() => updateFormat(ar, -1)} className="w-7 h-7 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold transition-colors">−</button>
@@ -174,23 +176,21 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
             </div>
           ))}
           {(() => {
-            const extraTotal = formatDist['4:5'] + formatDist['3:4'] + formatDist['4:3'];
+            const extraTotal = formatDist['4:5'] + formatDist['3:4'];
             return (
               <details className="mt-2 pt-2 border-t border-slate-700/60">
                 <summary className="text-xs text-slate-400 hover:text-slate-200 cursor-pointer select-none flex items-center justify-between">
-                  <span>Доп. форматы вручную (4:5, 3:4, 4:3)</span>
+                  <span>Доп. форматы вручную (4:5, 3:4)</span>
                   {extraTotal > 0 && <span className="text-amber-300 font-semibold">{extraTotal} выбрано</span>}
                 </summary>
                 <div className="mt-3 space-y-2.5">
-                  {(['4:5', '3:4', '4:3'] as BatchAspectRatio[]).map(ar => (
+                  {(['4:5', '3:4'] as BatchAspectRatio[]).map(ar => (
                     <div key={ar} className="flex items-center gap-3">
                       <span className="text-slate-300 text-sm font-mono w-10 shrink-0">{ar}</span>
                       <span className="text-slate-500 text-xs flex-1 truncate">
                         {ar === '4:5'
                           ? 'Portrait — прямой 4:5 без кропа (без GPT Image 2K / Grok)'
-                          : ar === '3:4'
-                          ? 'Portrait — Etsy Vertical'
-                          : 'Landscape — Etsy horizontal thumbnail'}
+                          : 'Portrait — Etsy Vertical'}
                       </span>
                       <div className="flex items-center gap-2 shrink-0">
                         <button onClick={() => updateFormat(ar, -1)} className="w-7 h-7 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold transition-colors">−</button>
@@ -639,10 +639,12 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
         {cards.map((card, idx) => {
           const isVideoMaster = card.tags.aspectRatio === '9:16';
           const previewAspectClass =
-            exportPreset === 'site_meta_4x5' && !isVideoMaster
-              ? 'aspect-[4/5]'
-              : exportPreset === 'meta_square_1x1' && !isVideoMaster
+            exportPreset === 'etsy_cover_4x3' && !isVideoMaster
+              ? 'aspect-[4/3]'
+              : (exportPreset === 'etsy_square_1x1' || exportPreset === 'meta_square_1x1') && !isVideoMaster
               ? 'aspect-square'
+              : (exportPreset === 'site_meta_4x5' || (exportPreset === 'etsy_pack' && card.tags.aspectRatio !== '4:3')) && !isVideoMaster
+              ? 'aspect-[4/5]'
               : exportPreset === 'pinterest_2x3' && !isVideoMaster
               ? 'aspect-[2/3]'
               : ASPECT_CLASS_MAP[card.tags.aspectRatio] ?? 'aspect-[2/3]';

@@ -104,7 +104,7 @@ test.describe('Batch generator', () => {
     expect(aspectRatios.every((ar: string) => ['2:3', '9:16'].includes(ar))).toBe(true);
 
     for (let i = 0; i < 6; i++) await expect(tab.getByAltText(`Result ${i + 1}`)).toBeVisible();
-    await expect.poll(() => apis.logEvents.filter((e) => e.status === 'success').length).toBe(6);
+    await expect.poll(() => apis.logEvents.filter((e) => e.status === 'success' && e.model === 'nano-banana-2-1').length).toBe(6);
   });
 
   test('3 photos: 2x 2:3 photo masters + 1x 9:16 video master, three requests', async ({ page, apis }) => {
