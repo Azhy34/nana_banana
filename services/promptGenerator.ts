@@ -153,6 +153,7 @@ export interface RandomTagOptions {
   audience?: AudienceKey;
   heroRoom?: boolean;
   macroTexture?: boolean;
+  randomInterior?: boolean;
   cleanFloor?: boolean;
   personMode?: BatchPersonMode;
   promptMode?: PromptMode;
@@ -163,6 +164,74 @@ export interface RandomTagOptions {
   keyObject?: string;
   accessories?: string[];
   plant?: string | null;
+}
+
+/**
+ * Pure autonomous Random prompt function: passes ONLY the wallpaper reference, child's age,
+ * child's gender, and aspect ratio — leaving 100% of the interior design, style, furniture,
+ * color harmony, lighting, and composition to the model itself based on the wallpaper.
+ */
+export function buildRandomInteriorPrompt(tags: Pick<BatchPromptTags, 'ageGroup' | 'audience' | 'aspectRatio'>): string {
+  const ageLabel: Record<AgeGroupKey, string> = {
+    baby: 'a baby (0 to 1 year old)',
+    vorschul: 'a preschool child (3 to 6 years old)',
+    schulkind: 'a school-age child (6 to 10 years old)',
+    teenager: 'a teenager (10 to 16 years old)',
+  };
+  const genderLabel: Record<AudienceKey, string> = {
+    boy: 'for a boy',
+    girl: 'for a girl',
+    neutral: 'gender-neutral (suitable for any child)',
+  };
+  const ageText = ageLabel[tags.ageGroup] ?? ageLabel.vorschul;
+  const genderText = genderLabel[tags.audience ?? 'neutral'] ?? genderLabel.neutral;
+
+  return [
+    `Photorealistic editorial interior photograph of a children's room for ${ageText} (${genderText}), showcasing REFERENCE_IMAGE_1 as a full-wall mural wallpaper pasted seamlessly edge-to-edge from baseboard to ceiling on the feature wall with its exact illustration and colors preserved 1:1.`,
+    `Look closely at the artwork, theme, mood, and color palette of the wallpaper in REFERENCE_IMAGE_1 and autonomously choose the most fitting, harmonious, high-end interior design, age-appropriate furniture, color accents, rug, decor, natural daylight, and camera framing that best complement this specific wallpaper.`,
+    `Aspect ratio: ${tags.aspectRatio}.`,
+  ].join('\n\n');
+}
+
+/**
+ * Picks mandatory Random interior slot indices in a batch deck:
+ * - 6+ cards (e.g. 6, 9, 12, 15) -> 2 random cards
+ * - 2..5 cards (e.g. 3, 4, 5)    -> 1 random card
+ * - 1 card                       -> 0 random cards
+ * Avoids colliding with heroIdx and macroIdx when other slots are available.
+ */
+export function pickRandomSlotIndices(formats: readonly BatchAspectRatio[], heroIdx: number, macroIdx: number): Set<number> {
+  const total = formats.length;
+  const targetRandomCount = total >= 6 ? 2 : total >= 2 ? 1 : 0;
+  const chosen = new Set<number>();
+  if (targetRandomCount === 0) return chosen;
+
+  // Prefer photo ratios (2:3, 4:5, 4:3, 3:4) first, then 9:16, avoiding heroIdx & macroIdx
+  const candidates: number[] = [];
+  formats.forEach((ar, idx) => {
+    if (idx !== heroIdx && idx !== macroIdx && ar !== '9:16') candidates.push(idx);
+  });
+  formats.forEach((ar, idx) => {
+    if (idx !== heroIdx && idx !== macroIdx && ar === '9:16') candidates.push(idx);
+  });
+
+  // Spread the random cards evenly across the deck (e.g., middle & end)
+  if (candidates.length <= targetRandomCount) {
+    candidates.forEach(i => chosen.add(i));
+    return chosen;
+  }
+  for (let k = 0; k < targetRandomCount; k++) {
+    const pos = Math.min(
+      candidates.length - 1,
+      Math.floor(((k + 1) * candidates.length) / (targetRandomCount + 1)),
+    );
+    chosen.add(candidates[pos]);
+  }
+  // If rounding caused collision, fill from remaining candidates from the back
+  for (let i = candidates.length - 1; i >= 0 && chosen.size < targetRandomCount; i--) {
+    chosen.add(candidates[i]);
+  }
+  return chosen;
 }
 
 export function generateRandomTags(
@@ -204,6 +273,7 @@ export function generateRandomTags(
     audience,
     heroRoom: options.heroRoom ?? false,
     macroTexture: options.macroTexture ?? false,
+    randomInterior: options.randomInterior ?? false,
     cleanFloor: options.cleanFloor ?? false,
     personMode: options.personMode ?? 'none',
     promptMode: options.promptMode ?? 'full',
@@ -284,7 +354,10 @@ export function generateBatchDeck(
   // Place 1 Macro Texture in Interior shot on a non-Hero listing slot if requested.
   const macroIdx = options.includeMacro ? pickMacroSlotIndex(formats, heroIdx) : -1;
 
-  // Assign human storytelling scenes to viral 9:16 cards and ~1/3 of photo cards (never on Hero or Macro cards)
+  // Mandatory Random interior slots: 1 random card for 2..5 cards (e.g. 3), 2 random cards for 6+ cards (e.g. 6, 9, 12, 15).
+  const randomIndices = pickRandomSlotIndices(formats, heroIdx, macroIdx);
+
+  // Assign human storytelling scenes to viral 9:16 cards and ~1/3 of photo cards (never on Hero, Macro, or Random cards)
   let videoEligibleSeen = 0;
   let photoEligibleSeen = 0;
   let cleanRoomToggle = 0;
@@ -295,6 +368,7 @@ export function generateBatchDeck(
     const keyDeck = keyObjDecks[ageGroup];
     const isHero = idx === heroIdx;
     const isMacro = idx === macroIdx;
+    const isRandom = !isHero && !isMacro && randomIndices.has(idx);
 
     let personMode: BatchPersonMode = 'none';
     let cardLighting = ageGroup === 'baby'
@@ -306,7 +380,7 @@ export function generateBatchDeck(
       ? nonWideAngles[idx % nonWideAngles.length]
       : rawAngle;
 
-    if (!isHero && !isMacro && ageGroup !== 'teenager') {
+    if (!isHero && !isMacro && !isRandom && ageGroup !== 'teenager') {
       const agePeoplePool = peopleDecks[ageGroup];
       if (ar === '9:16') {
         // 9:16 video masters alternate: 50% with people (shuffled candid scenes), 25% doorway walk-in reveal, 25% sunbeam & curtain breeze
@@ -374,6 +448,7 @@ export function generateBatchDeck(
       audience: effectiveAudience,
       heroRoom: isHero,
       macroTexture: isMacro,
+      randomInterior: isRandom,
       cleanFloor,
       personMode,
       promptMode: options.promptMode ?? 'full',
@@ -389,6 +464,9 @@ export function generateBatchDeck(
 }
 
 export function buildGeminiPrompt(tags: BatchPromptTags): string {
+  if (tags.randomInterior) {
+    return buildRandomInteriorPrompt(tags);
+  }
   const colorData = trendsData.colors.find(c => c.name === tags.color);
   const styleData = trendsData.styles.find(s => s.name === tags.style);
   const brandData = trendsData.brands.find(b => b.name === tags.brand);

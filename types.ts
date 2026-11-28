@@ -62,6 +62,7 @@ export interface BatchPromptTags {
   audience?: AudienceKey;
   heroRoom?: boolean;
   macroTexture?: boolean;
+  randomInterior?: boolean;
   cleanFloor?: boolean;
   personMode?: BatchPersonMode;
   promptMode?: PromptMode;

@@ -18,6 +18,7 @@ import { resolveCardTexture } from '../services/macroTexture';
 import { exportCardImage, exportCardsAsZip, ExportPresetId } from '../services/exportCrop';
 import { saveCardImage, loadAllCardImages, clearCardImages } from '../services/batchImageStore';
 import { generateTraceId } from '../utils/tracing';
+import { discoverRandomInteriorWithSearch } from '../services/randomInteriorSearch';
 
 export type BatchStep = 'setup' | 'cards' | 'results';
 
@@ -223,8 +224,18 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     setCards(prev => prev.map(c => {
       if (c.id !== cardId) return c;
       const newTags = { ...c.tags, [key]: value };
-      if (key === 'macroTexture' && value) newTags.heroRoom = false;
-      if (key === 'heroRoom' && value) newTags.macroTexture = false;
+      if (key === 'macroTexture' && value) {
+        newTags.heroRoom = false;
+        newTags.randomInterior = false;
+      }
+      if (key === 'heroRoom' && value) {
+        newTags.macroTexture = false;
+        newTags.randomInterior = false;
+      }
+      if (key === 'randomInterior' && value) {
+        newTags.heroRoom = false;
+        newTags.macroTexture = false;
+      }
       if (key === 'ageGroup') {
         const nextAge = value as AgeGroupKey;
         const ageOptions = muralSafeKeyObjects(nextAge);
@@ -250,9 +261,43 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       if (c.id !== cardId) return c;
       const pool = resolveAgePool(targetAge);
       const lockedAge = pool.includes(c.tags.ageGroup) ? c.tags.ageGroup : pool[0];
-      const tags = generateRandomTags(c.tags.aspectRatio, lockedAge, { audience, promptMode });
+      const tags = generateRandomTags(c.tags.aspectRatio, lockedAge, {
+        audience,
+        promptMode,
+        randomInterior: Boolean(c.tags.randomInterior),
+      });
       return { ...c, tags, promptText: buildGeminiPrompt(tags) };
     }));
+  };
+
+  const discoverCardWithGoogleSearch = async (cardId: string) => {
+    const card = cards.find(c => c.id === cardId);
+    const geminiKey = apiKey || localStorage.getItem('gemini_api_key') || '';
+    if (!card || !wallpaper) return;
+    if (!geminiKey || geminiKey.startsWith('sk-or-')) {
+      alert('Для поиска идей через Gemini + Google Search укажите Gemini API Key в шапке.');
+      return;
+    }
+    try {
+      const res = await discoverRandomInteriorWithSearch({
+        geminiApiKey: geminiKey,
+        wallpaper,
+        ageGroup: card.tags.ageGroup,
+        audience: card.tags.audience || audience || 'neutral',
+        aspectRatio: card.tags.aspectRatio,
+      });
+      if (res.prompt) {
+        setCards(prev =>
+          prev.map(c =>
+            c.id === cardId
+              ? { ...c, tags: { ...c.tags, randomInterior: true, heroRoom: false, macroTexture: false }, promptText: res.prompt }
+              : c,
+          ),
+        );
+      }
+    } catch (err: any) {
+      alert(`Ошибка Google Search: ${err.message || 'Failed'}`);
+    }
   };
 
   const rerandomizeAccessories = (cardId: string) => {
@@ -308,6 +353,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
     const concurrencyLimit = 4;
     let cursor = 0;
+    const randomCardIds = selectedCards.filter(c => c.tags.randomInterior).map(c => c.id);
+    const geminiKeyForSearch = apiKey || localStorage.getItem('gemini_api_key') || '';
 
     const runWorker = async () => {
       while (cursor < selectedCards.length) {
@@ -316,11 +363,42 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
         try {
           const cardTraceId = generateTraceId();
           const texture = resolveCardTexture(card.tags);
+          let activePrompt = card.promptText;
+
+          // When there are 2+ Random cards and a valid Gemini API key is available, let the 2nd Random card
+          // use Gemini + live Google Search grounding to discover a new web-grounded interior prompt and log it,
+          // while the 1st Random card tests Nano Banana's own pure autonomous interior choice.
+          const isSecondRandomSlot =
+            Boolean(card.tags.randomInterior) &&
+            randomCardIds.indexOf(card.id) >= 1 &&
+            Boolean(geminiKeyForSearch) &&
+            !geminiKeyForSearch.startsWith('sk-or-') &&
+            activePrompt === buildGeminiPrompt(card.tags);
+
+          if (isSecondRandomSlot) {
+            try {
+              const discovered = await discoverRandomInteriorWithSearch({
+                geminiApiKey: geminiKeyForSearch,
+                wallpaper,
+                ageGroup: card.tags.ageGroup,
+                audience: card.tags.audience || audience || 'neutral',
+                aspectRatio: card.tags.aspectRatio,
+                traceId: cardTraceId,
+              });
+              if (discovered.prompt) {
+                activePrompt = discovered.prompt;
+                setCards(prev => prev.map(c => (c.id === card.id ? { ...c, promptText: activePrompt } : c)));
+              }
+            } catch {
+              // Fall back seamlessly to pure Nano Banana random prompt
+            }
+          }
+
           const img = await generateBatchImage(
             apiKey,
             replicateToken,
             wallpaper,
-            card.promptText,
+            activePrompt,
             card.tags.aspectRatio,
             card.model,
             provider,
@@ -454,7 +532,7 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
       setBatchStep, setWallpaper, setSelectedModels, setExpandedCard, setIncludeMacro,
       setAudience, setTargetAge, setIncludeHero, setPromptMode, setExportPreset,
       handleWallpaperUpload, updateFormat, selectCount, generateCards,
-      updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
+      updateTag, rerandomize, rerandomizeAccessories, discoverCardWithGoogleSearch, deleteCard, addCard,
       updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadCard, downloadSelected
     }
   };

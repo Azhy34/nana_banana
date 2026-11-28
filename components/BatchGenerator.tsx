@@ -63,7 +63,7 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
     setBatchStep, setWallpaper, setSelectedModels, setExpandedCard, setIncludeMacro,
     setAudience, setTargetAge, setIncludeHero, setPromptMode, setExportPreset,
     handleWallpaperUpload, updateFormat, selectCount, generateCards,
-    updateTag, rerandomize, rerandomizeAccessories, deleteCard, addCard,
+    updateTag, rerandomize, rerandomizeAccessories, discoverCardWithGoogleSearch, deleteCard, addCard,
     updatePromptText, handleGenerateAll, regenerate, refineInPro, toggleSelected, downloadCard, downloadSelected
   } = actions;
 
@@ -404,8 +404,22 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${card.model === ModelType.Pro ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-teal-500/20 text-teal-300 border-teal-500/30'}`}>
                     {getModelCapability(card.model)?.label || card.model}
                   </span>
+                  {card.tags.randomInterior && (
+                    <span className="bg-fuchsia-500/20 text-fuchsia-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-fuchsia-500/40">
+                      🎲 AI Рандом (под обои)
+                    </span>
+                  )}
                 </div>
                 <div className="flex gap-2">
+                  {card.tags.randomInterior && (
+                    <button
+                      onClick={() => discoverCardWithGoogleSearch(card.id)}
+                      title="Найти свежую идею интерьера в Google Search под эти обои (gemini-3.1-flash-lite)"
+                      className="px-3 py-1.5 text-xs bg-fuchsia-700/40 hover:bg-fuchsia-700/60 text-fuchsia-200 border border-fuchsia-500/40 rounded-lg transition-colors"
+                    >
+                      🔍 Google AI
+                    </button>
+                  )}
                   <button onClick={() => rerandomize(card.id)}
                     className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors">
                     🔄 Randomize
@@ -474,6 +488,15 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
                     className="rounded border-slate-600 bg-slate-700 text-amber-500"
                   />
                   🔍 Macro texture
+                </label>
+                <label className="flex items-center gap-2 text-xs text-fuchsia-300 cursor-pointer mt-4">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(card.tags.randomInterior)}
+                    onChange={e => updateTag(card.id, 'randomInterior', e.target.checked)}
+                    className="rounded border-slate-600 bg-slate-700 text-fuchsia-500"
+                  />
+                  🎲 AI Рандом (только возраст/пол/размер)
                 </label>
                 {(() => {
                   const v = validateModelInput({
@@ -624,6 +647,11 @@ export const BatchGenerator: React.FC<Props> = ({ provider, apiKey, replicateTok
             <div className="p-2.5 flex items-center justify-between gap-1.5 flex-wrap">
               <div className="flex items-center gap-2">
                 <span className="text-slate-500 text-xs font-mono shrink-0">{card.tags.aspectRatio}</span>
+                {card.tags.randomInterior && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30">
+                    🎲 Рандом
+                  </span>
+                )}
                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${card.model === ModelType.NanoBananaPro || card.model === ModelType.Pro ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-teal-500/20 text-teal-400 border-teal-500/30'}`}>
                   {(() => {
                     const cap = getModelCapability(card.model);
