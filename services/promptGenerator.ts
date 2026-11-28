@@ -239,6 +239,10 @@ export function generateBatchDeck(
   const styleDeck = shuffled(TAG_OPTIONS.styles);
   const lightDeck = shuffled(TAG_OPTIONS.lighting);
   const angleDeck = shuffled(TAG_OPTIONS.cameraAngles);
+  const nonWideAngles = shuffled(TAG_OPTIONS.cameraAngles.filter(a => !/wide architectural view/i.test(a)));
+  const usedColors = new Set<string>();
+  const usedRugs = new Set<string>();
+  const usedAccs = new Set<string>();
   const keyObjDecks: Record<AgeGroupKey, string[]> = {
     baby: shuffled(muralSafeKeyObjects('baby')),
     vorschul: shuffled(muralSafeKeyObjects('vorschul')),
@@ -296,7 +300,11 @@ export function generateBatchDeck(
     let cardLighting = ageGroup === 'baby'
       ? babyLightDeck[idx % babyLightDeck.length]
       : lightDeck[idx % lightDeck.length];
-    let cardAngle = angleDeck[idx % angleDeck.length];
+    const rawAngle = angleDeck[idx % angleDeck.length];
+    const isNarrowVertical = ar === '9:16' || ar === '2:3';
+    let cardAngle = (isNarrowVertical && /wide architectural view/i.test(rawAngle) && nonWideAngles.length > 0)
+      ? nonWideAngles[idx % nonWideAngles.length]
+      : rawAngle;
 
     if (!isHero && !isMacro && ageGroup !== 'teenager') {
       const agePeoplePool = peopleDecks[ageGroup];
@@ -343,9 +351,13 @@ export function generateBatchDeck(
 
     const rugDeck = rugDecks[ageGroup];
     const accDeck = accDecks[ageGroup];
+    const pickedRug = rugDeck.find(r => !usedRugs.has(r)) ?? rugDeck[ageIdx % Math.max(1, rugDeck.length)];
+    if (pickedRug) usedRugs.add(pickedRug);
+    const pickedAcc = accDeck.find(a => !usedAccs.has(a)) ?? accDeck[ageIdx % Math.max(1, accDeck.length)];
+    if (pickedAcc) usedAccs.add(pickedAcc);
     const dealtAccessories = [
-      ...(rugDeck.length > 0 ? [rugDeck[ageIdx % rugDeck.length]] : []),
-      ...(accDeck.length > 0 ? [accDeck[ageIdx % accDeck.length]] : []),
+      ...(pickedRug ? [pickedRug] : []),
+      ...(pickedAcc ? [pickedAcc] : []),
     ].slice(0, trendsData.staging.maxAccessories);
     const dealtPlant =
       isHero && plantDeck.length > 0
@@ -354,8 +366,9 @@ export function generateBatchDeck(
           ? plantDeck[plantCursor++ % plantDeck.length]
           : null;
     const cardStyle = styleDeck[idx % styleDeck.length];
-    const styleColors = getColorsForStyle(cardStyle, effectiveAudience, ageGroup);
-    const dealtColor = styleColors[idx % styleColors.length];
+    const styleColors = shuffled(getColorsForStyle(cardStyle, effectiveAudience, ageGroup));
+    const dealtColor = styleColors.find(c => !usedColors.has(c)) ?? styleColors[idx % Math.max(1, styleColors.length)];
+    if (dealtColor) usedColors.add(dealtColor);
 
     return generateRandomTags(ar, ageGroup, {
       audience: effectiveAudience,
@@ -393,12 +406,18 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   }
 
   const material = tags.ageGroup === 'teenager'
-    ? 'solid wood with visible grain, matte metal accents, clean lines'
-    : 'solid wood with rich visible organic grain, tactile raw matte finish, soft rounded child-friendly edges';
+    ? 'solid wood with natural open-pore grain, brushed steel details, clean architectural lines'
+    : 'solid wood with rich visible organic grain, smooth hand-finished timber, soft rounded child-friendly edges';
 
   const naturalMaterials = tags.ageGroup === 'teenager'
-    ? 'solid wood, matte metal, organic linen'
+    ? 'solid oak and ash wood, brushed steel details, organic washed linen'
     : 'solid wood with visible grain, organic canvas, washed linen, breathable cotton';
+
+  const floorPool = ((trendsData.germanApartmentContext as { floorTypes?: string[]; floorType: string }).floorTypes) ?? [
+    trendsData.germanApartmentContext.floorType,
+  ];
+  const floorHash = ((tags.style?.length ?? 0) + (tags.color?.length ?? 0) + (tags.keyObject?.length ?? 0)) % floorPool.length;
+  const activeFloorType = floorPool[floorHash] || trendsData.germanApartmentContext.floorType;
 
   // The mural is the hero in every prompt: a furnished room of a real size, the hero piece along a side wall with at most two small
   // accessories, everything near the mural wall low (Promt/trends.json "staging"). The tag `compositionStrategy` is kept for old cards;
@@ -503,13 +522,18 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   // A tall frame cannot hold a wide mural whole without squeezing it (and half the frame becomes floor and ceiling): it shows a
   // floor-to-ceiling SECTION of the wall. Which ratios are tall and the words of that framing are data (trends.json "staging").
   // Exception: when the wide architectural full-room angle is chosen on 4:5 (or wider), keep the spacious full-room view.
-  const angle = tags.cameraAngle || TAG_OPTIONS.cameraAngles[0];
+  // Never allow wide architectural view on narrow 9:16 or 2:3 frames (where showing both side walls squeezes the wall into a corridor).
+  const rawAngle = tags.cameraAngle || TAG_OPTIONS.cameraAngles[0];
+  const isNarrowTall = tags.aspectRatio === '9:16' || tags.aspectRatio === '2:3';
+  const angle = (isNarrowTall && /opposite end of the room|wide architectural view/i.test(rawAngle))
+    ? TAG_OPTIONS.cameraAngles[0]
+    : rawAngle;
   const isWideRoomAngle = /opposite end of the room|wide architectural view/i.test(angle);
   const staging = trendsData.staging as { framingTall?: string; tallRatios?: string[] };
   const isTall =
     !!staging.framingTall &&
     (staging.tallRatios ?? []).includes(tags.aspectRatio as string) &&
-    !(isWideRoomAngle && tags.aspectRatio === '4:5');
+    !(isWideRoomAngle && (tags.aspectRatio === '4:5' || tags.aspectRatio === '3:4'));
 
   const spatialLayoutLock =
     "STRICT SPATIAL LAYOUT LOCK: preserve the exact left-to-right and top-to-bottom positions, orientations, sizes, shapes, and colors of every element in REFERENCE_IMAGE_1 — never move, mirror, flip, resize, add, or repaint any motif, cloud, moon, star, or illustration.";
@@ -526,7 +550,7 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
     'a mid-century mushroom table lamp',
     () => `a mid-century ${triadLampColor || pick([...MUSHROOM_LAMP_COLORS])} mushroom table lamp`,
   );
-  const furnitureSection = `Focal furniture: ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material} (${keyDescWithLampColor}). Architecture: ${trendsData.germanApartmentContext.floorType} under a ${trendsData.germanApartmentContext.ceilingHeight}; all items near the mural wall stay under 90 cm so the mural remains open. ${compositionText}`;
+  const furnitureSection = `Focal furniture: ${brandData?.name ?? tags.brand}-inspired ${keyObjData?.name ?? tags.keyObject} crafted from ${material} (${keyDescWithLampColor}). Architecture: ${activeFloorType} under a ${trendsData.germanApartmentContext.ceilingHeight}; all items near the mural wall stay under 90 cm so the mural remains open. ${compositionText}`;
 
   const colorAccentText = tags.heroRoom
     ? `Interior colourway: ${colorData?.name ?? tags.color} (${colorData?.description ?? ''}), carried harmoniously across the floor rug and planter.`
@@ -541,8 +565,8 @@ export function buildGeminiPrompt(tags: BatchPromptTags): string {
   const distance = camDistData?.name ?? tags.cameraDistance ?? 'wide shot';
   const distanceNote = camDistData?.description ? `: ${camDistData.description}` : '';
   const cameraBody = tags.cameraBody || 'Sony A7R V';
-  const lens = isWideRoomAngle ? '28mm gentle wide lens' : (tags.lens || '35mm prime lens');
-  const aperture = tags.aperture || 'f/5.6 aperture';
+  const lens = isWideRoomAngle ? '35mm prime lens' : (tags.lens || '35mm prime lens');
+  const aperture = tags.aperture || 'f/4.0 aperture';
 
   const view = isTall
     ? `${isWideRoomAngle ? angle : angle.replace(/ and pulled well back.*$/, '')}, at ${elevation}. Framing: ${staging.framingTall}`

@@ -72,24 +72,25 @@ export function buildMacroTexturePrompt(
   const foregroundAnchor = pickMacroVariant();
   const styleBit = ctx.styleName ? ` (${ctx.styleName} aesthetic)` : '';
   const colorBit = ctx.colorName ? ` Harmonized with subtle ${ctx.colorName.toLowerCase()} room tones.` : '';
-  const lightBit = ctx.lightingDescription
-    ? `${ctx.lightingDescription}, angled low across the wall`
-    : 'Warm raking natural daylight from a nearby side window angled low across the wall';
+  const isDaylightDesc = ctx.lightingDescription && !/twilight|dusk|lamplight|evening/i.test(ctx.lightingDescription);
+  const lightBit = isDaylightDesc
+    ? `${ctx.lightingDescription}, angled gently across the wall`
+    : 'Fresh directional morning daylight from a nearby side window angled gently across the wall';
 
   if (tags.promptMode === 'brief') {
     return [
-      `Create an editorial macro close-up photograph of the wall mural inside a real European children's room${styleBit}.`,
-      `References: image 1 is the wall mural artwork — reproduce an authentic close-up section of its illustration at true real-world print scale, colors and drawing completely unchanged 1:1. Image 2 is the pure Craft Lambda non-woven sand-grain paper texture — transfer only its fine matte sand micro-relief and chalky paper fibers onto the printed wall surface.`,
-      `Scene: The camera sits 40 cm from the pasted wallpaper wall at an oblique 35-degree angle so the mural fills 85–90% of the frame edge to edge, smooth and seamless with zero folds or seams. ${foregroundAnchor}${colorBit} No people, no hands, no rolled wallpaper.`,
-      `Light and camera: ${lightBit}, revealing the tactile fine-grain sand relief and ultra-matte reflection-free paper finish. Shot on Sony A7R V, 90mm f/4 macro lens, tack-sharp focus across the textured wallpaper fibers with natural shallow depth of field at the frame edges. Real photograph, natural daylight grain.`,
+      `Create an editorial close-up interior photograph of the wall mural inside a real European children's room${styleBit}.`,
+      `References: image 1 is the wall mural artwork — reproduce an authentic close-up section of its exact printed illustration at true 1:1 wall scale, keeping all shapes, orientations, colors, and details completely unchanged without redrawing or restyling. Image 2 is the pure Craft Lambda non-woven sand-grain paper texture — transfer only its fine matte sand micro-relief and non-woven paper fibers onto the printed wall surface.`,
+      `Scene: The camera sits 75–90 cm from the pasted wallpaper wall at a gentle 15-degree angle so a clear, undistorted section of the mural fills 85% of the frame, smooth and seamless with zero folds or seams. ${foregroundAnchor}${colorBit} No people, no hands, no rolled wallpaper.`,
+      `Light and camera: ${lightBit}, revealing the tactile fine-grain sand relief and ultra-matte reflection-free paper finish. Shot on Sony A7R V, 50mm f/4 prime lens, tack-sharp focus across the textured wallpaper with natural optical depth at the frame edges. Real photograph, natural daylight.`,
     ].join('\n\n');
   }
 
   return [
-    `This is an intimate commercial editorial macro detail photograph showcasing the real physical texture and print quality of a designer wall mural installed inside a European children's bedroom${styleBit}. REFERENCE_IMAGE_1 is the wallpaper artwork: reproduce an authentic close-up section of this exact illustration flat on the wall at its true real-world wall scale, preserving every color, soft watercolor brushstroke, line, and proportion 1:1 without redrawing or restyling. REFERENCE_IMAGE_2 is the pure physical Craft Lambda non-woven sand texture: apply its fine sand-grain micro-relief (Sandstruktur), subtle matte paper fleece fibers, and ultra-matte chalky reflection-free finish directly across the printed wallpaper surface.`,
-    `Composition & Interior Context: Camera positioned 35–50 cm from the wall at an oblique 35-degree raking angle. The seamlessly pasted wall mural occupies 85–90% of the frame, completely flat and taut on the wall with zero peeling, zero seams, and zero folds. ${foregroundAnchor}${colorBit}`,
+    `This is an intimate commercial editorial close-up detail photograph showcasing the real physical texture and print quality of a designer wall mural installed inside a European children's bedroom${styleBit}. REFERENCE_IMAGE_1 is the wallpaper artwork: reproduce an authentic section of this exact printed illustration flat on the wall at its true real-world wall scale, preserving every exact shape, orientation, color, shading, and proportion 1:1 without redrawing, restyling, flipping, or adding sketch lines. REFERENCE_IMAGE_2 is the pure physical Craft Lambda non-woven sand texture: apply its fine sand-grain micro-relief (Sandstruktur), subtle non-woven paper fleece fibers, and ultra-matte reflection-free finish directly across the printed wallpaper surface.`,
+    `Composition & Interior Context: Camera positioned 75–90 cm from the wall at a gentle 15-degree angle (nearly straight-on with subtle side depth so the artwork geometry is never warped). The seamlessly pasted wall mural occupies 85% of the frame, completely flat and taut on the wall with zero peeling, zero seams, and zero folds. ${foregroundAnchor}${colorBit}`,
     `Lighting & Tactility: ${lightBit}, grazing gently across the wallpaper surface so the fine sand micro-relief shows the dry, ultra-matte non-woven fleece paper grain and soft micro-shadows with zero sparkle, zero sheen, and zero glossy vinyl reflection.`,
-    `Camera & Realism: Shot on Sony A7R V with a 90mm macro prime lens at f/4, natural optical depth of field keeping the central wallpaper artwork and sand-grain paper texture razor-sharp while the outer frame edges fall into smooth organic lens bokeh. Authentic architectural editorial photography, unretouched natural daylight. Aspect ratio: ${tags.aspectRatio}.`,
-    `Avoid: rolled wallpaper, folded paper, paper curls, peeling edges, hands holding samples, swatch cards, flat studio table scan, glossy vinyl sheen, plastic reflection, specular glare, visible seams, tiling, distorted illustration, altered colors, altered mural characters, people, faces, text overlays, CGI render look.`,
+    `Camera & Realism: Shot on Sony A7R V with a 50mm prime lens at f/4.0, natural optical depth of field keeping the central wallpaper artwork and sand-grain paper texture razor-sharp while the foreground corner falls into smooth organic lens bokeh. Authentic architectural editorial photography, unretouched natural daylight. Aspect ratio: ${tags.aspectRatio}.`,
+    `Avoid: rolled wallpaper, folded paper, paper curls, peeling edges, hands holding samples, swatch cards, flat studio table scan, glossy vinyl sheen, plastic reflection, specular glare, visible seams, tiling, distorted illustration, redrawn characters, pencil outlines, flipped motifs, altered colors, people, faces, text overlays, CGI render look.`,
   ].join('\n\n');
 }
