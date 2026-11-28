@@ -273,9 +273,10 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
 
   const discoverCardWithGoogleSearch = async (cardId: string) => {
     const card = cards.find(c => c.id === cardId);
-    const geminiKey = apiKey || localStorage.getItem('gemini_api_key') || '';
+    const savedGeminiKey = localStorage.getItem('gemini_api_key') || '';
+    const geminiKey = apiKey.startsWith('AIza') ? apiKey : savedGeminiKey;
     if (!card || !wallpaper) return;
-    if (!geminiKey || geminiKey.startsWith('sk-or-')) {
+    if (!geminiKey || !geminiKey.startsWith('AIza')) {
       alert('Для поиска идей через Gemini + Google Search укажите Gemini API Key в шапке.');
       return;
     }
@@ -359,7 +360,8 @@ export function useBatch(provider: AIProvider, apiKey: string, replicateToken: s
     const concurrencyLimit = 4;
     let cursor = 0;
     const randomCardIds = selectedCards.filter(c => c.tags.randomInterior).map(c => c.id);
-    const geminiKeyForSearch = apiKey || localStorage.getItem('gemini_api_key') || '';
+    const savedGeminiKey = localStorage.getItem('gemini_api_key') || '';
+    const geminiKeyForSearch = apiKey.startsWith('AIza') ? apiKey : savedGeminiKey;
 
     const runWorker = async () => {
       while (cursor < selectedCards.length) {
